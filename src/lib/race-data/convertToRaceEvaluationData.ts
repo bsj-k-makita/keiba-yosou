@@ -166,6 +166,7 @@ function toInvestmentInput(e: AnalysisHorseEntry): InvestmentCommentInput | unde
     valueChange: valueChangeRaw as InvestmentCommentInput["valueChange"],
     keyFactors: keyFactorsRaw.filter((v): v is string => typeof v === "string" && v.trim().length > 0).slice(0, 3),
     riskFactors: riskFactorsRaw.filter((v): v is string => typeof v === "string" && v.trim().length > 0).slice(0, 3),
+    kellyWeight: n(e.kelly_weight) ?? n(e.kellyWeight),
   };
 }
 

@@ -62,6 +62,7 @@ export type InvestmentCommentInput = {
   predictedProbability: number;
   actualOdds: number;
   oddsSource?: "actual" | "estimated";
+  /** 実質期待値: (P × O) - margin。1.0超で購入ライン。 */
   valueScore?: number;
   valueRank: InvestmentValueRank;
   confidenceRank?: InvestmentConfidenceRank;
@@ -69,6 +70,8 @@ export type InvestmentCommentInput = {
   valueChange: InvestmentValueChange;
   keyFactors: string[];
   riskFactors: string[];
+  /** Fractional Kelly による推奨投資比率（0〜0.25）。全資金に対する割合。 */
+  kellyWeight?: number;
 };
 
 export type HorsePedigree = {

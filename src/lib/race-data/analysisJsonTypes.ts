@@ -122,6 +122,9 @@ export type AnalysisHorseEntry = {
   valueScore?: number;
   value_rank?: "S" | "A" | "B" | "C" | "D";
   valueRank?: "S" | "A" | "B" | "C" | "D";
+  /** Fractional Kelly による推奨投資比率（0〜0.25）*/
+  kelly_weight?: number;
+  kellyWeight?: number;
   confidence_rank?: "S" | "A" | "B" | "C";
   confidenceRank?: "S" | "A" | "B" | "C";
   bet_type?: "軸" | "相手" | "ヒモ穴" | "見送り";

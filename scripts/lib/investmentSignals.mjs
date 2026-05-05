@@ -50,11 +50,49 @@ function hasObservedTimestamp(v) {
   return typeof v === "string" && v.length >= 10;
 }
 
-function toValueRank(valueScore) {
-  if (valueScore >= 1.55) return "S";
-  if (valueScore >= 1.2) return "A";
-  if (valueScore >= 1.05) return "B";
-  if (valueScore >= 0.9) return "C";
+// マージン（控除率・予測誤差の安全バッファ）
+const EV_MARGIN = 0.15;
+// フラクショナルケリー係数（0.25 = クォーターケリー）
+const KELLY_FRACTION = 0.25;
+// ケリー比率の上限（全資金の25%まで）
+const KELLY_MAX = 0.25;
+
+/**
+ * 実質期待値を計算する。
+ * E_effective = (P × O) - Margin
+ * 単純な P×O ではなく、控除率・予測誤差のバッファを差し引く。
+ */
+function calcEffectiveEv(prob, odds) {
+  if (!Number.isFinite(prob) || !Number.isFinite(odds) || odds <= 0) return 0;
+  return round2(prob * odds - EV_MARGIN);
+}
+
+/**
+ * Fractional Kelly 基準による投資比率を算出する。
+ * f* = (P × (O-1) - (1-P)) / (O-1) = (P×O - 1) / (O-1)
+ * kelly_weight = max(0, f*) × kelly_fraction（上限: KELLY_MAX）
+ */
+function calcKellyWeight(prob, odds) {
+  if (!Number.isFinite(prob) || !Number.isFinite(odds) || odds <= 1.0) return 0;
+  const netOdds = odds - 1.0;
+  const kellyF = (prob * netOdds - (1 - prob)) / netOdds;
+  if (kellyF <= 0) return 0;
+  return round2(Math.min(kellyF * KELLY_FRACTION, KELLY_MAX));
+}
+
+/**
+ * 実質期待値に基づくランク（BettingEvaluator の閾値に準拠）。
+ * S: effective_ev >= 1.40（強い買い推奨）
+ * A: effective_ev >= 1.20
+ * B: effective_ev >= 1.05（最低ライン）
+ * C: effective_ev >= 0.90（様子見）
+ * D: それ以下（見送り）
+ */
+function toValueRank(effectiveEv) {
+  if (effectiveEv >= 1.40) return "S";
+  if (effectiveEv >= 1.20) return "A";
+  if (effectiveEv >= 1.05) return "B";
+  if (effectiveEv >= 0.90) return "C";
   return "D";
 }
 
@@ -204,8 +242,11 @@ export function enrichInvestmentSignalsInRaceData(data) {
     const placeOdds = estimatePlaceOdds({ ...entry, marketWinOdds, marketPopularity: popularity }, fieldSize);
     const effectiveOdds = placeOdds?.odds ?? round2(clamp(expectedOdds, 1.1, 40));
     const oddsSource = placeOdds?.source ?? "estimated";
-    const valueScore = round2(effectiveOdds / expectedOdds);
+    // 実質期待値: E_effective = (P × O) - Margin（単純な P×O ではなくマージン控除）
+    const valueScore = calcEffectiveEv(predictedProbability, effectiveOdds);
     const valueRank = toValueRank(valueScore);
+    // ケリー基準による投資比率（Fractional Kelly 0.25倍）
+    const kellyWeight = calcKellyWeight(predictedProbability, effectiveOdds);
     const confidenceRank = toConfidenceRank(predictedProbability);
     const betType = toBetType(predictedProbability, valueRank);
     const valueChange = computeValueChange(prevOdds, effectiveOdds);
@@ -225,8 +266,11 @@ export function enrichInvestmentSignalsInRaceData(data) {
     entry.market_popularity_source = hasActualPopularity ? "actual" : "estimated";
     entry.market_win_odds = marketWinOdds;
     entry.market_win_odds_source = marketWinOddsSource;
+    // 実質期待値（マージン控除済み）
     entry.value_score = valueScore;
     entry.value_rank = valueRank;
+    // Fractional Kelly による投資比率（0〜0.25）
+    entry.kelly_weight = kellyWeight;
     entry.confidence_rank = confidenceRank;
     entry.bet_type = betType;
     entry.value_change = valueChange;
