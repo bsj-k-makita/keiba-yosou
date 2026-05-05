@@ -1,0 +1,407 @@
+{
+  "raceId": "202501010101",
+  "raceInfo": {
+    "raceId": "202501010101",
+    "date": "2025-01-01",
+    "venue": "東京",
+    "raceNumber": 1,
+    "raceName": "3歳未勝利",
+    "surface": "芝",
+    "distance": 1600,
+    "groundLabel": "良",
+    "weather": "晴"
+  },
+  "condition": {
+    "venue": "東京",
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle"
+  },
+  "entries": [
+    {
+      "horseId": "h1",
+      "horseName": "ライトニングラン",
+      "horseNumber": 7,
+      "frameNumber": 7,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 88,
+        "stamina": 72,
+        "kick": 74,
+        "sustain": 84,
+        "power": 70
+      },
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "C",
+        "kick": "A",
+        "sustain": "S",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 78.3,
+        "adjustedScore": 78.3,
+        "scoreDiff": 0,
+        "baseAbilityCore": 79.7,
+        "intrinsicAbilityScore": 79.7,
+        "raceAdjustedInput": 78.9,
+        "conditionFitDelta": -1.4,
+        "reproducibilityDelta": 0,
+        "riskPenalty": 0,
+        "raceRelativeScore": 84,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 0,
+        "classLevelBonus": 0,
+        "finalEvaluationScore": 86,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 0,
+        "roleHint": "判定不能",
+        "pastRunInsight": "",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "対抗"
+      },
+      "pastRuns": [],
+      "predicted_probability": 0.52,
+      "value_score": 0.57,
+      "value_rank": "D",
+      "confidence_rank": "S",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "馬場適性不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 1,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 2.35,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.1
+    },
+    {
+      "horseId": "h2",
+      "horseName": "ミッドナイトステラ",
+      "horseNumber": 3,
+      "frameNumber": 3,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 76,
+        "stamina": 80,
+        "kick": 82,
+        "sustain": 78,
+        "power": 74
+      },
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "A+",
+        "kick": "S",
+        "sustain": "A",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 79.1,
+        "adjustedScore": 79.1,
+        "scoreDiff": 0,
+        "baseAbilityCore": 78.8,
+        "intrinsicAbilityScore": 78.8,
+        "raceAdjustedInput": 79,
+        "conditionFitDelta": 0.3,
+        "reproducibilityDelta": 0,
+        "riskPenalty": 0,
+        "raceRelativeScore": 90,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 0,
+        "classLevelBonus": 0,
+        "finalEvaluationScore": 92,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 0,
+        "roleHint": "判定不能",
+        "pastRunInsight": "",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "本命候補"
+      },
+      "pastRuns": [],
+      "predicted_probability": 0.49,
+      "value_score": 0.72,
+      "value_rank": "D",
+      "confidence_rank": "A",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "長距離実績"
+      ],
+      "risk_factors": [
+        "馬場適性不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 2,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 3.85,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.46
+    },
+    {
+      "horseId": "h3",
+      "horseName": "カフェブレンド",
+      "horseNumber": 1,
+      "frameNumber": 1,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 82,
+        "stamina": 77,
+        "kick": 79,
+        "sustain": 76,
+        "power": 73
+      },
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "A",
+        "kick": "A+",
+        "sustain": "B",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 77.9,
+        "adjustedScore": 77.9,
+        "scoreDiff": 0,
+        "baseAbilityCore": 78.2,
+        "intrinsicAbilityScore": 78.2,
+        "raceAdjustedInput": 78,
+        "conditionFitDelta": -0.3,
+        "reproducibilityDelta": 0,
+        "riskPenalty": 0,
+        "raceRelativeScore": 30,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 0,
+        "classLevelBonus": 0,
+        "finalEvaluationScore": 32,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 0,
+        "roleHint": "判定不能",
+        "pastRunInsight": "",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [],
+      "predicted_probability": 0.48,
+      "value_score": 1,
+      "value_rank": "C",
+      "confidence_rank": "A",
+      "bet_type": "軸",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "末脚性能"
+      ],
+      "risk_factors": [
+        "馬場適性不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 3,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 5.51,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 2.09
+    },
+    {
+      "horseId": "h4",
+      "horseName": "サンダーヒル",
+      "horseNumber": 8,
+      "frameNumber": 8,
+      "runningStyle": "逃げ",
+      "abilities": {
+        "speed": 70,
+        "stamina": 88,
+        "kick": 68,
+        "sustain": 85,
+        "power": 82
+      },
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "S",
+        "kick": "C",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 77,
+        "adjustedScore": 77,
+        "scoreDiff": 0,
+        "baseAbilityCore": 80.6,
+        "intrinsicAbilityScore": 80.6,
+        "raceAdjustedInput": 78.6,
+        "conditionFitDelta": -3.6,
+        "reproducibilityDelta": 0,
+        "riskPenalty": 0,
+        "raceRelativeScore": 66,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 0,
+        "classLevelBonus": 0,
+        "finalEvaluationScore": 68,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 0,
+        "roleHint": "判定不能",
+        "pastRunInsight": "",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "相手"
+      },
+      "pastRuns": [],
+      "predicted_probability": 0.46,
+      "value_score": 1.27,
+      "value_rank": "A",
+      "confidence_rank": "A",
+      "bet_type": "軸",
+      "value_change": "STABLE",
+      "key_factors": [
+        "長距離実績",
+        "持続力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 4,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 7.29,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 2.77
+    },
+    {
+      "horseId": "h5",
+      "horseName": "ブリーズアット",
+      "horseNumber": 5,
+      "frameNumber": 5,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 74,
+        "stamina": 76,
+        "kick": 91,
+        "sustain": 72,
+        "power": 69
+      },
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "B",
+        "kick": "S",
+        "sustain": "C",
+        "power": "C"
+      },
+      "evaluation": {
+        "baseScore": 79.4,
+        "adjustedScore": 79.4,
+        "scoreDiff": 0,
+        "baseAbilityCore": 78.2,
+        "intrinsicAbilityScore": 78.2,
+        "raceAdjustedInput": 78.9,
+        "conditionFitDelta": 1.2,
+        "reproducibilityDelta": 0,
+        "riskPenalty": 0,
+        "raceRelativeScore": 84,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 0,
+        "classLevelBonus": 0,
+        "finalEvaluationScore": 84,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 0,
+        "roleHint": "判定不能",
+        "pastRunInsight": "",
+        "fitLevel": "中",
+        "paceFit": "△",
+        "buyLabel": "単穴"
+      },
+      "pastRuns": [],
+      "predicted_probability": 0.43,
+      "value_score": 1.5,
+      "value_rank": "A",
+      "confidence_rank": "A",
+      "bet_type": "軸",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "長距離実績"
+      ],
+      "risk_factors": [
+        "馬場適性不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 5,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 9.16,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 3.48
+    },
+    {
+      "horseId": "h6",
+      "horseName": "ヘヴィウェイトソウル",
+      "horseNumber": 2,
+      "frameNumber": 2,
+      "runningStyle": "自在",
+      "abilities": {
+        "speed": 68,
+        "stamina": 84,
+        "kick": 71,
+        "sustain": 79,
+        "power": 90
+      },
+      "abilityGrades": {
+        "speed": "C",
+        "stamina": "S",
+        "kick": "B",
+        "sustain": "A+",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 76.1,
+        "adjustedScore": 76.1,
+        "scoreDiff": 0,
+        "baseAbilityCore": 80.6,
+        "intrinsicAbilityScore": 80.6,
+        "raceAdjustedInput": 78.1,
+        "conditionFitDelta": -4.5,
+        "reproducibilityDelta": 0,
+        "riskPenalty": 0,
+        "raceRelativeScore": 36,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 0,
+        "classLevelBonus": 0,
+        "finalEvaluationScore": 38,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 0,
+        "roleHint": "判定不能",
+        "pastRunInsight": "",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "相手"
+      },
+      "pastRuns": [],
+      "predicted_probability": 0.42,
+      "value_score": 1.77,
+      "value_rank": "S",
+      "confidence_rank": "A",
+      "bet_type": "軸",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "長距離実績"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 6,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 11.11,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 4.22
+    }
+  ]
+}

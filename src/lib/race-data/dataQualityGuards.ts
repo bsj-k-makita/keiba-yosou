@@ -1,0 +1,39 @@
+import type { RaceEvaluationData } from "./raceEvaluationTypes";
+
+function hasPastRuns(entry: RaceEvaluationData["entries"][number]): boolean {
+  return Array.isArray(entry.pastRuns) && entry.pastRuns.length > 0;
+}
+
+function isHighClassRaceName(name: string | undefined): boolean {
+  if (!name) return false;
+  return /(G1|G2|G3|OP|L|\([Gg][123]\)|ステークス|天皇賞|桜花賞|皐月賞|菊花賞|大阪杯)/.test(name);
+}
+
+export function assertRaceDataQuality(data: RaceEvaluationData): void {
+  const total = data.entries.length;
+  if (total === 0) {
+    throw new Error("出走馬データが空です。データを再取得してください。");
+  }
+
+  const withPastRuns = data.entries.filter(hasPastRuns).length;
+  const coverage = withPastRuns / total;
+  const raceName = data.raceInfo.raceName;
+  const ageKnown = data.entries.filter((e) => Number.isFinite(e.age));
+  const avgAge =
+    ageKnown.length > 0
+      ? ageKnown.reduce((s, e) => s + Number(e.age), 0) / ageKnown.length
+      : 3;
+  const highClass = isHighClassRaceName(raceName) || avgAge >= 4.5;
+
+  if (total >= 8 && withPastRuns === 0) {
+    throw new Error(
+      "過去走データが1件も取得できていません。評価を停止しました。データ再取得後に再度お試しください。",
+    );
+  }
+
+  if (highClass && coverage < 0.5) {
+    throw new Error(
+      `過去走データ取得率が不足しています (${withPastRuns}/${total})。評価を停止しました。データ再取得をお願いします。`,
+    );
+  }
+}

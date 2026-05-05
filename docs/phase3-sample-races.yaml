@@ -1,0 +1,16 @@
+version: 1
+description: "Phase 3 回顧データ連携の固定確認レース"
+
+sample_races:
+  - raceId: "202609020812"
+    reason: "pastRuns の件数が十分あり、文脈補正の反応を確認しやすい"
+  - raceId: "202609020811"
+    reason: "同開催で比較しやすく、CSV反映後の差分検証に使いやすい"
+  - raceId: "202501010101"
+    reason: "旧形式データ。未投入時中立(0)を確認する回帰サンプル"
+
+checkpoints:
+  - "CSV適用前後で対象馬の pastRuns[].tripTrouble01 / tripBenefit01 が更新される"
+  - "評価再計算後に tripContextBonus が変化する"
+  - "未投入レースでは tripContextBonus は 0 のまま"
+

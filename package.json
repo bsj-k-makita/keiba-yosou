@@ -1,0 +1,39 @@
+{
+  "name": "keiba-yosou",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "test": "vitest run",
+    "preview": "vite preview",
+    "fetch-races:netkeiba-2026-04-25-26": "node scripts/fetch-races-from-netkeiba.mjs",
+    "fetch-past-runs": "node scripts/fetch-past-runs.mjs",
+    "fetch-live-odds": "node scripts/fetch-live-odds.mjs --all --source=http --retries=3 --retry-wait=30000",
+    "generate-latest-odds-csv": "node scripts/generate-latest-odds-csv.mjs --all --out=data/latest-odds.csv --source=jra",
+    "refresh-latest-odds": "node scripts/refresh-latest-odds.mjs --source=jra",
+    "reset-market-odds": "node scripts/reset-market-odds.mjs",
+    "apply-external-odds": "node scripts/apply-external-odds.mjs",
+    "fetch-results": "node scripts/fetch-race-results.mjs",
+    "apply-trip-context": "node scripts/apply-trip-context.mjs",
+    "enrich-investment-signals": "node scripts/enrich-investment-signals.mjs --all",
+    "backfill-index-grade": "node scripts/backfill-index-race-grade.mjs"
+  },
+  "dependencies": {
+    "iconv-lite": "^0.7.2",
+    "playwright": "^1.59.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "cheerio": "^1.2.0",
+    "typescript": "~5.6.2",
+    "vite": "^5.4.10",
+    "vitest": "^4.1.5"
+  }
+}

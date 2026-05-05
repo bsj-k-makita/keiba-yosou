@@ -1,0 +1,281 @@
+version: 1
+generated_from:
+  - src/domain/race-evaluation/courseWeights.ts
+  - src/domain/race-evaluation/adjustments.ts
+  - src/domain/race-evaluation/weightResolver.ts
+  - src/domain/race-evaluation/abilityCoreScoring.ts
+  - src/domain/race-evaluation/distanceFit.ts
+  - src/domain/race-evaluation/classLevelScore.ts
+  - src/domain/race-evaluation/contextualBonuses.ts
+  - src/domain/race-evaluation/performanceAbility.ts
+  - src/domain/race-evaluation/finalScoring.ts
+  - src/domain/race-evaluation/scoreCalculator.ts
+  - src/domain/race-evaluation/markAssigner.ts
+  - src/domain/race-evaluation/buyLabel.ts
+  - src/domain/race-evaluation/dismissalRules.ts
+
+ability_axes:
+  - speed
+  - stamina
+  - kick
+  - sustain
+  - power
+
+labels:
+  speed: "スピード"
+  stamina: "スタミナ"
+  kick: "末脚"
+  sustain: "持続力"
+  power: "パワー"
+
+venue_base_weights:
+  default_venue_key: "東京"
+  venues:
+    "東京":
+      speed: 0.143
+      stamina: 0.143
+      kick: 0.357
+      sustain: 0.286
+      power: 0.071
+    "京都":
+      speed: 0.214
+      stamina: 0.143
+      kick: 0.357
+      sustain: 0.214
+      power: 0.071
+    "阪神外":
+      speed: 0.214
+      stamina: 0.143
+      kick: 0.286
+      sustain: 0.286
+      power: 0.214
+    "中山":
+      speed: 0.250
+      stamina: 0.188
+      kick: 0.125
+      sustain: 0.313
+      power: 0.313
+    "中京":
+      speed: 0.188
+      stamina: 0.313
+      kick: 0.188
+      sustain: 0.313
+      power: 0.250
+    "福島":
+      speed: 0.357
+      stamina: 0.214
+      kick: 0.071
+      sustain: 0.286
+      power: 0.143
+    "小倉":
+      speed: 0.267
+      stamina: 0.267
+      kick: 0.133
+      sustain: 0.267
+      power: 0.133
+    "札幌函館":
+      speed: 0.143
+      stamina: 0.286
+      kick: 0.071
+      sustain: 0.214
+      power: 0.286
+
+adjustments:
+  ground:
+    good:
+      label: "良"
+      delta: { speed: 0.00, stamina: 0.00, kick: 0.00, sustain: 0.00, power: 0.00 }
+    yielding:
+      label: "稍重"
+      delta: { speed: -0.02, stamina: 0.04, kick: -0.03, sustain: 0.03, power: 0.05 }
+    heavy:
+      label: "重"
+      delta: { speed: -0.05, stamina: 0.08, kick: -0.07, sustain: 0.05, power: 0.10 }
+    bad:
+      label: "不良"
+      delta: { speed: -0.08, stamina: 0.12, kick: -0.10, sustain: 0.06, power: 0.14 }
+    fast_track:
+      label: "超高速馬場"
+      delta: { speed: 0.05, stamina: -0.04, kick: 0.08, sustain: 0.02, power: -0.06 }
+    slow_track:
+      label: "時計のかかる馬場"
+      delta: { speed: -0.04, stamina: 0.07, kick: -0.05, sustain: 0.05, power: 0.09 }
+
+  bias:
+    flat:
+      label: "フラット"
+      delta: { speed: 0.00, stamina: 0.00, kick: 0.00, sustain: 0.00, power: 0.00 }
+    front_favor:
+      label: "前残り"
+      delta: { speed: 0.08, stamina: 0.00, kick: -0.08, sustain: 0.06, power: 0.02 }
+    closer_favor:
+      label: "差し有利"
+      delta: { speed: -0.05, stamina: 0.02, kick: 0.08, sustain: 0.05, power: 0.00 }
+    inside_favor:
+      label: "内有利"
+      delta: { speed: 0.05, stamina: 0.00, kick: -0.03, sustain: 0.03, power: 0.02 }
+    outside_favor:
+      label: "外有利"
+      delta: { speed: -0.03, stamina: 0.02, kick: 0.05, sustain: 0.04, power: 0.00 }
+
+  pace:
+    slow:
+      label: "スロー"
+      delta: { speed: -0.04, stamina: -0.05, kick: 0.12, sustain: 0.02, power: -0.03 }
+    middle:
+      label: "ミドル"
+      delta: { speed: 0.00, stamina: 0.00, kick: 0.00, sustain: 0.00, power: 0.00 }
+    high:
+      label: "ハイ"
+      delta: { speed: -0.04, stamina: 0.10, kick: -0.10, sustain: 0.08, power: 0.05 }
+    many_front_runners:
+      label: "逃げ先行多数"
+      delta: { speed: -0.03, stamina: 0.08, kick: -0.06, sustain: 0.08, power: 0.04 }
+    no_front_runner:
+      label: "逃げ馬不在"
+      delta: { speed: 0.04, stamina: -0.04, kick: 0.08, sustain: 0.00, power: -0.03 }
+
+contextual_inputs:
+  horse_optional_fields:
+    - sex
+    - age
+    - frameNumber
+    - jockey
+    - trainer
+    - bodyWeightKg
+    - pedigree.sireName
+    - pedigree.damSireName
+    - pedigree.courseFit01
+    - pedigree.distanceFit01
+    - pedigree.maleStayerFit01
+    - pedigree.femaleMiddleFit01
+    - signals.jockeyCourseWinRate01
+    - signals.jockeyCoursePlaceRate01
+    - signals.trainerCourseWinRate01
+    - signals.trainerCoursePlaceRate01
+    - pastRuns[].tripTrouble01
+    - pastRuns[].tripBenefit01
+  race_optional_fields:
+    - trackBiasStrength01
+    - turnCount
+    - section200mSec
+  design_note: "未入力時は中立(0点)として処理し、従来ロジックと同一挙動を維持。"
+
+contextual_bonus_layer:
+  pedigree_bonus:
+    purpose: "血統のコース/距離適性を加点減点"
+    range: "[-4.0, +4.0]"
+    notes:
+      - "courseFit01 / distanceFit01 を中心化して評価"
+      - "牡馬中長距離・牝馬2000m以下など性別×距離バイアスを反映"
+      - "種牡馬名ベースのヒューリスティック(例: ルーラーシップ, スワーヴリチャード)を補助利用"
+  gate_bias_bonus:
+    purpose: "枠順×当日トラックバイアス(内有利/外有利)の物理補正"
+    range: "[-4.0, +4.0]"
+    notes:
+      - "inside_favor / outside_favor のときのみ適用"
+      - "turnCount が多いほど内外有利を増幅"
+  connections_bonus:
+    purpose: "騎手・調教師の対象コース実績を反映"
+    range: "[-4.0, +4.0]"
+    notes:
+      - "jockey/trainer の win/place rate(0-1)を基準値差で評価"
+      - "コース条件に特化した名称ベース補助ルールを併用"
+  trend_bonus:
+    purpose: "年齢・馬体重など客観傾向を反映"
+    range: "[-3.0, +3.0]"
+    notes:
+      - "長距離では4-5歳を加点、6歳以上を減点"
+      - "長距離では460kg未満(極端な軽量除く)を加点"
+  pace_balance_bonus:
+    purpose: "前後傾差適性(瞬発偏重 vs 消耗耐性)を反映"
+    range: "[-3.0, +3.0]"
+    notes:
+      - "過去走ラップから front-last 差を推定"
+      - "当該レースの前後傾(または pace 既定値)との一致度で評価"
+  trip_context_bonus:
+    purpose: "前走の不利/恩恵を評価に反映"
+    range: "[-2.5, +2.5]"
+    notes:
+      - "tripTrouble01(不利)は加点方向"
+      - "tripBenefit01(恩恵)は減点方向"
+
+adjustment_strength:
+  weak: 0.5
+  middle: 1.0
+  strong: 1.5
+
+weight_resolution:
+  min_weight: 0.05
+  max_weight: 0.45
+  process:
+    - "venue base weights を取得（courseKey優先、無ければvenue、未定義なら東京）"
+    - "ground + bias + pace の delta を合算"
+    - "adjustmentStrength を掛けて base に加算"
+    - "各軸を [0.05, 0.45] にクランプ"
+    - "5軸合計が1になるよう正規化"
+
+scoring_pipeline:
+  base_ability_core:
+    formula: "5軸平均 * 0.75 + 上位2軸平均 * 0.25"
+  intrinsic_ability_score:
+    formula: "baseAbilityCore + reproducibilityDelta - riskPenalty"
+  condition_score:
+    formula: "sum(ability[axis] * finalWeight[axis])"
+  race_adjusted_input:
+    default_formula: "intrinsic * 0.45 + conditionScore * 0.55 + classLevelBonus * 0.9"
+    with_max_performance_formula: "intrinsic * 0.35 + conditionScore * 0.45 + maxPerformance * 0.2 + classLevelBonus * 0.9"
+  race_relative_score:
+    zscore:
+      rel_min: 35
+      rel_max: 85
+      z_scale: 8
+      std_floor: 2
+    fallback_minmax: "標準偏差が小さい場合は35-85のmin-max"
+  pace_fit_bonus:
+    "◎": 5
+    "○": 2
+    "△": 0
+    "×": -5
+  final_evaluation_score:
+    formula: "clamp(0, 100, raceRelative + paceFitBonus + lapShapeFitBonus + distanceFitBonus + classLevelBonus + (pedigreeBonus + gateBiasBonus + connectionsBonus + trendBonus + paceBalanceBonus + tripContextBonus) - variancePenalty)"
+
+ranking:
+  base_rank: "baseScore 降順"
+  adjusted_rank: "adjustedScore 降順"
+  final_rank: "finalEvaluationScore 降順"
+
+marks:
+  by_final_rank:
+    1: "◎"
+    2: "○"
+    3: "▲"
+    4: "△"
+    5: "△"
+  star_rule:
+    symbol: "☆"
+    conditions:
+      - "最終順位が6位以下"
+      - "baseRank - finalRank >= 3"
+      - "scoreDiff >= 0.5"
+
+dismiss_logic:
+  threshold: "4条件中2件以上で消し候補"
+  conditions:
+    - "finalRank > (頭数 - 2)"
+    - "fitLevel == 低"
+    - "paceFit == ×"
+    - "scoreDiff <= -1.0"
+
+buy_label_assignment:
+  rank_based:
+    1: "本命候補"
+    2: "対抗"
+    3: "単穴"
+    "4-5":
+      scoreDiff_gte_3: "穴候補"
+      otherwise: "相手"
+    "6+": "消し"
+  post_filter:
+    - "消し候補IDは強制で『消し』"
+    - "本命候補でも longshot guard 条件で『相手』へ降格する場合あり"

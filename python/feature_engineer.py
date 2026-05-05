@@ -1,0 +1,544 @@
+"""
+競馬予想AIシステム - 特徴量エンジニアリングモジュール
+
+データリークを防ぎながら以下の特徴量を生成する:
+1. 馬の過去成績集計（勝率・連対率・平均着順）
+2. 騎手・調教師の成績（勝率）
+3. 条件別（距離・コース・馬場）の過去成績
+4. 血統カテゴリ変数（父・母父）
+5. 馬の得意な季節・月別成績
+6. 脚質分類（逃げ・先行・差し・追込）
+7. スピード指数・上がり3F比較
+8. 馬齢・斤量・体重変動など基本情報
+"""
+
+import logging
+from typing import Optional
+
+import numpy as np
+import pandas as pd
+
+logger = logging.getLogger(__name__)
+
+
+class FeatureEngineer:
+    """
+    マスターDataFrameに特徴量を追加するクラス。
+
+    全ての集計処理でデータリーク（未来情報の混入）を防ぐため、
+    "その日より前の成績"のみを使う shift + expanding/rolling パターンを採用する。
+    """
+
+    def __init__(self, horse_results_df: pd.DataFrame):
+        """
+        Args:
+            horse_results_df: DataProcessor.clean_horse_results() の結果
+        """
+        self.horse_results = horse_results_df.copy()
+        self.horse_results["race_date"] = pd.to_datetime(
+            self.horse_results["race_date"], errors="coerce"
+        )
+        self.horse_results = self.horse_results.sort_values(
+            ["horse_id", "race_date"]
+        ).reset_index(drop=True)
+
+    # ----------------------------------------------------------
+    # パブリック: 全特徴量を追加する
+    # ----------------------------------------------------------
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        マスターDataFrameに全特徴量を追加して返す。
+
+        Args:
+            df: DataProcessor.build_master_df() の結果
+        Returns:
+            特徴量追加済みDataFrame
+        """
+        df = df.copy()
+        df["race_date"] = pd.to_datetime(df["race_date"], errors="coerce")
+
+        logger.info("特徴量生成開始: %d rows", len(df))
+
+        df = self._add_horse_stats(df)
+        df = self._add_jockey_stats(df)
+        df = self._add_trainer_stats(df)
+        df = self._add_condition_specific_stats(df)
+        df = self._add_seasonal_stats(df)
+        df = self._add_running_style(df)
+        df = self._add_speed_index(df)
+        df = self._add_basic_features(df)
+
+        logger.info("特徴量生成完了: %d cols", df.shape[1])
+        return df
+
+    # ----------------------------------------------------------
+    # 1. 馬の過去成績集計
+    # ----------------------------------------------------------
+    def _add_horse_stats(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        各レース時点での馬の過去全成績集計を追加する。
+
+        追加特徴量:
+        - horse_win_rate: 勝率（1着率）
+        - horse_top2_rate: 連対率（1-2着率）
+        - horse_top3_rate: 複勝率（1-3着率）
+        - horse_avg_finish: 平均着順
+        - horse_race_count: 過去レース数
+        - horse_last_finish: 前走着順
+        - horse_last_margin: 前走タイム差
+        - horse_recent3_avg: 直近3走平均着順
+        - horse_days_since_last: 前走からの日数
+        """
+        hr = self.horse_results[
+            ["horse_id", "race_date", "finish_pos", "margin", "horse_count"]
+        ].copy()
+
+        # 馬ごとに時系列ソート済みで累積集計（shift(1)でデータリーク防止）
+        hr = hr.sort_values(["horse_id", "race_date"])
+
+        def expanding_stats(group: pd.DataFrame) -> pd.DataFrame:
+            g = group.sort_values("race_date").reset_index(drop=True)
+            shift_pos = g["finish_pos"].shift(1)  # 前走より前
+            # 累積計算
+            g["horse_race_count"] = shift_pos.expanding().count()
+            g["horse_win_rate"] = shift_pos.eq(1).expanding().mean()
+            g["horse_top2_rate"] = shift_pos.le(2).expanding().mean()
+            g["horse_top3_rate"] = shift_pos.le(3).expanding().mean()
+            g["horse_avg_finish"] = shift_pos.expanding().mean()
+            g["horse_last_finish"] = shift_pos
+            g["horse_last_margin"] = g["margin"].shift(1)
+            g["horse_recent3_avg"] = (
+                shift_pos.shift(-1).rolling(3, min_periods=1).mean()
+                if len(g) > 1 else pd.Series([np.nan] * len(g))
+            )
+            # 前走からの経過日数
+            g["horse_days_since_last"] = (
+                g["race_date"] - g["race_date"].shift(1)
+            ).dt.days
+            return g
+
+        stats = hr.groupby("horse_id", group_keys=False).apply(expanding_stats)
+        stats = stats[
+            ["horse_id", "race_date", "horse_race_count", "horse_win_rate",
+             "horse_top2_rate", "horse_top3_rate", "horse_avg_finish",
+             "horse_last_finish", "horse_last_margin", "horse_recent3_avg",
+             "horse_days_since_last"]
+        ]
+
+        df = df.merge(stats, on=["horse_id", "race_date"], how="left")
+
+        # 欠損補完（初出走など）
+        df["horse_race_count"] = df["horse_race_count"].fillna(0)
+        df["horse_win_rate"] = df["horse_win_rate"].fillna(0)
+        df["horse_top2_rate"] = df["horse_top2_rate"].fillna(0)
+        df["horse_top3_rate"] = df["horse_top3_rate"].fillna(0)
+        df["horse_avg_finish"] = df["horse_avg_finish"].fillna(
+            df["horse_count"].fillna(10)
+        )
+        df["horse_last_finish"] = df["horse_last_finish"].fillna(-1)
+        df["horse_days_since_last"] = df["horse_days_since_last"].fillna(999)
+
+        return df
+
+    # ----------------------------------------------------------
+    # 2. 騎手の過去成績集計
+    # ----------------------------------------------------------
+    def _add_jockey_stats(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        騎手の通算・コース別勝率を追加する。
+
+        追加特徴量:
+        - jockey_win_rate: 騎手通算勝率
+        - jockey_top3_rate: 騎手通算複勝率
+        - jockey_venue_win_rate: 騎手×場所の勝率
+        """
+        if "jockey_id" not in df.columns:
+            return df
+
+        jockey_ref = df[["jockey_id", "race_date", "finish_pos", "venue"]].copy()
+        jockey_ref = jockey_ref.sort_values(["jockey_id", "race_date"])
+
+        def jockey_expanding(group: pd.DataFrame) -> pd.DataFrame:
+            g = group.sort_values("race_date").reset_index(drop=True)
+            shifted = g["finish_pos"].shift(1)
+            g["jockey_win_rate"] = shifted.eq(1).expanding().mean()
+            g["jockey_top3_rate"] = shifted.le(3).expanding().mean()
+            return g
+
+        jstats = jockey_ref.groupby("jockey_id", group_keys=False).apply(
+            jockey_expanding
+        )[["jockey_id", "race_date", "jockey_win_rate", "jockey_top3_rate"]]
+
+        df = df.merge(jstats, on=["jockey_id", "race_date"], how="left")
+
+        # 騎手×場所 勝率（全期間平均、推論時も利用可）
+        venue_win = (
+            df.groupby(["jockey_id", "venue"])["finish_pos"]
+            .apply(lambda x: (x == 1).mean())
+            .reset_index()
+            .rename(columns={"finish_pos": "jockey_venue_win_rate"})
+        )
+        df = df.merge(venue_win, on=["jockey_id", "venue"], how="left")
+
+        df["jockey_win_rate"] = df["jockey_win_rate"].fillna(
+            df["jockey_win_rate"].median()
+        )
+        df["jockey_top3_rate"] = df["jockey_top3_rate"].fillna(
+            df["jockey_top3_rate"].median()
+        )
+        df["jockey_venue_win_rate"] = df["jockey_venue_win_rate"].fillna(0)
+
+        return df
+
+    # ----------------------------------------------------------
+    # 3. 調教師の過去成績集計
+    # ----------------------------------------------------------
+    def _add_trainer_stats(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        調教師の通算勝率を追加する。
+
+        追加特徴量:
+        - trainer_win_rate: 調教師通算勝率
+        - trainer_top3_rate: 調教師通算複勝率
+        """
+        if "trainer_id" not in df.columns:
+            return df
+
+        trainer_ref = df[["trainer_id", "race_date", "finish_pos"]].copy()
+        trainer_ref = trainer_ref.sort_values(["trainer_id", "race_date"])
+
+        def trainer_expanding(group: pd.DataFrame) -> pd.DataFrame:
+            g = group.sort_values("race_date").reset_index(drop=True)
+            shifted = g["finish_pos"].shift(1)
+            g["trainer_win_rate"] = shifted.eq(1).expanding().mean()
+            g["trainer_top3_rate"] = shifted.le(3).expanding().mean()
+            return g
+
+        tstats = trainer_ref.groupby("trainer_id", group_keys=False).apply(
+            trainer_expanding
+        )[["trainer_id", "race_date", "trainer_win_rate", "trainer_top3_rate"]]
+
+        df = df.merge(tstats, on=["trainer_id", "race_date"], how="left")
+        df["trainer_win_rate"] = df["trainer_win_rate"].fillna(
+            df["trainer_win_rate"].median()
+        )
+        df["trainer_top3_rate"] = df["trainer_top3_rate"].fillna(
+            df["trainer_top3_rate"].median()
+        )
+        return df
+
+    # ----------------------------------------------------------
+    # 4. 条件別（距離・コース・馬場）の過去成績
+    # ----------------------------------------------------------
+    def _add_condition_specific_stats(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        馬の特定条件下での過去成績を追加する（データリーク防止）。
+
+        追加特徴量:
+        - horse_same_distance_win_rate: 同距離勝率
+        - horse_same_surface_win_rate: 同コース種別勝率
+        - horse_same_ground_win_rate: 同馬場状態勝率
+        - horse_same_venue_win_rate: 同競馬場勝率
+        """
+        hr = self.horse_results[
+            ["horse_id", "race_date", "finish_pos",
+             "distance", "surface", "ground_state", "venue"]
+        ].copy()
+        hr["race_date"] = pd.to_datetime(hr["race_date"], errors="coerce")
+
+        # 距離カテゴリ（短距離/マイル/中距離/長距離）
+        hr["distance_cat"] = pd.cut(
+            hr["distance"],
+            bins=[0, 1400, 1800, 2200, 9999],
+            labels=["短距離", "マイル", "中距離", "長距離"],
+        ).astype(str)
+        df["distance_cat"] = pd.cut(
+            df["distance"],
+            bins=[0, 1400, 1800, 2200, 9999],
+            labels=["短距離", "マイル", "中距離", "長距離"],
+        ).astype(str)
+
+        for cond_col, feat_name in [
+            ("distance_cat", "horse_same_distance_win_rate"),
+            ("surface", "horse_same_surface_win_rate"),
+            ("ground_state", "horse_same_ground_win_rate"),
+            ("venue", "horse_same_venue_win_rate"),
+        ]:
+            cond_stats = self._expanding_win_rate_by_condition(
+                hr, cond_col=cond_col, out_col=feat_name
+            )
+            # race_dateが重複しやすいのでhorse_id + race_date + cond_colでmerge
+            merge_keys = ["horse_id", "race_date", cond_col]
+            # dfのcond_col列確認
+            if cond_col not in df.columns:
+                continue
+            df = df.merge(
+                cond_stats[[*merge_keys, feat_name]],
+                on=merge_keys,
+                how="left",
+            )
+            df[feat_name] = df[feat_name].fillna(0)
+
+        return df
+
+    def _expanding_win_rate_by_condition(
+        self,
+        hr: pd.DataFrame,
+        cond_col: str,
+        out_col: str,
+    ) -> pd.DataFrame:
+        """
+        条件ごとに expanding 勝率を計算する（データリーク防止）。
+        """
+        hr = hr.copy().sort_values(["horse_id", "race_date"])
+
+        def calc_group(group: pd.DataFrame) -> pd.DataFrame:
+            g = group.sort_values("race_date").reset_index(drop=True)
+            shifted = g["finish_pos"].shift(1)
+            g[out_col] = shifted.eq(1).expanding().mean()
+            return g
+
+        result = hr.groupby(["horse_id", cond_col], group_keys=False).apply(calc_group)
+        return result
+
+    # ----------------------------------------------------------
+    # 5. 季節・月別の過去成績
+    # ----------------------------------------------------------
+    def _add_seasonal_stats(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        馬の季節・月別成績を追加する。
+
+        追加特徴量:
+        - horse_month_win_rate: 同月での勝率
+        - horse_season_win_rate: 同季節での勝率（春夏秋冬）
+        """
+        hr = self.horse_results[
+            ["horse_id", "race_date", "finish_pos"]
+        ].copy()
+        hr["race_date"] = pd.to_datetime(hr["race_date"], errors="coerce")
+        hr["month"] = hr["race_date"].dt.month
+        hr["season"] = hr["month"].map(self._month_to_season)
+
+        df["month"] = df["race_date"].dt.month
+        df["season"] = df["month"].map(self._month_to_season)
+
+        for cond_col, feat_name in [
+            ("month", "horse_month_win_rate"),
+            ("season", "horse_season_win_rate"),
+        ]:
+            cond_stats = self._expanding_win_rate_by_condition(
+                hr, cond_col=cond_col, out_col=feat_name
+            )
+            df = df.merge(
+                cond_stats[["horse_id", "race_date", cond_col, feat_name]],
+                on=["horse_id", "race_date", cond_col],
+                how="left",
+            )
+            df[feat_name] = df[feat_name].fillna(0)
+
+        return df
+
+    @staticmethod
+    def _month_to_season(month: int) -> str:
+        if month in [3, 4, 5]:
+            return "春"
+        elif month in [6, 7, 8]:
+            return "夏"
+        elif month in [9, 10, 11]:
+            return "秋"
+        else:
+            return "冬"
+
+    # ----------------------------------------------------------
+    # 6. 脚質分類
+    # ----------------------------------------------------------
+    def _add_running_style(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        過去成績の通過順位から脚質を分類する。
+
+        passage_rankは "2-2-3-3" 形式の通過順位文字列。
+        最初のコーナー通過順位の平均から脚質を判定する。
+
+        分類:
+        - 逃げ: 平均1着通過
+        - 先行: 平均2-3着通過
+        - 差し: 平均4-6着通過
+        - 追込: 平均7着以上通過
+        """
+        hr = self.horse_results[
+            ["horse_id", "race_date", "passage_rank", "horse_count"]
+        ].copy()
+        hr["race_date"] = pd.to_datetime(hr["race_date"], errors="coerce")
+
+        # passage_rankから第1コーナー通過順位を抽出
+        hr["first_corner_rank"] = hr["passage_rank"].apply(
+            self._extract_first_corner_rank
+        )
+
+        # 過去全走の第1コーナー平均
+        hr = hr.sort_values(["horse_id", "race_date"])
+
+        def calc_style(group: pd.DataFrame) -> pd.DataFrame:
+            g = group.sort_values("race_date").reset_index(drop=True)
+            g["avg_first_corner"] = (
+                g["first_corner_rank"].shift(1).expanding().mean()
+            )
+            return g
+
+        style_df = hr.groupby("horse_id", group_keys=False).apply(calc_style)[
+            ["horse_id", "race_date", "avg_first_corner"]
+        ]
+
+        df = df.merge(style_df, on=["horse_id", "race_date"], how="left")
+
+        # 脚質分類
+        df["running_style"] = df["avg_first_corner"].apply(
+            self._classify_running_style
+        )
+        df["running_style"] = df["running_style"].fillna("自在")
+        df["avg_first_corner"] = df["avg_first_corner"].fillna(
+            df["horse_count"].fillna(10) / 2
+        )
+
+        return df
+
+    @staticmethod
+    def _extract_first_corner_rank(passage_rank: str) -> Optional[float]:
+        """'2-2-3-3' → 2.0"""
+        if pd.isna(passage_rank) or str(passage_rank).strip() == "":
+            return None
+        parts = str(passage_rank).strip().split("-")
+        try:
+            return float(parts[0])
+        except (ValueError, IndexError):
+            return None
+
+    @staticmethod
+    def _classify_running_style(avg_rank: Optional[float]) -> str:
+        if avg_rank is None or pd.isna(avg_rank):
+            return "自在"
+        if avg_rank <= 1.5:
+            return "逃げ"
+        elif avg_rank <= 3.5:
+            return "先行"
+        elif avg_rank <= 6.5:
+            return "差し"
+        else:
+            return "追込"
+
+    # ----------------------------------------------------------
+    # 7. スピード指数（レース内相対タイム）
+    # ----------------------------------------------------------
+    def _add_speed_index(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        レース内でのスピード指数を計算する。
+
+        スピード指数 = 距離基準タイム - 実際のタイム（秒）を正規化
+        同一レース内での相対評価とする。
+
+        追加特徴量:
+        - speed_index: レース内偏差値ベースのスピード指数
+        - horse_avg_speed_index: 過去走のスピード指数平均
+        - last_final3f: 前走の上がり3ハロン
+        - avg_final3f: 過去走の平均上がり3ハロン
+        - final3f_rank: 前走の上がり3ハロン順位
+        """
+        # finish_time_sec がなければスキップ
+        if "finish_time_sec" not in df.columns:
+            return df
+
+        # レース内偏差値化
+        df["speed_index"] = df.groupby("race_id")["finish_time_sec"].transform(
+            lambda x: (x.mean() - x) / (x.std() + 1e-6) * 10 + 50
+        )
+
+        # 馬の過去走スピード指数平均（データリーク防止: shiftを使う）
+        hr_speed = self.horse_results[
+            ["horse_id", "race_date", "finish_pos", "final_3f"]
+        ].copy()
+        hr_speed["race_date"] = pd.to_datetime(hr_speed["race_date"], errors="coerce")
+        hr_speed = hr_speed.sort_values(["horse_id", "race_date"])
+
+        def speed_stats(group: pd.DataFrame) -> pd.DataFrame:
+            g = group.sort_values("race_date").reset_index(drop=True)
+            g["last_final3f"] = g["final_3f"].shift(1)
+            g["avg_final3f"] = g["final_3f"].shift(1).expanding().mean()
+            # 上がり3F順位（レース内）は horse_results にはないため省略
+            return g
+
+        speed_df = hr_speed.groupby("horse_id", group_keys=False).apply(speed_stats)[
+            ["horse_id", "race_date", "last_final3f", "avg_final3f"]
+        ]
+
+        df = df.merge(speed_df, on=["horse_id", "race_date"], how="left")
+        df["last_final3f"] = df["last_final3f"].fillna(df["last_final3f"].median())
+        df["avg_final3f"] = df["avg_final3f"].fillna(df["avg_final3f"].median())
+
+        return df
+
+    # ----------------------------------------------------------
+    # 8. 基本特徴量の追加・整形
+    # ----------------------------------------------------------
+    def _add_basic_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        基本情報から派生特徴量を追加する。
+
+        追加特徴量:
+        - year, month, day_of_week: 日付分解
+        - horse_age_group: 馬齢グループ（2-3歳/4-5歳/6歳以上）
+        - weight_carried_diff_from_avg: 平均斤量との差
+        - is_outside_frame: 外枠かどうか（7-8枠）
+        - is_inner_frame: 内枠かどうか（1-2枠）
+        - log_odds: オッズの対数（正規化）
+        - popularity_ratio: 人気÷頭数（相対人気）
+        """
+        df = df.copy()
+
+        if "race_date" in df.columns:
+            df["year"] = df["race_date"].dt.year
+            df["day_of_week"] = df["race_date"].dt.dayofweek
+
+        if "age" in df.columns:
+            df["horse_age_group"] = pd.cut(
+                df["age"],
+                bins=[0, 3, 5, 99],
+                labels=["2-3歳", "4-5歳", "6歳以上"],
+            ).astype(str)
+
+        if "weight_carried" in df.columns:
+            avg_wc = df.groupby("race_id")["weight_carried"].transform("mean")
+            df["weight_carried_diff_from_avg"] = df["weight_carried"] - avg_wc
+
+        if "frame_number" in df.columns:
+            df["is_outer_frame"] = (df["frame_number"] >= 7).astype(int)
+            df["is_inner_frame"] = (df["frame_number"] <= 2).astype(int)
+
+        if "odds" in df.columns:
+            df["log_odds"] = np.log1p(df["odds"])
+
+        if "popularity" in df.columns and "horse_count" in df.columns:
+            df["popularity_ratio"] = df["popularity"] / df["horse_count"].replace(0, 1)
+
+        return df
+
+    # ----------------------------------------------------------
+    # 目的変数の生成
+    # ----------------------------------------------------------
+    @staticmethod
+    def make_target(df: pd.DataFrame, target: str = "win") -> pd.Series:
+        """
+        目的変数を生成する。
+
+        Args:
+            df: マスターDataFrame
+            target: "win"（単勝）/ "top3"（複勝）
+
+        Returns:
+            0/1のSeries
+        """
+        if target == "win":
+            return (df["finish_pos"] == 1).astype(int)
+        elif target == "top3":
+            return (df["finish_pos"] <= 3).astype(int)
+        else:
+            raise ValueError(f"Unknown target: {target}")

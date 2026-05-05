@@ -1,0 +1,2208 @@
+{
+  "raceId": "202606030810",
+  "raceInfo": {
+    "raceId": "202606030810",
+    "date": "2026-04-19",
+    "venue": "中山",
+    "raceNumber": 10,
+    "raceName": "京葉Ｓ(L)",
+    "surface": "ダート",
+    "distance": 1200,
+    "groundLabel": "良",
+    "weather": "晴"
+  },
+  "condition": {
+    "venue": "中山",
+    "distance": 1200,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle"
+  },
+  "entries": [
+    {
+      "horseId": "2022105244",
+      "horseName": "ポッドベイダー",
+      "horseNumber": 1,
+      "frameNumber": 1,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 40,
+        "stamina": 31,
+        "kick": 54,
+        "sustain": 52,
+        "power": 47
+      },
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "B",
+        "kick": "S",
+        "sustain": "A+",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 65.7,
+        "adjustedScore": 55.3,
+        "scoreDiff": -10.4,
+        "baseAbilityCore": 56.8,
+        "intrinsicAbilityScore": 56.9,
+        "raceAdjustedInput": 67.7,
+        "conditionFitDelta": -1.6,
+        "reproducibilityDelta": 0.1,
+        "riskPenalty": 0,
+        "raceRelativeScore": 69.3,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.7,
+        "classLevelBonus": 3.2,
+        "finalEvaluationScore": 76.3,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 18.8,
+        "roleHint": "軸",
+        "pastRunInsight": "直近3走・大敗1回(好走4回あり) · 2桁着順1回/5走 · 展開一貫性52%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "本命候補"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 4,
+          "marginToWinnerSec": 0.2,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-02-10",
+          "raceId": "202608020410",
+          "raceName": "大和S(OP)",
+          "raceClass": "OP",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.2,
+            10.9,
+            11.6,
+            11.8,
+            12.2,
+            12.2
+          ]
+        },
+        {
+          "date": "2025-12-14",
+          "raceId": "202506050411",
+          "raceName": "カペラS(GIII)",
+          "raceClass": "G1",
+          "place": 7,
+          "marginToWinnerSec": 1.5,
+          "section200mSec": [
+            11.5,
+            10.3,
+            11.1,
+            12,
+            12.1,
+            11.6
+          ]
+        },
+        {
+          "date": "2025-09-14",
+          "raceId": "202506040411",
+          "raceName": "ラジオ日本賞(OP)",
+          "raceClass": "OP",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            11.7,
+            10.8,
+            11.3,
+            11.7,
+            12.1,
+            12.3
+          ]
+        },
+        {
+          "date": "2025-08-10",
+          "raceId": "202507030607",
+          "raceName": "CBC賞(GIII)",
+          "raceClass": "G1",
+          "place": 11,
+          "marginToWinnerSec": 0.5,
+          "section200mSec": [
+            11.8,
+            10.7,
+            11.5,
+            11.3,
+            10.7,
+            11.4
+          ]
+        }
+      ],
+      "predicted_probability": 0.33,
+      "value_score": 0.58,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "持続力"
+      ],
+      "risk_factors": [
+        "スタミナ不安"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 4,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 4.64,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.76
+    },
+    {
+      "horseId": "2021110104",
+      "horseName": "エコロエイト",
+      "horseNumber": 2,
+      "frameNumber": 2,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 69,
+        "stamina": 36,
+        "kick": 19,
+        "sustain": 60,
+        "power": 50
+      },
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "S",
+        "kick": "B",
+        "sustain": "S",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 59.3,
+        "adjustedScore": 49.8,
+        "scoreDiff": -9.4,
+        "baseAbilityCore": 50.7,
+        "intrinsicAbilityScore": 51.6,
+        "raceAdjustedInput": 62,
+        "conditionFitDelta": -1.8,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 55.1,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.2,
+        "classLevelBonus": 1.7,
+        "finalEvaluationScore": 59,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 39.1,
+        "roleHint": "頭",
+        "pastRunInsight": "2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 9,
+          "marginToWinnerSec": 0.9,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-03-28",
+          "raceId": "202606030109",
+          "raceName": "ブラッドストーンS(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12,
+            10.7,
+            11.4,
+            11.8,
+            12.2,
+            12.5
+          ]
+        },
+        {
+          "date": "2026-02-28",
+          "raceId": "202606020110",
+          "raceName": "春風S(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 2,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            11.9,
+            10.2,
+            11,
+            12.1,
+            12.3,
+            12.5
+          ]
+        },
+        {
+          "date": "2025-12-13",
+          "raceId": "202506050310",
+          "raceName": "アクアラインS(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 15,
+          "marginToWinnerSec": 3.1,
+          "section200mSec": [
+            11.8,
+            10.8,
+            11.5,
+            11.6,
+            12.2,
+            13
+          ]
+        },
+        {
+          "date": "2025-09-20",
+          "raceId": "202506040612",
+          "raceName": "3歳以上2勝クラス",
+          "raceClass": "2勝",
+          "place": 1,
+          "marginToWinnerSec": 0
+        }
+      ],
+      "predicted_probability": 0.48,
+      "value_score": 0.53,
+      "value_rank": "D",
+      "confidence_rank": "A",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 1,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 1.85,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.1
+    },
+    {
+      "horseId": "2019101759",
+      "horseName": "ムーヴ",
+      "horseNumber": 3,
+      "frameNumber": 2,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 10,
+        "stamina": 33,
+        "kick": 55,
+        "sustain": 45,
+        "power": 39
+      },
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "S",
+        "kick": "S",
+        "sustain": "A",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 60.8,
+        "adjustedScore": 51.1,
+        "scoreDiff": -9.7,
+        "baseAbilityCore": 52.2,
+        "intrinsicAbilityScore": 53.1,
+        "raceAdjustedInput": 63.4,
+        "conditionFitDelta": -2,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 58.6,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.6,
+        "classLevelBonus": 2.2,
+        "finalEvaluationScore": 62.9,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 10.7,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "相手"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 6,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-03-22",
+          "raceId": "202606020811",
+          "raceName": "千葉S(OP)",
+          "raceClass": "OP",
+          "place": 2,
+          "marginToWinnerSec": 0.1,
+          "section200mSec": [
+            11.9,
+            10.6,
+            11.3,
+            12.1,
+            12.4,
+            12.4
+          ]
+        },
+        {
+          "date": "2025-12-07",
+          "raceId": "202509050211",
+          "raceName": "りんくうS(OP)",
+          "raceClass": "OP",
+          "place": 13,
+          "marginToWinnerSec": 0.8,
+          "section200mSec": [
+            12.2,
+            11.2,
+            11.5,
+            11.6,
+            11.7,
+            12.4
+          ]
+        },
+        {
+          "date": "2025-10-26",
+          "raceId": "202505040911",
+          "raceName": "神無月S(OP)",
+          "raceClass": "OP",
+          "place": 10,
+          "marginToWinnerSec": 0.7,
+          "section200mSec": [
+            12.5,
+            10.8,
+            11.4,
+            12,
+            11.9,
+            11.5,
+            12
+          ]
+        },
+        {
+          "date": "2025-06-15",
+          "raceId": "202509030412",
+          "raceName": "リボン賞(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.1,
+            10.5,
+            11.2,
+            12.2,
+            11.9,
+            12.5
+          ]
+        }
+      ],
+      "predicted_probability": 0.17,
+      "value_score": 0.74,
+      "value_rank": "D",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "持続力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 10,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 11.53,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 4.38
+    },
+    {
+      "horseId": "2020106062",
+      "horseName": "ジュンウィンダム",
+      "horseNumber": 4,
+      "frameNumber": 3,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 15,
+        "stamina": 31,
+        "kick": 37,
+        "sustain": 39,
+        "power": 39
+      },
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "A",
+        "kick": "A+",
+        "sustain": "B",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 54.7,
+        "adjustedScore": 46,
+        "scoreDiff": -8.7,
+        "baseAbilityCore": 47,
+        "intrinsicAbilityScore": 46.9,
+        "raceAdjustedInput": 57.5,
+        "conditionFitDelta": -0.9,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 1,
+        "raceRelativeScore": 43.9,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.3,
+        "classLevelBonus": 1.8,
+        "finalEvaluationScore": 47.2,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 16.5,
+        "roleHint": "軸",
+        "pastRunInsight": "直近3走・大敗1回(好走1回あり) · 2桁着順3回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-25",
+          "raceId": "202608030111",
+          "raceName": "天王山S(OP)",
+          "raceClass": "OP",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12,
+            10.5,
+            11,
+            11.6,
+            12.3,
+            13
+          ]
+        },
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 12,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-04-04",
+          "raceId": "202609020310",
+          "raceName": "ポラリスS(OP)",
+          "raceClass": "OP",
+          "place": 13,
+          "marginToWinnerSec": 1.5,
+          "section200mSec": [
+            12.2,
+            10.3,
+            11.3,
+            11.7,
+            12,
+            12.4,
+            12.3
+          ]
+        },
+        {
+          "date": "2026-01-18",
+          "raceId": "202606010710",
+          "raceName": "ジャニュアリーS(OP)",
+          "raceClass": "OP",
+          "place": 9,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11.1,
+            12,
+            12.5,
+            12.8
+          ]
+        },
+        {
+          "date": "2025-10-04",
+          "raceId": "202508030111",
+          "raceName": "オパールS(L)",
+          "raceClass": "OP",
+          "place": 12,
+          "marginToWinnerSec": 0.7,
+          "section200mSec": [
+            12.1,
+            10.6,
+            11,
+            11.3,
+            11,
+            11.7
+          ]
+        }
+      ],
+      "predicted_probability": 0.14,
+      "value_score": 0.96,
+      "value_rank": "C",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 15,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 18,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 6.84
+    },
+    {
+      "horseId": "2021110069",
+      "horseName": "エスカル",
+      "horseNumber": 5,
+      "frameNumber": 3,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 37,
+        "stamina": 32,
+        "kick": 31,
+        "sustain": 54,
+        "power": 55
+      },
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "A+",
+        "kick": "A",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 60.6,
+        "adjustedScore": 51,
+        "scoreDiff": -9.6,
+        "baseAbilityCore": 51.9,
+        "intrinsicAbilityScore": 52.8,
+        "raceAdjustedInput": 61.4,
+        "conditionFitDelta": -1.8,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 53.6,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.2,
+        "classLevelBonus": 2.2,
+        "finalEvaluationScore": 57.4,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 12.4,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 5,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-02-10",
+          "raceId": "202608020410",
+          "raceName": "大和S(OP)",
+          "raceClass": "OP",
+          "place": 6,
+          "marginToWinnerSec": 0.5,
+          "section200mSec": [
+            12.2,
+            10.9,
+            11.6,
+            11.8,
+            12.2,
+            12.2
+          ]
+        },
+        {
+          "date": "2025-12-21",
+          "raceId": "202507050611",
+          "raceName": "コールドムーンS(OP)",
+          "raceClass": "OP",
+          "place": 5,
+          "marginToWinnerSec": 0.4,
+          "section200mSec": [
+            12.3,
+            10.6,
+            11.2,
+            12,
+            12.3,
+            12.2,
+            11.9
+          ]
+        },
+        {
+          "date": "2025-11-23",
+          "raceId": "202505050511",
+          "raceName": "霜月S(OP)",
+          "raceClass": "OP",
+          "place": 6,
+          "marginToWinnerSec": 0.9,
+          "section200mSec": [
+            12.5,
+            10.9,
+            11.6,
+            11.9,
+            12.1,
+            12,
+            12.3
+          ]
+        },
+        {
+          "date": "2025-09-14",
+          "raceId": "202506040411",
+          "raceName": "ラジオ日本賞(OP)",
+          "raceClass": "OP",
+          "place": 10,
+          "marginToWinnerSec": 1.3,
+          "section200mSec": [
+            11.7,
+            10.8,
+            11.3,
+            11.7,
+            12.1,
+            12.3
+          ]
+        }
+      ],
+      "predicted_probability": 0.24,
+      "value_score": 0.62,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 6,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 6.79,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 2.58
+    },
+    {
+      "horseId": "2020110062",
+      "horseName": "ワールズコライド",
+      "horseNumber": 6,
+      "frameNumber": 4,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 53,
+        "stamina": 31,
+        "kick": 18,
+        "sustain": 45,
+        "power": 44
+      },
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "A",
+        "kick": "C",
+        "sustain": "A",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 49.4,
+        "adjustedScore": 41.5,
+        "scoreDiff": -7.8,
+        "baseAbilityCore": 42.5,
+        "intrinsicAbilityScore": 39.6,
+        "raceAdjustedInput": 48.2,
+        "conditionFitDelta": 1.9,
+        "reproducibilityDelta": 0.1,
+        "riskPenalty": 3,
+        "raceRelativeScore": 30,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 1.9,
+        "classLevelBonus": 1.2,
+        "finalEvaluationScore": 34.1,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 19.1,
+        "roleHint": "軸",
+        "pastRunInsight": "直近3走・大敗1回 · 2桁着順3回/5走 · 展開一貫性52%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 14,
+          "marginToWinnerSec": 1.1,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-01-18",
+          "raceId": "202606010710",
+          "raceName": "ジャニュアリーS(OP)",
+          "raceClass": "OP",
+          "place": 16,
+          "marginToWinnerSec": 2.4,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11.1,
+            12,
+            12.5,
+            12.8
+          ]
+        },
+        {
+          "date": "2025-08-17",
+          "raceId": "202504020807",
+          "raceName": "NST賞(OP)",
+          "raceClass": "OP",
+          "place": 9,
+          "marginToWinnerSec": 0.9,
+          "section200mSec": [
+            11.8,
+            10.7,
+            11.1,
+            12.2,
+            12.3,
+            12.4
+          ]
+        },
+        {
+          "date": "2024-11-09",
+          "raceId": "202408060310",
+          "raceName": "室町S(OP)",
+          "raceClass": "OP",
+          "place": 14,
+          "marginToWinnerSec": 1.6,
+          "section200mSec": [
+            12.2,
+            10.7,
+            11.2,
+            11.8,
+            12.5,
+            12.3
+          ]
+        },
+        {
+          "date": "2024-02-11",
+          "raceId": "202405010610",
+          "raceName": "バレンタインS(OP)",
+          "raceClass": "OP",
+          "place": 8,
+          "marginToWinnerSec": 0.9,
+          "section200mSec": [
+            12.5,
+            11,
+            12,
+            12.2,
+            12.1,
+            12,
+            12.2
+          ]
+        }
+      ],
+      "predicted_probability": 0.22,
+      "value_score": 0.66,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 7,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 7.93,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 3.01
+    },
+    {
+      "horseId": "2020106557",
+      "horseName": "コンクイスタ",
+      "horseNumber": 7,
+      "frameNumber": 4,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 19,
+        "stamina": 31,
+        "kick": 37,
+        "sustain": 39,
+        "power": 49
+      },
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "A",
+        "kick": "A+",
+        "sustain": "C",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 60.5,
+        "adjustedScore": 50.9,
+        "scoreDiff": -9.6,
+        "baseAbilityCore": 52.2,
+        "intrinsicAbilityScore": 53.1,
+        "raceAdjustedInput": 63.9,
+        "conditionFitDelta": -2.2,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 59.8,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.2,
+        "classLevelBonus": 2.7,
+        "finalEvaluationScore": 63.5,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 23.5,
+        "roleHint": "頭",
+        "pastRunInsight": "2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "単穴"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 2,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-02-22",
+          "raceId": "202609010211",
+          "raceName": "令月S(OP)",
+          "raceClass": "OP",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.1,
+            10.9,
+            11.6,
+            12,
+            12.2,
+            12.3
+          ]
+        },
+        {
+          "date": "2025-12-28",
+          "raceId": "202509050811",
+          "raceName": "ギャラクシーS(OP)",
+          "raceClass": "OP",
+          "place": 4,
+          "marginToWinnerSec": 0.2,
+          "section200mSec": [
+            12,
+            10.6,
+            11.3,
+            11.9,
+            12.2,
+            12.6,
+            12.8
+          ]
+        },
+        {
+          "date": "2025-11-23",
+          "raceId": "202505050511",
+          "raceName": "霜月S(OP)",
+          "raceClass": "OP",
+          "place": 14,
+          "marginToWinnerSec": 1.7,
+          "section200mSec": [
+            12.5,
+            10.9,
+            11.6,
+            11.9,
+            12.1,
+            12,
+            12.3
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "raceId": "202507030207",
+          "raceName": "東海S(GIII)",
+          "raceClass": "G1",
+          "place": 6,
+          "marginToWinnerSec": 1.2,
+          "section200mSec": [
+            11.8,
+            11.2,
+            11.6,
+            11.7,
+            11.7,
+            11.9,
+            12.3
+          ]
+        }
+      ],
+      "predicted_probability": 0.16,
+      "value_score": 0.93,
+      "value_rank": "C",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 13,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 15.35,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 5.83
+    },
+    {
+      "horseId": "2022102493",
+      "horseName": "トリリオンボーイ",
+      "horseNumber": 8,
+      "frameNumber": 5,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 22,
+        "stamina": 30,
+        "kick": 32,
+        "sustain": 49,
+        "power": 47
+      },
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "B",
+        "kick": "A",
+        "sustain": "A+",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 52.6,
+        "adjustedScore": 44.3,
+        "scoreDiff": -8.4,
+        "baseAbilityCore": 44.7,
+        "intrinsicAbilityScore": 43.8,
+        "raceAdjustedInput": 54.1,
+        "conditionFitDelta": 0.5,
+        "reproducibilityDelta": 0.1,
+        "riskPenalty": 1,
+        "raceRelativeScore": 35.4,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 1.6,
+        "classLevelBonus": 1.7,
+        "finalEvaluationScore": 37.7,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 19.4,
+        "roleHint": "軸",
+        "pastRunInsight": "直近3走・大敗1回(好走1回あり) · 2桁着順3回/5走 · 展開一貫性52%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-26",
+          "raceId": "202605020210",
+          "raceName": "オアシスS(L)",
+          "raceClass": "OP",
+          "place": 12,
+          "marginToWinnerSec": 1.6,
+          "section200mSec": [
+            12.3,
+            10.8,
+            11.2,
+            11.8,
+            12.1,
+            12.6,
+            12.6,
+            12.2
+          ]
+        },
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 8,
+          "marginToWinnerSec": 0.9,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-03-14",
+          "raceId": "202609010711",
+          "raceName": "コーラルS(L)",
+          "raceClass": "OP",
+          "place": 10,
+          "marginToWinnerSec": 1.4,
+          "section200mSec": [
+            12,
+            11,
+            11.4,
+            11.8,
+            11.7,
+            12.3,
+            12.2
+          ]
+        },
+        {
+          "date": "2026-01-10",
+          "raceId": "202608010311",
+          "raceName": "すばるS(L)",
+          "raceClass": "OP",
+          "place": 10,
+          "marginToWinnerSec": 1.4,
+          "section200mSec": [
+            12.2,
+            11.1,
+            11.8,
+            12.1,
+            12,
+            12.4,
+            12
+          ]
+        },
+        {
+          "date": "2025-12-21",
+          "raceId": "202509050609",
+          "raceName": "御影S(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.2,
+            10.6,
+            11.2,
+            11.7,
+            11.8,
+            12.4,
+            12.6
+          ]
+        }
+      ],
+      "predicted_probability": 0.16,
+      "value_score": 0.78,
+      "value_rank": "D",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 11,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 12.78,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 4.86
+    },
+    {
+      "horseId": "2022104972",
+      "horseName": "スリーピース",
+      "horseNumber": 9,
+      "frameNumber": 5,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 54,
+        "stamina": 35,
+        "kick": 29,
+        "sustain": 61,
+        "power": 56
+      },
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "S",
+        "kick": "B",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 59.3,
+        "adjustedScore": 49.8,
+        "scoreDiff": -9.4,
+        "baseAbilityCore": 50.8,
+        "intrinsicAbilityScore": 51.7,
+        "raceAdjustedInput": 61.9,
+        "conditionFitDelta": -1.9,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 54.8,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.3,
+        "classLevelBonus": 1.5,
+        "finalEvaluationScore": 59.3,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 26,
+        "roleHint": "頭",
+        "pastRunInsight": "2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "相手"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 10,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-04-11",
+          "raceId": "202606030510",
+          "raceName": "卯月S(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            11.9,
+            10.8,
+            11.5,
+            11.6,
+            11.7,
+            12.4
+          ]
+        },
+        {
+          "date": "2026-03-07",
+          "raceId": "202609010510",
+          "raceName": "なにわS(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 9,
+          "marginToWinnerSec": 0.7,
+          "section200mSec": [
+            12.1,
+            10.6,
+            11.3,
+            11.7,
+            12.4,
+            13
+          ]
+        },
+        {
+          "date": "2026-02-14",
+          "raceId": "202605010510",
+          "raceName": "銀蹄S(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 12,
+          "marginToWinnerSec": 2.1,
+          "section200mSec": [
+            12.6,
+            11,
+            11.7,
+            11.9,
+            11.9,
+            11.8,
+            12.5
+          ]
+        },
+        {
+          "date": "2026-01-04",
+          "raceId": "202606010112",
+          "raceName": "4歳以上2勝クラス",
+          "raceClass": "2勝",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12,
+            10.9,
+            11.8,
+            12.1,
+            11.9,
+            12.3
+          ]
+        }
+      ],
+      "predicted_probability": 0.42,
+      "value_score": 0.58,
+      "value_rank": "D",
+      "confidence_rank": "A",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 3,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 3.64,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.38
+    },
+    {
+      "horseId": "2019105761",
+      "horseName": "エティエンヌ",
+      "horseNumber": 10,
+      "frameNumber": 6,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 9,
+        "stamina": 32,
+        "kick": 48,
+        "sustain": 39,
+        "power": 38
+      },
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "A+",
+        "kick": "S",
+        "sustain": "B",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 53.7,
+        "adjustedScore": 45.1,
+        "scoreDiff": -8.5,
+        "baseAbilityCore": 46,
+        "intrinsicAbilityScore": 46.9,
+        "raceAdjustedInput": 54.5,
+        "conditionFitDelta": -1.8,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 36.4,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.4,
+        "classLevelBonus": 1.7,
+        "finalEvaluationScore": 40.1,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 7.2,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 11,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-02-10",
+          "raceId": "202608020410",
+          "raceName": "大和S(OP)",
+          "raceClass": "OP",
+          "place": 7,
+          "marginToWinnerSec": 0.6,
+          "section200mSec": [
+            12.2,
+            10.9,
+            11.6,
+            11.8,
+            12.2,
+            12.2
+          ]
+        },
+        {
+          "date": "2025-12-07",
+          "raceId": "202509050211",
+          "raceName": "りんくうS(OP)",
+          "raceClass": "OP",
+          "place": 14,
+          "marginToWinnerSec": 0.9,
+          "section200mSec": [
+            12.2,
+            11.2,
+            11.5,
+            11.6,
+            11.7,
+            12.4
+          ]
+        },
+        {
+          "date": "2025-11-08",
+          "raceId": "202508040111",
+          "raceName": "室町S(OP)",
+          "raceClass": "OP",
+          "place": 8,
+          "marginToWinnerSec": 0.7,
+          "section200mSec": [
+            12.1,
+            10.7,
+            11.4,
+            11.7,
+            11.9,
+            12.5
+          ]
+        },
+        {
+          "date": "2025-09-14",
+          "raceId": "202506040411",
+          "raceName": "ラジオ日本賞(OP)",
+          "raceClass": "OP",
+          "place": 9,
+          "marginToWinnerSec": 1.2,
+          "section200mSec": [
+            11.7,
+            10.8,
+            11.3,
+            11.7,
+            12.1,
+            12.3
+          ]
+        }
+      ],
+      "predicted_probability": 0.15,
+      "value_score": 0.95,
+      "value_rank": "C",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "持続力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 14,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 16.67,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 6.33
+    },
+    {
+      "horseId": "2020103876",
+      "horseName": "モンドプリューム",
+      "horseNumber": 11,
+      "frameNumber": 6,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 28,
+        "stamina": 31,
+        "kick": 36,
+        "sustain": 52,
+        "power": 45
+      },
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "A",
+        "kick": "A+",
+        "sustain": "A+",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 61.7,
+        "adjustedScore": 51.9,
+        "scoreDiff": -9.8,
+        "baseAbilityCore": 52.9,
+        "intrinsicAbilityScore": 53.8,
+        "raceAdjustedInput": 64.1,
+        "conditionFitDelta": -1.9,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 60.3,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.7,
+        "classLevelBonus": 2.1,
+        "finalEvaluationScore": 64.3,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 15.4,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "対抗"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 7,
+          "marginToWinnerSec": 0.7,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-01-18",
+          "raceId": "202606010710",
+          "raceName": "ジャニュアリーS(OP)",
+          "raceClass": "OP",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11.1,
+            12,
+            12.5,
+            12.8
+          ]
+        },
+        {
+          "date": "2025-12-13",
+          "raceId": "202506050310",
+          "raceName": "アクアラインS(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            11.8,
+            10.8,
+            11.5,
+            11.6,
+            12.2,
+            13
+          ]
+        },
+        {
+          "date": "2025-09-28",
+          "raceId": "202506040912",
+          "raceName": "外房S(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 12,
+          "marginToWinnerSec": 1.1,
+          "section200mSec": [
+            11.8,
+            10.6,
+            11.3,
+            12.2,
+            12.4,
+            12.6
+          ]
+        },
+        {
+          "date": "2025-09-07",
+          "raceId": "202506040209",
+          "raceName": "浦安特別(2勝クラス)",
+          "raceClass": "2勝",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            11.7,
+            10.8,
+            11.3,
+            12.1,
+            12.7,
+            12.5
+          ]
+        }
+      ],
+      "predicted_probability": 0.19,
+      "value_score": 0.66,
+      "value_rank": "D",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 8,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 9.1,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 3.46
+    },
+    {
+      "horseId": "2019101975",
+      "horseName": "ナムラフランク",
+      "horseNumber": 12,
+      "frameNumber": 7,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 35,
+        "stamina": 29,
+        "kick": 32,
+        "sustain": 43,
+        "power": 48
+      },
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "C",
+        "kick": "A",
+        "sustain": "A",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 57.9,
+        "adjustedScore": 48.7,
+        "scoreDiff": -9.2,
+        "baseAbilityCore": 50,
+        "intrinsicAbilityScore": 50.9,
+        "raceAdjustedInput": 61.4,
+        "conditionFitDelta": -2.2,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 53.6,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.3,
+        "classLevelBonus": 2.2,
+        "finalEvaluationScore": 59,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 22.5,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走3回あり) · 2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-03-14",
+          "raceId": "202609010711",
+          "raceName": "コーラルS(L)",
+          "raceClass": "OP",
+          "place": 12,
+          "marginToWinnerSec": 1.7,
+          "section200mSec": [
+            12,
+            11,
+            11.4,
+            11.8,
+            11.7,
+            12.3,
+            12.2
+          ]
+        },
+        {
+          "date": "2026-02-10",
+          "raceId": "202608020410",
+          "raceName": "大和S(OP)",
+          "raceClass": "OP",
+          "place": 11,
+          "marginToWinnerSec": 1.3,
+          "section200mSec": [
+            12.2,
+            10.9,
+            11.6,
+            11.8,
+            12.2,
+            12.2
+          ]
+        },
+        {
+          "date": "2026-01-18",
+          "raceId": "202606010710",
+          "raceName": "ジャニュアリーS(OP)",
+          "raceClass": "OP",
+          "place": 3,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11.1,
+            12,
+            12.5,
+            12.8
+          ]
+        },
+        {
+          "date": "2025-12-28",
+          "raceId": "202509050811",
+          "raceName": "ギャラクシーS(OP)",
+          "raceClass": "OP",
+          "place": 3,
+          "marginToWinnerSec": 0.2,
+          "section200mSec": [
+            12,
+            10.6,
+            11.3,
+            11.9,
+            12.2,
+            12.6,
+            12.8
+          ]
+        }
+      ],
+      "predicted_probability": 0.19,
+      "value_score": 0.74,
+      "value_rank": "D",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "スタミナ不安"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 9,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 10.3,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 3.91
+    },
+    {
+      "horseId": "2020110105",
+      "horseName": "マニバドラ",
+      "horseNumber": 13,
+      "frameNumber": 7,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 67,
+        "stamina": 34,
+        "kick": 21,
+        "sustain": 53,
+        "power": 53
+      },
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "S",
+        "kick": "B",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 58,
+        "adjustedScore": 48.7,
+        "scoreDiff": -9.2,
+        "baseAbilityCore": 50,
+        "intrinsicAbilityScore": 48.9,
+        "raceAdjustedInput": 59.6,
+        "conditionFitDelta": -0.2,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 2,
+        "raceRelativeScore": 49.1,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.4,
+        "classLevelBonus": 2,
+        "finalEvaluationScore": 54.2,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 26.3,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗2回(好走3回あり) · 2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 3,
+          "marginToWinnerSec": 0.2,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-02-10",
+          "raceId": "202608020410",
+          "raceName": "大和S(OP)",
+          "raceClass": "OP",
+          "place": 13,
+          "marginToWinnerSec": 1.6,
+          "section200mSec": [
+            12.2,
+            10.9,
+            11.6,
+            11.8,
+            12.2,
+            12.2
+          ]
+        },
+        {
+          "date": "2025-10-05",
+          "raceId": "202508030210",
+          "raceName": "藤森S(OP)",
+          "raceClass": "OP",
+          "place": 13,
+          "marginToWinnerSec": 2.1,
+          "section200mSec": [
+            12.1,
+            11,
+            11.5,
+            11.7,
+            11.3,
+            11.8
+          ]
+        },
+        {
+          "date": "2025-06-08",
+          "raceId": "202509030211",
+          "raceName": "水無月S(OP)",
+          "raceClass": "OP",
+          "place": 5,
+          "marginToWinnerSec": 0.5,
+          "section200mSec": [
+            12.1,
+            10.8,
+            11.4,
+            11.8,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2025-04-20",
+          "raceId": "202506030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 2,
+          "marginToWinnerSec": 0.2,
+          "section200mSec": [
+            12,
+            10.9,
+            11.8,
+            12.2,
+            11.9,
+            12.3
+          ]
+        }
+      ],
+      "predicted_probability": 0.42,
+      "value_score": 0.46,
+      "value_rank": "D",
+      "confidence_rank": "A",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 2,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 2.7,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.1
+    },
+    {
+      "horseId": "2020101707",
+      "horseName": "スマートフォルス",
+      "horseNumber": 14,
+      "frameNumber": 8,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 8,
+        "stamina": 33,
+        "kick": 60,
+        "sustain": 39,
+        "power": 38
+      },
+      "abilityGrades": {
+        "speed": "C",
+        "stamina": "A+",
+        "kick": "S",
+        "sustain": "B",
+        "power": "C"
+      },
+      "evaluation": {
+        "baseScore": 56.5,
+        "adjustedScore": 47.5,
+        "scoreDiff": -9,
+        "baseAbilityCore": 48.6,
+        "intrinsicAbilityScore": 49.5,
+        "raceAdjustedInput": 59.6,
+        "conditionFitDelta": -2,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 49.1,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.4,
+        "classLevelBonus": 2.1,
+        "finalEvaluationScore": 52.9,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 14.2,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 13,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-02-10",
+          "raceId": "202608020410",
+          "raceName": "大和S(OP)",
+          "raceClass": "OP",
+          "place": 5,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            12.2,
+            10.9,
+            11.6,
+            11.8,
+            12.2,
+            12.2
+          ]
+        },
+        {
+          "date": "2025-12-07",
+          "raceId": "202509050211",
+          "raceName": "りんくうS(OP)",
+          "raceClass": "OP",
+          "place": 4,
+          "marginToWinnerSec": 0.1,
+          "section200mSec": [
+            12.2,
+            11.2,
+            11.5,
+            11.6,
+            11.7,
+            12.4
+          ]
+        },
+        {
+          "date": "2025-10-05",
+          "raceId": "202508030210",
+          "raceName": "藤森S(OP)",
+          "raceClass": "OP",
+          "place": 5,
+          "marginToWinnerSec": 0.9,
+          "section200mSec": [
+            12.1,
+            11,
+            11.5,
+            11.7,
+            11.3,
+            11.8
+          ]
+        },
+        {
+          "date": "2025-06-21",
+          "raceId": "202509030511",
+          "raceName": "天保山S(OP)",
+          "raceClass": "OP",
+          "place": 10,
+          "marginToWinnerSec": 1.2,
+          "section200mSec": [
+            11.8,
+            10.5,
+            11.5,
+            12,
+            12.4,
+            12.5,
+            12.9
+          ]
+        }
+      ],
+      "predicted_probability": 0.16,
+      "value_score": 0.85,
+      "value_rank": "D",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "持続力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 12,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 14.05,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 5.34
+    },
+    {
+      "horseId": "2021105608",
+      "horseName": "カズゴルティス",
+      "horseNumber": 15,
+      "frameNumber": 8,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 48,
+        "stamina": 30,
+        "kick": 34,
+        "sustain": 45,
+        "power": 55
+      },
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "B",
+        "kick": "A",
+        "sustain": "A",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 56.8,
+        "adjustedScore": 47.8,
+        "scoreDiff": -9,
+        "baseAbilityCore": 49.1,
+        "intrinsicAbilityScore": 50,
+        "raceAdjustedInput": 60.1,
+        "conditionFitDelta": -2.2,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 50.3,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.4,
+        "classLevelBonus": 1.8,
+        "finalEvaluationScore": 55.4,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 22.1,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走2回あり) · 2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-25",
+          "raceId": "202608030111",
+          "raceName": "天王山S(OP)",
+          "raceClass": "OP",
+          "place": 8,
+          "marginToWinnerSec": 1.3,
+          "section200mSec": [
+            12,
+            10.5,
+            11,
+            11.6,
+            12.3,
+            13
+          ]
+        },
+        {
+          "date": "2026-04-19",
+          "raceId": "202606030810",
+          "raceName": "京葉S(L)",
+          "raceClass": "OP",
+          "place": 15,
+          "marginToWinnerSec": 1.8,
+          "section200mSec": [
+            11.8,
+            10.4,
+            11,
+            11.7,
+            12,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-01-17",
+          "raceId": "202606010611",
+          "raceName": "カーバンクルS(OP)",
+          "raceClass": "OP",
+          "place": 8,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            11.9,
+            10.6,
+            11.2,
+            11.4,
+            11,
+            11.3
+          ]
+        },
+        {
+          "date": "2025-11-08",
+          "raceId": "202508040111",
+          "raceName": "室町S(OP)",
+          "raceClass": "OP",
+          "place": 7,
+          "marginToWinnerSec": 0.6,
+          "section200mSec": [
+            12.1,
+            10.7,
+            11.4,
+            11.7,
+            11.9,
+            12.5
+          ]
+        },
+        {
+          "date": "2025-09-28",
+          "raceId": "202506040912",
+          "raceName": "外房S(3勝クラス)",
+          "raceClass": "3勝",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            11.8,
+            10.6,
+            11.3,
+            12.2,
+            12.4,
+            12.6
+          ]
+        }
+      ],
+      "predicted_probability": 0.27,
+      "value_score": 0.59,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "先行力"
+      ],
+      "risk_factors": [
+        "スタミナ不安"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 5,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 5.7,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 2.17
+    }
+  ]
+}

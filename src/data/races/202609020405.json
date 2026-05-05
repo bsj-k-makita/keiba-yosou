@@ -1,0 +1,2013 @@
+{
+  "raceId": "202609020405",
+  "raceInfo": {
+    "raceId": "202609020405",
+    "date": "2026-04-05",
+    "venue": "阪神",
+    "raceNumber": 5,
+    "raceName": "３歳１勝クラス",
+    "surface": "ダート",
+    "distance": 1800,
+    "groundLabel": "重",
+    "weather": "晴"
+  },
+  "condition": {
+    "venue": "阪神",
+    "distance": 1800,
+    "ground": "heavy",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle"
+  },
+  "entries": [
+    {
+      "horseId": "2023107371",
+      "horseName": "クイノールト",
+      "horseNumber": 1,
+      "frameNumber": 1,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 56,
+        "stamina": 36,
+        "kick": 24,
+        "sustain": 61,
+        "power": 59
+      },
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "C",
+        "kick": "A",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 38,
+        "adjustedScore": 41,
+        "scoreDiff": 3,
+        "baseAbilityCore": 42.4,
+        "intrinsicAbilityScore": 41.3,
+        "raceAdjustedInput": 47.1,
+        "conditionFitDelta": -0.3,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 2,
+        "raceRelativeScore": 30,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.1,
+        "classLevelBonus": -0.1,
+        "finalEvaluationScore": 31.9,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 42.9,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗2回(好走1回あり) · 2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 11,
+          "marginToWinnerSec": 1.9,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-01-17",
+          "raceId": "202608010606",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 8,
+          "marginToWinnerSec": 2.8,
+          "section200mSec": [
+            12.4,
+            12,
+            13.3,
+            13.2,
+            13.1,
+            13.1,
+            12.3,
+            12.1,
+            12.1
+          ]
+        },
+        {
+          "date": "2025-12-07",
+          "raceId": "202509050206",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.9,
+            11.5,
+            14,
+            12.6,
+            12.6,
+            12.8,
+            12.6,
+            12.3,
+            12.7
+          ]
+        }
+      ],
+      "predicted_probability": 0.32,
+      "value_score": 0.76,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 5,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 6.28,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 2.39
+    },
+    {
+      "horseId": "2023106403",
+      "horseName": "アスクチャンスマン",
+      "horseNumber": 2,
+      "frameNumber": 2,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 24,
+        "stamina": 39,
+        "kick": 43,
+        "sustain": 50,
+        "power": 42
+      },
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "S",
+        "kick": "S",
+        "sustain": "B",
+        "power": "C"
+      },
+      "evaluation": {
+        "baseScore": 45.5,
+        "adjustedScore": 49,
+        "scoreDiff": 3.5,
+        "baseAbilityCore": 48.2,
+        "intrinsicAbilityScore": 49.1,
+        "raceAdjustedInput": 58.4,
+        "conditionFitDelta": -0.1,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 54.4,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2,
+        "classLevelBonus": -0.1,
+        "finalEvaluationScore": 55.4,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 17.4,
+        "roleHint": "軸",
+        "pastRunInsight": "展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 6,
+          "marginToWinnerSec": 1.1,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-02-01",
+          "raceId": "202608020203",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            7.2,
+            11.2,
+            11.9,
+            14.2,
+            13.2,
+            12.9,
+            13.1,
+            12.8,
+            12.4,
+            12.4
+          ]
+        },
+        {
+          "date": "2026-01-05",
+          "raceId": "202608010202",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 3,
+          "marginToWinnerSec": 0.4,
+          "section200mSec": [
+            7.2,
+            11.2,
+            12,
+            13,
+            12.8,
+            13.1,
+            13.1,
+            13,
+            12.9,
+            12.6
+          ]
+        },
+        {
+          "date": "2025-12-20",
+          "raceId": "202509050502",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 7,
+          "marginToWinnerSec": 1.1,
+          "section200mSec": [
+            12.4,
+            11.3,
+            12.9,
+            12.9,
+            12.4,
+            12.5,
+            12,
+            11.3,
+            11.4,
+            11.6
+          ]
+        },
+        {
+          "date": "2025-10-26",
+          "raceId": "202508030903",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 8,
+          "marginToWinnerSec": 1.4,
+          "section200mSec": [
+            12.6,
+            11.2,
+            12.6,
+            12.8,
+            12.7,
+            12.6,
+            12.3,
+            12.2,
+            11.6,
+            11.9
+          ]
+        }
+      ],
+      "predicted_probability": 0.18,
+      "value_score": 0.88,
+      "value_rank": "D",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "末脚性能"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 10,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 12.88,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 4.89
+    },
+    {
+      "horseId": "2023103783",
+      "horseName": "ヴォーカライズ",
+      "horseNumber": 3,
+      "frameNumber": 3,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 46,
+        "stamina": 36,
+        "kick": 31,
+        "sustain": 55,
+        "power": 53
+      },
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "B",
+        "kick": "A+",
+        "sustain": "A+",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 47.7,
+        "adjustedScore": 50,
+        "scoreDiff": 2.4,
+        "baseAbilityCore": 51.5,
+        "intrinsicAbilityScore": 52.4,
+        "raceAdjustedInput": 61.2,
+        "conditionFitDelta": -2.4,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 60.9,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.7,
+        "classLevelBonus": 0.6,
+        "finalEvaluationScore": 65.6,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 12.5,
+        "roleHint": "軸",
+        "pastRunInsight": "展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "単穴"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-25",
+          "raceId": "202605020106",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 6,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            12.3,
+            11,
+            11.5,
+            12.3,
+            12.6,
+            12.7,
+            12.2,
+            12.2
+          ]
+        },
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 4,
+          "marginToWinnerSec": 0.7,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-01-31",
+          "raceId": "202605010107",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 3,
+          "marginToWinnerSec": 0.4,
+          "section200mSec": [
+            11.9,
+            11.1,
+            12.1,
+            12.7,
+            12.8,
+            12.3,
+            12,
+            12.6
+          ]
+        },
+        {
+          "date": "2025-12-06",
+          "raceId": "202509050102",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.8,
+            11.5,
+            13,
+            12.8,
+            13.3,
+            12.9,
+            12.8,
+            12.4,
+            12.2
+          ]
+        },
+        {
+          "date": "2025-10-11",
+          "raceId": "202508030302",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 3,
+          "marginToWinnerSec": 0.1,
+          "section200mSec": [
+            12.5,
+            11.6,
+            13.7,
+            12.9,
+            13,
+            12.7,
+            12.3,
+            12.4,
+            12.4
+          ]
+        }
+      ],
+      "predicted_probability": 0.25,
+      "value_score": 0.84,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 7,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 8.81,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 3.35
+    },
+    {
+      "horseId": "2023104339",
+      "horseName": "ルファーダ",
+      "horseNumber": 4,
+      "frameNumber": 4,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 34,
+        "stamina": 38,
+        "kick": 26,
+        "sustain": 51,
+        "power": 47
+      },
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "A+",
+        "kick": "A",
+        "sustain": "B",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 43.9,
+        "adjustedScore": 46.5,
+        "scoreDiff": 2.6,
+        "baseAbilityCore": 47.2,
+        "intrinsicAbilityScore": 48.1,
+        "raceAdjustedInput": 57.9,
+        "conditionFitDelta": -1.6,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 53.2,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.7,
+        "classLevelBonus": 0.3,
+        "finalEvaluationScore": 57.3,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 18.9,
+        "roleHint": "軸",
+        "pastRunInsight": "直近3走・大敗1回(好走3回あり) · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "相手"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-25",
+          "raceId": "202608030107",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 4,
+          "marginToWinnerSec": 0.8,
+          "section200mSec": [
+            12.3,
+            11.4,
+            13.1,
+            12.7,
+            12.4,
+            12.3,
+            12.3,
+            12.7,
+            13.1
+          ]
+        },
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 8,
+          "marginToWinnerSec": 1.5,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-03-08",
+          "raceId": "202609010601",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            13,
+            11.7,
+            13.8,
+            13.5,
+            13.1,
+            13.1,
+            12.8,
+            12.6,
+            12.7
+          ]
+        },
+        {
+          "date": "2026-02-15",
+          "raceId": "202608020601",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 2,
+          "marginToWinnerSec": 0.1,
+          "section200mSec": [
+            12.9,
+            11.8,
+            13.4,
+            13,
+            13.3,
+            13.3,
+            12.4,
+            12.5,
+            12.2
+          ]
+        },
+        {
+          "date": "2025-11-23",
+          "raceId": "202508040602",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 2,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            12.2,
+            11.3,
+            12.5,
+            12.9,
+            13.5,
+            13.3,
+            13.1,
+            12.7,
+            12.5
+          ]
+        }
+      ],
+      "predicted_probability": 0.18,
+      "value_score": 0.98,
+      "value_rank": "C",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 11,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 14.29,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 5.43
+    },
+    {
+      "horseId": "2023103547",
+      "horseName": "ブリッジエフェクト",
+      "horseNumber": 5,
+      "frameNumber": 4,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 21,
+        "stamina": 36,
+        "kick": 32,
+        "sustain": 51,
+        "power": 42
+      },
+      "abilityGrades": {
+        "speed": "C",
+        "stamina": "B",
+        "kick": "A+",
+        "sustain": "A",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 43,
+        "adjustedScore": 45.6,
+        "scoreDiff": 2.6,
+        "baseAbilityCore": 45.4,
+        "intrinsicAbilityScore": 46.3,
+        "raceAdjustedInput": 56.8,
+        "conditionFitDelta": -0.7,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 50.6,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.6,
+        "classLevelBonus": 0.3,
+        "finalEvaluationScore": 52.2,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 26.3,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走3回あり) · 2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 10,
+          "marginToWinnerSec": 1.9,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-01-31",
+          "raceId": "202605010107",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 4,
+          "marginToWinnerSec": 0.5,
+          "section200mSec": [
+            11.9,
+            11.1,
+            12.1,
+            12.7,
+            12.8,
+            12.3,
+            12,
+            12.6
+          ]
+        },
+        {
+          "date": "2025-11-22",
+          "raceId": "202503030503",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            7.3,
+            10.8,
+            11.7,
+            12.5,
+            13,
+            12.9,
+            13.4,
+            13.6,
+            12.7
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "raceId": "202503030206",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 2,
+          "marginToWinnerSec": 0.1,
+          "section200mSec": [
+            7.2,
+            11.6,
+            12.3,
+            12.8,
+            13,
+            12.6,
+            12.8,
+            13.1,
+            13.1
+          ]
+        }
+      ],
+      "predicted_probability": 0.15,
+      "value_score": 0.98,
+      "value_rank": "C",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 13,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 17.2,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 6.54
+    },
+    {
+      "horseId": "2023105445",
+      "horseName": "ドメイン",
+      "horseNumber": 6,
+      "frameNumber": 5,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 58,
+        "stamina": 37,
+        "kick": 21,
+        "sustain": 53,
+        "power": 53
+      },
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "A",
+        "kick": "C",
+        "sustain": "A+",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 44,
+        "adjustedScore": 47.5,
+        "scoreDiff": 3.5,
+        "baseAbilityCore": 48.4,
+        "intrinsicAbilityScore": 49.3,
+        "raceAdjustedInput": 58.5,
+        "conditionFitDelta": -1.8,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 54.6,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.3,
+        "classLevelBonus": 0.1,
+        "finalEvaluationScore": 58,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 20.7,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走3回あり) · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "穴候補"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-25",
+          "raceId": "202608030107",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 9,
+          "marginToWinnerSec": 1.5,
+          "section200mSec": [
+            12.3,
+            11.4,
+            13.1,
+            12.7,
+            12.4,
+            12.3,
+            12.3,
+            12.7,
+            13.1
+          ]
+        },
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 7,
+          "marginToWinnerSec": 1.3,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-01-25",
+          "raceId": "202608010902",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            7.2,
+            10.9,
+            11.5,
+            13.7,
+            13.8,
+            13.5,
+            13.1,
+            12.7,
+            12.9,
+            13.1
+          ]
+        },
+        {
+          "date": "2026-01-10",
+          "raceId": "202608010302",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 3,
+          "marginToWinnerSec": 0.1,
+          "section200mSec": [
+            7.3,
+            11.2,
+            11.8,
+            13.7,
+            13.7,
+            13.4,
+            13,
+            12.8,
+            13,
+            12.7
+          ]
+        },
+        {
+          "date": "2025-12-21",
+          "raceId": "202509050601",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 3,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            12.8,
+            11.4,
+            13.8,
+            12.7,
+            12.5,
+            12.8,
+            12.5,
+            12.4,
+            12.5
+          ]
+        }
+      ],
+      "predicted_probability": 0.27,
+      "value_score": 0.77,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 6,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 7.53,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 2.86
+    },
+    {
+      "horseId": "2023100612",
+      "horseName": "タイセイジェイド",
+      "horseNumber": 7,
+      "frameNumber": 5,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 60,
+        "stamina": 39,
+        "kick": 23,
+        "sustain": 66,
+        "power": 58
+      },
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "S",
+        "kick": "B",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 43.2,
+        "adjustedScore": 45.3,
+        "scoreDiff": 2.1,
+        "baseAbilityCore": 47.8,
+        "intrinsicAbilityScore": 46.7,
+        "raceAdjustedInput": 56.6,
+        "conditionFitDelta": -1.4,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 2,
+        "raceRelativeScore": 50.2,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.1,
+        "classLevelBonus": 0.5,
+        "finalEvaluationScore": 53.3,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 29.7,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗2回(好走2回あり) · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-26",
+          "raceId": "202608030206",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 3,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            11.7,
+            11.1,
+            11.9,
+            11.9,
+            12.4,
+            12.6,
+            12.6
+          ]
+        },
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 9,
+          "marginToWinnerSec": 1.5,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-03-01",
+          "raceId": "202606020204",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 4,
+          "marginToWinnerSec": 2.1,
+          "section200mSec": [
+            12.6,
+            11.6,
+            12.9,
+            12.8,
+            12.6,
+            12.1,
+            12.8,
+            12.1,
+            12.2
+          ]
+        },
+        {
+          "date": "2026-02-15",
+          "raceId": "202605010603",
+          "raceName": "3歳新馬",
+          "raceClass": "新馬",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.6,
+            11,
+            11.7,
+            12.8,
+            13.6,
+            13.2,
+            12.2,
+            12.7
+          ]
+        }
+      ],
+      "predicted_probability": 0.39,
+      "value_score": 0.43,
+      "value_rank": "D",
+      "confidence_rank": "A",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "先行力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 2,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 2.89,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.1
+    },
+    {
+      "horseId": "2023105762",
+      "horseName": "ケイアイアマゾン",
+      "horseNumber": 8,
+      "frameNumber": 6,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 26,
+        "stamina": 37,
+        "kick": 27,
+        "sustain": 46,
+        "power": 46
+      },
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "A",
+        "kick": "A",
+        "sustain": "C",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 37.2,
+        "adjustedScore": 39.7,
+        "scoreDiff": 2.6,
+        "baseAbilityCore": 40,
+        "intrinsicAbilityScore": 40.9,
+        "raceAdjustedInput": 49.3,
+        "conditionFitDelta": -1.2,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 33.1,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.3,
+        "classLevelBonus": 0.1,
+        "finalEvaluationScore": 34.2,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 25.3,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走1回あり) · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-25",
+          "raceId": "202608030107",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 7,
+          "marginToWinnerSec": 1.4,
+          "section200mSec": [
+            12.3,
+            11.4,
+            13.1,
+            12.7,
+            12.4,
+            12.3,
+            12.3,
+            12.7,
+            13.1
+          ]
+        },
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 5,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-03-14",
+          "raceId": "202607010106",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 7,
+          "marginToWinnerSec": 1.8,
+          "section200mSec": [
+            12.9,
+            11.1,
+            12.7,
+            12.9,
+            12.8,
+            12.8,
+            12.8,
+            12.1,
+            12.6
+          ]
+        },
+        {
+          "date": "2025-12-21",
+          "raceId": "202509050604",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.8,
+            10.9,
+            13.8,
+            12.8,
+            12.9,
+            13.1,
+            12.9,
+            12.9,
+            13
+          ]
+        },
+        {
+          "date": "2025-12-06",
+          "raceId": "202509050102",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 8,
+          "marginToWinnerSec": 2.2,
+          "section200mSec": [
+            12.8,
+            11.5,
+            13,
+            12.8,
+            13.3,
+            12.9,
+            12.8,
+            12.4,
+            12.2
+          ]
+        }
+      ],
+      "predicted_probability": 0.15,
+      "value_score": 0.9,
+      "value_rank": "C",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 12,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 15.73,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 5.98
+    },
+    {
+      "horseId": "2023103092",
+      "horseName": "セルジュバローズ",
+      "horseNumber": 9,
+      "frameNumber": 6,
+      "runningStyle": "逃げ",
+      "abilities": {
+        "speed": 74,
+        "stamina": 36,
+        "kick": 21,
+        "sustain": 66,
+        "power": 57
+      },
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "A",
+        "kick": "B",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 39.5,
+        "adjustedScore": 42.1,
+        "scoreDiff": 2.6,
+        "baseAbilityCore": 44.2,
+        "intrinsicAbilityScore": 44.3,
+        "raceAdjustedInput": 52.8,
+        "conditionFitDelta": -2.2,
+        "reproducibilityDelta": 0.1,
+        "riskPenalty": 0,
+        "raceRelativeScore": 41.3,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.1,
+        "classLevelBonus": -0.2,
+        "finalEvaluationScore": 43.1,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 42.6,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走3回あり) · 2桁着順1回/5走 · 展開一貫性52%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 12,
+          "marginToWinnerSec": 3.6,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-03-21",
+          "raceId": "202607010303",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            7.3,
+            11.6,
+            11.5,
+            14,
+            13.8,
+            12.8,
+            13,
+            13.2,
+            12.7,
+            12.5
+          ]
+        },
+        {
+          "date": "2025-12-13",
+          "raceId": "202509050302",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 2,
+          "marginToWinnerSec": 1.4,
+          "section200mSec": [
+            12.8,
+            11.2,
+            13.4,
+            13.1,
+            13,
+            13.1,
+            12.6,
+            12.4,
+            12.1
+          ]
+        },
+        {
+          "date": "2025-11-29",
+          "raceId": "202508040706",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 3,
+          "marginToWinnerSec": 0.8,
+          "section200mSec": [
+            12.5,
+            11.3,
+            12.9,
+            12.9,
+            13.3,
+            13.1,
+            12.4,
+            12.4,
+            13
+          ]
+        }
+      ],
+      "predicted_probability": 0.51,
+      "value_score": 0.56,
+      "value_rank": "D",
+      "confidence_rank": "S",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 1,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 1.94,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.1
+    },
+    {
+      "horseId": "2023107229",
+      "horseName": "スカイストライプス",
+      "horseNumber": 10,
+      "frameNumber": 7,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 45,
+        "stamina": 41,
+        "kick": 46,
+        "sustain": 56,
+        "power": 52
+      },
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "S",
+        "kick": "S",
+        "sustain": "A+",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 50.3,
+        "adjustedScore": 52.9,
+        "scoreDiff": 2.6,
+        "baseAbilityCore": 53.2,
+        "intrinsicAbilityScore": 54.1,
+        "raceAdjustedInput": 62.5,
+        "conditionFitDelta": -1.2,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 64,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.6,
+        "classLevelBonus": 0.5,
+        "finalEvaluationScore": 68.7,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 8.9,
+        "roleHint": "軸",
+        "pastRunInsight": "展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "対抗"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 3,
+          "marginToWinnerSec": 0.4,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-01-05",
+          "raceId": "202608010204",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 4,
+          "marginToWinnerSec": 0.8,
+          "section200mSec": [
+            12.3,
+            11.3,
+            13.1,
+            12.8,
+            13,
+            13,
+            12.8,
+            12.7,
+            11.4
+          ]
+        },
+        {
+          "date": "2025-12-13",
+          "raceId": "202509050302",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.8,
+            11.2,
+            13.4,
+            13.1,
+            13,
+            13.1,
+            12.6,
+            12.4,
+            12.1
+          ]
+        },
+        {
+          "date": "2025-10-04",
+          "raceId": "202505040102",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 4,
+          "marginToWinnerSec": 0.4,
+          "section200mSec": [
+            13,
+            11.7,
+            11.8,
+            11.8,
+            12.1,
+            12.4,
+            13.1,
+            11.7,
+            11.1,
+            11.6
+          ]
+        },
+        {
+          "date": "2025-08-10",
+          "raceId": "202507030604",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 4,
+          "marginToWinnerSec": 0.6,
+          "section200mSec": [
+            13.2,
+            11.6,
+            13.4,
+            12.8,
+            12.6,
+            12.6,
+            12.5,
+            11.8,
+            11.1,
+            11.1
+          ]
+        }
+      ],
+      "predicted_probability": 0.34,
+      "value_score": 0.66,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "スタミナ不安"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 4,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 5.09,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.93
+    },
+    {
+      "horseId": "2023105468",
+      "horseName": "アーサーバローズ",
+      "horseNumber": 11,
+      "frameNumber": 7,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 48,
+        "stamina": 36,
+        "kick": 22,
+        "sustain": 53,
+        "power": 57
+      },
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "B",
+        "kick": "B",
+        "sustain": "A",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 38.6,
+        "adjustedScore": 41,
+        "scoreDiff": 2.4,
+        "baseAbilityCore": 42.4,
+        "intrinsicAbilityScore": 43.3,
+        "raceAdjustedInput": 53.1,
+        "conditionFitDelta": -2.3,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 42,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.4,
+        "classLevelBonus": -0.4,
+        "finalEvaluationScore": 43.7,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 45,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走3回あり) · 2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 13,
+          "marginToWinnerSec": 4.9,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-03-22",
+          "raceId": "202609011002",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.7,
+            11.2,
+            13.7,
+            13.2,
+            12.9,
+            13,
+            12.8,
+            12.3,
+            12.9
+          ]
+        },
+        {
+          "date": "2026-03-08",
+          "raceId": "202609010601",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 3,
+          "marginToWinnerSec": 0.1,
+          "section200mSec": [
+            13,
+            11.7,
+            13.8,
+            13.5,
+            13.1,
+            13.1,
+            12.8,
+            12.6,
+            12.7
+          ]
+        },
+        {
+          "date": "2026-01-31",
+          "raceId": "202608020102",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 3,
+          "marginToWinnerSec": 0.2,
+          "section200mSec": [
+            12.6,
+            11.8,
+            13.2,
+            13.4,
+            13.4,
+            12.7,
+            12.4,
+            12.5,
+            12.8
+          ]
+        },
+        {
+          "date": "2026-01-24",
+          "raceId": "202610010101",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 9,
+          "marginToWinnerSec": 2.1,
+          "section200mSec": [
+            7,
+            11.2,
+            12.5,
+            13.4,
+            12.6,
+            12.1,
+            12.6,
+            12.9,
+            13.1
+          ]
+        }
+      ],
+      "predicted_probability": 0.23,
+      "value_score": 0.89,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 8,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 10.14,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 3.85
+    },
+    {
+      "horseId": "2023107043",
+      "horseName": "シルバーレシオ",
+      "horseNumber": 12,
+      "frameNumber": 8,
+      "runningStyle": "追込",
+      "abilities": {
+        "speed": 32,
+        "stamina": 38,
+        "kick": 31,
+        "sustain": 53,
+        "power": 49
+      },
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "A+",
+        "kick": "A+",
+        "sustain": "A",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 52.4,
+        "adjustedScore": 54.9,
+        "scoreDiff": 2.6,
+        "baseAbilityCore": 55.7,
+        "intrinsicAbilityScore": 56.6,
+        "raceAdjustedInput": 65.5,
+        "conditionFitDelta": -1.7,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 71,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 3.1,
+        "classLevelBonus": 1.1,
+        "finalEvaluationScore": 75,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 4.2,
+        "roleHint": "軸",
+        "pastRunInsight": "展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "本命候補"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-01-31",
+          "raceId": "202608020107",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 2,
+          "marginToWinnerSec": 0.2,
+          "section200mSec": [
+            12.5,
+            11.6,
+            13.3,
+            13,
+            12.8,
+            12.7,
+            12.5,
+            12.2,
+            12.2
+          ]
+        },
+        {
+          "date": "2026-01-10",
+          "raceId": "202608010304",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 2,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.4,
+            11.5,
+            13.2,
+            13,
+            13.5,
+            13.7,
+            12.2,
+            12,
+            12.3
+          ]
+        },
+        {
+          "date": "2025-12-14",
+          "raceId": "202506050407",
+          "raceName": "2歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 4,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            12.8,
+            11.7,
+            13.1,
+            13,
+            12.5,
+            12.9,
+            12.5,
+            12.8,
+            13
+          ]
+        },
+        {
+          "date": "2025-10-18",
+          "raceId": "202508030602",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.1,
+            11,
+            12.6,
+            12.7,
+            12.9,
+            12.7,
+            12.8,
+            12.9,
+            12.6
+          ]
+        }
+      ],
+      "predicted_probability": 0.19,
+      "value_score": 0.83,
+      "value_rank": "D",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 9,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 11.49,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 4.37
+    },
+    {
+      "horseId": "2023104387",
+      "horseName": "チェリヴェント",
+      "horseNumber": 13,
+      "frameNumber": 8,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 61,
+        "stamina": 38,
+        "kick": 37,
+        "sustain": 49,
+        "power": 50
+      },
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "A+",
+        "kick": "S",
+        "sustain": "B",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 41.4,
+        "adjustedScore": 42.9,
+        "scoreDiff": 1.5,
+        "baseAbilityCore": 44.8,
+        "intrinsicAbilityScore": 45.7,
+        "raceAdjustedInput": 55.2,
+        "conditionFitDelta": -2.8,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 46.9,
+        "paceFitBonus": 2,
+        "distanceFitBonus": 2.4,
+        "classLevelBonus": -0.1,
+        "finalEvaluationScore": 49.4,
+        "lapShapeFitBonus": 0,
+        "varianceScore": 36.5,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走2回あり) · 2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-05",
+          "raceId": "202609020405",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 2,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            12.5,
+            11,
+            12.5,
+            12.8,
+            12.8,
+            12.4,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-03-14",
+          "raceId": "202606020506",
+          "raceName": "3歳1勝クラス",
+          "raceClass": "1勝",
+          "place": 15,
+          "marginToWinnerSec": 2.9,
+          "section200mSec": [
+            12.6,
+            11.1,
+            12.5,
+            13.1,
+            11.9,
+            12.4,
+            12.9,
+            13.4,
+            13.5
+          ]
+        },
+        {
+          "date": "2026-02-21",
+          "raceId": "202609010102",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 1,
+          "marginToWinnerSec": 0,
+          "section200mSec": [
+            13,
+            11.8,
+            13.6,
+            12.6,
+            13.3,
+            13.3,
+            12.8,
+            12.4,
+            12
+          ]
+        },
+        {
+          "date": "2025-11-30",
+          "raceId": "202508040802",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 6,
+          "marginToWinnerSec": 1.3,
+          "section200mSec": [
+            12.4,
+            10.6,
+            11.4,
+            11.7,
+            12.3,
+            12.4,
+            11.9,
+            11.7,
+            12
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "raceId": "202508040203",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 7,
+          "marginToWinnerSec": 1.6,
+          "section200mSec": [
+            12.9,
+            11.6,
+            12.9,
+            13.3,
+            13.4,
+            12.6,
+            12.1,
+            11.9,
+            11.6,
+            12
+          ]
+        }
+      ],
+      "predicted_probability": 0.35,
+      "value_score": 0.53,
+      "value_rank": "D",
+      "confidence_rank": "A",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "馬場対応力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 3,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 3.95,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.5
+    }
+  ]
+}

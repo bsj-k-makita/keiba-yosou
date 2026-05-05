@@ -1,0 +1,841 @@
+{
+  "raceId": "202605020304",
+  "meta": {
+    "date": "2026-05-02",
+    "venue": "東京",
+    "raceNumber": 4,
+    "raceName": "3歳未勝利",
+    "surface": "芝",
+    "distance": 2000,
+    "groundLabel": null,
+    "weather": null
+  },
+  "entries": [
+    {
+      "horseId": "2023103757",
+      "horseName": "シーラス",
+      "frameNumber": 1,
+      "horseNumber": 1,
+      "sex": "牡",
+      "age": 3,
+      "jockey": "レーン",
+      "trainer": "堀",
+      "weight": 57,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 33,
+        "stamina": 44,
+        "kick": 55,
+        "sustain": 66,
+        "power": 77
+      },
+      "pastRuns": [],
+      "pedigree": {},
+      "predicted_probability": 0.28,
+      "value_score": 0.81,
+      "value_rank": "D",
+      "confidence_rank": "B",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 5,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 7.64,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 2.9
+    },
+    {
+      "horseId": "2023107010",
+      "horseName": "サトノスターライト",
+      "frameNumber": 2,
+      "horseNumber": 2,
+      "sex": "牝",
+      "age": 3,
+      "jockey": "大野",
+      "trainer": "森一",
+      "weight": 55,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 28,
+        "stamina": 39,
+        "kick": 50,
+        "sustain": 61,
+        "power": 72
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-11",
+          "raceId": "202606030506",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 2,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            12.6,
+            11.2,
+            12.8,
+            12.9,
+            12.3,
+            12,
+            11.5,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2026-01-25",
+          "raceId": "202606010905",
+          "raceName": "3歳新馬",
+          "raceClass": "新馬",
+          "place": 3,
+          "marginToWinnerSec": 0.4,
+          "section200mSec": [
+            12.9,
+            11.3,
+            13.2,
+            13,
+            12.5,
+            12.9,
+            12.8,
+            12.2,
+            11.3,
+            11.3
+          ]
+        }
+      ],
+      "pedigree": {},
+      "predicted_probability": 0.2,
+      "value_score": 1.22,
+      "value_rank": "A",
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 10,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 16,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 6.08
+    },
+    {
+      "horseId": "2023106451",
+      "horseName": "コスモアマデウス",
+      "frameNumber": 3,
+      "horseNumber": 3,
+      "sex": "牡",
+      "age": 3,
+      "jockey": "柴田大",
+      "trainer": "畠山",
+      "weight": 57,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 47,
+        "stamina": 58,
+        "kick": 69,
+        "sustain": 80,
+        "power": 30
+      },
+      "pastRuns": [
+        {
+          "date": "2026-02-21",
+          "raceId": "202605010709",
+          "raceName": "フリージア賞(1勝クラス)",
+          "raceClass": "1勝",
+          "place": 7,
+          "marginToWinnerSec": 2.1,
+          "section200mSec": [
+            12.7,
+            11.5,
+            11.6,
+            11.9,
+            12.2,
+            12.4,
+            12.2,
+            11.4,
+            11.3,
+            11.5
+          ]
+        },
+        {
+          "date": "2026-02-15",
+          "raceId": "202605010605",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 8,
+          "marginToWinnerSec": 0.8,
+          "section200mSec": [
+            13.1,
+            11.6,
+            11.7,
+            12,
+            12.3,
+            12.6,
+            11.6,
+            11.4,
+            11.5
+          ]
+        },
+        {
+          "date": "2025-11-08",
+          "raceId": "202505050103",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 12,
+          "marginToWinnerSec": 2.3,
+          "section200mSec": [
+            13.2,
+            11.9,
+            12.4,
+            12.9,
+            12.9,
+            12.6,
+            12.4,
+            11.3,
+            10.5,
+            11.1
+          ]
+        },
+        {
+          "date": "2025-10-26",
+          "raceId": "202505040902",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 9,
+          "marginToWinnerSec": 1.9,
+          "section200mSec": [
+            13,
+            11.6,
+            11.5,
+            12,
+            12.3,
+            12.1,
+            12.5,
+            12.2,
+            11.9,
+            12
+          ]
+        },
+        {
+          "date": "2025-10-12",
+          "raceId": "202505040405",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 9,
+          "marginToWinnerSec": 2.1,
+          "section200mSec": [
+            13,
+            11.9,
+            12,
+            12.1,
+            12.4,
+            12.4,
+            12.3,
+            11.5,
+            11.4,
+            11.2
+          ]
+        }
+      ],
+      "pedigree": {},
+      "predicted_probability": 0.52,
+      "value_score": 0.57,
+      "value_rank": "D",
+      "confidence_rank": "S",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "末脚性能"
+      ],
+      "risk_factors": [
+        "馬場適性不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 1,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 2.13,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.1
+    },
+    {
+      "horseId": "2023106180",
+      "horseName": "ブルーリファール",
+      "frameNumber": 4,
+      "horseNumber": 4,
+      "sex": "牡",
+      "age": 3,
+      "jockey": "石橋脩",
+      "trainer": "小野",
+      "weight": 57,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 32,
+        "stamina": 43,
+        "kick": 54,
+        "sustain": 65,
+        "power": 76
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-18",
+          "raceId": "202603010305",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 11,
+          "marginToWinnerSec": 1.6,
+          "section200mSec": [
+            12.4,
+            10.3,
+            12.2,
+            12.9,
+            12.5,
+            12,
+            11.8,
+            11.5,
+            11.6
+          ]
+        }
+      ],
+      "pedigree": {},
+      "predicted_probability": 0.26,
+      "value_score": 1.24,
+      "value_rank": "A",
+      "confidence_rank": "B",
+      "bet_type": "相手",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 8,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 12.52,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 4.76
+    },
+    {
+      "horseId": "2023106919",
+      "horseName": "エバーシャンティ",
+      "frameNumber": 5,
+      "horseNumber": 5,
+      "sex": "牝",
+      "age": 3,
+      "jockey": "戸崎圭",
+      "trainer": "久保田",
+      "weight": 55,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 55,
+        "stamina": 66,
+        "kick": 77,
+        "sustain": 27,
+        "power": 38
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-11",
+          "raceId": "202606030506",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 12,
+          "marginToWinnerSec": 1,
+          "section200mSec": [
+            12.6,
+            11.2,
+            12.8,
+            12.9,
+            12.3,
+            12,
+            11.5,
+            12.2,
+            12,
+            12
+          ]
+        },
+        {
+          "date": "2025-08-16",
+          "raceId": "202501010701",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 3,
+          "marginToWinnerSec": 0.8,
+          "section200mSec": [
+            12.7,
+            12,
+            12.4,
+            12.6,
+            12.4,
+            11.8,
+            11.6,
+            11.6,
+            11.7
+          ]
+        },
+        {
+          "date": "2025-07-20",
+          "raceId": "202502011205",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 4,
+          "marginToWinnerSec": 0.8,
+          "section200mSec": [
+            12.8,
+            11.7,
+            12.8,
+            12.8,
+            11.8,
+            12,
+            11.7,
+            11.8,
+            11.3
+          ]
+        }
+      ],
+      "pedigree": {},
+      "predicted_probability": 0.39,
+      "value_score": 0.69,
+      "value_rank": "D",
+      "confidence_rank": "A",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "長距離実績"
+      ],
+      "risk_factors": [
+        "持続力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 3,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 4.69,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.78
+    },
+    {
+      "horseId": "2023105403",
+      "horseName": "スワーヴマルス",
+      "frameNumber": 6,
+      "horseNumber": 6,
+      "sex": "牡",
+      "age": 3,
+      "jockey": "武豊",
+      "trainer": "田中博",
+      "weight": 57,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 40,
+        "stamina": 51,
+        "kick": 62,
+        "sustain": 73,
+        "power": 23
+      },
+      "pastRuns": [
+        {
+          "date": "2026-01-31",
+          "raceId": "202605010105",
+          "raceName": "3歳新馬",
+          "raceClass": "新馬",
+          "place": 3,
+          "marginToWinnerSec": 0.4,
+          "section200mSec": [
+            13.1,
+            11.8,
+            12,
+            12.6,
+            12.6,
+            12.5,
+            11.4,
+            11,
+            11.2
+          ]
+        }
+      ],
+      "pedigree": {},
+      "predicted_probability": 0.27,
+      "value_score": 0.95,
+      "value_rank": "C",
+      "confidence_rank": "B",
+      "bet_type": "相手",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "末脚性能"
+      ],
+      "risk_factors": [
+        "馬場適性不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 6,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 9.22,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 3.5
+    },
+    {
+      "horseId": "2023102689",
+      "horseName": "カキュウ",
+      "frameNumber": 7,
+      "horseNumber": 7,
+      "sex": "牝",
+      "age": 3,
+      "jockey": "西塚",
+      "trainer": "佐藤吉",
+      "weight": 55,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 68,
+        "stamina": 79,
+        "kick": 29,
+        "sustain": 40,
+        "power": 51
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-05",
+          "raceId": "202606030405",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 12,
+          "marginToWinnerSec": 3.2,
+          "section200mSec": [
+            12.5,
+            11.2,
+            12.5,
+            12.5,
+            12.4,
+            12.2,
+            12.3,
+            12,
+            12.3,
+            12.3
+          ]
+        },
+        {
+          "date": "2026-02-28",
+          "raceId": "202606020105",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 16,
+          "marginToWinnerSec": 0.9,
+          "section200mSec": [
+            12.8,
+            11.6,
+            12.5,
+            12.7,
+            12.3,
+            12,
+            12,
+            12,
+            11.8,
+            12
+          ]
+        },
+        {
+          "date": "2026-01-25",
+          "raceId": "202606010905",
+          "raceName": "3歳新馬",
+          "raceClass": "新馬",
+          "place": 16,
+          "marginToWinnerSec": 2.6,
+          "section200mSec": [
+            12.9,
+            11.3,
+            13.2,
+            13,
+            12.5,
+            12.9,
+            12.8,
+            12.2,
+            11.3,
+            11.3
+          ]
+        }
+      ],
+      "pedigree": {},
+      "predicted_probability": 0.42,
+      "value_score": 0.53,
+      "value_rank": "D",
+      "confidence_rank": "A",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "長距離実績",
+        "先行力"
+      ],
+      "risk_factors": [
+        "末脚のキレ負け"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 2,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 3.35,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 1.27
+    },
+    {
+      "horseId": "2023104832",
+      "horseName": "ピコペアシェイプ",
+      "frameNumber": 7,
+      "horseNumber": 8,
+      "sex": "セ",
+      "age": 3,
+      "jockey": "北村宏",
+      "trainer": "伊藤大",
+      "weight": 57,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 31,
+        "stamina": 42,
+        "kick": 53,
+        "sustain": 64,
+        "power": 75
+      },
+      "pastRuns": [],
+      "pedigree": {},
+      "predicted_probability": 0.24,
+      "value_score": 1.3,
+      "value_rank": "A",
+      "confidence_rank": "B",
+      "bet_type": "相手",
+      "value_change": "STABLE",
+      "key_factors": [
+        "馬場対応力",
+        "持続力"
+      ],
+      "risk_factors": [
+        "先行力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 9,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 14.24,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 5.41
+    },
+    {
+      "horseId": "2023103034",
+      "horseName": "トップオブザキング",
+      "frameNumber": 8,
+      "horseNumber": 9,
+      "sex": "牡",
+      "age": 3,
+      "jockey": "石田",
+      "trainer": "蛯名利",
+      "weight": 54,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 54,
+        "stamina": 65,
+        "kick": 76,
+        "sustain": 26,
+        "power": 37
+      },
+      "pastRuns": [
+        {
+          "date": "2026-04-25",
+          "raceId": "202603010506",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 13,
+          "marginToWinnerSec": 3.5,
+          "section200mSec": [
+            7.3,
+            11,
+            12.1,
+            12.9,
+            12.9,
+            12.3,
+            12.5,
+            12.7,
+            13
+          ]
+        },
+        {
+          "date": "2026-02-07",
+          "raceId": "202605010303",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 13,
+          "marginToWinnerSec": 2.9,
+          "section200mSec": [
+            12.5,
+            11.3,
+            12.1,
+            12.8,
+            13,
+            12.8,
+            12.5,
+            12.5
+          ]
+        },
+        {
+          "date": "2026-01-25",
+          "raceId": "202606010904",
+          "raceName": "3歳新馬",
+          "raceClass": "新馬",
+          "place": 12,
+          "marginToWinnerSec": 2.2,
+          "section200mSec": [
+            12.9,
+            12.3,
+            13.8,
+            13.4,
+            12.8,
+            13.1,
+            13.3,
+            13.5,
+            13.5
+          ]
+        }
+      ],
+      "pedigree": {},
+      "predicted_probability": 0.35,
+      "value_score": 0.82,
+      "value_rank": "D",
+      "confidence_rank": "A",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "長距離実績"
+      ],
+      "risk_factors": [
+        "持続力不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 4,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 6.13,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 2.33
+    },
+    {
+      "horseId": "2023103560",
+      "horseName": "タイドグラフ",
+      "frameNumber": 8,
+      "horseNumber": 10,
+      "sex": "牡",
+      "age": 3,
+      "jockey": "横山武",
+      "trainer": "上原博",
+      "weight": 57,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 40,
+        "stamina": 51,
+        "kick": 62,
+        "sustain": 73,
+        "power": 23
+      },
+      "pastRuns": [
+        {
+          "date": "2026-01-17",
+          "raceId": "202606010605",
+          "raceName": "3歳未勝利",
+          "raceClass": "未勝利",
+          "place": 6,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            12.3,
+            10.9,
+            12.4,
+            12.4,
+            12.3,
+            12.4,
+            12.5,
+            12,
+            11.7,
+            11.8
+          ]
+        },
+        {
+          "date": "2025-11-30",
+          "raceId": "202505050804",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 3,
+          "marginToWinnerSec": 0.7
+        },
+        {
+          "date": "2025-10-12",
+          "raceId": "202505040403",
+          "raceName": "2歳未勝利",
+          "raceClass": "未勝利",
+          "place": 3,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            13.1,
+            11.8,
+            11.7,
+            11.9,
+            12.3,
+            12.1,
+            12.2,
+            11.8,
+            11.4,
+            11.7
+          ]
+        },
+        {
+          "date": "2025-08-17",
+          "raceId": "202504020804",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 9,
+          "marginToWinnerSec": 2.5,
+          "section200mSec": [
+            12.9,
+            11.6,
+            12.2,
+            13.2,
+            13.2,
+            12.7,
+            11.6,
+            10.9,
+            11.2
+          ]
+        }
+      ],
+      "pedigree": {},
+      "predicted_probability": 0.27,
+      "value_score": 1.11,
+      "value_rank": "B",
+      "confidence_rank": "B",
+      "bet_type": "相手",
+      "value_change": "STABLE",
+      "key_factors": [
+        "持続力",
+        "末脚性能"
+      ],
+      "risk_factors": [
+        "馬場適性不足"
+      ],
+      "odds_source": "estimated",
+      "market_popularity": 7,
+      "market_popularity_source": "estimated",
+      "market_win_odds": 10.85,
+      "market_win_odds_source": "estimated",
+      "estimated_actual_odds": 4.12
+    }
+  ]
+}
