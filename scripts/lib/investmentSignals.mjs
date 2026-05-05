@@ -83,15 +83,15 @@ function calcKellyWeight(prob, odds) {
 /**
  * 実質期待値に基づくランク（BettingEvaluator の閾値に準拠）。
  * S: effective_ev >= 1.40（強い買い推奨）
- * A: effective_ev >= 1.20
- * B: effective_ev >= 1.05（最低ライン）
+ * A: effective_ev >= 1.10
+ * B: effective_ev >= 1.00
  * C: effective_ev >= 0.90（様子見）
  * D: それ以下（見送り）
  */
 function toValueRank(effectiveEv) {
   if (effectiveEv >= 1.40) return "S";
-  if (effectiveEv >= 1.20) return "A";
-  if (effectiveEv >= 1.05) return "B";
+  if (effectiveEv >= 1.10) return "A";
+  if (effectiveEv >= 1.0) return "B";
   if (effectiveEv >= 0.90) return "C";
   return "D";
 }

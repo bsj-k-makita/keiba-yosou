@@ -17,13 +17,20 @@ const VALUE_RANK_STYLE: Record<string, { bg: string; color: string; label: strin
   D: { bg: "#bdc3c7", color: "#555", label: "D" },
 };
 
-// bet_type に応じたラベルスタイル
-const BET_TYPE_STYLE: Record<string, { color: string }> = {
-  "軸":   { color: "#c0392b" },
-  "相手": { color: "#e67e22" },
-  "ヒモ穴": { color: "#8e44ad" },
-  "見送り": { color: "#95a5a6" },
-};
+/** EVテーブル右列。実質期待値の帯（valueRank）に合わせ、ランク列と同じ物差しで表記する。 */
+function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; color: string } {
+  const vr = inv.valueRank;
+  if (vr === "S" || vr === "A") {
+    return { text: "【期待値高】", color: "#c0392b" };
+  }
+  if (vr === "B") {
+    return { text: "【期待値あり】", color: "#27ae60" };
+  }
+  if (vr === "C") {
+    return { text: "【期待値控えめ】", color: "#7f8c8d" };
+  }
+  return { text: "【期待値低】", color: "#95a5a6" };
+}
 
 type EvRow = {
   horseId: string;
@@ -83,7 +90,8 @@ function EvSection({
     <div className="bet-panel__ev-section">
       <h3 className="bet-panel__ev-title">AIオッズ評価（実質期待値）</h3>
       <p className="bet-panel__ev-desc">
-        実質期待値 = (予測確率 × オッズ) − 0.15 ／ ケリー投資比率は全資金に対する割合
+        実質期待値 = (予測確率 × オッズ) − 0.15 ／ ケリー投資比率は全資金に対する割合。
+        期待値判断列は左のランク（S〜D）と同じ帯で【期待値高】などと表示します（上部の買い目選定とは別ロジックです）。
       </p>
       <table className="bet-panel__ev-table">
         <thead>
@@ -96,7 +104,7 @@ function EvSection({
             <th>オッズ</th>
             <th>ケリー%</th>
             <th>推奨額</th>
-            <th>買い区分</th>
+            <th>期待値判断</th>
           </tr>
         </thead>
         <tbody>
@@ -106,7 +114,7 @@ function EvSection({
             const kelly = inv.kellyWeight ?? 0;
             const recommendedAmount = Math.floor((budget * kelly) / 100) * 100;
             const isBuy = inv.betType !== "見送り";
-            const betTypeStyle = BET_TYPE_STYLE[inv.betType] ?? { color: "#95a5a6" };
+            const judgment = expectationJudgmentLabel(inv);
             return (
               <tr
                 key={row.horseId}
@@ -135,8 +143,8 @@ function EvSection({
                 <td style={{ textAlign: "right", fontWeight: kelly > 0 ? "bold" : "normal" }}>
                   {recommendedAmount > 0 ? `${recommendedAmount.toLocaleString()}円` : "—"}
                 </td>
-                <td style={{ textAlign: "center", color: betTypeStyle.color, fontWeight: "bold" }}>
-                  {inv.betType}
+                <td style={{ textAlign: "center", color: judgment.color, fontWeight: "bold" }}>
+                  {judgment.text}
                 </td>
               </tr>
             );
@@ -145,7 +153,9 @@ function EvSection({
       </table>
 
       {candidates.length === 0 ? (
-        <p className="bet-panel__ev-no-bet">購入推奨なし：実質期待値が閾値を超える馬がいません。</p>
+        <p className="bet-panel__ev-no-bet">
+          ケリー配分・買い区分の対象馬（データ上「見送り」以外）がありません。
+        </p>
       ) : (
         <div className="bet-panel__ev-summary">
           <p>
