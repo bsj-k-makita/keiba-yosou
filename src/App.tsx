@@ -41,10 +41,6 @@ function AppNav({
         >
           {theme === "dark" ? "☀ LIGHT" : "🌙 DARK"}
         </button>
-        <span className="app-nav__live" aria-label="ライブ分析中">
-          <span className="app-nav__live-dot" aria-hidden />
-          LIVE
-        </span>
       </div>
     </nav>
   );
