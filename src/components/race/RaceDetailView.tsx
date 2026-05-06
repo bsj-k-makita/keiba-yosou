@@ -13,7 +13,7 @@ import {
   weightsToDemand0to100,
   type RaceCondition,
 } from "../../domain/race-evaluation";
-import { RaceAdjustmentPanel } from "./RaceAdjustmentPanel";
+import { RaceAdjustmentPanel, loadGlobalProfile } from "./RaceAdjustmentPanel";
 import { HorseEvaluationCard } from "./HorseEvaluationCard";
 import { FutureRaceInsightsStub, RaceEvaluationSummary } from "./RaceEvaluationSummary";
 import { RaceConclusionPanel } from "./RaceConclusionPanel";
@@ -147,9 +147,13 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   const initialCondition = useMemo<RaceCondition>(() => {
     const inferredSection = inferRaceSection200mFromEntries(race.raceId, horses);
     const carryOver = loadCarryOverCondition(race.raceInfo);
+    // グローバルプロファイル（「本日の設定を全レースに適用」）が保存されていれば、
+    // per-venue キャリーオーバーより優先して適用する
+    const globalProfile = loadGlobalProfile();
     return {
       ...race.condition,
       ...(carryOver ?? {}),
+      ...(globalProfile ?? {}),
       raceName: race.condition.raceName ?? race.raceInfo.raceName,
       surface: race.condition.surface ?? race.raceInfo.surface,
       section200mSec: race.condition.section200mSec ?? inferredSection,

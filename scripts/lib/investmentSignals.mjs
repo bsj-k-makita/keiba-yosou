@@ -15,20 +15,39 @@ function toRank(values) {
   return rank;
 }
 
-function scoreFromAbilities(entry) {
+/**
+ * 能力値からベーススコアを算出する。
+ * コース/バイアス条件に応じたウェイトを適用し、
+ * ゲートバイアス補正を Softmax 前のスコアに直接加算する。
+ *
+ * @param entry 馬エントリ
+ * @param gateBonus 枠バイアスによる加算ポイント（例: 内有利時に内枠馬へ +2.5）
+ */
+function scoreFromAbilities(entry, gateBonus = 0) {
   const ab = entry?.abilities ?? {};
   const speed = Number(ab.speed ?? 50);
   const stamina = Number(ab.stamina ?? 50);
   const kick = Number(ab.kick ?? 50);
   const sustain = Number(ab.sustain ?? 50);
   const power = Number(ab.power ?? 50);
-  return speed * 0.28 + stamina * 0.22 + kick * 0.2 + sustain * 0.18 + power * 0.12;
+  const base = speed * 0.28 + stamina * 0.22 + kick * 0.2 + sustain * 0.18 + power * 0.12;
+  return base + gateBonus;
 }
 
-function softmax(values) {
+/**
+ * Softmax 変換。温度パラメータ T で評価差の鋭さを制御する。
+ * T が小さいほど上位馬に確率が集中する（強い補正時に使用）。
+ * - T=8（デフォルト）: 標準的な分布
+ * - T=6（補正強度「強」時）: 評価差をより鋭く確率に反映
+ *
+ * @param values スコア配列
+ * @param temperature 温度パラメータ（デフォルト: 8）
+ */
+function softmax(values, temperature = 8) {
   if (values.length === 0) return [];
+  const T = Math.max(1, temperature); // 最小1で数値安定性を確保
   const max = Math.max(...values);
-  const exps = values.map((v) => Math.exp((v - max) / 8));
+  const exps = values.map((v) => Math.exp((v - max) / T));
   const sum = exps.reduce((s, v) => s + v, 0);
   if (sum <= 0) return values.map(() => 1 / values.length);
   return exps.map((v) => v / sum);
@@ -67,8 +86,15 @@ const KELLY_MAX = 0.25;
  *   その他（一般戦） → 0.15（デフォルト）
  * 追加加算:
  *   多頭数（16頭以上） → +0.05（競馬場のランダム性増大）
+ * 詳細補正割引:
+ *   詳細補正（馬場・時計・展開・バイアス）を複数設定した場合、
+ *   相場観の精度が上がったとみなしてマージンを微減（最小 0.08）。
+ *
+ * @param raceInfo レース情報オブジェクト
+ * @param fieldSize 出走頭数
+ * @param condition レース条件（補正設定数の計算に使用）
  */
-function calcDynamicEvMargin(raceInfo, fieldSize) {
+function calcDynamicEvMargin(raceInfo, fieldSize, condition) {
   const raceName = String(raceInfo?.raceName ?? "");
   const raceGrade = String(raceInfo?.raceGrade ?? "");
 
@@ -86,6 +112,31 @@ function calcDynamicEvMargin(raceInfo, fieldSize) {
   // 多頭数（16頭以上）: 混雑・ロス・偶発的事故のリスクが上がる
   if (Number.isFinite(fieldSize) && fieldSize >= 16) {
     margin += 0.05;
+  }
+
+  // 詳細補正割引: ユーザーが複数の条件を設定するほどマージンを削減
+  // 相場観の精度が上がり、モデルと市場の乖離を正確に見積もれると判断
+  if (condition != null) {
+    let detailCount = 0;
+    const ground = String(condition.ground ?? "good");
+    const trackSpeed = String(condition.trackSpeed ?? "standard");
+    const bias = String(condition.bias ?? "flat");
+    const pace = String(condition.pace ?? "middle");
+    const userTrackBias = parseNumeric(condition.userTrackBias ?? 0) ?? 0;
+    const abilityPriority = condition.abilityPriority;
+
+    if (ground !== "good") detailCount++;
+    if (trackSpeed !== "standard") detailCount++;
+    if (bias !== "flat") detailCount++;
+    if (pace !== "middle") detailCount++;
+    if (Math.abs(userTrackBias) >= 0.3) detailCount++;
+    if (abilityPriority) detailCount++;
+
+    // 1補正につき 0.01 削減（最大 0.06 削減）、下限は 0.08
+    if (detailCount >= 2) {
+      const discount = Math.min(detailCount * 0.01, 0.06);
+      margin = Math.max(0.08, margin - discount);
+    }
   }
 
   // 上限 0.30（極端な値を防止）
@@ -308,23 +359,50 @@ function calcPopularityBiasDecay(prob, odds) {
 export function enrichInvestmentSignalsInRaceData(data) {
   const entries = Array.isArray(data?.entries) ? data.entries : [];
   if (entries.length === 0) return data;
-  const scores = entries.map((e) => scoreFromAbilities(e));
-  const rawProbs = softmax(scores);
-  const modelRanks = toRank(scores);
+
   const fieldSize = entries.length;
+  const condition = data.condition ?? {};
+  const userTrackBias = parseNumeric(condition.userTrackBias ?? data.userTrackBias) ?? 0;
+  const biasSetting = String(condition.bias ?? "flat");
+  const adjustmentStrength = String(condition.adjustmentStrength ?? "middle");
 
-  // 1. 動的EVマージン: レース属性に応じたマージン計算
-  const evMargin = calcDynamicEvMargin(data.raceInfo, fieldSize);
+  // --- ゲートバイアスのスコア直接加算 ---
+  // 「内有利」設定時: 1-3番枠に +2.5pt、「外有利」設定時: 外枠に +2.5pt をSoftmax前スコアに加算
+  const GATE_BONUS_PTS = 2.5;
+  function calcGateBonusPoints(gateNumber, fieldSize_, userBias) {
+    if (Math.abs(userBias) < 0.3) return 0; // 弱いバイアスは加算しない
+    const innerGates = 3;
+    const outerGates = Math.max(fieldSize_ - 3, 3);
+    if (userBias < -0.3) {
+      // 内有利: 1-3番枠にボーナス
+      return gateNumber <= innerGates ? GATE_BONUS_PTS * Math.abs(userBias) : 0;
+    }
+    if (userBias > 0.3) {
+      // 外有利: 最外3枠にボーナス
+      return gateNumber > outerGates ? GATE_BONUS_PTS * Math.abs(userBias) : 0;
+    }
+    return 0;
+  }
 
-  // 2. トラックバイアス補正: 枠番バイアス + 展開バイアスを確率に乗算して再正規化
-  const userTrackBias = parseNumeric(data.condition?.userTrackBias ?? data.userTrackBias) ?? 0;
-  const biasSetting = String(data.condition?.bias ?? "flat");
+  const scores = entries.map((e, i) => {
+    const gateNumber = parseNumeric(e.horseNumber ?? e.gate) ?? (i + 1);
+    const gateBonus = calcGateBonusPoints(gateNumber, fieldSize, userTrackBias);
+    return scoreFromAbilities(e, gateBonus);
+  });
 
-  const biasMultipliers = entries.map((entry, i) => {
-    const gateNumber = parseNumeric(entry.horseNumber ?? entry.gate) ?? (i + 1);
-    const gateBias = calcGateBiasMultiplier(gateNumber, fieldSize, userTrackBias);
+  // --- Softmax温度: 補正強度「強」のとき T=6（鋭い評価差）、それ以外は T=8 ---
+  const softmaxTemp = adjustmentStrength === "strong" ? 6 : 8;
+  const rawProbs = softmax(scores, softmaxTemp);
+  const modelRanks = toRank(scores);
+
+  // 1. 動的EVマージン: レース属性 + 詳細補正設定数に応じたマージン計算
+  const evMargin = calcDynamicEvMargin(data.raceInfo, fieldSize, condition);
+
+  // 2. トラックバイアス補正: 展開バイアス（脚質）を確率に乗算して再正規化
+  // ※枠番バイアスはスコアに直接加算済みのため、ここでは展開バイアスのみ適用
+  const biasMultipliers = entries.map((entry) => {
     const styleBias = calcRunningStyleBiasMultiplier(entry.runningStyle, biasSetting);
-    return gateBias * styleBias;
+    return styleBias;
   });
 
   const rawBiasProbs = rawProbs.map((p, i) => p * biasMultipliers[i]);
