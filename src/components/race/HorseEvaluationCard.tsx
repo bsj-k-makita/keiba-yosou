@@ -7,8 +7,10 @@ import {
   type HorseAbility,
   type HorseScoreResult,
   type RaceCondition,
+  type WeightSet,
 } from "../../domain/race-evaluation";
 import { inferRadarShape } from "../../domain/race-evaluation";
+import { getFinalWeights } from "../../domain/race-evaluation";
 import {
   computeFitScore,
   findL1CloseTypePeers,
@@ -59,6 +61,25 @@ function horseToRadarMap(horse: HorseAbility): Record<AbilityKey, number> {
     kick: horse.kick,
     sustain: horse.sustain,
     power: horse.power,
+  };
+}
+
+/**
+ * コース特性 + ユーザー補正適用済みの「加重スコア貢献」マップを生成する。
+ * 各軸 = horse[ability] × finalWeight[ability] × 5（× 5 で ~0-100 スケールに戻す）
+ * → これを RadarChart に渡すと「どの能力がこのコース・条件でより貢献しているか」が視覚化される。
+ */
+function horseToWeightedRadarMap(
+  horse: HorseAbility,
+  weights: WeightSet,
+): Record<AbilityKey, number> {
+  const numAbilities = ABILITY_KEYS.length; // 5
+  return {
+    speed:   Math.min(100, horse.speed   * weights.speed   * numAbilities),
+    stamina: Math.min(100, horse.stamina * weights.stamina * numAbilities),
+    kick:    Math.min(100, horse.kick    * weights.kick    * numAbilities),
+    sustain: Math.min(100, horse.sustain * weights.sustain * numAbilities),
+    power:   Math.min(100, horse.power   * weights.power   * numAbilities),
   };
 }
 
@@ -116,6 +137,14 @@ export function HorseEvaluationCard({
 
   const hMap = useMemo(() => horseToRadarMap(horse), [horse]);
   const radarShape = useMemo(() => inferRadarShape(horse), [horse]);
+
+  // コース特性 + ユーザー補正（abilityPriority含む）を適用した最終ウェイト
+  const finalWeights = useMemo(() => getFinalWeights(condition), [condition]);
+  // 加重レーダーマップ: 「条件適合した能力貢献」の視覚化
+  const weightedRadarMap = useMemo(
+    () => horseToWeightedRadarMap(horse, finalWeights),
+    [horse, finalWeights],
+  );
   const contextualTotal =
     (result.pedigreeBonus ?? 0) +
     (result.gateBiasBonus ?? 0) +
@@ -189,8 +218,24 @@ export function HorseEvaluationCard({
         <h3 className="horse-card__ability-title">基本能力</h3>
         <div className="horse-card__ability-main">
           <div className="horse-card__radar-hero" aria-label="能力バランス">
-            <div className="horse-card__radar-svg-wrap">
-              <RadarChart horse={hMap} size={260} />
+            <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", flexWrap: "wrap" }}>
+              {/* 素の能力レーダー */}
+              <div style={{ textAlign: "center" }}>
+                <div className="horse-card__radar-svg-wrap">
+                  <RadarChart horse={hMap} size={200} />
+                </div>
+                <p style={{ fontSize: "0.7em", color: "#6c757d", margin: "2px 0 0" }}>素の能力</p>
+              </div>
+              {/* コース特性 + 補正適用済み加重レーダー */}
+              <div style={{ textAlign: "center" }}>
+                <div className="horse-card__radar-svg-wrap">
+                  <RadarChart horse={weightedRadarMap} size={200} />
+                </div>
+                <p style={{ fontSize: "0.7em", color: "#0071e3", margin: "2px 0 0" }}>
+                  コース特性・補正
+                  {condition.abilityPriority ? ` (${condition.abilityPriority}重視)` : ""}
+                </p>
+              </div>
             </div>
             <p className="horse-card__radar-shape">{radarShape.line}</p>
           </div>

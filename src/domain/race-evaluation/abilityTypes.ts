@@ -122,6 +122,18 @@ export type HorseAbility = {
 
 export type AdjustmentStrengthKey = "weak" | "middle" | "strong";
 
+/**
+ * 能力値の「重視ステータス」プリセット。
+ * 選択時、対象能力のウェイトを 1.5 倍にしてから正規化する。
+ * null = プリセット未選択（コースデフォルトのまま）
+ */
+export type AbilityPriority =
+  | "speed"    // スピード/先行重視
+  | "stamina"  // スタミナ/持続重視（staminaとsustainを両方ブースト）
+  | "kick"     // キレ（瞬発）勝負
+  | "power"    // パワー/急坂重視
+  | null;
+
 export type RaceCondition = {
   venue: string;
   courseKey?: string;
@@ -152,6 +164,11 @@ export type RaceCondition = {
    * -1: 極端な内有利, 0: フラット, +1: 極端な外有利
    */
   userTrackBias?: number;
+  /**
+   * 能力値の重視プリセット。
+   * 設定時、対象能力ウェイトを 1.5 倍にして正規化し、評価に反映する。
+   */
+  abilityPriority?: AbilityPriority;
 };
 
 export type BuyLabel = BuyLabelLingo;

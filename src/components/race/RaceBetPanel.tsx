@@ -29,19 +29,22 @@ const VALUE_RANK_STYLE: Record<string, { bg: string; color: string; label: strin
 
 /**
  * 期待値ヒートマップ: EVに応じた行の背景色グラデーション。
- * EV < 1.0  → グレー（薄）
- * 1.0 ≤ EV < 1.2 → 薄緑
- * EV ≥ 1.2  → 濃緑
- * Sランク    → 濃緑 + アニメーション（点滅バッジ）
+ * EV ≥ 1.25  → 濃緑（「激アツ」バッジ付与）
+ * 1.10 ≤ EV < 1.25 → 薄緑
+ * 1.00 ≤ EV < 1.10 → 極薄緑
+ * EV < 1.00  → 彩度を落としたグレー
  */
 function evHeatmapStyle(ev: number, valueRank: string): CSSProperties {
-  if (ev >= 1.2 || valueRank === "S") {
-    return { background: "rgba(39,174,96,0.15)", borderLeft: "3px solid #27ae60" };
+  if (ev >= 1.25 || valueRank === "S") {
+    return { background: "rgba(39,174,96,0.20)", borderLeft: "4px solid #1e8449" };
   }
-  if (ev >= 1.0) {
-    return { background: "rgba(39,174,96,0.07)", borderLeft: "3px solid #a9dfbf" };
+  if (ev >= 1.10) {
+    return { background: "rgba(39,174,96,0.10)", borderLeft: "3px solid #27ae60" };
   }
-  return { background: "transparent", borderLeft: "3px solid transparent" };
+  if (ev >= 1.00) {
+    return { background: "rgba(39,174,96,0.05)", borderLeft: "3px solid #a9dfbf" };
+  }
+  return { background: "rgba(127,140,141,0.06)", borderLeft: "3px solid transparent" };
 }
 
 /** EVテーブル右列。実質期待値の帯（valueRank）に合わせ、ランク列と同じ物差しで表記する。 */
@@ -65,26 +68,48 @@ function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; 
  * A: 期待値高
  * B: 期待値あり
  */
-function EvSpecialBadge({ rank }: { rank: string }) {
-  if (rank === "S") {
+function EvSpecialBadge({ rank, ev }: { rank: string; ev: number }) {
+  // EV ≥ 1.25 → 激アツ（Sランク相当 or EV数値で判定）
+  if (rank === "S" || ev >= 1.25) {
     return (
-      <span
-        className="ev-badge ev-badge--treasure"
-        title="EV Sランク: 最高評価の期待値馬"
-        style={{
-          display: "inline-block",
-          padding: "0.1em 0.4em",
-          borderRadius: "3px",
-          background: "#c0392b",
-          color: "#fff",
-          fontWeight: "bold",
-          fontSize: "0.75em",
-          marginLeft: "0.3em",
-          animation: "ev-pulse 1.4s ease-in-out infinite",
-        }}
-      >
-        ★お宝馬
-      </span>
+      <>
+        <span
+          className="ev-badge ev-badge--gekiatu"
+          title="EV 激アツ: EV 1.25以上の最高評価"
+          style={{
+            display: "inline-block",
+            padding: "0.1em 0.5em",
+            borderRadius: "3px",
+            background: "#1e8449",
+            color: "#fff",
+            fontWeight: "bold",
+            fontSize: "0.75em",
+            marginLeft: "0.3em",
+            animation: "ev-pulse 1.4s ease-in-out infinite",
+          }}
+        >
+          🔥激アツ
+        </span>
+        {rank === "S" && (
+          <span
+            className="ev-badge ev-badge--treasure"
+            title="EV Sランク: 最高評価の期待値馬"
+            style={{
+              display: "inline-block",
+              padding: "0.1em 0.4em",
+              borderRadius: "3px",
+              background: "#c0392b",
+              color: "#fff",
+              fontWeight: "bold",
+              fontSize: "0.75em",
+              marginLeft: "0.2em",
+              animation: "ev-pulse 1.4s ease-in-out infinite",
+            }}
+          >
+            ★お宝馬
+          </span>
+        )}
+      </>
     );
   }
   if (rank === "A") {
@@ -223,7 +248,7 @@ function EvSection({
       <h3 className="bet-panel__ev-title">AIオッズ評価（実質期待値）</h3>
       <p className="bet-panel__ev-desc">
         実質期待値 = (予測確率 × オッズ) − マージン（頭数16+: 0.20、通常: 0.15）。
-        ★ヒートマップ: 緑枠は期待値1.0以上、濃緑は1.2以上。
+        ★ヒートマップ: 🔥激アツ(EV≥1.25・濃緑)、薄緑(EV≥1.10)、淡緑(EV≥1.00)、グレー(EV&lt;1.00)。
         {biasActive && (
           <strong style={{ color: "#2980b9" }}> ⚡ 馬場バイアス補正適用中（枠番補正）</strong>
         )}
@@ -248,7 +273,7 @@ function EvSection({
             const inv = row.investment;
             // ランタイム補正済みEV（馬場バイアス考慮）
             const { ev, adjusted } = calcRuntimeAdjustedEv(inv, row.gate, fieldSize, condition, runtimeMargin);
-            const adjustedRank = ev >= 1.40 ? "S" : ev >= 1.10 ? "A" : ev >= 1.0 ? "B" : ev >= 0.90 ? "C" : "D";
+            const adjustedRank = ev >= 1.40 ? "S" : ev >= 1.25 ? "S" : ev >= 1.10 ? "A" : ev >= 1.0 ? "B" : ev >= 0.90 ? "C" : "D";
             const displayRank = adjusted ? adjustedRank : inv.valueRank;
             const kelly = (inv.kellyWeight ?? 0) * kellyFraction;
             const recommendedAmount = Math.floor((budget * kelly) / 100) * 100;
@@ -266,7 +291,7 @@ function EvSection({
                 <td style={{ textAlign: "center" }}>{row.gate}番</td>
                 <td>
                   {row.horseName}
-                  <EvSpecialBadge rank={displayRank} />
+                  <EvSpecialBadge rank={displayRank} ev={ev} />
                 </td>
                 <td style={{ textAlign: "right", fontWeight: "bold", color: ev >= 1.0 ? "#27ae60" : "#e74c3c" }}>
                   {ev.toFixed(2)}

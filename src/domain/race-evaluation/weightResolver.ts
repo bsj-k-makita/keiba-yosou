@@ -13,7 +13,12 @@ import {
   PACE_ADJUSTMENTS,
   TRACK_SPEED_ADJUSTMENTS,
 } from "./adjustments";
-import { BASE_COURSE_WEIGHTS, DEFAULT_VENUE_KEY } from "./courseWeights";
+import {
+  BASE_COURSE_WEIGHTS,
+  DEFAULT_COURSE_WEIGHTS,
+  DEFAULT_VENUE_KEY,
+  inferCourseWeightKey,
+} from "./courseWeights";
 import { applyVenuePhysicalFactorAdjustments } from "./venuePhysicalFactors";
 
 function emptyDelta(): WeightSet {
@@ -27,13 +32,54 @@ function deltaFrom(
   return map[key]?.adjustment ?? emptyDelta();
 }
 
-export function getBaseWeights(condition: RaceCondition): WeightSet {
-  const venueKey = condition.courseKey ?? condition.venue;
-  const base = BASE_COURSE_WEIGHTS[venueKey] ?? BASE_COURSE_WEIGHTS[DEFAULT_VENUE_KEY];
-  if (!base) {
-    throw new Error(`No base weights for venue: ${venueKey}`);
+/**
+ * 能力プリセット（abilityPriority）を適用する。
+ * 対象能力のウェイトを 1.5 倍にし、合計が 1.0 になるよう再正規化する。
+ * "stamina" プリセットは stamina と sustain の両方を 1.5 倍にする
+ *（スタミナ/持続重視の意図に合わせたセット適用）。
+ */
+function applyAbilityPriority(
+  weights: WeightSet,
+  priority: RaceCondition["abilityPriority"],
+): WeightSet {
+  if (!priority) return weights;
+
+  const out: WeightSet = { ...weights };
+  const BOOST = 1.5;
+
+  if (priority === "stamina") {
+    out.stamina = out.stamina * BOOST;
+    out.sustain = out.sustain * BOOST;
+  } else {
+    out[priority] = out[priority] * BOOST;
   }
-  return { ...base };
+
+  return normalizeWeights(out);
+}
+
+export function getBaseWeights(condition: RaceCondition): WeightSet {
+  // 1. 新コース別ウェイトキーの解決を試みる
+  const courseWeightKey = inferCourseWeightKey(condition);
+  let base: WeightSet | undefined;
+
+  if (courseWeightKey != null) {
+    base = DEFAULT_COURSE_WEIGHTS[courseWeightKey];
+  }
+
+  // 2. フォールバック: 旧 venue キー → DEFAULT_VENUE_KEY
+  if (base == null) {
+    const venueKey = condition.courseKey ?? condition.venue;
+    base =
+      BASE_COURSE_WEIGHTS[venueKey] ??
+      BASE_COURSE_WEIGHTS[DEFAULT_VENUE_KEY];
+  }
+
+  if (!base) {
+    throw new Error(`No base weights for venue: ${condition.venue}`);
+  }
+
+  // 3. abilityPriority プリセットを適用（1.5x → 再正規化）
+  return applyAbilityPriority({ ...base }, condition.abilityPriority);
 }
 
 export function applyAdjustments(
