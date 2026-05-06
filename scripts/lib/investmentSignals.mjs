@@ -50,7 +50,7 @@ function hasObservedTimestamp(v) {
   return typeof v === "string" && v.length >= 10;
 }
 
-// マージン（控除率・予測誤差の安全バッファ）
+// ベースマージン（控除率・予測誤差の安全バッファ）
 const EV_MARGIN = 0.15;
 // フラクショナルケリー係数（0.25 = クォーターケリー）
 const KELLY_FRACTION = 0.25;
@@ -58,13 +58,48 @@ const KELLY_FRACTION = 0.25;
 const KELLY_MAX = 0.25;
 
 /**
+ * 動的EVマージンを計算する。
+ * レースの不確実性・信頼性に応じてベースマージン(0.15)を変動させる。
+ *
+ * 基準:
+ *   新馬・未勝利戦  → 0.20（過去実績なし・予測困難）
+ *   重賞 G1/G2/G3   → 0.10（データ蓄積・信頼性高）
+ *   その他（一般戦） → 0.15（デフォルト）
+ * 追加加算:
+ *   多頭数（16頭以上） → +0.05（競馬場のランダム性増大）
+ */
+function calcDynamicEvMargin(raceInfo, fieldSize) {
+  const raceName = String(raceInfo?.raceName ?? "");
+  const raceGrade = String(raceInfo?.raceGrade ?? "");
+
+  let margin = EV_MARGIN; // デフォルト 0.15
+
+  // 新馬・未勝利戦: 過去実績データが少なくリスク高
+  if (raceName.includes("新馬") || raceName.includes("未勝利")) {
+    margin = 0.20;
+  }
+  // 重賞（G1/G2/G3）: データ蓄積が厚く予測精度が高い
+  else if (raceGrade === "G1" || raceGrade === "G2" || raceGrade === "G3") {
+    margin = 0.10;
+  }
+
+  // 多頭数（16頭以上）: 混雑・ロス・偶発的事故のリスクが上がる
+  if (Number.isFinite(fieldSize) && fieldSize >= 16) {
+    margin += 0.05;
+  }
+
+  // 上限 0.30（極端な値を防止）
+  return round2(Math.min(margin, 0.30));
+}
+
+/**
  * 実質期待値を計算する。
  * E_effective = (P × O) - Margin
- * 単純な P×O ではなく、控除率・予測誤差のバッファを差し引く。
+ * margin には calcDynamicEvMargin の返値を渡せる（省略時はデフォルト 0.15）。
  */
-function calcEffectiveEv(prob, odds) {
+function calcEffectiveEv(prob, odds, margin = EV_MARGIN) {
   if (!Number.isFinite(prob) || !Number.isFinite(odds) || odds <= 0) return 0;
-  return round2(prob * odds - EV_MARGIN);
+  return round2(prob * odds - margin);
 }
 
 /**
@@ -187,15 +222,116 @@ function computeValueChange(previousOdds, nextOdds) {
 }
 
 /**
+ * 当日トラックバイアス補正係数（枠番ベース）。
+ * userTrackBias: -1=内有利(強) ～ 0=フラット ～ +1=外有利(強)
+ * gateNumber: 馬番（1〜18）
+ *
+ * 計算式: P_corrected = P × BiasMultiplier
+ * 内有利(bias<0) → 内枠(1〜3番)に ×1.1〜1.15、外枠に ×0.85〜0.9
+ * 外有利(bias>0) → 外枠に ×1.1〜1.15、内枠に ×0.85〜0.9
+ */
+function calcGateBiasMultiplier(gateNumber, fieldSize, userTrackBias) {
+  if (!Number.isFinite(userTrackBias) || Math.abs(userTrackBias) < 0.05) return 1.0;
+  if (!Number.isFinite(gateNumber) || gateNumber <= 0) return 1.0;
+
+  const size = Math.max(8, fieldSize || 12);
+  // ゲート番号の相対位置（0.0=最内, 1.0=最外）
+  const relativePos = (gateNumber - 1) / Math.max(size - 1, 1);
+
+  // 最大補正幅: バイアス強度1.0時に ±15%（内外の差は最大30%）
+  const MAX_CORRECTION = 0.15;
+  // 内有利(bias<0)なら内枠(relativePos~0)を加点、外枠を減点
+  const correction = -userTrackBias * (relativePos - 0.5) * MAX_CORRECTION * 2;
+
+  return clamp(1.0 + correction, 0.75, 1.30);
+}
+
+/**
+ * 展開バイアス補正係数（脚質ベース）。
+ * biasSetting: "front_favor" | "closer_favor" | その他(フラット)
+ *
+ * 前残り(front_favor) → 逃げ・先行・好位に ×1.10、差し・追込に ×0.90
+ * 差し決着(closer_favor) → 差し・追込に ×1.10、逃げ・先行に ×0.90
+ */
+function calcRunningStyleBiasMultiplier(runningStyle, biasSetting) {
+  if (!biasSetting || biasSetting === "flat") return 1.0;
+  const frontStyles = new Set(["逃げ", "先行", "好位"]);
+  const closerStyles = new Set(["差し", "追込"]);
+
+  if (biasSetting === "front_favor") {
+    if (frontStyles.has(runningStyle)) return 1.10;
+    if (closerStyles.has(runningStyle)) return 0.90;
+  }
+  if (biasSetting === "closer_favor") {
+    if (closerStyles.has(runningStyle)) return 1.10;
+    if (frontStyles.has(runningStyle)) return 0.90;
+  }
+  return 1.0;
+}
+
+/**
+ * 人気バイアス（オッズの歪み）補正係数。
+ * AI予測確率 > 市場内包確率（1/odds）の場合、過剰人気馬と判定して期待値を減衰。
+ *
+ * 乖離率 5%超: 最大 10% の減衰（decay 係数 0.90〜1.0）
+ * 1倍台の圧倒的人気馬（odds < 2.0 かつ prob > 0.5）にも追加で 5% 減衰。
+ */
+function calcPopularityBiasDecay(prob, odds) {
+  if (!Number.isFinite(prob) || !Number.isFinite(odds) || odds <= 0) return 1.0;
+
+  const impliedProb = 1 / odds; // オッズから逆算した市場の支持確率
+  const overConfidence = prob - impliedProb;
+
+  let decay = 1.0;
+
+  // AI確率が市場確率を 5% 超過 → 過剰人気バイアスとして最大 10% 減衰
+  if (overConfidence > 0.05) {
+    decay = Math.max(0.90, 1.0 - Math.min(overConfidence, 0.20) * 0.5);
+  }
+
+  // 1倍台（odds < 2.0）の圧倒的人気馬: さらに 5% 減衰（市場が過剰に収縮）
+  if (odds < 2.0 && prob > 0.45) {
+    decay = Math.max(0.85, decay - 0.05);
+  }
+
+  return decay;
+}
+
+/**
  * race JSON 1ファイル分を期待値短評用フィールドで埋める。
+ *
+ * 拡張ロジック（v2）:
+ *   1. 動的EVマージン: レース種別（新馬/重賞等）と頭数に応じてマージンを変動
+ *   2. トラックバイアス補正: condition.userTrackBias と脚質バイアスを確率に適用
+ *   3. 人気バイアス減衰: 過剰人気馬の期待値を自動的に抑制
  */
 export function enrichInvestmentSignalsInRaceData(data) {
   const entries = Array.isArray(data?.entries) ? data.entries : [];
   if (entries.length === 0) return data;
   const scores = entries.map((e) => scoreFromAbilities(e));
-  const probs = softmax(scores);
+  const rawProbs = softmax(scores);
   const modelRanks = toRank(scores);
   const fieldSize = entries.length;
+
+  // 1. 動的EVマージン: レース属性に応じたマージン計算
+  const evMargin = calcDynamicEvMargin(data.raceInfo, fieldSize);
+
+  // 2. トラックバイアス補正: 枠番バイアス + 展開バイアスを確率に乗算して再正規化
+  const userTrackBias = parseNumeric(data.condition?.userTrackBias ?? data.userTrackBias) ?? 0;
+  const biasSetting = String(data.condition?.bias ?? "flat");
+
+  const biasMultipliers = entries.map((entry, i) => {
+    const gateNumber = parseNumeric(entry.horseNumber ?? entry.gate) ?? (i + 1);
+    const gateBias = calcGateBiasMultiplier(gateNumber, fieldSize, userTrackBias);
+    const styleBias = calcRunningStyleBiasMultiplier(entry.runningStyle, biasSetting);
+    return gateBias * styleBias;
+  });
+
+  const rawBiasProbs = rawProbs.map((p, i) => p * biasMultipliers[i]);
+  const sumBiasProbs = rawBiasProbs.reduce((s, v) => s + v, 0);
+  // バイアス補正済み確率（再正規化）
+  const probs = sumBiasProbs > 0 ? rawBiasProbs.map((p) => p / sumBiasProbs) : rawProbs;
+
   for (let i = 0; i < entries.length; i += 1) {
     const entry = entries[i];
     const pWin = probs[i] ?? 1 / entries.length;
@@ -242,11 +378,16 @@ export function enrichInvestmentSignalsInRaceData(data) {
     const placeOdds = estimatePlaceOdds({ ...entry, marketWinOdds, marketPopularity: popularity }, fieldSize);
     const effectiveOdds = placeOdds?.odds ?? round2(clamp(expectedOdds, 1.1, 40));
     const oddsSource = placeOdds?.source ?? "estimated";
-    // 実質期待値: E_effective = (P × O) - Margin（単純な P×O ではなくマージン控除）
-    const valueScore = calcEffectiveEv(predictedProbability, effectiveOdds);
+
+    // 3. 人気バイアス減衰: 過剰人気馬の期待値を抑制
+    const popularityDecay = calcPopularityBiasDecay(predictedProbability, effectiveOdds);
+
+    // 実質期待値: 動的マージン + 人気バイアス減衰を適用
+    // E_effective = (P × O × decay) - margin
+    const valueScore = calcEffectiveEv(predictedProbability * popularityDecay, effectiveOdds, evMargin);
     const valueRank = toValueRank(valueScore);
     // ケリー基準による投資比率（Fractional Kelly 0.25倍）
-    const kellyWeight = calcKellyWeight(predictedProbability, effectiveOdds);
+    const kellyWeight = calcKellyWeight(predictedProbability * popularityDecay, effectiveOdds);
     const confidenceRank = toConfidenceRank(predictedProbability);
     const betType = toBetType(predictedProbability, valueRank);
     const valueChange = computeValueChange(prevOdds, effectiveOdds);
@@ -266,7 +407,7 @@ export function enrichInvestmentSignalsInRaceData(data) {
     entry.market_popularity_source = hasActualPopularity ? "actual" : "estimated";
     entry.market_win_odds = marketWinOdds;
     entry.market_win_odds_source = marketWinOddsSource;
-    // 実質期待値（マージン控除済み）
+    // 実質期待値（動的マージン控除済み・人気バイアス補正済み）
     entry.value_score = valueScore;
     entry.value_rank = valueRank;
     // Fractional Kelly による投資比率（0〜0.25）
@@ -276,6 +417,9 @@ export function enrichInvestmentSignalsInRaceData(data) {
     entry.value_change = valueChange;
     entry.key_factors = abilityLabels.length > 0 ? abilityLabels : ["能力上位"];
     entry.risk_factors = [risk];
+    // デバッグ用: 適用したマージンと減衰係数を記録
+    entry.ev_margin_applied = evMargin;
+    entry.popularity_decay_applied = round2(popularityDecay);
   }
   return data;
 }
