@@ -225,6 +225,10 @@ export type HorseScoreResult = {
   paceBalanceBonus: number;
   /** 前走の不利・恩恵（負けて強し / 展開利）の文脈補正 */
   tripContextBonus: number;
+  /** コースの物理特性（内前/外前など）との一致による直接加点 */
+  courseTraitBonus?: number;
+  /** コース特性一致時の説明ラベル（UI表示・tooltip用） */
+  courseTraitReasons?: string[];
   /** `raceRelativeScore` + `paceFitBonus`（0〜100）。印・買い判断の基準順は `finalRank` */
   finalEvaluationScore: number;
   /**

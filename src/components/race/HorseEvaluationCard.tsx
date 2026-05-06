@@ -141,6 +141,15 @@ export function HorseEvaluationCard({
     () => computeConnectionSpecialBadges(horse, condition),
     [horse, condition],
   );
+  const courseTraitBadge = useMemo(() => {
+    const bonus = result.courseTraitBonus ?? 0;
+    const reasons = result.courseTraitReasons ?? [];
+    if (bonus <= 0 || reasons.length === 0) return null;
+    return {
+      text: `🧭 コース特性一致 +${bonus.toFixed(1)}`,
+      title: reasons.join("\n"),
+    };
+  }, [result.courseTraitBonus, result.courseTraitReasons]);
 
   return (
     <article
@@ -299,8 +308,13 @@ export function HorseEvaluationCard({
             {marketAlert}
           </p>
         ) : null}
-        {connectionBadges.length > 0 ? (
+        {connectionBadges.length > 0 || courseTraitBadge != null ? (
           <div className="horse-card__special-badges">
+            {courseTraitBadge ? (
+              <span className="horse-card__special-badge" data-kind="course-trait" title={courseTraitBadge.title}>
+                {courseTraitBadge.text}
+              </span>
+            ) : null}
             {connectionBadges.map((badge) => (
               <span
                 key={badge}

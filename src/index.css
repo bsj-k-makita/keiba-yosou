@@ -1464,6 +1464,18 @@ samp {
   border-color: #fca5a5;
 }
 
+.horse-card__special-badge[data-kind="course-trait"] {
+  color: #0f4f8a;
+  background: #e0f2ff;
+  border-color: #8ecbf5;
+}
+
+:root[data-theme="dark"] .horse-card__special-badge[data-kind="course-trait"] {
+  color: #8fd3ff;
+  background: rgba(10, 132, 255, 0.18);
+  border-color: rgba(10, 132, 255, 0.45);
+}
+
 /* Ability spotlight */
 .horse-card__ability-panel {
   margin: 8px 0 14px;

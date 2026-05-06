@@ -38,6 +38,7 @@ import { blendAbilityWithPastRuns } from "./performanceAbility";
 import { computeContextualBonuses } from "./contextualBonuses";
 import { BUY_LABELS } from "./lingoConstants";
 import { ADJUSTMENT_STRENGTH } from "./adjustments";
+import { computeCourseTraitHits } from "./courseTraitResolver";
 
 export { extractStrongAbilities } from "./strongAbilities";
 export {
@@ -199,6 +200,8 @@ export function evaluateRace(
       trendBonus: 0,
       paceBalanceBonus: 0,
       tripContextBonus: 0,
+      courseTraitBonus: 0,
+      courseTraitReasons: [],
       finalEvaluationScore: 0,
       evaluationBaselineScore: 0,
       evaluationAdjustmentDelta: 0,
@@ -247,6 +250,9 @@ export function evaluateRace(
     const weakTierImpact = weakTierImpactFromDiff(r.scoreDiff, condition.adjustmentStrength);
     const dScaled = round1(dBonus * strengthMult);
     const contextualScaled = round1(contextualTotal * strengthMult);
+    const traitHits = computeCourseTraitHits(h, condition);
+    const courseTraitBonus = round1(traitHits.reduce((sum, hit) => sum + hit.bonus, 0));
+    const courseTraitReasons = traitHits.map((hit) => `${hit.label}: ${hit.reason} (+${hit.bonus.toFixed(1)})`);
     r.raceRelativeScore = relScore;
     r.paceFitBonus = pBonus;
     r.distanceFitBonus = dBonus;
@@ -258,6 +264,8 @@ export function evaluateRace(
     r.trendBonus = contextual.trendBonus;
     r.paceBalanceBonus = contextual.paceBalanceBonus;
     r.tripContextBonus = contextual.tripContextBonus;
+    r.courseTraitBonus = courseTraitBonus;
+    r.courseTraitReasons = courseTraitReasons;
     const classCombined = round1(clamp(cBonus + r.stepPatternBonus, -4.5, 5.5));
     const lapStack = r.lapShapeFitBonus + r.lapSustainBonus + r.lapQualityBonus;
     r.evaluationBaselineScore = combineFinalEvaluationScore(
@@ -280,6 +288,7 @@ export function evaluateRace(
       contextualScaled,
       conditionImpactBonus,
     );
+    r.finalEvaluationScore = round1(r.finalEvaluationScore + courseTraitBonus);
     r.evaluationAdjustmentDelta = round1(r.finalEvaluationScore - r.evaluationBaselineScore);
   }
 

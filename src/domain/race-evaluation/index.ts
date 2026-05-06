@@ -27,3 +27,4 @@ export * from "./pastRunDerivedSignals";
 export * from "./resolveEvaluationSignals";
 export * from "./contextualBonuses";
 export * from "./racePreview";
+export * from "./courseTraitResolver";
