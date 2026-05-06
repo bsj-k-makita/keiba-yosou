@@ -500,7 +500,15 @@ export function RaceDetailView({ race, raceIndex }: Props) {
 
           {/* 結果確認タブ */}
           {tab === "bets" && (
-            <RaceBetPanel sorted={sorted} horses={horses} condition={condition} />
+            <RaceBetPanel
+              sorted={sorted}
+              horses={horses}
+              condition={condition}
+              onConditionChange={(next) => {
+                userEditedRef.current = true;
+                setCondition(next);
+              }}
+            />
           )}
 
           {/* 結果確認タブ */}
