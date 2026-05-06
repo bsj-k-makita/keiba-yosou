@@ -1,9 +1,12 @@
 import type { AbilityKey } from "../../domain/race-evaluation/abilityTypes";
 import { ABILITY_KEYS, ABILITY_LABELS } from "../../domain/race-evaluation/abilityTypes";
 
+/** viewBox 内の描画領域（周囲にラベル用パディングを付けるため g でオフセット） */
 const W = 160;
 const CX = 80;
 const CY = 80;
+const VIEW_PAD = 14;
+const VB_SIZE = W + VIEW_PAD * 2;
 const R_MAX = 52;
 /** 外周の軸ラベル用（多角形グリッドより外側） */
 const R_LAB = 68;
@@ -47,7 +50,7 @@ type Props = {
 /**
  * 能力5項目のみのレーダー（混在オーバーレイをしない）
  */
-export function RadarChart({ horse, size = 192 }: Props) {
+export function RadarChart({ horse, size = 168 }: Props) {
   const series = horse ?? ({} as Record<AbilityKey, number>);
   const keys = ABILITY_KEYS;
   const rings = [0.25, 0.5, 0.75, 1];
@@ -55,12 +58,14 @@ export function RadarChart({ horse, size = 192 }: Props) {
   return (
     <svg
       className="radar"
-      viewBox={`0 0 ${W} ${W}`}
+      viewBox={`0 0 ${VB_SIZE} ${VB_SIZE}`}
       width={size}
       height={size}
+      overflow="visible"
       role="img"
       aria-label="5つの能力の相対的な形（0〜100を端までに正規化）"
     >
+      <g transform={`translate(${VIEW_PAD},${VIEW_PAD})`}>
       {rings.map((r) => (
         <polygon
           key={r}
@@ -125,6 +130,7 @@ export function RadarChart({ horse, size = 192 }: Props) {
           strokeWidth={1.1}
         />
       ))}
+      </g>
     </svg>
   );
 }

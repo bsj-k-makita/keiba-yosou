@@ -257,7 +257,7 @@ export function HorseEvaluationCard({
         <div className="horse-card__ability-main">
           <div className="horse-card__radar-hero" aria-label="能力バランス">
             <div className="horse-card__radar-svg-wrap">
-              <RadarChart horse={hMap} size={200} />
+              <RadarChart horse={hMap} size={168} />
             </div>
             <p className="horse-card__radar-caption">補正後能力バランス（5項目）</p>
             <p className="horse-card__radar-note">

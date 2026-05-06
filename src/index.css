@@ -1,18 +1,23 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   Design tokens — DESIGN.md（Apple: Fog / Snow / Ink + Azure アクセント）
+   Design tokens — 白ベース + アクセント（Oceanic Teal）
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 :root,
 :root[data-theme="light"] {
+  --app-nav-height: 52px;
+
+  --color-oceanic-teal: #1c5d5f;
+  --color-deep-teal: #0e4749;
+
+  --color-fog: #ffffff;
+  --color-snow: #ffffff;
   --color-ink: #1d1d1f;
   --color-graphite: #707070;
   --color-slate: #474747;
   --color-ash: #333333;
-  --color-fog: #f5f5f7;
-  --color-snow: #ffffff;
   --color-obsidian: #000000;
   --color-silver-mist: #e8e8ed;
-  --color-azure: #0071e3;
-  --color-cobalt-link: #0066cc;
+  --color-azure: var(--color-oceanic-teal);
+  --color-cobalt-link: var(--color-deep-teal);
   --color-caution: #b64400;
 
   --font-display: var(--font-ui);
@@ -28,7 +33,7 @@
   --font-size-body: 14px;
 
   --c-white: var(--color-snow);
-  --c-pale: var(--color-fog);
+  --c-pale: #f5f5f7;
   --c-black: var(--color-fog);
   --c-ink: var(--color-ink);
   --c-graphite: var(--color-graphite);
@@ -44,12 +49,12 @@
 
   --c-blue: var(--color-azure);
   --c-blue-dark: var(--color-cobalt-link);
-  --c-blue-bright: #0077ed;
-  --c-blue-bg: rgba(0, 113, 227, 0.1);
-  --c-blue-weak: rgba(0, 113, 227, 0.22);
+  --c-blue-bright: #2a8e91;
+  --c-blue-bg: rgba(28, 93, 95, 0.1);
+  --c-blue-weak: rgba(28, 93, 95, 0.22);
   --c-mint: var(--color-azure);
-  --c-mint-soft: rgba(0, 113, 227, 0.12);
-  --c-pop-accent: var(--color-azure);
+  --c-mint-soft: rgba(28, 93, 95, 0.12);
+  --c-pop-accent: var(--color-oceanic-teal);
 
   --c-gold: var(--color-ink);
   --c-gold-bg: var(--color-fog);
@@ -70,8 +75,8 @@
   --c-hero-grad-2: var(--color-snow);
   --c-hero-grad-3: var(--color-fog);
   --c-chip-bg: var(--color-snow);
-  --c-sticky-bg: rgba(245, 245, 247, 0.92);
-  --c-nav-bg: var(--color-fog);
+  --c-sticky-bg: rgba(255, 255, 255, 0.92);
+  --c-nav-bg: #ffffff;
   --c-tab-bg: var(--color-snow);
   --c-tab-hover-border: var(--color-silver-mist);
   --c-accent-contrast: var(--color-snow);
@@ -82,12 +87,11 @@
   --c-mark-border: var(--color-silver-mist);
   --c-table-cell-border: var(--color-silver-mist);
   --c-table-row-odd: var(--color-snow);
-  --c-table-row-even: var(--color-fog);
-  --c-table-row-hover: rgba(0, 113, 227, 0.06);
+  --c-table-row-even: #fafafa;
+  --c-table-row-hover: rgba(28, 93, 95, 0.06);
   --c-panel-border: var(--color-silver-mist);
   --c-bet-ticket-bg: var(--color-snow);
   --c-bet-ticket-border: var(--color-silver-mist);
-  /* フォーム・アラート等（フォールバック無しでテーマ追従させる） */
   --c-bg: #f8f9fb;
   --c-surface-alt: #eef1f7;
   --c-yellow-bg: #fffbeb;
@@ -119,6 +123,11 @@
 }
 
 :root[data-theme="dark"] {
+  --app-nav-height: 52px;
+
+  --color-oceanic-teal: #5eead4;
+  --color-deep-teal: #99f6e4;
+
   --color-ink: #f5f5f7;
   --color-graphite: #a1a1a6;
   --color-slate: #c7c7cc;
@@ -127,8 +136,8 @@
   --color-snow: #1c1c1e;
   --color-obsidian: #ffffff;
   --color-silver-mist: #424245;
-  --color-azure: #0a84ff;
-  --color-cobalt-link: #64b5ff;
+  --color-azure: var(--color-oceanic-teal);
+  --color-cobalt-link: var(--color-deep-teal);
   --color-caution: #ffb340;
 
   --c-white: #1c1c1e;
@@ -148,12 +157,12 @@
 
   --c-blue: var(--color-azure);
   --c-blue-dark: var(--color-cobalt-link);
-  --c-blue-bright: #409cff;
-  --c-blue-bg: rgba(10, 132, 255, 0.18);
-  --c-blue-weak: rgba(10, 132, 255, 0.35);
+  --c-blue-bright: #7af3e0;
+  --c-blue-bg: rgba(94, 234, 212, 0.18);
+  --c-blue-weak: rgba(94, 234, 212, 0.35);
   --c-mint: var(--color-azure);
-  --c-mint-soft: rgba(10, 132, 255, 0.2);
-  --c-pop-accent: var(--color-azure);
+  --c-mint-soft: rgba(94, 234, 212, 0.2);
+  --c-pop-accent: var(--color-oceanic-teal);
 
   --c-gold: var(--color-ink);
   --c-gold-bg: #2c2c2e;
@@ -178,7 +187,7 @@
   --c-nav-bg: #000000;
   --c-tab-bg: #2c2c2e;
   --c-tab-hover-border: #545458;
-  --c-accent-contrast: #ffffff;
+  --c-accent-contrast: #0c1211;
   --c-density-shadow: none;
   --c-heavy-shadow: none;
   --c-card-border-hover: #545458;
@@ -187,7 +196,7 @@
   --c-table-cell-border: #424245;
   --c-table-row-odd: #1c1c1e;
   --c-table-row-even: #242426;
-  --c-table-row-hover: rgba(10, 132, 255, 0.12);
+  --c-table-row-hover: rgba(94, 234, 212, 0.12);
   --c-panel-border: #424245;
   --c-bet-ticket-bg: #2c2c2e;
   --c-bet-ticket-border: #424245;
@@ -234,7 +243,7 @@ samp {
   align-items: center;
   justify-content: space-between;
   padding: 0 22px;
-  height: 44px;
+  min-height: var(--app-nav-height);
   background: var(--c-nav-bg);
   border-bottom: 1px solid var(--c-border);
   position: sticky;
@@ -250,14 +259,17 @@ samp {
   color: var(--c-text);
 }
 
-.app-nav__logo-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+.app-nav__logo-img {
+  height: 42px;
+  width: auto;
+  max-width: min(320px, 62vw);
+  display: block;
   flex-shrink: 0;
-  background: var(--color-obsidian);
-  border: 2px solid var(--color-azure);
-  box-sizing: border-box;
+  object-fit: contain;
+}
+
+:root[data-theme="dark"] .app-nav__logo-img {
+  filter: invert(1) brightness(1.08);
 }
 
 .app-nav__logo-text {
@@ -320,14 +332,17 @@ samp {
   font-weight: 400;
 }
 
-.app-footer__logo-mark {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+.app-footer__logo-img {
+  height: 34px;
+  width: auto;
+  max-width: 220px;
+  display: block;
   flex-shrink: 0;
-  background: var(--color-obsidian);
-  border: 2px solid var(--color-azure);
-  box-sizing: border-box;
+  object-fit: contain;
+}
+
+:root[data-theme="dark"] .app-footer__logo-img {
+  filter: invert(1) brightness(1.08);
 }
 
 .app-footer__copy {
@@ -537,13 +552,13 @@ samp {
 
 .detail-sidebar {
   position: sticky;
-  top: calc(44px + 12px);
+  top: calc(var(--app-nav-height) + 12px);
 }
 
 /* Condition sticky bar */
 .app__condition-sticky {
   position: sticky;
-  top: 44px;
+  top: var(--app-nav-height);
   z-index: 50;
   margin: 0 -22px;
   padding: 8px 22px 10px;
@@ -1568,9 +1583,9 @@ samp {
 }
 
 :root[data-theme="dark"] .horse-card__special-badge[data-kind="course-trait"] {
-  color: #8fd3ff;
-  background: rgba(10, 132, 255, 0.18);
-  border-color: rgba(10, 132, 255, 0.45);
+  color: var(--color-deep-teal);
+  background: var(--c-blue-bg);
+  border-color: var(--c-blue-weak);
 }
 
 :root[data-theme="dark"] .horse-card__special-badge[data-kind="quick-adjustment"] {
@@ -1735,8 +1750,8 @@ samp {
 
 :root[data-theme="dark"] .horse-card__ability-grade[data-grade="B"] {
   color: var(--c-blue-bright);
-  background: rgba(10, 132, 255, 0.16);
-  border-color: rgba(10, 132, 255, 0.35);
+  background: var(--c-blue-bg);
+  border-color: var(--c-blue-weak);
 }
 
 :root[data-theme="dark"] .horse-card__ability-grade[data-grade="C"] {
@@ -1761,7 +1776,9 @@ samp {
   justify-content: center;
   margin: 0 0 8px;
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
+  padding: 4px 2px;
+  box-sizing: border-box;
 }
 
 .horse-card__radar-shape {
@@ -1803,8 +1820,10 @@ samp {
 }
 
 .radar {
+  display: block;
+  overflow: visible;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
-  width: min(100%, 260px);
+  width: min(100%, 216px);
   height: auto;
 }
 
@@ -1816,7 +1835,7 @@ samp {
     min-height: 680px;
   }
   .horse-card__radar-svg-wrap .radar {
-    width: min(100%, 300px);
+    width: min(100%, 240px);
     height: auto;
   }
 }
@@ -2173,7 +2192,7 @@ samp {
 .rl-page {
   background: var(--color-fog);
   max-width: 100%;
-  min-height: calc(100dvh - 44px);
+  min-height: calc(100dvh - var(--app-nav-height));
   padding-bottom: 64px;
 }
 
@@ -2181,7 +2200,7 @@ samp {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100dvh - 44px);
+  min-height: calc(100dvh - var(--app-nav-height));
 }
 
 .rl-loading-text,
@@ -2907,14 +2926,14 @@ samp {
 .horse-list {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 6px;
+  border-spacing: 0 4px;
   font-size: var(--font-size-body);
-  min-width: 480px;
+  min-width: 520px;
 }
 
 .horse-list__th {
   text-align: left;
-  padding: 10px 12px;
+  padding: 8px 11px;
   font-size: var(--font-size-body);
   font-weight: 500;
   color: var(--c-text-muted);
@@ -2932,12 +2951,21 @@ samp {
 }
 
 .horse-list__th--radar {
-  width: 142px;
+  width: 151px;
+  min-width: 151px;
 }
 
+.horse-list__th--name {
+  min-width: 12rem;
+}
+
+.horse-list__th--buy,
+.horse-list__td--buy {
+  min-width: 6.25rem;
+}
 
 .horse-list__td {
-  padding: 12px 14px;
+  padding: 10px 11px;
   border-top: 1px solid var(--c-table-cell-border);
   border-bottom: 1px solid var(--c-table-cell-border);
   vertical-align: middle;
@@ -2954,22 +2982,30 @@ samp {
 }
 
 .horse-list__td--radar {
-  padding: 4px 6px;
+  padding: 6px 8px;
   vertical-align: middle;
-  width: 142px;
+  width: 151px;
+  min-width: 151px;
 }
 
 .horse-list__td--radar .radar {
   display: block;
   margin: auto;
+  max-width: 149px;
+  width: 149px;
+  height: auto;
+}
+
+.horse-list__td--name {
+  min-width: 14rem;
 }
 
 .horse-list__grades {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   align-items: flex-start;
-  max-width: 11.5rem;
+  max-width: 10.5rem;
 }
 
 .grade-pill {
@@ -3014,14 +3050,14 @@ samp {
 
 .horse-list__row .horse-list__td:first-child {
   border-left: 1px solid var(--c-table-cell-border);
-  border-top-left-radius: 12px;
-  border-bottom-left-radius: 12px;
+  border-top-left-radius: var(--radius-cards);
+  border-bottom-left-radius: var(--radius-cards);
 }
 
 .horse-list__row .horse-list__td:last-child {
   border-right: 1px solid var(--c-table-cell-border);
-  border-top-right-radius: 12px;
-  border-bottom-right-radius: 12px;
+  border-top-right-radius: var(--radius-cards);
+  border-bottom-right-radius: var(--radius-cards);
 }
 
 .horse-list tbody tr:nth-child(odd) .horse-list__td {
@@ -3091,13 +3127,16 @@ samp {
 .horse-list__buy-label {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  justify-content: center;
+  padding: 6px 12px;
   border-radius: var(--r-pill);
   border: 1px solid var(--c-blue-dark);
   background: var(--c-blue-dark);
   color: #ffffff;
   font-size: var(--font-size-body);
   font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
 .horse-list__alert-tag {
@@ -3153,7 +3192,7 @@ samp {
   font-size: var(--font-size-body);
   color: var(--c-text-sub, #555);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .horse-list__scenario {
@@ -3253,7 +3292,7 @@ samp {
   color: #fcd34d;
 }
 :root[data-theme="dark"] .grade-pill--b {
-  background: rgba(10, 132, 255, 0.18);
+  background: var(--c-blue-bg);
   color: var(--c-blue-bright);
 }
 :root[data-theme="dark"] .grade-pill--c {
@@ -3699,9 +3738,9 @@ samp {
 
 .bet-panel__kelly-opt--active {
   font-weight: 700;
-  background: #2980b9;
-  color: #fff;
-  border-color: #2980b9;
+  background: var(--color-oceanic-teal);
+  color: var(--c-accent-contrast);
+  border-color: var(--color-oceanic-teal);
 }
 
 .bet-panel__kelly-hint {
@@ -3925,8 +3964,8 @@ samp {
 
 .bet-ticket__donut {
   --p: 0%;
-  width: 56px;
-  height: 56px;
+  width: 43px;
+  height: 43px;
   border-radius: 50%;
   background: conic-gradient(var(--c-blue) var(--p), #3b3b3b 0);
   display: inline-flex;
@@ -3938,8 +3977,8 @@ samp {
 
 .bet-ticket__donut::before {
   content: "";
-  width: 38px;
-  height: 38px;
+  width: 29px;
+  height: 29px;
   border-radius: 50%;
   background: var(--c-black);
 }
@@ -4013,8 +4052,8 @@ samp {
 }
 
 .ai-dashboard__bar-wrap {
-  height: 28px;
-  border-radius: 14px;
+  height: 23px;
+  border-radius: 11px;
   overflow: hidden;
   background: var(--c-pale);
 }
@@ -4025,7 +4064,7 @@ samp {
   align-items: center;
   justify-content: flex-end;
   padding-right: 12px;
-  border-radius: 14px;
+  border-radius: 11px;
   color: var(--c-accent-contrast);
   font-weight: 500;
   font-variant-numeric: tabular-nums;

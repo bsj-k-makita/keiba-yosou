@@ -28,7 +28,12 @@ function AppNav({
   return (
     <nav className="app-nav" aria-label="サイトナビ">
       <Link to="/races" className="app-nav__logo">
-        <span className="app-nav__logo-icon" aria-hidden />
+        <img
+          className="app-nav__logo-img"
+          src="/logo.png"
+          alt=""
+          decoding="async"
+        />
         <span className="app-nav__logo-text">競馬AI分析</span>
       </Link>
       <div className="app-nav__right">
@@ -51,7 +56,12 @@ function AppFooter() {
   return (
     <footer className="app-footer">
       <div className="app-footer__logo">
-        <span className="app-footer__logo-mark" aria-hidden />
+        <img
+          className="app-footer__logo-img"
+          src="/logo.png"
+          alt=""
+          decoding="async"
+        />
         <span>競馬AI分析</span>
       </div>
       <p className="app-footer__copy">© {year} 競馬AI分析. All rights reserved.</p>
