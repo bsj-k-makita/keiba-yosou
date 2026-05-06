@@ -39,6 +39,7 @@ import {
   computeMarketAlertLabel,
   getLapProfileVisual,
 } from "./evaluationTags";
+import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
 
 type Props = {
   gate?: number;
@@ -49,6 +50,7 @@ type Props = {
   demand0to100: Record<AbilityKey, number>;
   allHorses: HorseAbility[];
   condition: RaceCondition;
+  viewModel?: RaceEvaluationViewModel;
   compact?: boolean;
 };
 
@@ -70,6 +72,7 @@ export function HorseEvaluationCard({
   demand0to100,
   allHorses,
   condition,
+  viewModel,
   compact = false,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -83,6 +86,12 @@ export function HorseEvaluationCard({
   const orderRank = result.finalRank ?? result.adjustedRank;
   const rankDelta =
     result.baseRank != null && orderRank != null ? result.baseRank - orderRank : 0;
+  const rankMoveBadge =
+    rankDelta > 0
+      ? `↑${rankDelta}位上昇`
+      : rankDelta < 0
+        ? `↓${Math.abs(rankDelta)}位下降`
+        : null;
 
   const strongLine = result.strongAbilities
     .map((k) => `${ABILITY_LABELS[k]} ${grades[k]}`)
@@ -114,11 +123,22 @@ export function HorseEvaluationCard({
   );
   const fitLevel = fitLevelFromScore(fitRaw);
 
-  const hMap = useMemo(() => horseToRadarMap(horse), [horse]);
+  const weightedRadar = viewModel?.byHorseId.get(horse.horseId)?.weightedRadar;
+  const hMap = useMemo(() => weightedRadar ?? horseToRadarMap(horse), [horse, weightedRadar]);
   const radarShape = useMemo(() => inferRadarShape(horse), [horse]);
-  const effectiveEv = horse.investment?.valueScore;
+  const effectiveEv = viewModel?.byHorseId.get(horse.horseId)?.effectiveEv ?? horse.investment?.valueScore;
   const effectiveEvHot =
     effectiveEv != null && Number.isFinite(effectiveEv) && effectiveEv > 1.25;
+  const evBand =
+    effectiveEv == null
+      ? "muted"
+      : effectiveEv >= 1.25
+        ? "emerald"
+        : effectiveEv >= 1.15
+          ? "green"
+          : effectiveEv >= 1.0
+            ? "light"
+            : "muted";
   const contextualTotal =
     (result.pedigreeBonus ?? 0) +
     (result.gateBiasBonus ?? 0) +
@@ -156,6 +176,7 @@ export function HorseEvaluationCard({
       className={`horse-card${compact ? " horse-card--compact" : ""}${effectiveEvHot ? " horse-card--ev-gold" : ""}`}
       data-buylabel={result.buyLabel}
       data-ev-hot={effectiveEvHot ? "1" : undefined}
+      data-ev-band={evBand}
     >
       <header className="horse-card__head">
         <span className="horse-card__mark" aria-hidden>
@@ -176,6 +197,16 @@ export function HorseEvaluationCard({
           <span className="horse-card__style-badge" title={UI.RUNNING_STYLE}>
             {horse.runningStyle}
           </span>
+          {rankMoveBadge ? (
+            <span
+              className={
+                rankDelta > 0 ? "horse-card__role-badge horse-card__role-badge--axis" : "horse-card__role-badge horse-card__role-badge--head"
+              }
+              title="条件調整による順位変動"
+            >
+              {rankMoveBadge}
+            </span>
+          ) : null}
         </div>
       </header>
 
@@ -208,9 +239,9 @@ export function HorseEvaluationCard({
             <div className="horse-card__radar-svg-wrap">
               <RadarChart horse={hMap} size={200} />
             </div>
-            <p className="horse-card__radar-caption">素の能力（5項目の相対バランス）</p>
+            <p className="horse-card__radar-caption">補正後能力バランス（5項目）</p>
             <p className="horse-card__radar-note">
-              条件・スライダー・重点項目の反映はスコア側にのみ適用されています。
+              条件・スライダー・重点項目の反映をレーダー形状にも反映しています。
             </p>
             <p className="horse-card__radar-shape">{radarShape.line}</p>
           </div>

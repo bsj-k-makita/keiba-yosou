@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import {
   valueRankFromEffectiveEv,
   type HorseAbility,
@@ -7,21 +7,25 @@ import {
   type InvestmentCommentInput,
 } from "../../domain/race-evaluation";
 import { buildBetPlan, type BetMode } from "./betBuilder";
+import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
+import { EvHeatmap } from "./EvHeatmap";
+import { effectiveSoftmaxTemperature } from "../../lib/pipeline/normalization";
 
 type Props = {
   sorted: HorseScoreResult[];
   horses: HorseAbility[];
   condition: RaceCondition;
+  viewModel?: RaceEvaluationViewModel;
   /** 馬場傾向クイック入力から条件を変更するコールバック */
   onConditionChange?: (next: RaceCondition) => void;
 };
 
-/** ケリー分率設定 */
+/** 資金配分率設定 */
 type KellyFraction = "full" | "half" | "quarter";
 const KELLY_FRACTION_OPTIONS: { key: KellyFraction; label: string; value: number }[] = [
-  { key: "full",    label: "フルケリー",   value: 1.0 },
-  { key: "half",    label: "ハーフ",       value: 0.5 },
-  { key: "quarter", label: "クォーター",   value: 0.25 },
+  { key: "full",    label: "攻め",   value: 1.0 },
+  { key: "half",    label: "バランス", value: 0.5 },
+  { key: "quarter", label: "堅実", value: 0.25 },
 ];
 
 // value_rank に応じたバッジスタイル
@@ -166,41 +170,13 @@ function EvRankBadge({ rank }: { rank: string }) {
   );
 }
 
-/**
- * ランタイムでトラックバイアスを確率に反映して調整済みEVを返す。
- * buildTime に計算された predictedProbability に枠番・脚質バイアスを乗じて再計算。
- *
- * P_adj = P × gateBiasMultiplier × styleBiasMultiplier（正規化は省略）
- * EV_adj = P_adj × O - margin
- */
-function calcRuntimeAdjustedEv(
-  inv: InvestmentCommentInput,
-  gate: number,
-  fieldSize: number,
-  condition: RaceCondition,
-  evMargin: number,
-): { ev: number; adjusted: boolean } {
-  const userTrackBias = condition.userTrackBias ?? 0;
-  const biasSetting = condition.bias ?? "flat";
-
-  if (Math.abs(userTrackBias) < 0.05 && biasSetting === "flat") {
-    return { ev: inv.valueScore ?? 0, adjusted: false };
-  }
-
-  const size = Math.max(8, fieldSize);
-  const relativePos = gate > 0 ? (gate - 1) / Math.max(size - 1, 1) : 0.5;
-  const MAX_CORRECTION = 0.15;
-  const gateCorrection = -userTrackBias * (relativePos - 0.5) * MAX_CORRECTION * 2;
-  const gateMult = Math.max(0.75, Math.min(1.30, 1.0 + gateCorrection));
-
-  // HorseAbility の runningStyle は inv に含まれないため、
-  // スタイルバイアスはゲートバイアスのみで近似（展開傾向は条件設定パネル側で反映済み）
-  const styleMult = 1.0;
-
-  const adjProb = Math.min(inv.predictedProbability * gateMult * styleMult, 0.99);
-  const adjEv = Math.round((adjProb * inv.actualOdds - evMargin) * 100) / 100;
-
-  return { ev: adjEv, adjusted: true };
+function sharpProbability(
+  row: EvRow,
+  viewModel?: RaceEvaluationViewModel,
+): number {
+  const p = viewModel?.byHorseId.get(row.horseId)?.adjustedWinProbability;
+  if (p != null && Number.isFinite(p) && p > 0) return p;
+  return row.investment.predictedProbability;
 }
 
 function EvSection({
@@ -208,19 +184,21 @@ function EvSection({
   budget,
   kellyFraction,
   condition,
+  viewModel,
 }: {
   rows: EvRow[];
   budget: number;
   kellyFraction: number;
   condition: RaceCondition;
+  viewModel?: RaceEvaluationViewModel;
 }) {
   // 見送りを除いた購入候補
   const candidates = rows.filter((r) => r.investment.betType !== "見送り");
-  const fieldSize = rows.length;
-
-  // 動的EVマージン（ランタイム推定: 馬場条件からは判定不能なため、頭数のみ反映）
-  const runtimeMargin = fieldSize >= 16 ? 0.20 : 0.15;
-  const biasActive = Math.abs(condition.userTrackBias ?? 0) >= 0.05 || condition.bias !== "flat";
+  const runtimeMargin = rows.length >= 16 ? 0.20 : 0.15;
+  const softmaxTemperature = effectiveSoftmaxTemperature(
+    condition.softmaxTemperature,
+    condition.adjustmentStrength,
+  );
 
   return (
     <div className="bet-panel__ev-section">
@@ -234,10 +212,8 @@ function EvSection({
 
       <h3 className="bet-panel__ev-title">AIオッズ評価（実質期待値）</h3>
       <p className="bet-panel__ev-desc">
-        実質期待値 = (予測確率 × オッズ) − マージン（頭数16+: 0.20、通常: 0.15）。ランク S は実質EV 10 以上（帯再計算）。
-        ハイライトは実質EVの色（緑／赤）、ランク、馬名横の🔥激アツ等のバッジで判別します。
-        資金の割合・推奨額は予算に対する目安です。上部の買い目選定とは別ロジックです。
-          {biasActive && <strong className="bet-panel__ev-bias-active"> ⚡ 馬場バイアス補正適用中（枠番補正）</strong>}
+        実質期待値 = (補正後確率 × オッズ) − マージン。強設定では温度を半減して確率を尖らせます（現在有効T={softmaxTemperature.toFixed(1)}）。
+        低温ほど上位馬へ確率が集中し、推奨配分額が大きく動きます。
       </p>
 
       <div className="bet-panel__ev-table-wrap">
@@ -246,11 +222,11 @@ function EvSection({
           <tr>
             <th>馬番</th>
             <th>馬名</th>
-            <th>実質EV{biasActive ? "（補正）" : ""}</th>
+            <th>実質EV</th>
             <th>ランク</th>
             <th>確率</th>
             <th>オッズ</th>
-            <th>資金の割合</th>
+            <th>推奨配分</th>
             <th>推奨額</th>
             <th>期待値判断</th>
           </tr>
@@ -258,11 +234,12 @@ function EvSection({
         <tbody>
           {rows.map((row) => {
             const inv = row.investment;
-            // ランタイム補正済みEV（馬場バイアス考慮）
-            const { ev, adjusted } = calcRuntimeAdjustedEv(inv, row.gate, fieldSize, condition, runtimeMargin);
+            const probability = sharpProbability(row, viewModel);
+            const ev = Math.round((probability * inv.actualOdds - runtimeMargin) * 100) / 100;
             const adjustedRank = ev >= 1.40 ? "S" : ev >= 1.25 ? "S" : ev >= 1.10 ? "A" : ev >= 1.0 ? "B" : ev >= 0.90 ? "C" : "D";
-            const displayRank = adjusted ? adjustedRank : inv.valueRank;
-            const kelly = (inv.kellyWeight ?? 0) * kellyFraction;
+            const displayRank = adjustedRank;
+            const runtimeKelly = viewModel?.byHorseId.get(row.horseId)?.kellyFraction ?? inv.kellyWeight ?? 0;
+            const kelly = runtimeKelly * kellyFraction;
             const recommendedAmount = Math.floor((budget * kelly) / 100) * 100;
             const judgment = expectationJudgmentLabel({ ...inv, valueRank: displayRank });
 
@@ -278,13 +255,13 @@ function EvSection({
                   style={{ color: ev >= 1.0 ? "var(--ev-pos)" : "var(--ev-neg)" }}
                 >
                   <strong>{ev.toFixed(2)}</strong>
-                  {adjusted && <span className="bet-panel__ev-adj">↑補</span>}
+                  <span className="bet-panel__ev-adj">再計算</span>
                 </td>
                 <td style={{ textAlign: "center" }}>
                   <EvRankBadge rank={displayRank} />
                 </td>
                 <td style={{ textAlign: "right" }}>
-                  {(inv.predictedProbability * 100).toFixed(1)}%
+                  {(probability * 100).toFixed(1)}%
                 </td>
                 <td style={{ textAlign: "right" }}>
                   {inv.actualOdds.toFixed(1)}倍
@@ -321,12 +298,13 @@ function EvSection({
           <p>
             購入候補: <strong>{candidates.length}頭</strong>
             {" ／ "}
-            合計推奨投資:
+            合計推奨購入額:
             <strong>
               {" "}
               {candidates
                 .reduce((sum, r) => {
-                  const kelly = (r.investment.kellyWeight ?? 0) * kellyFraction;
+                  const runtimeKelly = viewModel?.byHorseId.get(r.horseId)?.kellyFraction ?? r.investment.kellyWeight ?? 0;
+                  const kelly = runtimeKelly * kellyFraction;
                   return sum + Math.floor((budget * kelly) / 100) * 100;
                 }, 0)
                 .toLocaleString()}
@@ -444,11 +422,12 @@ function TrackBiasQuickPanel({
   );
 }
 
-export function RaceBetPanel({ sorted, horses, condition, onConditionChange }: Props) {
+export function RaceBetPanel({ sorted, horses, condition, viewModel, onConditionChange }: Props) {
   const [mode, setMode] = useState<BetMode>("conservative");
   const [antiGami, setAntiGami] = useState<boolean>(false);
   const [budgetInput, setBudgetInput] = useState<string>("5000");
   const [kellyFractionKey, setKellyFractionKey] = useState<KellyFraction>("quarter");
+  const [copyState, setCopyState] = useState<"idle" | "done" | "failed">("idle");
 
   const budget = Number.isFinite(Number(budgetInput)) ? Math.max(1000, Math.round(Number(budgetInput))) : 5000;
   const kellyFractionValue = KELLY_FRACTION_OPTIONS.find((o) => o.key === kellyFractionKey)?.value ?? 0.25;
@@ -458,6 +437,40 @@ export function RaceBetPanel({ sorted, horses, condition, onConditionChange }: P
     [antiGami, budget, condition, horses, mode, sorted],
   );
   const evRows = useMemo(() => buildEvRows(sorted, horses), [sorted, horses]);
+  const copyPayload = useMemo(() => {
+    const runtimeMargin = evRows.length >= 16 ? 0.2 : 0.15;
+    const lines = evRows
+      .map((row) => {
+        const p = sharpProbability(row, viewModel);
+        const odds = row.investment.actualOdds;
+        const kelly = (viewModel?.byHorseId.get(row.horseId)?.kellyFraction ?? row.investment.kellyWeight ?? 0) * kellyFractionValue;
+        const amount = Math.floor((budget * kelly) / 100) * 100;
+        const ev = p * odds - runtimeMargin;
+        if (amount <= 0) return null;
+        return {
+          gate: row.gate,
+          line: `馬番${row.gate}：複勝 ${amount.toLocaleString()}円（EV ${ev.toFixed(2)} / P ${(p * 100).toFixed(1)}%）`,
+          amount,
+        };
+      })
+      .filter((v): v is { gate: number; line: string; amount: number } => v != null)
+      .sort((a, b) => b.amount - a.amount);
+    return [
+      `総予算: ${budget.toLocaleString()}円`,
+      `リスク設定: ${KELLY_FRACTION_OPTIONS.find((o) => o.key === kellyFractionKey)?.label ?? "クォーター"}`,
+      ...lines.map((l) => l.line),
+    ].join("\n");
+  }, [budget, evRows, kellyFractionKey, kellyFractionValue, viewModel]);
+  const handleCopyInstructions = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(copyPayload);
+      setCopyState("done");
+    } catch {
+      setCopyState("failed");
+    } finally {
+      setTimeout(() => setCopyState("idle"), 1800);
+    }
+  }, [copyPayload]);
   const planKey = `${condition.pace}-${mode}-${antiGami}-${plan?.totalStake ?? 0}-${plan?.tickets
     .flatMap((t) => t.items.map((i) => i.combo))
     .join("|")}`;
@@ -477,6 +490,7 @@ export function RaceBetPanel({ sorted, horses, condition, onConditionChange }: P
             budget={budget}
             kellyFraction={kellyFractionValue}
             condition={condition}
+            viewModel={viewModel}
           />
         )}
       </section>
@@ -513,9 +527,9 @@ export function RaceBetPanel({ sorted, horses, condition, onConditionChange }: P
             onChange={(e) => setBudgetInput(e.target.value)}
           />
         </label>
-        {/* ケリー分率セレクター */}
-        <div className="bet-panel__control" role="group" aria-label="ケリー分率設定">
-          <span className="bet-panel__kelly-label">ケリー分率（リスク調整）</span>
+        {/* 資金配分セレクター */}
+        <div className="bet-panel__control" role="group" aria-label="資金配分スタイル設定">
+          <span className="bet-panel__kelly-label">資金配分スタイル（リスク調整）</span>
           <div className="bet-panel__kelly-row">
             {KELLY_FRACTION_OPTIONS.map((opt) => (
               <button
@@ -523,16 +537,16 @@ export function RaceBetPanel({ sorted, horses, condition, onConditionChange }: P
                 type="button"
                 className={`bet-panel__kelly-opt${kellyFractionKey === opt.key ? " bet-panel__kelly-opt--active" : ""}`}
                 onClick={() => setKellyFractionKey(opt.key)}
-                title={`${opt.label}: ケリー比率を×${opt.value}倍に調整（${(opt.value * 100).toFixed(0)}%適用）`}
+                title={`${opt.label}: 推奨配分率を×${opt.value}倍に調整（${(opt.value * 100).toFixed(0)}%適用）`}
               >
                 {opt.label}
               </button>
             ))}
           </div>
           <p className="bet-panel__kelly-hint">
-            {kellyFractionKey === "full" && "フルケリー: 理論上最大効率。ドローダウンが大きいため上級者向け。"}
-            {kellyFractionKey === "half" && "ハーフケリー: フルの半分。ドローダウンを抑えながら効率的な複利成長。"}
-            {kellyFractionKey === "quarter" && "クォーターケリー（推奨）: 保守的設定。長期安定運用に最適。"}
+            {kellyFractionKey === "full" && "攻め配分: 的中時の伸びは大きい一方、ブレも大きい設定です。"}
+            {kellyFractionKey === "half" && "バランス配分: 攻めと守りの中間で、迷ったらここから。"}
+            {kellyFractionKey === "quarter" && "堅実配分（推奨）: 購入額を抑えて、安定重視で運用する設定です。"}
           </p>
         </div>
 
@@ -565,9 +579,21 @@ export function RaceBetPanel({ sorted, horses, condition, onConditionChange }: P
             setKellyFractionKey("quarter");
           }}
         >
-          少額（3千円）クォーターケリー
+          少額（3千円）堅実配分
+        </button>
+        <button
+          type="button"
+          className="bet-panel__quick-btn"
+          onClick={() => void handleCopyInstructions()}
+        >
+          投票指示をコピー
         </button>
       </div>
+      {copyState !== "idle" && (
+        <p className="bet-panel__copy-hint">
+          {copyState === "done" ? "コピーしました。投票画面へ貼り付けできます。" : "コピーに失敗しました。"}
+        </p>
+      )}
 
       <div className="bet-panel__summary">
         <p>総投資: <strong>{plan.totalStake.toLocaleString()}円</strong></p>
@@ -614,12 +640,22 @@ export function RaceBetPanel({ sorted, horses, condition, onConditionChange }: P
       </div>
 
       {evRows.length > 0 && (
-        <EvSection
-          rows={evRows}
-          budget={budget}
-          kellyFraction={kellyFractionValue}
-          condition={condition}
-        />
+        <>
+          <EvHeatmap
+            rows={evRows.map((row) => ({
+              horseId: row.horseId,
+              horseName: row.horseName,
+              effectiveEv: viewModel?.byHorseId.get(row.horseId)?.effectiveEv ?? row.investment.valueScore ?? null,
+            }))}
+          />
+          <EvSection
+            rows={evRows}
+            budget={budget}
+            kellyFraction={kellyFractionValue}
+            condition={condition}
+            viewModel={viewModel}
+          />
+        </>
       )}
     </section>
   );

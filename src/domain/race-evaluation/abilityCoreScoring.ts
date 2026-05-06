@@ -49,7 +49,8 @@ const MIX_BY_STRENGTH: Record<RaceCondition["adjustmentStrength"], { withoutMax:
   },
   strong: {
     withoutMax: { base: 0.10, condition: 0.90, maxPerf: 0 },
-    withMax: { base: 0.08, condition: 0.82, maxPerf: 0.10 },
+    // strongはユーザーの舞台設定を最優先し、Intrinsic:Condition=10:90を固定する。
+    withMax: { base: 0.10, condition: 0.90, maxPerf: 0.00 },
   },
 };
 

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import {
   BIAS_ADJUSTMENTS,
   GROUND_ADJUSTMENTS,
@@ -7,7 +8,6 @@ import {
   classifyLapStructure,
   LAP_STRUCTURE,
   computeAbilityLetterGrades,
-  evaluateRace,
   findSameTypePeers,
   getFinalWeights,
   weightsToDemand0to100,
@@ -24,6 +24,7 @@ import { RaceBetPanel } from "./RaceBetPanel";
 import { RaceAdjustProvider } from "./RaceAdjustContext";
 import { getHorsesFromRaceData, getRaceEvaluationById, getRaceResultById, type RaceEvaluationData } from "../../lib/race-data";
 import type { RaceIndexItem } from "../../lib/race-data";
+import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
 
 const NEUTRAL_CONDITION: RaceCondition = {
   venue: "東京",
@@ -33,6 +34,7 @@ const NEUTRAL_CONDITION: RaceCondition = {
   bias: "flat",
   pace: "middle",
   adjustmentStrength: "middle",
+  softmaxTemperature: 8.0,
 };
 
 type ViewTab = "list" | "ai" | "cards" | "bets" | "result";
@@ -66,6 +68,7 @@ type CarryOverCondition = Pick<
   | "trackBiasStrength01"
   | "userTrackBias"
   | "abilityFocus"
+  | "softmaxTemperature"
 >;
 
 function carryOverStorageKey(raceInfo: RaceEvaluationData["raceInfo"]): string {
@@ -92,6 +95,7 @@ function saveCarryOverCondition(raceInfo: RaceEvaluationData["raceInfo"], condit
     trackBiasStrength01: condition.trackBiasStrength01,
     userTrackBias: condition.userTrackBias,
     abilityFocus: condition.abilityFocus,
+    softmaxTemperature: condition.softmaxTemperature,
   };
   try {
     localStorage.setItem(carryOverStorageKey(raceInfo), JSON.stringify(payload));
@@ -152,6 +156,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   const [tab, setTab] = useState<ViewTab>("list");
   const [cardDensity, setCardDensity] = useState<CardDensity>("regular");
   const [tableCompact, setTableCompact] = useState(false);
+  const [tableSummary, setTableSummary] = useState(false);
 
   const horses = useMemo(() => getHorsesFromRaceData(race), [race]);
   const initialCondition = useMemo<RaceCondition>(() => {
@@ -167,6 +172,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       raceName: race.condition.raceName ?? race.raceInfo.raceName,
       surface: race.condition.surface ?? race.raceInfo.surface,
       section200mSec: race.condition.section200mSec ?? inferredSection,
+      softmaxTemperature: globalProfile?.softmaxTemperature ?? carryOver?.softmaxTemperature ?? race.condition.softmaxTemperature ?? 8.0,
     };
   }, [horses, race.condition, race.raceId, race.raceInfo]);
   const [condition, setCondition] = useState<RaceCondition>(initialCondition);
@@ -205,10 +211,14 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     saveCarryOverCondition(race.raceInfo, condition);
   }, [condition, race.raceInfo]);
 
-  const results = useMemo(
-    () => (horses.length && condition ? evaluateRace(horses, condition) : []),
+  const pipeline = useMemo(
+    () =>
+      horses.length && condition
+        ? runRaceEvaluationPipeline(horses, condition)
+        : { results: [], viewModel: { byHorseId: new Map() }, adjustedProbabilities: new Map<string, number>() },
     [horses, condition],
   );
+  const results = pipeline.results;
 
   const gradesMap = useMemo(() => computeAbilityLetterGrades(horses), [horses]);
 
@@ -254,6 +264,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
           ? "ラップタイプ: 中間（判定弱）"
           : `ラップタイプ: ${lapType}`;
     const userBias = condition.userTrackBias ?? 0;
+    const softmaxTemperature = condition.softmaxTemperature ?? 8.0;
     const userBiasText =
       userBias <= -0.8
         ? "手動補正: 内有利(強)"
@@ -265,8 +276,8 @@ export function RaceDetailView({ race, raceIndex }: Props) {
               ? "手動補正: 外有利"
               : "手動補正なし";
     return {
-      conditionOneLine: `${condition.venue} · ${g} · ${clock} · ${b} · ${p} · 強度${s} · ${userBiasText} · ${lapText}`,
-      conditionMetaLine: `${condition.venue} / ${g} / ${clock} / ${b} / ${p} / 強度${s} / ユーザーバイアス${userBias.toFixed(1)} / ${lapText}`,
+      conditionOneLine: `${condition.venue} · ${g} · ${clock} · ${b} · ${p} · 強度${s} · T${softmaxTemperature.toFixed(1)} · ${userBiasText} · ${lapText}`,
+      conditionMetaLine: `${condition.venue} / ${g} / ${clock} / ${b} / ${p} / 強度${s} / 温度T=${softmaxTemperature.toFixed(1)} / ユーザーバイアス${userBias.toFixed(1)} / ${lapText}`,
     };
   }, [condition]);
 
@@ -310,11 +321,21 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   );
 
   // 結果パネルから条件を適用する
-  function handleApplySuggest(bias: string) {
+  const handleApplySuggest = useCallback((bias: string) => {
     userEditedRef.current = true;
     setCondition((prev) => ({ ...prev, bias }));
     setTab("list");
-  }
+  }, []);
+
+  const handleConditionPanelChange = useCallback((next: RaceCondition) => {
+    userEditedRef.current = true;
+    setCondition(next);
+  }, []);
+
+  const handleBetConditionChange = useCallback((next: RaceCondition) => {
+    userEditedRef.current = true;
+    setCondition(next);
+  }, []);
 
   const TABS: { key: ViewTab; label: string }[] = [
     { key: "list", label: "出馬表" },
@@ -325,7 +346,15 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   ];
 
   return (
-    <RaceAdjustProvider value={{ condition, horses, results }}>
+    <RaceAdjustProvider
+      value={{
+        condition,
+        horses,
+        results,
+        viewModel: pipeline.viewModel,
+        onConditionChange: handleConditionPanelChange,
+      }}
+    >
     <div className="app">
       {/* ヘッダ */}
       <header className="app__hero app__hero--compact">
@@ -375,10 +404,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             >
               <RaceAdjustmentPanel
                 condition={condition}
-                onChange={(next) => {
-                  userEditedRef.current = true;
-                  setCondition(next);
-                }}
+                onChange={handleConditionPanelChange}
                 embedded
               />
               <p className="app__meta">{conditionMetaLine}</p>
@@ -425,13 +451,23 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 >
                   コンパクト表示
                 </button>
+                <button
+                  type="button"
+                  className={`view-density__btn${tableSummary ? " view-density__btn--active" : ""}`}
+                  onClick={() => setTableSummary((v) => !v)}
+                  aria-pressed={tableSummary}
+                >
+                  サマリー表示
+                </button>
               </div>
               <HorseListTable
                 sorted={sorted}
                 horses={horses}
                 gradesMap={gradesMap}
                 condition={condition}
+                viewModel={pipeline.viewModel}
                 compact={tableCompact}
+                summaryMode={tableSummary}
               />
             </section>
           )}
@@ -496,17 +532,23 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                   const gate = "gate" in horse ? (horse as typeof horse & { gate?: number }).gate : undefined;
                   const grades = gradesMap.get(r.horseId)!;
                   return (
-                    <HorseEvaluationCard
+                    <motion.div
                       key={r.horseId}
-                      gate={gate}
-                      horse={horse}
-                      result={r}
-                      grades={grades}
-                      demand0to100={demand0to100}
-                      allHorses={horses}
-                      condition={condition}
-                      compact={cardDensity === "compact"}
-                    />
+                      layout
+                      transition={{ type: "spring", stiffness: 340, damping: 34, mass: 0.65 }}
+                    >
+                      <HorseEvaluationCard
+                        gate={gate}
+                        horse={horse}
+                        result={r}
+                        grades={grades}
+                        demand0to100={demand0to100}
+                        allHorses={horses}
+                        condition={condition}
+                        viewModel={pipeline.viewModel}
+                        compact={cardDensity === "compact"}
+                      />
+                    </motion.div>
                   );
                 })}
               </div>
@@ -519,10 +561,8 @@ export function RaceDetailView({ race, raceIndex }: Props) {
               sorted={sorted}
               horses={horses}
               condition={condition}
-              onConditionChange={(next) => {
-                userEditedRef.current = true;
-                setCondition(next);
-              }}
+              viewModel={pipeline.viewModel}
+              onConditionChange={handleBetConditionChange}
             />
           )}
 

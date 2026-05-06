@@ -55,6 +55,8 @@ function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
+const MAX_COURSE_TRAIT_TOTAL = 8.5;
+
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
 }
@@ -67,9 +69,9 @@ function conditionImpactBonusFromDiff(
     return round1(clamp(scoreDiff * 1.8, -6, 6));
   }
   if (strength === "middle") {
-    return round1(clamp(scoreDiff * 4.8, -16, 16));
+    return round1(clamp(scoreDiff * 4.8, -22, 22));
   }
-  return round1(clamp(scoreDiff * 8.0, -36, 36));
+  return round1(clamp(scoreDiff * 8.0, -30, 30));
 }
 
 function weakTierImpactFromDiff(
@@ -219,7 +221,8 @@ export function evaluateRace(
     };
   });
 
-  const relativeMode = condition.adjustmentStrength === "strong" ? "preserve_absolute" : "normalized";
+  const relativeMode =
+    condition.adjustmentStrength === "strong" ? "absolute_delta" : "normalized";
   const rel = computeRaceRelativeScores(
     results.map((r) => ({ horseId: r.horseId, raceAdjustedInput: r.raceAdjustedInput })),
     relativeMode,
@@ -251,7 +254,8 @@ export function evaluateRace(
     const dScaled = round1(dBonus * strengthMult);
     const contextualScaled = round1(contextualTotal * strengthMult);
     const traitHits = computeCourseTraitHits(h, condition);
-    const courseTraitBonus = round1(traitHits.reduce((sum, hit) => sum + hit.bonus, 0));
+    // コース特性は finalEvaluationScore へ直結するが、単独要因での暴走を防ぐため +8.5 に制限。
+    const courseTraitBonus = round1(clamp(traitHits.reduce((sum, hit) => sum + hit.bonus, 0), 0, MAX_COURSE_TRAIT_TOTAL));
     const courseTraitReasons = traitHits.map((hit) => `${hit.label}: ${hit.reason} (+${hit.bonus.toFixed(1)})`);
     r.raceRelativeScore = relScore;
     r.paceFitBonus = pBonus;

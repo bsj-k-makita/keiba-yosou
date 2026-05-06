@@ -763,6 +763,31 @@ samp {
   margin: 0 0 8px;
 }
 
+.adj-panel__gate-grid {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 0 8px;
+}
+
+.adj-panel__gate-cell {
+  min-height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text-2);
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adj-panel__gate-cell--glow {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35), 0 0 8px rgba(245, 158, 11, 0.35);
+  background: linear-gradient(120deg, rgba(252, 211, 77, 0.3), rgba(251, 191, 36, 0.18));
+}
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    Race Conclusion Panel
    (Showcase mode — dark feature band)
@@ -1084,6 +1109,23 @@ samp {
     0 0 0 2px rgba(255, 200, 80, 0.55),
     0 0 22px rgba(255, 210, 90, 0.35);
   background: linear-gradient(160deg, rgba(255, 250, 220, 0.5), var(--c-white) 55%);
+}
+
+.horse-card[data-ev-band="emerald"] {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.22), var(--c-white) 55%);
+}
+
+.horse-card[data-ev-band="green"] {
+  background: linear-gradient(145deg, rgba(34, 197, 94, 0.18), var(--c-white) 62%);
+}
+
+.horse-card[data-ev-band="light"] {
+  background: linear-gradient(145deg, rgba(132, 204, 22, 0.14), var(--c-white) 68%);
+}
+
+.horse-card[data-ev-band="muted"] {
+  filter: saturate(0.35);
+  opacity: 0.86;
 }
 
 /* buyLabel border accent（本命のみ Azure） */
@@ -2412,6 +2454,11 @@ samp {
   color: var(--c-blue-dark);
 }
 
+.rl-race-row__feature--value {
+  background: linear-gradient(135deg, #059669, #16a34a);
+  color: #fff;
+}
+
 /* R番号バッジ */
 .rl-race-row__r-badge {
   flex-shrink: 0;
@@ -3523,6 +3570,12 @@ samp {
   margin: 0 0 12px;
 }
 
+.bet-panel__copy-hint {
+  margin: -4px 0 12px;
+  font-size: 12px;
+  color: var(--c-text-2);
+}
+
 .bet-panel__quick-btn {
   min-height: 44px;
   border: 1px solid var(--c-blue);
@@ -3917,5 +3970,77 @@ samp {
   }
   to {
     transform: scaleX(1);
+  }
+}
+
+.ev-heatmap {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  background: var(--c-white);
+}
+
+.ev-heatmap__title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-text);
+}
+
+.ev-heatmap__grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.ev-heatmap__cell {
+  border: 1px solid var(--c-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #f8fafc;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.ev-heatmap__cell--hot {
+  border-color: #f1c40f;
+  box-shadow: 0 0 0 1px rgba(241, 196, 15, 0.55), 0 0 8px rgba(241, 196, 15, 0.35);
+  background: linear-gradient(120deg, #fff9df, #fff5bf);
+}
+
+.ev-heatmap__cell--cool {
+  border-color: #b1b9c5;
+  background: #f1f5f9;
+}
+
+.ev-heatmap__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text);
+}
+
+.ev-heatmap__ev {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.horse-list__row[data-ev-hot="1"] td {
+  background: linear-gradient(90deg, rgba(255, 247, 204, 0.55), rgba(255, 255, 255, 0));
+}
+
+@media (max-width: 720px) {
+  .bet-panel__quick-actions {
+    position: sticky;
+    bottom: 8px;
+    z-index: 30;
+    padding: 8px;
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    background: var(--c-sticky-bg);
+    backdrop-filter: blur(8px);
   }
 }

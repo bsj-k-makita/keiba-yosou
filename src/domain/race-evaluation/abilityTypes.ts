@@ -139,7 +139,7 @@ export type RaceCondition = {
   courseKey?: string;
   raceName?: string;
   /**
-   * ON の能力軸は最終ウェイト計算で 2 倍したあと再正規化（重点項目）。
+   * ON の能力軸は最終ウェイト計算で 3 倍したあと再正規化（重点項目）。
    */
   abilityFocus?: Partial<Record<AbilityKey, boolean>>;
   /** 芝・ダート。未設定時は物理特性補正では「芝」扱い。 */
@@ -173,6 +173,11 @@ export type RaceCondition = {
    * 設定時、対象能力ウェイトを 1.5 倍にして正規化し、評価に反映する。
    */
   abilityPriority?: AbilityPriority;
+  /**
+   * Softmax温度（2〜16）。
+   * 標準は 8。strong では内部的に半減（8 -> 4）し、1強を作りやすくする。
+   */
+  softmaxTemperature?: number;
 };
 
 export type BuyLabel = BuyLabelLingo;

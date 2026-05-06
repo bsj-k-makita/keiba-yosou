@@ -1,6 +1,7 @@
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "../../domain/race-evaluation";
 import { BUY_LABELS } from "../../domain/race-evaluation/lingoConstants";
 import { computeMarketAlertLabel } from "./evaluationTags";
+import { effectiveSoftmaxTemperature, softmaxDistribution } from "../../lib/pipeline/normalization";
 
 export type BetMode = "conservative" | "aggressive";
 
@@ -81,17 +82,35 @@ function paceAdaptiveScore(horse: HorseAbility, result: HorseScoreResult, condit
 function normalizedWinProbabilities(
   targets: HorseScoreResult[],
   horses: readonly HorseAbility[],
+  condition: RaceCondition,
 ): Map<string, number> {
   const horseMap = new Map(horses.map((h) => [h.horseId, h] as const));
-  const raw = targets.map((r, idx) => {
-    const odds = horseMap.get(r.horseId)?.signals?.winOdds;
-    const rank = r.finalRank ?? r.adjustedRank ?? idx + 1;
-    const base = odds != null && Number.isFinite(odds) && odds > 0 ? 1 / odds : 1 / (rank + 2);
-    return { horseId: r.horseId, value: Math.max(0.0001, base) };
-  });
-  const sum = raw.reduce((s, r) => s + r.value, 0);
+  const temperature = effectiveSoftmaxTemperature(
+    condition.softmaxTemperature,
+    condition.adjustmentStrength,
+  );
+  const scoreProb = softmaxDistribution(
+    targets.map((row) => ({ horseId: row.horseId, score: row.finalEvaluationScore })),
+    temperature,
+  );
+  const weighted = new Map<string, number>();
+  let sum = 0;
+  for (const row of targets) {
+    const horse = horseMap.get(row.horseId);
+    const odds = horse?.signals?.winOdds;
+    const marketPrior =
+      odds != null && Number.isFinite(odds) && odds > 0
+        ? Math.max(0.02, Math.min(0.7, 1 / odds))
+        : 0.12;
+    const p = (scoreProb.get(row.horseId) ?? 0) * 0.85 + marketPrior * 0.15;
+    weighted.set(row.horseId, p);
+    sum += p;
+  }
+  if (sum <= 1e-9) return scoreProb;
   const normalized = new Map<string, number>();
-  for (const r of raw) normalized.set(r.horseId, r.value / sum);
+  for (const [horseId, value] of weighted.entries()) {
+    normalized.set(horseId, value / sum);
+  }
   return normalized;
 }
 
@@ -214,7 +233,7 @@ export function buildBetPlan(
   const budgetSafe = Math.max(1000, budget);
   const umarenRatio = mode === "conservative" ? 0.6 : 0.35;
   const sanrenRatio = mode === "conservative" ? 0.4 : 0.65;
-  const probMap = normalizedWinProbabilities(targets, horses);
+  const probMap = normalizedWinProbabilities(targets, horses, condition);
   const tickets: BetTicket[] = [
     buildTicket(
       "馬連",

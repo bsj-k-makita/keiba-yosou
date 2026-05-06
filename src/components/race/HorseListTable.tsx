@@ -12,14 +12,17 @@ import {
   computeMarketAlertLabel,
   getLapProfileVisual,
 } from "./evaluationTags";
+import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
 
 type Props = {
   sorted: HorseScoreResult[];
   horses: HorseAbility[];
   gradesMap: Map<string, AbilityGradeRow>;
   condition: RaceCondition;
+  viewModel?: RaceEvaluationViewModel;
   onSelectHorse?: (horseId: string) => void;
   compact?: boolean;
+  summaryMode?: boolean;
 };
 
 function gradeClass(grade: string): string {
@@ -78,7 +81,16 @@ function summarizeContextual(result: HorseScoreResult): { total: number; detail:
   return { total, detail };
 }
 
-export function HorseListTable({ sorted, horses, gradesMap, condition, onSelectHorse, compact = false }: Props) {
+export function HorseListTable({
+  sorted,
+  horses,
+  gradesMap,
+  condition,
+  viewModel,
+  onSelectHorse,
+  compact = false,
+  summaryMode = false,
+}: Props) {
   const horseMap = useMemo(() => new Map(horses.map((h) => [h.horseId, h] as const)), [horses]);
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
   const prevTopsRef = useRef<Map<string, number>>(new Map());
@@ -121,24 +133,28 @@ export function HorseListTable({ sorted, horses, gradesMap, condition, onSelectH
           <tr>
             <th className="horse-list__th horse-list__th--mark">印</th>
             <th className="horse-list__th horse-list__th--gate">馬番</th>
-            <th className="horse-list__th horse-list__th--radar">能力</th>
-            <th className="horse-list__th horse-list__th--name">馬名 / 短評</th>
-            <th className="horse-list__th horse-list__th--score">スコア</th>
-            <th className="horse-list__th horse-list__th--grades" title="能力軸ごとの等級">能力等級</th>
+            {!summaryMode && <th className="horse-list__th horse-list__th--radar">能力</th>}
+            <th className="horse-list__th horse-list__th--name">{summaryMode ? "馬名" : "馬名 / 短評"}</th>
+            <th className="horse-list__th horse-list__th--score">{summaryMode ? "EV" : "スコア"}</th>
+            {!summaryMode && <th className="horse-list__th horse-list__th--grades" title="能力軸ごとの等級">能力等級</th>}
             <th className="horse-list__th horse-list__th--buy">買い</th>
-            <th className="horse-list__th horse-list__th--role">役割</th>
-            <th
-              className="horse-list__th horse-list__th--lap"
-              title="当日ラップ形状と過去走ラップ形状の一致度。データ不足時は判定不能。"
-            >
-              ラップ一致度
-            </th>
-            <th
-              className="horse-list__th horse-list__th--lap"
-              title="血統・枠順・陣営・傾向・前後傾・不利恩恵の追加補正合計。"
-            >
-              追加補正
-            </th>
+            {!summaryMode && <th className="horse-list__th horse-list__th--role">役割</th>}
+            {!summaryMode && (
+              <th
+                className="horse-list__th horse-list__th--lap"
+                title="当日ラップ形状と過去走ラップ形状の一致度。データ不足時は判定不能。"
+              >
+                ラップ一致度
+              </th>
+            )}
+            {!summaryMode && (
+              <th
+                className="horse-list__th horse-list__th--lap"
+                title="血統・枠順・陣営・傾向・前後傾・不利恩恵の追加補正合計。"
+              >
+                追加補正
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -152,7 +168,9 @@ export function HorseListTable({ sorted, horses, gradesMap, condition, onSelectH
             const isDismiss = r.buyLabel === BUY_LABELS.DISMISS;
             const lapBonus = (r.lapShapeFitBonus ?? 0) + (r.lapSustainBonus ?? 0) + (r.lapQualityBonus ?? 0);
             const grades = gradesMap.get(r.horseId);
-            const radarMap = horseToRadarMap(horse);
+            const vm = viewModel?.byHorseId.get(horse.horseId);
+            const effectiveEv = vm?.effectiveEv;
+            const radarMap = vm?.weightedRadar ?? horseToRadarMap(horse);
             const contextual = summarizeContextual(r);
             const lapStatus = inferLapStatus(horse, condition, r);
             const lapProfile = getLapProfileVisual(r.lapProfile);
@@ -176,6 +194,7 @@ export function HorseListTable({ sorted, horses, gradesMap, condition, onSelectH
                 }}
                 className={`horse-list__row${isDismiss ? " horse-list__row--dismiss" : ""}`}
                 data-buylabel={r.buyLabel}
+                data-ev-hot={vm?.evHot ? "1" : undefined}
                 onClick={() => onSelectHorse?.(r.horseId)}
                 style={{ cursor: onSelectHorse ? "pointer" : undefined }}
               >
@@ -201,13 +220,14 @@ export function HorseListTable({ sorted, horses, gradesMap, condition, onSelectH
                   ) : "—"}
                 </td>
 
-                {/* ミニレーダー */}
-                <td className="horse-list__td horse-list__td--radar">
-                  <RadarChart
-                    horse={radarMap as Parameters<typeof RadarChart>[0]["horse"]}
-                    size={132}
-                  />
-                </td>
+                {!summaryMode && (
+                  <td className="horse-list__td horse-list__td--radar">
+                    <RadarChart
+                      horse={radarMap as Parameters<typeof RadarChart>[0]["horse"]}
+                      size={132}
+                    />
+                  </td>
+                )}
 
                 {/* 馬名 + 短評 */}
                 <td className="horse-list__td horse-list__td--name">
@@ -216,27 +236,30 @@ export function HorseListTable({ sorted, horses, gradesMap, condition, onSelectH
                       <span className="horse-list__horse-name">{horse.horseName}</span>
                       <span className="horse-list__style">{horse.runningStyle}</span>
                     </div>
-                    <p className="horse-list__comment">{comment}</p>
+                    {!summaryMode && <p className="horse-list__comment">{comment}</p>}
                   </div>
                 </td>
 
                 {/* スコア */}
                 <td className="horse-list__td horse-list__td--score">
-                  <span className="horse-list__score">{r.adjustedScore.toFixed(1)}</span>
+                  <span className="horse-list__score">
+                    {summaryMode ? (effectiveEv != null ? effectiveEv.toFixed(2) : "—") : r.adjustedScore.toFixed(1)}
+                  </span>
                 </td>
 
-                {/* 能力等級 */}
-                <td className="horse-list__td horse-list__td--grades">
-                  {grades ? (
-                    <span className="horse-list__grades">
-                      <span className={gradeClass(grades.speed)} title="スピード">{`スピード${grades.speed}`}</span>
-                      <span className={gradeClass(grades.stamina)} title="スタミナ">{`スタミナ${grades.stamina}`}</span>
-                      <span className={gradeClass(grades.kick)} title="末脚">{`末脚${grades.kick}`}</span>
-                      <span className={gradeClass(grades.sustain)} title="持続力">{`持続力${grades.sustain}`}</span>
-                      <span className={gradeClass(grades.power)} title="パワー">{`パワー${grades.power}`}</span>
-                    </span>
-                  ) : "—"}
-                </td>
+                {!summaryMode && (
+                  <td className="horse-list__td horse-list__td--grades">
+                    {grades ? (
+                      <span className="horse-list__grades">
+                        <span className={gradeClass(grades.speed)} title="スピード">{`スピード${grades.speed}`}</span>
+                        <span className={gradeClass(grades.stamina)} title="スタミナ">{`スタミナ${grades.stamina}`}</span>
+                        <span className={gradeClass(grades.kick)} title="末脚">{`末脚${grades.kick}`}</span>
+                        <span className={gradeClass(grades.sustain)} title="持続力">{`持続力${grades.sustain}`}</span>
+                        <span className={gradeClass(grades.power)} title="パワー">{`パワー${grades.power}`}</span>
+                      </span>
+                    ) : "—"}
+                  </td>
+                )}
 
                 {/* 買いラベル */}
                 <td className="horse-list__td horse-list__td--buy">
@@ -257,51 +280,55 @@ export function HorseListTable({ sorted, horses, gradesMap, condition, onSelectH
                   ) : null}
                 </td>
 
-                {/* 役割 */}
-                <td className="horse-list__td horse-list__td--role">
-                  {r.roleHint === "頭" && (
-                    <span className="horse-card__role-badge horse-card__role-badge--head" title={`stddev ${r.varianceScore.toFixed(1)}`}>頭</span>
-                  )}
-                  {r.roleHint === "軸" && (
-                    <span className="horse-card__role-badge horse-card__role-badge--axis" title={`stddev ${r.varianceScore.toFixed(1)}`}>軸</span>
-                  )}
-                  {r.roleHint === "判定不能" && (
-                    <span className="horse-list__role-na">—</span>
-                  )}
-                </td>
+                {!summaryMode && (
+                  <td className="horse-list__td horse-list__td--role">
+                    {r.roleHint === "頭" && (
+                      <span className="horse-card__role-badge horse-card__role-badge--head" title={`stddev ${r.varianceScore.toFixed(1)}`}>頭</span>
+                    )}
+                    {r.roleHint === "軸" && (
+                      <span className="horse-card__role-badge horse-card__role-badge--axis" title={`stddev ${r.varianceScore.toFixed(1)}`}>軸</span>
+                    )}
+                    {r.roleHint === "判定不能" && (
+                      <span className="horse-list__role-na">—</span>
+                    )}
+                  </td>
+                )}
 
-                {/* ラップ適合 */}
-                <td className="horse-list__td horse-list__td--lap">
-                  {lapStatus === "none" ? (
-                    <span className="horse-list__role-na">判定不能</span>
-                  ) : lapBonus !== 0 ? (
-                    <span className={lapBonus > 0 ? "horse-card__lap-bonus--pos" : "horse-card__lap-bonus--neg"}>
-                      {lapProfile.icon} {lapProfile.label}
-                      {lapStatus === "partial" ? "（部分）" : ""}
-                      {" "}
-                      {lapBonus > 0 ? "+" : ""}{lapBonus.toFixed(1)}
-                    </span>
-                  ) : (
-                    <span className="horse-list__role-na">
-                      {lapProfile.icon} {lapProfile.label}
-                      {lapStatus === "partial" ? "（部分）" : ""}
-                      {" "}
-                      0.0
-                    </span>
-                  )}
-                </td>
-                <td className="horse-list__td horse-list__td--lap">
-                  {contextual.total !== 0 ? (
-                    <span
-                      className={contextual.total > 0 ? "horse-card__lap-bonus--pos" : "horse-card__lap-bonus--neg"}
-                      title={contextual.detail}
-                    >
-                      {contextual.total > 0 ? "+" : ""}{contextual.total.toFixed(1)}
-                    </span>
-                  ) : (
-                    <span className="horse-list__role-na" title={contextual.detail}>0.0</span>
-                  )}
-                </td>
+                {!summaryMode && (
+                  <td className="horse-list__td horse-list__td--lap">
+                    {lapStatus === "none" ? (
+                      <span className="horse-list__role-na">判定不能</span>
+                    ) : lapBonus !== 0 ? (
+                      <span className={lapBonus > 0 ? "horse-card__lap-bonus--pos" : "horse-card__lap-bonus--neg"}>
+                        {lapProfile.icon} {lapProfile.label}
+                        {lapStatus === "partial" ? "（部分）" : ""}
+                        {" "}
+                        {lapBonus > 0 ? "+" : ""}{lapBonus.toFixed(1)}
+                      </span>
+                    ) : (
+                      <span className="horse-list__role-na">
+                        {lapProfile.icon} {lapProfile.label}
+                        {lapStatus === "partial" ? "（部分）" : ""}
+                        {" "}
+                        0.0
+                      </span>
+                    )}
+                  </td>
+                )}
+                {!summaryMode && (
+                  <td className="horse-list__td horse-list__td--lap">
+                    {contextual.total !== 0 ? (
+                      <span
+                        className={contextual.total > 0 ? "horse-card__lap-bonus--pos" : "horse-card__lap-bonus--neg"}
+                        title={contextual.detail}
+                      >
+                        {contextual.total > 0 ? "+" : ""}{contextual.total.toFixed(1)}
+                      </span>
+                    ) : (
+                      <span className="horse-list__role-na" title={contextual.detail}>0.0</span>
+                    )}
+                  </td>
+                )}
               </tr>
             );
           })}

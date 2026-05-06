@@ -15,7 +15,7 @@ const STD_FLOOR = 1.5;
 const REL_STRONG_MIN = 0;
 const REL_STRONG_MAX = 100;
 
-export type RelativeScoreMode = "normalized" | "preserve_absolute";
+export type RelativeScoreMode = "normalized" | "preserve_absolute" | "absolute_delta";
 
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
@@ -50,6 +50,15 @@ export function computeRaceRelativeScores(
     for (const { horseId, raceAdjustedInput: x } of rows) {
       const t = span < 1e-9 ? 0.5 : (x - min) / span;
       const rel = REL_STRONG_MIN + t * (REL_STRONG_MAX - REL_STRONG_MIN);
+      out.set(horseId, round1(rel));
+    }
+    return out;
+  }
+  if (mode === "absolute_delta") {
+    const pivot = mean(values);
+    const ABSOLUTE_SCALE = 6.0;
+    for (const { horseId, raceAdjustedInput: x } of rows) {
+      const rel = Math.max(REL_STRONG_MIN, Math.min(REL_STRONG_MAX, 50 + (x - pivot) * ABSOLUTE_SCALE));
       out.set(horseId, round1(rel));
     }
     return out;

@@ -6,6 +6,12 @@ export type StrategicProfileKey = keyof typeof strategicJson;
 export const STRATEGIC_WEIGHTS = strategicJson as Record<StrategicProfileKey, WeightSet>;
 
 const DEFAULT_PROFILE: StrategicProfileKey = "TOKYO_TURF";
+// StrategicWeights 重要方針:
+// - 東京芝はキレ(0.40) + 持続(0.25) を主軸にして直線性能を最大化
+// - 中山はパワー(0.50) 全振りで急坂・機動力戦を優先
+// - ローカル小回りはテンの速さ(0.55) 優先
+// - 東京ダートは speed/stamina/kick/sustain = 0.20/0.20/0.25/0.25 で
+//   坂対応と末脚持続を両立し、単なる前残り専用にしない
 
 /**
  * 競馬場・コース文脈から戦略プロファイルキーを解決する。

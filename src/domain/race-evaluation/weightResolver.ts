@@ -59,7 +59,8 @@ function applyAbilityFocusDoubling(weights: WeightSet, condition: RaceCondition)
   const out: WeightSet = { ...weights };
   for (const key of ABILITY_KEYS) {
     if (focus[key]) {
-      out[key] *= 2;
+      // ユーザーの明示的意思を最終順位に直結させるため、重点項目は 3 倍で押し込む。
+      out[key] *= 3;
       touched = true;
     }
   }

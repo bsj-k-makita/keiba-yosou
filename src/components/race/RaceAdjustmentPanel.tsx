@@ -38,7 +38,7 @@ function biasText(v: number): string {
 
 type GlobalProfile = Pick<
   RaceCondition,
-  "ground" | "trackSpeed" | "bias" | "pace" | "adjustmentStrength" | "userTrackBias" | "abilityPriority"
+  "ground" | "trackSpeed" | "bias" | "pace" | "adjustmentStrength" | "userTrackBias" | "abilityPriority" | "softmaxTemperature"
 >;
 
 function saveGlobalProfile(condition: RaceCondition): void {
@@ -50,6 +50,7 @@ function saveGlobalProfile(condition: RaceCondition): void {
     adjustmentStrength: condition.adjustmentStrength,
     userTrackBias: condition.userTrackBias,
     abilityPriority: condition.abilityPriority,
+    softmaxTemperature: condition.softmaxTemperature,
   };
   try {
     localStorage.setItem(GLOBAL_PROFILE_KEY, JSON.stringify(profile));
@@ -87,6 +88,7 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         pace: "middle",
         adjustmentStrength: "middle",
         userTrackBias: 0,
+        softmaxTemperature: 8.0,
       };
     case "front_hold":
       return {
@@ -97,6 +99,7 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         pace: "high",
         adjustmentStrength: "middle",
         userTrackBias: 0,
+        softmaxTemperature: 7.0,
       };
     case "closer_reach":
       return {
@@ -107,6 +110,7 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         pace: "slow",
         adjustmentStrength: "middle",
         userTrackBias: 0,
+        softmaxTemperature: 9.0,
       };
     case "fast_clock":
       return {
@@ -116,6 +120,7 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         pace: "middle",
         adjustmentStrength: "middle",
         userTrackBias: 0,
+        softmaxTemperature: 6.5,
       };
     case "slow_clock":
       return {
@@ -125,10 +130,29 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         pace: "middle",
         adjustmentStrength: "middle",
         userTrackBias: 0,
+        softmaxTemperature: 10.0,
       };
     default:
       return base;
   }
+}
+
+function detectQuickPreset(condition: RaceCondition): QuickKey | null {
+  if (
+    condition.ground === "good" &&
+    (condition.trackSpeed ?? "standard") === "standard" &&
+    condition.bias === "flat" &&
+    condition.pace === "middle"
+  ) {
+    if (condition.adjustmentStrength === "middle" && Math.abs(condition.userTrackBias ?? 0) < 0.05) {
+      return "standard";
+    }
+  }
+  if (condition.bias === "front_favor" && condition.pace === "high") return "front_hold";
+  if (condition.bias === "closer_favor" && condition.pace === "slow") return "closer_reach";
+  if (condition.trackSpeed === "fast" && condition.bias === "flat") return "fast_clock";
+  if (condition.trackSpeed === "slow" && condition.bias === "flat") return "slow_clock";
+  return null;
 }
 
 type AbilityPreset = {
@@ -154,12 +178,14 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
     }
   });
   const userBias = clamp(condition.userTrackBias ?? 0, -1, 1);
+  const softmaxTemperature = clamp(condition.softmaxTemperature ?? 8.0, 2.0, 16.0);
 
   const strengthKeys = Object.keys(ADJUSTMENT_STRENGTH) as Array<
     keyof typeof ADJUSTMENT_STRENGTH
   >;
 
   const currentPriority = condition.abilityPriority ?? null;
+  const activeQuickPreset = detectQuickPreset(condition);
 
   // グローバルプロファイルの ON/OFF 切替
   function handleGlobalProfileToggle(checked: boolean): void {
@@ -254,35 +280,35 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
         <div className="adj-panel__chips">
           <button
             type="button"
-            className="chip"
+            className={`chip ${activeQuickPreset === "standard" ? "chip--active" : ""}`}
             onClick={() => onChange(applyQuickPreset("standard", condition))}
           >
             標準
           </button>
           <button
             type="button"
-            className="chip"
+            className={`chip ${activeQuickPreset === "front_hold" ? "chip--active" : ""}`}
             onClick={() => onChange(applyQuickPreset("front_hold", condition))}
           >
             前が止まらない
           </button>
           <button
             type="button"
-            className="chip"
+            className={`chip ${activeQuickPreset === "closer_reach" ? "chip--active" : ""}`}
             onClick={() => onChange(applyQuickPreset("closer_reach", condition))}
           >
             差しが届く
           </button>
           <button
             type="button"
-            className="chip"
+            className={`chip ${activeQuickPreset === "fast_clock" ? "chip--active" : ""}`}
             onClick={() => onChange(applyQuickPreset("fast_clock", condition))}
           >
             時計が速い
           </button>
           <button
             type="button"
-            className="chip"
+            className={`chip ${activeQuickPreset === "slow_clock" ? "chip--active" : ""}`}
             onClick={() => onChange(applyQuickPreset("slow_clock", condition))}
           >
             時計がかかる
@@ -291,8 +317,8 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
       </div>
 
       <div className="adj-panel__group">
-        <h3>重点項目（2倍→再正規化）</h3>
-        <p className="adj-panel__help">ON にした能力軸のウェイトを2倍し、合計1.0に戻して再計算します。</p>
+        <h3>重点項目（3倍→再正規化）</h3>
+        <p className="adj-panel__help">ON にした能力軸のウェイトを3倍し、合計1.0に戻して再計算します。</p>
         <div className="adj-panel__chips" role="group" aria-label="能力重点">
           {ABILITY_KEYS.map((k: AbilityKey) => (
             <button
@@ -387,6 +413,23 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
               <p className="adj-panel__user-bias-label">
                 枠バイアス補正（手動）: {userBias.toFixed(1)}（{biasText(userBias)}）
               </p>
+              <div className="adj-panel__gate-grid" aria-label="ゲートバイアス可視化">
+                {Array.from({ length: 18 }, (_, idx) => {
+                  const gate = idx + 1;
+                  const isInner = gate <= 3;
+                  const isOuter = gate >= 16;
+                  const glowInner = userBias <= -0.3 && isInner;
+                  const glowOuter = userBias >= 0.3 && isOuter;
+                  return (
+                    <span
+                      key={`gate-grid-${gate}`}
+                      className={`adj-panel__gate-cell${glowInner || glowOuter ? " adj-panel__gate-cell--glow" : ""}`}
+                    >
+                      {gate}
+                    </span>
+                  );
+                })}
+              </div>
               <p className="adj-panel__user-bias-help">
                 内外の有利不利を手動で上書きします（-1.0=内有利、+1.0=外有利、0.0=補正なし）。
               </p>
@@ -446,6 +489,39 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
                   onClick={() => onChange({ ...condition, adjustmentStrength: k })}
                 >
                   {k === "weak" ? "弱" : k === "middle" ? "中" : "強"}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Softmax温度（勝率の尖り）</legend>
+            <p className="adj-panel__user-bias-help">
+              ベース温度。強設定時は内部で半減（8→4）。低いほど1強化。現在 T={softmaxTemperature.toFixed(1)}
+            </p>
+            <input
+              type="range"
+              min={2}
+              max={16}
+              step={0.5}
+              value={softmaxTemperature}
+              onChange={(e) =>
+                onChange({
+                  ...condition,
+                  softmaxTemperature: Number.parseFloat(e.target.value),
+                })
+              }
+              aria-label="Softmax温度"
+            />
+            <div className="adj-panel__chips">
+              {[4, 6, 8, 10, 12].map((v) => (
+                <button
+                  key={`softmax-temp-${v}`}
+                  type="button"
+                  className={`chip ${Math.abs(softmaxTemperature - v) < 0.26 ? "chip--active" : ""}`}
+                  onClick={() => onChange({ ...condition, softmaxTemperature: v })}
+                >
+                  T={v}
                 </button>
               ))}
             </div>

@@ -13,10 +13,20 @@ export type CourseTraitHit = {
   bonus: number;
 };
 
+const MAX_TRAIT_BONUS = 8.5;
+
 const COURSE_TRAIT_MASTER: Record<string, readonly CourseTrait[]> = {
   TOKYO_T2000: ["SHORT_RUN_IN", "INNER_ADVAN"],
+  TOKYO_D1600: ["INNER_ADVAN"],
   NAKAYAMA_D1200: ["SHIBA_START", "OUTER_ADVAN"],
+  NAKAYAMA_T2500: ["SHORT_RUN_IN", "INNER_ADVAN"],
   NIIGATA_T1000: ["OUTSIDE_LAT_ONLY"],
+  NIIGATA_D1800: ["OUTER_ADVAN"],
+  HANSHIN_T1400: ["SHIBA_START", "OUTER_ADVAN"],
+  KYOTO_T1600: ["INNER_ADVAN"],
+  CHUKYO_T1200: ["OUTER_ADVAN"],
+  SAPPORO_T1800: ["INNER_ADVAN"],
+  KOKURA_T1200: ["SHORT_RUN_IN", "INNER_ADVAN"],
 };
 
 function clamp(n: number, min: number, max: number): number {
@@ -57,8 +67,8 @@ export function resolveCourseTraits(condition: RaceCondition): readonly CourseTr
 function strengthMultiplier(strength: RaceCondition["adjustmentStrength"]): number {
   if (strength === "weak") return 0.7;
   if (strength === "middle") return 1.0;
-  // strong は逆転を起こしやすくするため極端に増幅
-  return 2.0;
+  // strong は逆転を起こすが、特性単体は過学習を避けて +8.5 上限で制御する。
+  return 1.35;
 }
 
 function resolveGateNumber(horse: HorseAbility): number | null {
@@ -94,35 +104,53 @@ export function computeCourseTraitHits(
   const hasShibaStart = traits.includes("SHIBA_START");
   const hasOutsideLateOnly = traits.includes("OUTSIDE_LAT_ONLY");
 
-  // A. 内前有利（SHORT_RUN_IN / INNER_ADVAN）
-  if ((hasInner || hasShortRun) && gate != null && gate >= 1 && gate <= 4 && (style === "逃げ" || style === "先行")) {
-    const raw = 8.5 * mult;
-    const bonus = condition.adjustmentStrength === "strong" ? raw : clamp(raw, 0, 8.5);
+  const styleIsFront = style === "逃げ" || style === "先行";
+  const styleIsLate = style === "差し" || style === "追込";
+  const styleIsMidFront = styleIsFront || style === "好位";
+  const gateNum = gate ?? 0;
+  const frameNum = frame ?? 0;
+
+  // フラグ別に「枠番 × 脚質」シナジーへ直接変換する。
+  // 内前有利コースは序盤ポジション価値が高く、短い助走区間でロスの少ない内前を最大評価。
+  if ((hasInner || hasShortRun) && frameNum >= 1 && frameNum <= 3 && styleIsFront) {
+    const raw = 6.3 * mult;
+    const bonus = clamp(raw, 0, MAX_TRAIT_BONUS);
     hits.push({
-      label: "コース特性一致",
-      reason: `内前有利: 馬番${gate}・${style}（SHORT_RUN_IN/INNER_ADVAN）`,
+      label: "枠番×脚質シナジー",
+      reason: `内前有利: ${frameNum}枠 × ${style}（SHORT_RUN_IN/INNER_ADVAN）`,
       bonus: round1(bonus),
     });
   }
 
-  // B. 外前有利（SHIBA_START / OUTER_ADVAN）
-  if (hasOuter && frame != null && frame >= 7 && frame <= 8 && style === "先行") {
-    const raw = (hasShibaStart ? 7.5 : 6.5) * mult;
-    const bonus = condition.adjustmentStrength === "strong" ? raw : clamp(raw, 0, 8.5);
+  // 外先行有利は芝スタートで加速余地が生まれるため上乗せを強くする。
+  if (hasOuter && frameNum >= 6 && styleIsMidFront) {
+    const raw = (hasShibaStart ? 6.4 : 5.8) * mult;
+    const bonus = clamp(raw, 0, MAX_TRAIT_BONUS);
     hits.push({
-      label: "コース特性一致",
-      reason: `外前有利: ${frame}枠・${style}（OUTER_ADVAN${hasShibaStart ? "/SHIBA_START" : ""}）`,
+      label: "枠番×脚質シナジー",
+      reason: `外前有利: ${frameNum}枠 × ${style}（OUTER_ADVAN${hasShibaStart ? "/SHIBA_START" : ""}）`,
       bonus: round1(bonus),
     });
   }
 
-  // 新潟直千向け: 外ラチ依存（差し・追込の外枠を優遇）
-  if (hasOutsideLateOnly && frame != null && frame >= 6 && (style === "差し" || style === "追込")) {
-    const raw = 4.2 * mult;
-    const bonus = condition.adjustmentStrength === "strong" ? raw : clamp(raw, 0, 6.5);
+  // 外ラチ沿い依存（新潟直千など）は大外かつ差し/追込で一気に伸びる傾向。
+  if (hasOutsideLateOnly && frameNum >= 6 && styleIsLate) {
+    const raw = 6.1 * mult;
+    const bonus = clamp(raw, 0, MAX_TRAIT_BONUS);
     hits.push({
-      label: "コース特性一致",
-      reason: `外ラチ傾向: ${frame}枠・${style}（OUTSIDE_LAT_ONLY）`,
+      label: "枠番×脚質シナジー",
+      reason: `外ラチ傾向: ${frameNum}枠 × ${style}（OUTSIDE_LAT_ONLY）`,
+      bonus: round1(bonus),
+    });
+  }
+
+  // 同じ外有利でも馬番の絶対外目は包まれにくく、先行馬は加点を追加。
+  if (hasOuter && gateNum >= 11 && styleIsFront) {
+    const raw = 2.2 * mult;
+    const bonus = clamp(raw, 0, MAX_TRAIT_BONUS);
+    hits.push({
+      label: "枠番×脚質シナジー",
+      reason: `馬番外寄り: 馬番${gateNum} × ${style}（OUTER_ADVAN）`,
       bonus: round1(bonus),
     });
   }
