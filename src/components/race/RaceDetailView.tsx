@@ -10,7 +10,9 @@ import {
   evaluateRace,
   findSameTypePeers,
   getFinalWeights,
+  weightedAbilityRadarPercent,
   weightsToDemand0to100,
+  type AbilityKey,
   type RaceCondition,
 } from "../../domain/race-evaluation";
 import { RaceAdjustmentPanel, loadGlobalProfile } from "./RaceAdjustmentPanel";
@@ -21,11 +23,13 @@ import { RaceNavBar } from "./RaceNavBar";
 import { HorseListTable } from "./HorseListTable";
 import { RaceResultPanel } from "./RaceResultPanel";
 import { RaceBetPanel } from "./RaceBetPanel";
+import { RaceAdjustProvider } from "./RaceAdjustContext";
 import { getHorsesFromRaceData, getRaceEvaluationById, getRaceResultById, type RaceEvaluationData } from "../../lib/race-data";
 import type { RaceIndexItem } from "../../lib/race-data";
 
 const NEUTRAL_CONDITION: RaceCondition = {
   venue: "東京",
+  surface: "芝",
   ground: "good",
   trackSpeed: "standard",
   bias: "flat",
@@ -56,7 +60,14 @@ function inferRaceSection200mFromEntries(raceId: string, horses: ReturnType<type
 type BiasKey = "front_favor" | "closer_favor";
 type CarryOverCondition = Pick<
   RaceCondition,
-  "ground" | "trackSpeed" | "bias" | "pace" | "adjustmentStrength" | "trackBiasStrength01" | "userTrackBias"
+  | "ground"
+  | "trackSpeed"
+  | "bias"
+  | "pace"
+  | "adjustmentStrength"
+  | "trackBiasStrength01"
+  | "userTrackBias"
+  | "abilityFocus"
 >;
 
 function carryOverStorageKey(raceInfo: RaceEvaluationData["raceInfo"]): string {
@@ -82,6 +93,7 @@ function saveCarryOverCondition(raceInfo: RaceEvaluationData["raceInfo"], condit
     adjustmentStrength: condition.adjustmentStrength,
     trackBiasStrength01: condition.trackBiasStrength01,
     userTrackBias: condition.userTrackBias,
+    abilityFocus: condition.abilityFocus,
   };
   try {
     localStorage.setItem(carryOverStorageKey(raceInfo), JSON.stringify(payload));
@@ -217,6 +229,15 @@ export function RaceDetailView({ race, raceIndex }: Props) {
 
   const demand0to100 = useMemo(() => weightsToDemand0to100(finalW), [finalW]);
 
+  const weightedRadarByHorse = useMemo(() => {
+    const w = getFinalWeights(condition ?? NEUTRAL_CONDITION);
+    const m = new Map<string, Record<AbilityKey, number>>();
+    for (const h of horses) {
+      m.set(h.horseId, weightedAbilityRadarPercent(h, w));
+    }
+    return m;
+  }, [horses, condition]);
+
   const [conditionOpen, setConditionOpen] = useState(false);
 
   const { conditionOneLine, conditionMetaLine } = useMemo(() => {
@@ -315,6 +336,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   ];
 
   return (
+    <RaceAdjustProvider value={{ condition, horses, results }}>
     <div className="app">
       {/* ヘッダ */}
       <header className="app__hero app__hero--compact">
@@ -492,6 +514,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                       result={r}
                       grades={grades}
                       demand0to100={demand0to100}
+                      weightedRadar={weightedRadarByHorse.get(r.horseId)!}
                       allHorses={horses}
                       condition={condition}
                       compact={cardDensity === "compact"}
@@ -545,5 +568,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         </aside>
       </div>
     </div>
+    </RaceAdjustProvider>
   );
 }

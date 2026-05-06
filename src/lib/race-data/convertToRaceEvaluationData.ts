@@ -412,6 +412,8 @@ function toRaceEntryFromPreserved(
       paceBalanceBonus: recomputed?.paceBalanceBonus ?? 0,
       tripContextBonus: recomputed?.tripContextBonus ?? 0,
       finalEvaluationScore: recomputed?.finalEvaluationScore ?? 0,
+      evaluationBaselineScore: recomputed?.evaluationBaselineScore ?? 0,
+      evaluationAdjustmentDelta: recomputed?.evaluationAdjustmentDelta ?? 0,
       lapShapeFitBonus: recomputed?.lapShapeFitBonus ?? 0,
       lapSustainBonus: recomputed?.lapSustainBonus ?? 0,
       lapQualityBonus: recomputed?.lapQualityBonus ?? 0,

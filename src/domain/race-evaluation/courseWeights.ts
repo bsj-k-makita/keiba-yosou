@@ -108,6 +108,22 @@ export const BASE_COURSE_WEIGHTS: Record<string, WeightSet> = {
   },
 };
 
+/**
+ * 補正パネル競馬場セレクタ用。実レースの `getStrategicBaseWeights` は `strategicWeights` を参照。
+ */
+export const SELECTABLE_VENUES = [
+  "東京",
+  "中山",
+  "京都",
+  "阪神外",
+  "阪神",
+  "中京",
+  "新潟",
+  "福島",
+  "小倉",
+  "札幌函館",
+] as const;
+
 export const DEFAULT_VENUE_KEY = "東京";
 
 /**

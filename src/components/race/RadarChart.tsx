@@ -38,7 +38,10 @@ function labelPos(i: number): { x: number; y: number; textAnchor: "start" | "mid
 }
 
 type Props = {
-  horse: Record<AbilityKey, number>;
+  /** 生の能力値 0〜100 */
+  horse?: Record<AbilityKey, number>;
+  /** 指定時は horse より優先（加重比率シェイプ等） */
+  values?: Record<AbilityKey, number>;
   /** 既定 1.5〜2x 想定。旧100相当なら 180 前後。 */
   size?: number;
 };
@@ -46,10 +49,11 @@ type Props = {
 /**
  * 能力5項目のみのレーダー（混在オーバーレイをしない）
  */
-export function RadarChart({ horse, size = 192 }: Props) {
+export function RadarChart({ horse, values, size = 192 }: Props) {
+  const series = values ?? horse ?? ({} as Record<AbilityKey, number>);
   const keys = ABILITY_KEYS;
   const rings = [0.25, 0.5, 0.75, 1];
-  const points = keys.map((k, i) => ({ key: k, ...pt(clamp01(horse[k] ?? 0), i) }));
+  const points = keys.map((k, i) => ({ key: k, ...pt(clamp01(series[k] ?? 0), i) }));
   return (
     <svg
       className="radar"
@@ -57,7 +61,11 @@ export function RadarChart({ horse, size = 192 }: Props) {
       width={size}
       height={size}
       role="img"
-      aria-label="5つの能力の相対的な形（0〜100を端までに正規化）"
+      aria-label={
+        values != null
+          ? "条件ウェイト反映後の能力寄与バランス（合計100の按分）"
+          : "5つの能力の相対的な形（0〜100を端までに正規化）"
+      }
     >
       {rings.map((r) => (
         <polygon
@@ -110,7 +118,7 @@ export function RadarChart({ horse, size = 192 }: Props) {
       })}
 
       <path
-        d={pathD(keys, (k) => horse[k] ?? 0)}
+        d={pathD(keys, (k) => series[k] ?? 0)}
         fill="rgba(0,113,227,0.18)"
         stroke="#0071e3"
         strokeWidth={2.2}

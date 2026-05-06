@@ -95,6 +95,8 @@ export function buildEvaluationData(input: BuildInput): RaceEvaluationData {
           paceBalanceBonus: r.paceBalanceBonus,
           tripContextBonus: r.tripContextBonus,
           finalEvaluationScore: r.finalEvaluationScore,
+          evaluationBaselineScore: r.evaluationBaselineScore,
+          evaluationAdjustmentDelta: r.evaluationAdjustmentDelta,
           lapShapeFitBonus: r.lapShapeFitBonus,
           lapSustainBonus: r.lapSustainBonus,
           lapQualityBonus: r.lapQualityBonus,

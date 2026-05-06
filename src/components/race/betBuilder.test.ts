@@ -43,6 +43,8 @@ function result(id: string, name: string, rank: number, label: HorseScoreResult[
     paceBalanceBonus: 0,
     tripContextBonus: 0,
     finalEvaluationScore: 60,
+    evaluationBaselineScore: 60,
+    evaluationAdjustmentDelta: 0,
     finalRank: rank,
     buyLabel: label,
     reason: "",

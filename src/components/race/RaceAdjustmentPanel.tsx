@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { AbilityPriority, RaceCondition } from "../../domain/race-evaluation";
+import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "../../domain/race-evaluation/abilityTypes";
 import {
   ADJUSTMENT_STRENGTH,
   BIAS_ADJUSTMENTS,
@@ -7,7 +8,7 @@ import {
   PACE_ADJUSTMENTS,
   TRACK_SPEED_ADJUSTMENTS,
 } from "../../domain/race-evaluation/adjustments";
-import { BASE_COURSE_WEIGHTS } from "../../domain/race-evaluation/courseWeights";
+import { SELECTABLE_VENUES } from "../../domain/race-evaluation/courseWeights";
 
 type Props = {
   condition: RaceCondition;
@@ -16,7 +17,7 @@ type Props = {
   embedded?: boolean;
 };
 
-const VENUES = Object.keys(BASE_COURSE_WEIGHTS);
+const VENUES = SELECTABLE_VENUES as readonly string[];
 
 type QuickKey = "standard" | "front_hold" | "closer_reach" | "fast_clock" | "slow_clock";
 
@@ -286,6 +287,35 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
           >
             時計がかかる
           </button>
+        </div>
+      </div>
+
+      <div className="adj-panel__group">
+        <h3>重点項目（2倍→再正規化）</h3>
+        <p className="adj-panel__help">ON にした能力軸のウェイトを2倍し、合計1.0に戻して再計算します。</p>
+        <div className="adj-panel__chips" role="group" aria-label="能力重点">
+          {ABILITY_KEYS.map((k: AbilityKey) => (
+            <button
+              key={k}
+              type="button"
+              className={`chip ${condition.abilityFocus?.[k] ? "chip--active" : ""}`}
+              onClick={() => {
+                const on = condition.abilityFocus?.[k] ?? false;
+                const next: NonNullable<RaceCondition["abilityFocus"]> = { ...condition.abilityFocus };
+                if (on) {
+                  delete next[k];
+                } else {
+                  next[k] = true;
+                }
+                onChange({
+                  ...condition,
+                  abilityFocus: Object.keys(next).length > 0 ? next : undefined,
+                });
+              }}
+            >
+              {ABILITY_LABELS[k]}
+            </button>
+          ))}
         </div>
       </div>
 

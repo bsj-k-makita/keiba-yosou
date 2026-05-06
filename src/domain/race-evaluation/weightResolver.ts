@@ -13,13 +13,8 @@ import {
   PACE_ADJUSTMENTS,
   TRACK_SPEED_ADJUSTMENTS,
 } from "./adjustments";
-import {
-  BASE_COURSE_WEIGHTS,
-  DEFAULT_COURSE_WEIGHTS,
-  DEFAULT_VENUE_KEY,
-  inferCourseWeightKey,
-} from "./courseWeights";
 import { applyVenuePhysicalFactorAdjustments } from "./venuePhysicalFactors";
+import { getStrategicBaseWeights } from "./strategicWeights";
 
 function emptyDelta(): WeightSet {
   return { speed: 0, stamina: 0, kick: 0, sustain: 0, power: 0 };
@@ -57,29 +52,24 @@ function applyAbilityPriority(
   return normalizeWeights(out);
 }
 
+function applyAbilityFocusDoubling(weights: WeightSet, condition: RaceCondition): WeightSet {
+  const focus = condition.abilityFocus;
+  if (!focus) return weights;
+  let touched = false;
+  const out: WeightSet = { ...weights };
+  for (const key of ABILITY_KEYS) {
+    if (focus[key]) {
+      out[key] *= 2;
+      touched = true;
+    }
+  }
+  if (!touched) return weights;
+  return normalizeWeights(clampWeights(out));
+}
+
 export function getBaseWeights(condition: RaceCondition): WeightSet {
-  // 1. 新コース別ウェイトキーの解決を試みる
-  const courseWeightKey = inferCourseWeightKey(condition);
-  let base: WeightSet | undefined;
-
-  if (courseWeightKey != null) {
-    base = DEFAULT_COURSE_WEIGHTS[courseWeightKey];
-  }
-
-  // 2. フォールバック: 旧 venue キー → DEFAULT_VENUE_KEY
-  if (base == null) {
-    const venueKey = condition.courseKey ?? condition.venue;
-    base =
-      BASE_COURSE_WEIGHTS[venueKey] ??
-      BASE_COURSE_WEIGHTS[DEFAULT_VENUE_KEY];
-  }
-
-  if (!base) {
-    throw new Error(`No base weights for venue: ${condition.venue}`);
-  }
-
-  // 3. abilityPriority プリセットを適用（1.5x → 再正規化）
-  return applyAbilityPriority({ ...base }, condition.abilityPriority);
+  const strategic = getStrategicBaseWeights(condition);
+  return applyAbilityPriority({ ...strategic }, condition.abilityPriority);
 }
 
 export function applyAdjustments(
@@ -148,7 +138,8 @@ export function getFinalWeights(condition: RaceCondition): WeightSet {
   const strength = ADJUSTMENT_STRENGTH[condition.adjustmentStrength];
   const merged = applyAdjustments(base, adjustments, strength);
   const clamped = clampWeights(merged);
-  return normalizeWeights(clamped);
+  const normalized = normalizeWeights(clamped);
+  return applyAbilityFocusDoubling(normalized, condition);
 }
 
 export function calcHorseScore(horse: HorseAbility, weights: WeightSet): number {

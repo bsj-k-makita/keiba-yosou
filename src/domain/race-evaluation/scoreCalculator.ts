@@ -37,6 +37,7 @@ import { computeClassLevelBonus } from "./classLevelScore";
 import { blendAbilityWithPastRuns } from "./performanceAbility";
 import { computeContextualBonuses } from "./contextualBonuses";
 import { BUY_LABELS } from "./lingoConstants";
+import { ADJUSTMENT_STRENGTH } from "./adjustments";
 
 export { extractStrongAbilities } from "./strongAbilities";
 export {
@@ -55,6 +56,19 @@ function round1(n: number): number {
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
+}
+
+function conditionImpactBonusFromDiff(
+  scoreDiff: number,
+  strength: keyof typeof ADJUSTMENT_STRENGTH,
+): number {
+  if (strength === "weak") {
+    return round1(clamp(scoreDiff * 1.8, -6, 6));
+  }
+  if (strength === "middle") {
+    return round1(clamp(scoreDiff * 3.5, -12, 12));
+  }
+  return round1(clamp(scoreDiff * 6.0, -25, 25));
 }
 
 function computeStyleSignalFactor(horses: HorseAbility[]): number {
@@ -97,6 +111,7 @@ export function evaluateRace(
   const styleSignalFactor = computeStyleSignalFactor(evalHorses);
   const baseWeights = getBaseWeights(condition);
   const finalWeights = getFinalWeights(condition);
+  const strengthMult = ADJUSTMENT_STRENGTH[condition.adjustmentStrength];
 
   // 今日のレースラップ形状（敗因分解・ラップ形状一致に使う）
   const raceLapShape =
@@ -166,6 +181,8 @@ export function evaluateRace(
       paceBalanceBonus: 0,
       tripContextBonus: 0,
       finalEvaluationScore: 0,
+      evaluationBaselineScore: 0,
+      evaluationAdjustmentDelta: 0,
       lapShapeFitBonus: round1(lapShapeFitBonus),
       lapSustainBonus: round1(lapFit.sustainBonus),
       lapQualityBonus: round1(lapFit.qualityBonus),
@@ -205,9 +222,10 @@ export function evaluateRace(
       contextual.trendBonus +
       contextual.paceBalanceBonus +
       contextual.tripContextBonus;
-    // 条件切替の効き目を分かりやすくするため、
-    // 調整前後の差分(scoreDiff)を最終評価へ反映する。
-    const conditionImpactBonus = round1(clamp(r.scoreDiff * 1.8, -6, 6));
+    const conditionImpactBonus = conditionImpactBonusFromDiff(r.scoreDiff, condition.adjustmentStrength);
+    const weakTierImpact = round1(clamp(r.scoreDiff * 1.8, -6, 6));
+    const dScaled = round1(dBonus * strengthMult);
+    const contextualScaled = round1(contextualTotal * strengthMult);
     r.raceRelativeScore = relScore;
     r.paceFitBonus = pBonus;
     r.distanceFitBonus = dBonus;
@@ -219,16 +237,29 @@ export function evaluateRace(
     r.trendBonus = contextual.trendBonus;
     r.paceBalanceBonus = contextual.paceBalanceBonus;
     r.tripContextBonus = contextual.tripContextBonus;
+    const classCombined = round1(clamp(cBonus + r.stepPatternBonus, -4.5, 5.5));
+    const lapStack = r.lapShapeFitBonus + r.lapSustainBonus + r.lapQualityBonus;
+    r.evaluationBaselineScore = combineFinalEvaluationScore(
+      relScore,
+      pBonus,
+      lapStack,
+      dBonus,
+      classCombined,
+      vPenalty,
+      contextualTotal,
+      weakTierImpact,
+    );
     r.finalEvaluationScore = combineFinalEvaluationScore(
       relScore,
       pBonus,
-      r.lapShapeFitBonus + r.lapSustainBonus + r.lapQualityBonus,
-      dBonus,
-      round1(clamp(cBonus + r.stepPatternBonus, -4.5, 5.5)),
+      lapStack,
+      dScaled,
+      classCombined,
       vPenalty,
-      contextualTotal,
+      contextualScaled,
       conditionImpactBonus,
     );
+    r.evaluationAdjustmentDelta = round1(r.finalEvaluationScore - r.evaluationBaselineScore);
   }
 
   assignRanksForScore(results, "baseScore", "baseRank");

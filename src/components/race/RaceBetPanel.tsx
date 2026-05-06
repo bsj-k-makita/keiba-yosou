@@ -1,5 +1,11 @@
 import { useMemo, useState, type CSSProperties } from "react";
-import type { HorseAbility, HorseScoreResult, RaceCondition, InvestmentCommentInput } from "../../domain/race-evaluation";
+import {
+  valueRankFromEffectiveEv,
+  type HorseAbility,
+  type HorseScoreResult,
+  type RaceCondition,
+  type InvestmentCommentInput,
+} from "../../domain/race-evaluation";
 import { buildBetPlan, type BetMode } from "./betBuilder";
 
 type Props = {
@@ -47,9 +53,9 @@ function evHeatmapStyle(ev: number, valueRank: string): CSSProperties {
   return { background: "rgba(127,140,141,0.06)", borderLeft: "3px solid transparent" };
 }
 
-/** EVテーブル右列。実質期待値の帯（valueRank）に合わせ、ランク列と同じ物差しで表記する。 */
+/** EVテーブル。実質EV列とランク列は valueScore ベースの帯（JSON の value_rank より数値を優先）。 */
 function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; color: string } {
-  const vr = inv.valueRank;
+  const vr = valueRankFromEffectiveEv(inv.valueScore ?? 0);
   if (vr === "S" || vr === "A") {
     return { text: "【期待値高】", color: "#c0392b" };
   }
@@ -155,6 +161,7 @@ function buildEvRows(sorted: HorseScoreResult[], horses: HorseAbility[]): EvRow[
       investment: horse.investment,
     });
   }
+  rows.sort((a, b) => a.gate - b.gate || a.horseId.localeCompare(b.horseId));
   return rows;
 }
 
@@ -247,8 +254,9 @@ function EvSection({
 
       <h3 className="bet-panel__ev-title">AIオッズ評価（実質期待値）</h3>
       <p className="bet-panel__ev-desc">
-        実質期待値 = (予測確率 × オッズ) − マージン（頭数16+: 0.20、通常: 0.15）。
+        実質期待値 = (予測確率 × オッズ) − マージン（頭数16+: 0.20、通常: 0.15）。ランク S は実質EV 10 以上（帯再計算）。
         ★ヒートマップ: 🔥激アツ(EV≥1.25・濃緑)、薄緑(EV≥1.10)、淡緑(EV≥1.00)、グレー(EV&lt;1.00)。
+        資金の割合・推奨額は予算に対する目安です。上部の買い目選定とは別ロジックです。
         {biasActive && (
           <strong style={{ color: "#2980b9" }}> ⚡ 馬場バイアス補正適用中（枠番補正）</strong>
         )}
@@ -259,11 +267,11 @@ function EvSection({
           <tr>
             <th>馬番</th>
             <th>馬名</th>
-            <th>EV{biasActive ? "（補正）" : ""}</th>
+            <th>実質EV{biasActive ? "（補正）" : ""}</th>
             <th>ランク</th>
             <th>確率</th>
             <th>オッズ</th>
-            <th>ケリー%</th>
+            <th>資金の割合</th>
             <th>推奨額</th>
             <th>期待値判断</th>
           </tr>
@@ -328,7 +336,7 @@ function EvSection({
 
       {candidates.length === 0 ? (
         <p className="bet-panel__ev-no-bet">
-          ケリー配分・買い区分の対象馬（データ上「見送り」以外）がありません。
+          オッズ期待値で「見送り」以外の馬がいません（推奨割合の対象なし）。
         </p>
       ) : (
         <div className="bet-panel__ev-summary">

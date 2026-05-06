@@ -62,7 +62,7 @@ export type InvestmentCommentInput = {
   predictedProbability: number;
   actualOdds: number;
   oddsSource?: "actual" | "estimated";
-  /** 実質期待値: (P × O) - margin。1.0超で購入ライン。 */
+  /** 実質期待値: (P × O) - margin。 */
   valueScore?: number;
   valueRank: InvestmentValueRank;
   confidenceRank?: InvestmentConfidenceRank;
@@ -70,7 +70,7 @@ export type InvestmentCommentInput = {
   valueChange: InvestmentValueChange;
   keyFactors: string[];
   riskFactors: string[];
-  /** Fractional Kelly による推奨投資比率（0〜0.25）。全資金に対する割合。 */
+  /** 推奨する購入比率（0〜0.25）。入力予算に対する目安（算出は数学的な資金配分式ベース）。 */
   kellyWeight?: number;
 };
 
@@ -138,6 +138,10 @@ export type RaceCondition = {
   venue: string;
   courseKey?: string;
   raceName?: string;
+  /**
+   * ON の能力軸は最終ウェイト計算で 2 倍したあと再正規化（重点項目）。
+   */
+  abilityFocus?: Partial<Record<AbilityKey, boolean>>;
   /** 芝・ダート。未設定時は物理特性補正では「芝」扱い。 */
   surface?: "芝" | "ダート";
   /** 当該レース距離（m）。距離適性ボーナス計算に使用。 */
@@ -223,6 +227,13 @@ export type HorseScoreResult = {
   tripContextBonus: number;
   /** `raceRelativeScore` + `paceFitBonus`（0〜100）。印・買い判断の基準順は `finalRank` */
   finalEvaluationScore: number;
+  /**
+   * 補正強度を抑えた参照点（距離・文脈ボーナスは素の値、条件Impactのみ弱ティア）。
+   * UI で「補正前」表示に使用。
+   */
+  evaluationBaselineScore: number;
+  /** finalEvaluationScore − evaluationBaselineScore */
+  evaluationAdjustmentDelta: number;
   finalRank?: number;
   mark?: "◎" | "○" | "▲" | "△" | "☆" | "";
   buyLabel: BuyLabel;

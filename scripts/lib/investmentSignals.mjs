@@ -1,3 +1,12 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const STRATEGIC_WEIGHTS = JSON.parse(
+  readFileSync(join(__dirname, "../../src/domain/race-evaluation/strategicWeights.json"), "utf8"),
+);
+
 function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
@@ -15,33 +24,80 @@ function toRank(values) {
   return rank;
 }
 
+function resolveStrategicProfileKeyFromData(data) {
+  const c = data?.condition ?? {};
+  const ri = data?.raceInfo ?? {};
+  const venue = String(c.venue ?? ri.venue ?? "東京").trim();
+  const surface = c.surface ?? ri.surface ?? "芝";
+  const blob = `${c.courseKey ?? ""} ${venue} ${c.raceName ?? ri.raceName ?? ""}`;
+
+  if (/札幌|函館|北海道/.test(venue) || venue === "札幌函館") {
+    return surface === "ダート" ? "HOKKAIDO_DIRT" : "HOKKAIDO_TURF";
+  }
+  if (venue === "東京" || /^東京/.test(venue)) {
+    return surface === "ダート" ? "TOKYO_DIRT" : "TOKYO_TURF";
+  }
+  if (venue === "中山" || /中山/.test(blob)) {
+    return "NAKAYAMA_ALL";
+  }
+  if (/京都内/.test(blob) || c.courseKey === "京都内") {
+    return "KYOTO_FLAT";
+  }
+  if (/京都/.test(blob) || venue.includes("京都")) {
+    return surface === "ダート" ? "KYOTO_FLAT" : "KYOTO_TURF_OUT";
+  }
+  if (/阪神/.test(blob) || venue.includes("阪神")) {
+    if (/内/.test(blob) || c.courseTopology === "uphill") {
+      return "HANSHIN_INNER";
+    }
+    return surface === "ダート" ? "HANSHIN_INNER" : "HANSHIN_TURF_OUT";
+  }
+  if (venue.includes("新潟") || /新潟/.test(blob)) {
+    if (surface === "ダート") {
+      return "LOCAL_SMALL";
+    }
+    return /外|ストレート/.test(blob) ? "NIIGATA_TURF_OUT" : "LOCAL_SMALL";
+  }
+  if (venue === "中京" || /中京/.test(blob)) {
+    return "CHUKYO_ALL";
+  }
+  if (venue === "福島" || venue === "小倉") {
+    return "LOCAL_SMALL";
+  }
+  return "TOKYO_TURF";
+}
+
 /**
  * 能力値からベーススコアを算出する。
- * コース/バイアス条件に応じたウェイトを適用し、
- * ゲートバイアス補正を Softmax 前のスコアに直接加算する。
+ * 戦略ウェイト（strategicWeights.json）にゲートバイアスを加算して Softmax 前スコアとする。
  *
  * @param entry 馬エントリ
- * @param gateBonus 枠バイアスによる加算ポイント（例: 内有利時に内枠馬へ +2.5）
+ * @param data レースルート（condition / raceInfo）
+ * @param gateBonus 枠バイアスによる加算ポイント
  */
-function scoreFromAbilities(entry, gateBonus = 0) {
+function scoreFromAbilities(entry, data, gateBonus = 0) {
   const ab = entry?.abilities ?? {};
   const speed = Number(ab.speed ?? 50);
   const stamina = Number(ab.stamina ?? 50);
   const kick = Number(ab.kick ?? 50);
   const sustain = Number(ab.sustain ?? 50);
   const power = Number(ab.power ?? 50);
-  const base = speed * 0.28 + stamina * 0.22 + kick * 0.2 + sustain * 0.18 + power * 0.12;
-  return base + gateBonus;
+  const key = resolveStrategicProfileKeyFromData(data ?? {});
+  const w = STRATEGIC_WEIGHTS[key] ?? STRATEGIC_WEIGHTS.TOKYO_TURF;
+  const base =
+    speed * w.speed +
+    stamina * w.stamina +
+    kick * w.kick +
+    sustain * w.sustain +
+    power * w.power;
+  const bonus = Number.isFinite(gateBonus) ? gateBonus : 0;
+  return base + bonus;
 }
 
 /**
  * Softmax 変換。温度パラメータ T で評価差の鋭さを制御する。
- * T が小さいほど上位馬に確率が集中する（強い補正時に使用）。
- * - T=8（デフォルト）: 標準的な分布
- * - T=6（補正強度「強」時）: 評価差をより鋭く確率に反映
- *
- * @param values スコア配列
- * @param temperature 温度パラメータ（デフォルト: 8）
+ * - T=8（デフォルト）
+ * - T=4（補正強度「強」時の尖り）
  */
 function softmax(values, temperature = 8) {
   if (values.length === 0) return [];
@@ -167,18 +223,15 @@ function calcKellyWeight(prob, odds) {
 }
 
 /**
- * 実質期待値に基づくランク（BettingEvaluator の閾値に準拠）。
- * S: effective_ev >= 1.40（強い買い推奨）
- * A: effective_ev >= 1.10
- * B: effective_ev >= 1.00
- * C: effective_ev >= 0.90（様子見）
- * D: それ以下（見送り）
+ * 実質期待値に基づくランク（実質EV そのもので帯分け）。
+ * S: 10以上 / A: 8〜10未満 / B: 3〜8未満 / C: 1〜3未満 / D: 1未満
  */
 function toValueRank(effectiveEv) {
-  if (effectiveEv >= 1.40) return "S";
-  if (effectiveEv >= 1.10) return "A";
-  if (effectiveEv >= 1.0) return "B";
-  if (effectiveEv >= 0.90) return "C";
+  const ev = Number.isFinite(effectiveEv) ? effectiveEv : 0;
+  if (ev >= 10) return "S";
+  if (ev >= 8) return "A";
+  if (ev >= 3) return "B";
+  if (ev >= 1) return "C";
   return "D";
 }
 
@@ -359,7 +412,6 @@ function calcPopularityBiasDecay(prob, odds) {
 export function enrichInvestmentSignalsInRaceData(data) {
   const entries = Array.isArray(data?.entries) ? data.entries : [];
   if (entries.length === 0) return data;
-
   const fieldSize = entries.length;
   const condition = data.condition ?? {};
   const userTrackBias = parseNumeric(condition.userTrackBias ?? data.userTrackBias) ?? 0;
@@ -387,11 +439,11 @@ export function enrichInvestmentSignalsInRaceData(data) {
   const scores = entries.map((e, i) => {
     const gateNumber = parseNumeric(e.horseNumber ?? e.gate) ?? (i + 1);
     const gateBonus = calcGateBonusPoints(gateNumber, fieldSize, userTrackBias);
-    return scoreFromAbilities(e, gateBonus);
+    return scoreFromAbilities(e, data, gateBonus);
   });
 
-  // --- Softmax温度: 補正強度「強」のとき T=6（鋭い評価差）、それ以外は T=8 ---
-  const softmaxTemp = adjustmentStrength === "strong" ? 6 : 8;
+  // --- Softmax温度: 補正強度「強」のとき T=4（鋭い評価差）、それ以外は T=8 ---
+  const softmaxTemp = adjustmentStrength === "strong" ? 4 : 8;
   const rawProbs = softmax(scores, softmaxTemp);
   const modelRanks = toRank(scores);
 

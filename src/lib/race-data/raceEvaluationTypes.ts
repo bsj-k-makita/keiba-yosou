@@ -87,6 +87,9 @@ export type EntryEvaluationBlock = {
   tripContextBonus: number;
   /** 相対＋展開ボーナス（0〜100） */
   finalEvaluationScore: number;
+  /** 動的補正を弱めた参照点（パイプライン JSON に無い場合あり） */
+  evaluationBaselineScore?: number;
+  evaluationAdjustmentDelta?: number;
   /** ラップ形状一致ボーナス。判定不能のとき 0 */
   lapShapeFitBonus: number;
   /** 消耗戦での持続力ボーナス */

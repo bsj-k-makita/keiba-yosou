@@ -7,10 +7,8 @@ import {
   type HorseAbility,
   type HorseScoreResult,
   type RaceCondition,
-  type WeightSet,
 } from "../../domain/race-evaluation";
 import { inferRadarShape } from "../../domain/race-evaluation";
-import { getFinalWeights } from "../../domain/race-evaluation";
 import {
   computeFitScore,
   findL1CloseTypePeers,
@@ -49,6 +47,8 @@ type Props = {
   grades: AbilityGradeRow;
   /** 0〜100：適合度（今回向き）用。レーダー表示には使わない */
   demand0to100: Record<AbilityKey, number>;
+  /** 条件ウェイト反映後の按分（レーダー形状のリアルタイム更新用） */
+  weightedRadar: Record<AbilityKey, number>;
   allHorses: HorseAbility[];
   condition: RaceCondition;
   compact?: boolean;
@@ -64,31 +64,13 @@ function horseToRadarMap(horse: HorseAbility): Record<AbilityKey, number> {
   };
 }
 
-/**
- * コース特性 + ユーザー補正適用済みの「加重スコア貢献」マップを生成する。
- * 各軸 = horse[ability] × finalWeight[ability] × 5（× 5 で ~0-100 スケールに戻す）
- * → これを RadarChart に渡すと「どの能力がこのコース・条件でより貢献しているか」が視覚化される。
- */
-function horseToWeightedRadarMap(
-  horse: HorseAbility,
-  weights: WeightSet,
-): Record<AbilityKey, number> {
-  const numAbilities = ABILITY_KEYS.length; // 5
-  return {
-    speed:   Math.min(100, horse.speed   * weights.speed   * numAbilities),
-    stamina: Math.min(100, horse.stamina * weights.stamina * numAbilities),
-    kick:    Math.min(100, horse.kick    * weights.kick    * numAbilities),
-    sustain: Math.min(100, horse.sustain * weights.sustain * numAbilities),
-    power:   Math.min(100, horse.power   * weights.power   * numAbilities),
-  };
-}
-
 export function HorseEvaluationCard({
   gate,
   horse,
   result,
   grades,
   demand0to100,
+  weightedRadar,
   allHorses,
   condition,
   compact = false,
@@ -137,14 +119,9 @@ export function HorseEvaluationCard({
 
   const hMap = useMemo(() => horseToRadarMap(horse), [horse]);
   const radarShape = useMemo(() => inferRadarShape(horse), [horse]);
-
-  // コース特性 + ユーザー補正（abilityPriority含む）を適用した最終ウェイト
-  const finalWeights = useMemo(() => getFinalWeights(condition), [condition]);
-  // 加重レーダーマップ: 「条件適合した能力貢献」の視覚化
-  const weightedRadarMap = useMemo(
-    () => horseToWeightedRadarMap(horse, finalWeights),
-    [horse, finalWeights],
-  );
+  const effectiveEv = horse.investment?.valueScore;
+  const effectiveEvHot =
+    effectiveEv != null && Number.isFinite(effectiveEv) && effectiveEv > 1.25;
   const contextualTotal =
     (result.pedigreeBonus ?? 0) +
     (result.gateBiasBonus ?? 0) +
@@ -169,7 +146,11 @@ export function HorseEvaluationCard({
   );
 
   return (
-    <article className={`horse-card${compact ? " horse-card--compact" : ""}`} data-buylabel={result.buyLabel}>
+    <article
+      className={`horse-card${compact ? " horse-card--compact" : ""}${effectiveEvHot ? " horse-card--ev-gold" : ""}`}
+      data-buylabel={result.buyLabel}
+      data-ev-hot={effectiveEvHot ? "1" : undefined}
+    >
       <header className="horse-card__head">
         <span className="horse-card__mark" aria-hidden>
           {mark || "・"}
@@ -219,24 +200,25 @@ export function HorseEvaluationCard({
         <div className="horse-card__ability-main">
           <div className="horse-card__radar-hero" aria-label="能力バランス">
             <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", flexWrap: "wrap" }}>
-              {/* 素の能力レーダー */}
               <div style={{ textAlign: "center" }}>
                 <div className="horse-card__radar-svg-wrap">
                   <RadarChart horse={hMap} size={200} />
                 </div>
                 <p style={{ fontSize: "0.7em", color: "#6c757d", margin: "2px 0 0" }}>素の能力</p>
               </div>
-              {/* コース特性 + 補正適用済み加重レーダー */}
               <div style={{ textAlign: "center" }}>
                 <div className="horse-card__radar-svg-wrap">
-                  <RadarChart horse={weightedRadarMap} size={200} />
+                  <RadarChart values={weightedRadar} size={200} />
                 </div>
                 <p style={{ fontSize: "0.7em", color: "#0071e3", margin: "2px 0 0" }}>
-                  コース特性・補正
-                  {condition.abilityPriority ? ` (${condition.abilityPriority}重視)` : ""}
+                  条件ウェイト反映（寄与按分）
+                  {condition.abilityPriority ? ` · ${condition.abilityPriority}プリ` : ""}
                 </p>
               </div>
             </div>
+            <p className="horse-card__radar-note" title="現在の条件ウェイトに対する能力寄与の形">
+              スライダー・競馬場・重点項目（2倍）で右パネルが変化します。
+            </p>
             <p className="horse-card__radar-shape">{radarShape.line}</p>
           </div>
           <ul className="horse-card__ability-metrics">
@@ -293,6 +275,30 @@ export function HorseEvaluationCard({
         </p>
 
         <ScoreDiffIndicator diff={result.scoreDiff} />
+
+        <p
+          className="horse-card__score-amplify"
+          title="距離・血統などの素点に対し、補正強度・条件Impactを弱めた場合との差"
+        >
+          補正前 <strong>{result.evaluationBaselineScore.toFixed(1)}</strong>
+          {" → "}
+          補正後 <strong>{result.finalEvaluationScore.toFixed(1)}</strong>
+          {result.evaluationAdjustmentDelta !== 0 ? (
+            <span
+              className={
+                result.evaluationAdjustmentDelta > 0
+                  ? "horse-card__score-amplify-delta--pos"
+                  : "horse-card__score-amplify-delta--neg"
+              }
+            >
+              {" "}
+              ({result.evaluationAdjustmentDelta > 0 ? "+" : ""}
+              {result.evaluationAdjustmentDelta.toFixed(1)})
+            </span>
+          ) : (
+            <span className="horse-card__score-amplify-delta--flat"> （±0.0）</span>
+          )}
+        </p>
 
         {result.buyLabel === BUY_LABELS.DISMISS ? (
           <p className="horse-card__verdict horse-card__verdict--dismiss">

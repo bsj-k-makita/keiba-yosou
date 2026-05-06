@@ -647,6 +647,13 @@ samp {
   text-transform: uppercase;
 }
 
+.adj-panel__help {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--c-text-3);
+}
+
 .adj-panel__chips {
   display: flex;
   flex-wrap: wrap;
@@ -1058,6 +1065,14 @@ samp {
   padding: 22px;
 }
 
+.horse-card--ev-gold {
+  border-color: rgba(212, 175, 55, 0.85);
+  box-shadow:
+    0 0 0 2px rgba(255, 200, 80, 0.55),
+    0 0 22px rgba(255, 210, 90, 0.35);
+  background: linear-gradient(160deg, rgba(255, 250, 220, 0.5), var(--c-white) 55%);
+}
+
 /* buyLabel border accent（本命のみ Azure） */
 .horse-card[data-buylabel="本命候補"] { border-top: 3px solid var(--color-azure); }
 .horse-card[data-buylabel="対抗"]     { border-top: 2px solid var(--color-ink); }
@@ -1261,6 +1276,42 @@ samp {
 .horse-card__score-decomp-val--pos { color: var(--c-green); }
 .horse-card__score-decomp-val--neg { color: var(--c-orange); }
 .horse-card__score-decomp-sep      { color: var(--c-border-m); }
+
+.horse-card__score-amplify {
+  margin: 0 0 10px;
+  font-size: var(--font-size-body);
+  color: var(--c-text-2);
+  letter-spacing: -0.06px;
+}
+
+.horse-card__score-amplify strong {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.horse-card__score-amplify-delta--pos {
+  color: var(--c-green);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.horse-card__score-amplify-delta--neg {
+  color: var(--c-orange);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.horse-card__score-amplify-delta--flat {
+  color: var(--c-text-3);
+}
+
+.horse-card__radar-note {
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--c-text-3);
+  letter-spacing: -0.04px;
+}
 
 /* Score diff */
 .score-diff {

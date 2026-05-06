@@ -105,7 +105,7 @@ export function resolveVenuePhysicalFactorKey(condition: RaceCondition): string 
 }
 
 /**
- * `BASE_COURSE_WEIGHTS` を出発点にし、直線・坂・コーナー・距離・芝ダの案ロジックで補正した後、正規化する。
+ * 戦略ベースウェイト（`strategicWeights`）を出発点にし、直線・坂・コーナー・距離・芝ダの案ロジックで補正した後、正規化する。
  * 未定義会場は入力ベースをそのまま返す。
  */
 export function applyVenuePhysicalFactorAdjustments(base: WeightSet, condition: RaceCondition): WeightSet {
