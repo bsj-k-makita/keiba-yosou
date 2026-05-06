@@ -57,6 +57,7 @@ function inferLapStatus(
   if (inferLapEvaluable(horse, condition)) return "full";
   const lapTotal =
     (result.lapShapeFitBonus ?? 0) +
+    (result.raceAnalysisBonus ?? 0) +
     (result.lapSustainBonus ?? 0) +
     (result.lapQualityBonus ?? 0);
   if (Math.abs(lapTotal) >= 0.1 || (result.lapQualityBonus ?? 0) > 0 || (result.lapSustainBonus ?? 0) > 0) {
@@ -167,7 +168,11 @@ export function HorseListTable({
             const frameNumber = "frameNumber" in horse ? (horse as HorseAbility & { frameNumber?: number }).frameNumber : undefined;
             const frameColor = getFrameColor(frameNumber);
             const isDismiss = r.buyLabel === BUY_LABELS.DISMISS;
-            const lapBonus = (r.lapShapeFitBonus ?? 0) + (r.lapSustainBonus ?? 0) + (r.lapQualityBonus ?? 0);
+            const lapBonus =
+              (r.lapShapeFitBonus ?? 0) +
+              (r.raceAnalysisBonus ?? 0) +
+              (r.lapSustainBonus ?? 0) +
+              (r.lapQualityBonus ?? 0);
             const grades = gradesMap.get(r.horseId);
             const vm = viewModel?.byHorseId.get(horse.horseId);
             const effectiveEv = vm?.effectiveEv;

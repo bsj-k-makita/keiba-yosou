@@ -11,6 +11,8 @@ import { dirname, join } from "path";
 import { load } from "cheerio";
 import { fetchPastRunsForHorse } from "./lib/parseNetkeibaPastRuns.mjs";
 import { enrichInvestmentSignalsInRaceData } from "./lib/investmentSignals.mjs";
+import { attachRaceAnalysisOrLeave } from "./lib/raceAnalysis.mjs";
+import { buildDailyBaselineMaster, saveDailyBaseline, DAILY_BASELINE_PATH } from "./lib/dailyBaseline.mjs";
 import { fetchUtf8, fetchSpUtf8 } from "./lib/netkeibaFetch.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -465,6 +467,7 @@ async function main() {
           entry.pastRuns = Array.isArray(entry.pastRuns) ? entry.pastRuns : [];
         }
       }
+      attachRaceAnalysisOrLeave(data);
       const out = join(RACES_DIR, `${job.raceId}.json`);
       writeFileSync(out, `${JSON.stringify(data, null, 2)}\n`, "utf8");
       const idxRow = {
@@ -508,6 +511,12 @@ async function main() {
     return a.raceNumber - b.raceNumber;
   });
   writeFileSync(INDEX_PATH, `${JSON.stringify(next, null, 2)}\n`, "utf8");
+
+  try {
+    saveDailyBaseline(buildDailyBaselineMaster(RACES_DIR), DAILY_BASELINE_PATH);
+  } catch (e) {
+    process.stderr.write(`daily_baseline rebuild: ${e?.message || e}\n`);
+  }
 
   process.stdout.write(
     `done. wrote ${ok} race files, ${err} failed. index: ${metas.length} new rows (${targetDate ? `${targetDate} replaced` : "all configured dates replaced"}).\n`,

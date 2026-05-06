@@ -1,4 +1,5 @@
 import { load } from "cheerio";
+import { parseChakusaToSeconds } from "./parseNetkeibaPastRuns.mjs";
 
 /**
  * race.netkeiba.com race/result.html の結果テーブルをパースする。
@@ -12,6 +13,7 @@ import { load } from "cheerio";
  *     horseName: string,
  *     final3fSec: number | null,
  *     cornerPassing: string | null,
+ *     marginToWinnerSec: number | null,
  *   }>
  * }}
  */
@@ -42,6 +44,7 @@ export function parseRaceResultNetkeiba(html, raceId = "") {
   const iHorse = idx("馬名") >= 0 ? idx("馬名") : 3;
   const iFinal3f = idx("後3F");
   const iCorner = idx("コーナー通過順") >= 0 ? idx("コーナー通過順") : idx("通過");
+  const iMargin = idx("着差");
 
   const rows = table.find("tbody tr");
   const places = [];
@@ -88,6 +91,13 @@ export function parseRaceResultNetkeiba(html, raceId = "") {
       if (cornerPassing === "") cornerPassing = null;
     }
 
+    let marginToWinnerSec = null;
+    if (iMargin >= 0) {
+      const marginCell = tds.eq(iMargin).text().trim();
+      marginToWinnerSec = parseChakusaToSeconds(marginCell);
+    }
+    if (place === 1) marginToWinnerSec = 0;
+
     places.push({
       place,
       waku,
@@ -95,6 +105,7 @@ export function parseRaceResultNetkeiba(html, raceId = "") {
       horseName,
       final3fSec,
       cornerPassing,
+      marginToWinnerSec,
     });
   });
 

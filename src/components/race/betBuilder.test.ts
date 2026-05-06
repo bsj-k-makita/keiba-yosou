@@ -55,6 +55,7 @@ function result(id: string, name: string, rank: number, label: HorseScoreResult[
     strongAbilities: ["speed"],
     pastRunInsight: "",
     lapShapeFitBonus: 0,
+    raceAnalysisBonus: 0,
     lapSustainBonus: 0,
     lapQualityBonus: 0,
     stepPatternBonus: 0,

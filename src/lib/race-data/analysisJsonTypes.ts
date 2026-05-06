@@ -8,6 +8,18 @@ import type { HorseEvaluationSignals, PastRunRecord, RaceCondition } from "../..
 /** ルート or `analysis` / `analysisJson` 配下 */
 export type AnalysisJsonRoot = {
   raceId: string;
+  /** 結果確定後に付与されるレース質・バイアス（未取得時は無し） */
+  analysis?: {
+    bias?: { innerOuter?: number; frontCloser?: number };
+    lapType?: string;
+    paceBalance?: number;
+    medianFinal3fSec?: number;
+    meanMarginFieldSec?: number;
+    lapStructure?: string;
+    peerBaseline?: Record<string, unknown>;
+    source?: string;
+    computedAt?: string;
+  };
   /** レースメタ（必須想定。欠落時はルートの同名キーも探索） */
   meta?: AnalysisRaceMeta;
   condition?: Partial<RaceCondition> & Record<string, unknown>;

@@ -100,6 +100,8 @@ export type EntryEvaluationBlock = {
   adjustmentBadges?: string[];
   /** ラップ形状一致ボーナス。判定不能のとき 0 */
   lapShapeFitBonus: number;
+  /** 蓄積 raceAnalysis 由来のラップ質・枠バイアス一致 */
+  raceAnalysisBonus: number;
   /** 消耗戦での持続力ボーナス */
   lapSustainBonus: number;
   /** 上がりの質（時計+順位）ボーナス */

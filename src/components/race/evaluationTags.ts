@@ -26,7 +26,11 @@ export function computeMarketAlertLabel(
   const standing = getOddsStanding(horse, horses);
   if (standing == null) return null;
   const finalRank = result.finalRank ?? result.adjustedRank ?? 99;
-  const lapEdge = (result.lapShapeFitBonus ?? 0) + (result.lapSustainBonus ?? 0) + (result.lapQualityBonus ?? 0);
+  const lapEdge =
+    (result.lapShapeFitBonus ?? 0) +
+    (result.raceAnalysisBonus ?? 0) +
+    (result.lapSustainBonus ?? 0) +
+    (result.lapQualityBonus ?? 0);
   const contextEdge =
     (result.pedigreeBonus ?? 0) +
     (result.gateBiasBonus ?? 0) +

@@ -14,19 +14,8 @@ import {
   findL1CloseTypePeers,
   fitLevelFromScore,
 } from "../../domain/race-evaluation/fitScore";
-import {
-  ABILITY_AXIS_DESCRIPTIONS,
-  BUY_LABELS,
-  JUDGMENT,
-  UI,
-} from "../../domain/race-evaluation/lingoConstants";
-import { computePaceFitLevel } from "../../domain/race-evaluation/paceFit";
-import {
-  buildHorseAiShortReview,
-  buildHorseShortComment,
-  buildScoreReasonBrief,
-  buildFitSupplementLine,
-} from "../../domain/race-evaluation/reasonGenerator";
+import { BUY_LABELS, JUDGMENT, UI } from "../../domain/race-evaluation/lingoConstants";
+import { buildFitSupplementLine } from "../../domain/race-evaluation/reasonGenerator";
 import { inferHorseAbilityTypeLabel } from "../../domain/race-evaluation/typeMatcher";
 import { AbilityBar } from "./AbilityBar";
 import { FitLabel } from "./FitLabel";
@@ -34,11 +23,7 @@ import { getFrameColor } from "./frameColor";
 import { RadarChart } from "./RadarChart";
 import { ScoreDiffIndicator } from "./ScoreDiffIndicator";
 import { TypeMatchList } from "./TypeMatchList";
-import {
-  computeConnectionSpecialBadges,
-  computeMarketAlertLabel,
-  getLapProfileVisual,
-} from "./evaluationTags";
+import { computeConnectionSpecialBadges, computeMarketAlertLabel } from "./evaluationTags";
 import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
 import { netkeibaHorseResultUrl } from "../../lib/netkeibaUrls";
 
@@ -99,20 +84,10 @@ export function HorseEvaluationCard({
     .join(" / ");
 
   const typeLabel = inferHorseAbilityTypeLabel(horse, condition);
-  const shortComment = useMemo(
-    () => buildHorseShortComment(horse, result, condition),
-    [horse, result, condition],
-  );
   const fitLine = useMemo(
     () => buildFitSupplementLine(horse, condition),
     [horse, condition],
   );
-  const scoreReason = useMemo(() => buildScoreReasonBrief(result), [result]);
-  const paceFit = useMemo(
-    () => computePaceFitLevel(horse, condition),
-    [horse, condition],
-  );
-
   const l1Peers = useMemo(
     () => findL1CloseTypePeers(horse, allHorses, 2),
     [horse, allHorses],
@@ -151,15 +126,14 @@ export function HorseEvaluationCard({
     (result.trendBonus ?? 0) +
     (result.paceBalanceBonus ?? 0) +
     (result.tripContextBonus ?? 0);
-  const lapTotal = (result.lapShapeFitBonus ?? 0) + (result.lapSustainBonus ?? 0) + (result.lapQualityBonus ?? 0);
-  const lapVisual = getLapProfileVisual(result.lapProfile);
+  const lapTotal =
+    (result.lapShapeFitBonus ?? 0) +
+    (result.raceAnalysisBonus ?? 0) +
+    (result.lapSustainBonus ?? 0) +
+    (result.lapQualityBonus ?? 0);
   const marketAlert = useMemo(
     () => computeMarketAlertLabel(horse, result, allHorses),
     [allHorses, horse, result],
-  );
-  const aiShortReview = useMemo(
-    () => buildHorseAiShortReview(horse, result, condition, allHorses, grades, marketAlert ?? undefined),
-    [allHorses, condition, grades, horse, marketAlert, result],
   );
   const connectionBadges = useMemo(
     () => computeConnectionSpecialBadges(horse, condition),
@@ -230,15 +204,8 @@ export function HorseEvaluationCard({
         </div>
       </header>
 
-      <div className="horse-card__sub-row">
-        <p className="horse-card__pace-fit" title="脚質に対する展開の噛み合い（能力の向きではない）">
-          {UI.PACE_FIT}
-          {paceFit}
-        </p>
-        <span className="horse-card__lap-profile" title="ラップ適性プロファイル">
-          {lapVisual.icon} {lapVisual.label}
-        </span>
-        {result.roleHint !== "判定不能" && (
+      {result.roleHint !== "判定不能" && (
+        <div className="horse-card__sub-row">
           <span
             className={`horse-card__role-badge horse-card__role-badge--${result.roleHint === "頭" ? "head" : "axis"}`}
             title={
@@ -249,8 +216,8 @@ export function HorseEvaluationCard({
           >
             {result.roleHint}
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       <section className="horse-card__ability-panel" aria-label="基本能力">
         <h3 className="horse-card__ability-title">基本能力</h3>
@@ -277,14 +244,6 @@ export function HorseEvaluationCard({
             ))}
           </ul>
         </div>
-        <dl className="horse-card__ability-guide">
-          {ABILITY_KEYS.map((k) => (
-            <div key={`guide-${k}`} className="horse-card__ability-guide-row">
-              <dt className="horse-card__ability-guide-term">{ABILITY_LABELS[k]}</dt>
-              <dd className="horse-card__ability-guide-desc">{ABILITY_AXIS_DESCRIPTIONS[k]}</dd>
-            </div>
-          ))}
-        </dl>
       </section>
 
       <div className="horse-card__judge">
@@ -389,26 +348,23 @@ export function HorseEvaluationCard({
       </div>
 
       <section className="horse-card__brief" aria-label="短評">
-        <p className="horse-card__brief-line">{aiShortReview}</p>
-        <p className={`horse-card__brief-conclusion horse-card__brief-conclusion--${shortComment.tone}`}>
-          <span className="horse-card__brief-label">{shortComment.label}</span>
-          <span>{shortComment.conclusion}</span>
+        <p className="horse-card__brief-line horse-card__brief-line--compact">
+          <span className="horse-card__brief-mark" aria-label="印">
+            {mark || "・"}
+          </span>
+          {" · "}
+          <span>
+            <strong>点数</strong> {result.finalEvaluationScore.toFixed(1)}
+          </span>
+          {" · "}
+          {result.buyLabel === BUY_LABELS.DISMISS ? (
+            <strong>{BUY_LABELS.DISMISS}</strong>
+          ) : (
+            <>
+              <strong>{JUDGMENT.BUY}</strong> {result.buyLabel}
+            </>
+          )}
         </p>
-        <p className="horse-card__brief-line">
-          <strong>展開:</strong> {shortComment.scenario}
-        </p>
-        <p className="horse-card__brief-line">
-          <strong>過去走:</strong> {shortComment.past}
-        </p>
-        <p className="horse-card__brief-line">
-          <strong>点数根拠:</strong> {shortComment.scoring}
-        </p>
-        <div className="horse-card__score-why" aria-label="点数理由">
-          <p className="horse-card__brief-line">
-            <strong>点数理由:</strong> {scoreReason.headline}
-          </p>
-          <p className="horse-card__brief-line">{scoreReason.detail}</p>
-        </div>
       </section>
 
       <FitLabel level={fitLevel} supplement={fitLine} />

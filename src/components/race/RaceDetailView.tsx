@@ -16,7 +16,7 @@ import {
 } from "../../domain/race-evaluation";
 import { RaceAdjustmentPanel, loadGlobalProfile } from "./RaceAdjustmentPanel";
 import { HorseEvaluationCard } from "./HorseEvaluationCard";
-import { FutureRaceInsightsStub, RaceEvaluationSummary } from "./RaceEvaluationSummary";
+import { RaceEvaluationSummary } from "./RaceEvaluationSummary";
 import { RaceConclusionPanel } from "./RaceConclusionPanel";
 import { RaceNavBar } from "./RaceNavBar";
 import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
@@ -294,6 +294,11 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       return order.get(a.horseId)! - order.get(b.horseId)!;
     });
   }, [condition, results]);
+  /** AI予想タブ：pt（補正後スコア）降順 */
+  const sortedByPtDesc = useMemo(() => {
+    if (condition == null) return [];
+    return [...results].sort((a, b) => b.adjustedScore - a.adjustedScore);
+  }, [condition, results]);
   const topScore = useMemo(
     () => sorted.reduce((max, row) => Math.max(max, row.adjustedScore), 0),
     [sorted],
@@ -506,7 +511,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             <section className="ai-dashboard" aria-label="AI予想ダッシュボード">
               <h2 className="app__section-title app__section-title--pop">AI能力スコア</h2>
               <div className="ai-dashboard__chart">
-                {sorted.map((row) => {
+                {sortedByPtDesc.map((row) => {
                   const horse = horses.find((h) => h.horseId === row.horseId);
                   if (!horse) return null;
                   const barPercent = topScore > 0 ? Math.max(8, (row.adjustedScore / topScore) * 100) : 0;
@@ -618,12 +623,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             />
           )}
 
-          {tab !== "result" && (
-            <section className="app__supplement" aria-label="補足">
-              <h2 className="app__section-title">詳細・補足</h2>
-              <FutureRaceInsightsStub />
-            </section>
-          )}
         </div>
 
         <aside className="detail-sidebar">

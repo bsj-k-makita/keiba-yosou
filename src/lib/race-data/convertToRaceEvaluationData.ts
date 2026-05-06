@@ -1,5 +1,11 @@
 import { GROUND_ADJUSTMENTS } from "../../domain/race-evaluation/adjustments";
-import type { InvestmentCommentInput, RaceCondition } from "../../domain/race-evaluation/abilityTypes";
+import type {
+  InvestmentCommentInput,
+  RaceAnalysisSnapshot,
+  RaceCondition,
+  RacePeerBaselineSummary,
+  RaceStoredLapType,
+} from "../../domain/race-evaluation/abilityTypes";
 import type { DisplayGrade } from "../../domain/race-evaluation/abilityGrades";
 import { calcHorseScore, getFinalWeights, type HorseAbility, weightsToDemand0to100 } from "../../domain/race-evaluation";
 import {
@@ -43,6 +49,87 @@ function b(v: unknown): boolean | undefined {
 
 function round1(x: number): number {
   return Math.round(x * 10) / 10;
+}
+
+const STORED_LAP_TYPES = new Set<RaceStoredLapType>(["late_accelerated", "early_pressured", "even_pace", "neutral"]);
+
+function parseStoredLapType(v: unknown): RaceStoredLapType | undefined {
+  if (typeof v !== "string" || !STORED_LAP_TYPES.has(v as RaceStoredLapType)) return undefined;
+  return v as RaceStoredLapType;
+}
+
+function raceAnalysisFromUnknown(o: Record<string, unknown> | null | undefined): RaceAnalysisSnapshot | undefined {
+  if (o == null) return undefined;
+  const biasRaw = o["bias"] as Record<string, unknown> | undefined;
+  let bias: RaceAnalysisSnapshot["bias"];
+  if (biasRaw != null) {
+    bias = {
+      innerOuter: n(biasRaw["innerOuter"]),
+      frontCloser: n(biasRaw["frontCloser"]),
+      innerShare: n(biasRaw["innerShare"]),
+      outerSashiShare: n(biasRaw["outerSashiShare"]),
+    };
+  }
+  const lapType = parseStoredLapType(o["lapType"]);
+  const lapStructureLabel =
+    typeof o["lapStructure"] === "string"
+      ? o["lapStructure"]
+      : typeof o["lapStructureLabel"] === "string"
+        ? o["lapStructureLabel"]
+        : undefined;
+  const peerRaw = o["peerBaseline"];
+  let peerBaseline: RacePeerBaselineSummary | undefined;
+  if (peerRaw != null && typeof peerRaw === "object") {
+    const p = peerRaw as Record<string, unknown>;
+    peerBaseline = {
+      peerRaceCount: n(p["peerRaceCount"]),
+      avgPaceBalancePeer: n(p["avgPaceBalancePeer"]),
+      avgMedianFinal3fPeer: n(p["avgMedianFinal3fPeer"]),
+      avgMeanMarginPeer: n(p["avgMeanMarginPeer"]),
+      fallbackFromFile: typeof p["fallbackFromFile"] === "boolean" ? p["fallbackFromFile"] : undefined,
+      savedDayRaceCount: n(p["savedDayRaceCount"]),
+      savedAvgPaceBalance: n(p["savedAvgPaceBalance"]),
+    };
+  }
+  const snap: RaceAnalysisSnapshot = {
+    ...(bias != null ? { bias } : {}),
+    ...(lapType != null ? { lapType } : {}),
+    paceBalance: n(o["paceBalance"]),
+    medianFinal3fSec: n(o["medianFinal3fSec"]),
+    meanMarginFieldSec: n(o["meanMarginFieldSec"]),
+    ...(lapStructureLabel != null ? { lapStructureLabel } : {}),
+    ...(peerBaseline != null ? { peerBaseline } : {}),
+    source: typeof o["source"] === "string" ? o["source"] : undefined,
+    computedAt: typeof o["computedAt"] === "string" ? o["computedAt"] : undefined,
+  };
+  if (
+    snap.bias == null &&
+    snap.lapType == null &&
+    snap.paceBalance == null &&
+    snap.medianFinal3fSec == null &&
+    snap.meanMarginFieldSec == null &&
+    snap.lapStructureLabel == null &&
+    snap.peerBaseline == null &&
+    snap.source == null &&
+    snap.computedAt == null
+  ) {
+    return undefined;
+  }
+  return snap;
+}
+
+function mergeRaceAnalysisFromDoc(doc: Record<string, unknown>): RaceAnalysisSnapshot | undefined {
+  const cond = doc["condition"] as Record<string, unknown> | undefined;
+  const fromCondRa = cond?.["raceAnalysis"];
+  if (fromCondRa != null && typeof fromCondRa === "object") {
+    const a = raceAnalysisFromUnknown(fromCondRa as Record<string, unknown>);
+    if (a != null) return a;
+  }
+  const root = doc["analysis"];
+  if (root != null && typeof root === "object") {
+    return raceAnalysisFromUnknown(root as Record<string, unknown>);
+  }
+  return undefined;
 }
 
 /**
@@ -259,6 +346,7 @@ function toRaceInfo(raceId: string, pack: ReturnType<typeof mergeMeta>): RaceInf
 }
 
 function toCondition(doc: Record<string, unknown>, pack: ReturnType<typeof mergeMeta>): RaceCondition {
+  const mergedRa = mergeRaceAnalysisFromDoc(doc);
   const raw = (doc["condition"] ?? null) as Record<string, unknown> | null;
   if (raw != null) {
     return {
@@ -299,6 +387,7 @@ function toCondition(doc: Record<string, unknown>, pack: ReturnType<typeof merge
               biasSync: b((raw["quickAdjustments"] as Record<string, unknown>)["biasSync"]),
             }
           : undefined,
+      ...(mergedRa != null ? { raceAnalysis: mergedRa } : {}),
     };
   }
   return {
@@ -313,6 +402,7 @@ function toCondition(doc: Record<string, unknown>, pack: ReturnType<typeof merge
     adjustmentStrength: "middle",
     trackBiasStrength01: undefined,
     turnCount: undefined,
+    ...(mergedRa != null ? { raceAnalysis: mergedRa } : {}),
   };
 }
 
@@ -436,6 +526,7 @@ function toRaceEntryFromPreserved(
       lapFocusBonus: recomputed?.lapFocusBonus ?? 0,
       adjustmentBadges: recomputed?.adjustmentBadges ?? [],
       lapShapeFitBonus: recomputed?.lapShapeFitBonus ?? 0,
+      raceAnalysisBonus: recomputed?.raceAnalysisBonus ?? 0,
       lapSustainBonus: recomputed?.lapSustainBonus ?? 0,
       lapQualityBonus: recomputed?.lapQualityBonus ?? 0,
       stepPatternBonus: recomputed?.stepPatternBonus ?? 0,

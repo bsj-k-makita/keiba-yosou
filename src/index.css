@@ -3964,8 +3964,8 @@ samp {
 
 .bet-ticket__donut {
   --p: 0%;
-  width: 43px;
-  height: 43px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: conic-gradient(var(--c-blue) var(--p), #3b3b3b 0);
   display: inline-flex;
@@ -3977,8 +3977,8 @@ samp {
 
 .bet-ticket__donut::before {
   content: "";
-  width: 29px;
-  height: 29px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: var(--c-black);
 }

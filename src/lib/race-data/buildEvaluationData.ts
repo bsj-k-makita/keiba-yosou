@@ -102,6 +102,7 @@ export function buildEvaluationData(input: BuildInput): RaceEvaluationData {
           lapFocusBonus: r.lapFocusBonus,
           adjustmentBadges: r.adjustmentBadges,
           lapShapeFitBonus: r.lapShapeFitBonus,
+          raceAnalysisBonus: r.raceAnalysisBonus,
           lapSustainBonus: r.lapSustainBonus,
           lapQualityBonus: r.lapQualityBonus,
           stepPatternBonus: r.stepPatternBonus,

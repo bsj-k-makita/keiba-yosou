@@ -357,7 +357,11 @@ function inferCoreAbility(horse: HorseAbility, grades?: AbilityGradeRow): string
 }
 
 function inferLapFitLabel(result: HorseScoreResult, condition: RaceCondition): string {
-  const lapTotal = (result.lapShapeFitBonus ?? 0) + (result.lapSustainBonus ?? 0) + (result.lapQualityBonus ?? 0);
+  const lapTotal =
+    (result.lapShapeFitBonus ?? 0) +
+    (result.raceAnalysisBonus ?? 0) +
+    (result.lapSustainBonus ?? 0) +
+    (result.lapQualityBonus ?? 0);
   if ((condition.section200mSec?.length ?? 0) < 4 && Math.abs(lapTotal) < 0.1) return "判定不能";
   return result.lapProfile;
 }
@@ -427,6 +431,7 @@ function summarizeScoringByComponents(result: HorseScoreResult): string {
     result.raceRelativeScore +
       result.paceFitBonus +
       result.lapShapeFitBonus +
+      (result.raceAnalysisBonus ?? 0) +
       result.lapSustainBonus +
       result.lapQualityBonus +
       result.distanceFitBonus +
@@ -515,6 +520,7 @@ export function buildHorseShortComment(
 export function buildScoreReasonBrief(result: HorseScoreResult): ScoreReasonBrief {
   const pace = result.paceFitBonus ?? 0;
   const lap = result.lapShapeFitBonus ?? 0;
+  const lapStored = result.raceAnalysisBonus ?? 0;
   const lapSustain = result.lapSustainBonus ?? 0;
   const lapQuality = result.lapQualityBonus ?? 0;
   const dist = result.distanceFitBonus ?? 0;
@@ -530,10 +536,11 @@ export function buildScoreReasonBrief(result: HorseScoreResult): ScoreReasonBrie
   const contextual = pedigree + gate + gateStyle + connections + trend + paceBalance + trip;
   const paceText =
     pace >= 1.0 ? "展開がハマって加点" : pace <= -1.0 ? "展開が噛み合わず減点" : "展開影響は小さい";
+  const lapSum = lap + lapStored + lapSustain + lapQuality;
   const lapText =
-    lap + lapSustain + lapQuality >= 1.2
+    lapSum >= 1.2
       ? "ラップ適性あり"
-      : lap + lapSustain + lapQuality <= -0.8
+      : lapSum <= -0.8
         ? "ラップ適性が弱い"
         : "ラップ適性は中立";
   const scoreText =
@@ -545,7 +552,7 @@ export function buildScoreReasonBrief(result: HorseScoreResult): ScoreReasonBrie
   const strong = result.strongAbilities[0] ? ABILITY_LABELS[result.strongAbilities[0]] : "総合力";
 
   const headline = `${paceText}・${lapText}。${scoreText}。`;
-  const detail = `根拠: 相対${result.raceRelativeScore.toFixed(1)} + 展開${formatSigned(pace)} + ラップ${formatSigned(lap + lapSustain + lapQuality)} + 距離${formatSigned(dist)} + 実績${formatSigned(cls + step)} + 文脈補正${formatSigned(contextual)} = 最終${result.finalEvaluationScore.toFixed(1)}（強み: ${strong}）`;
+  const detail = `根拠: 相対${result.raceRelativeScore.toFixed(1)} + 展開${formatSigned(pace)} + ラップ${formatSigned(lapSum)} + 距離${formatSigned(dist)} + 実績${formatSigned(cls + step)} + 文脈補正${formatSigned(contextual)} = 最終${result.finalEvaluationScore.toFixed(1)}（強み: ${strong}）`;
   return { headline, detail };
 }
 

@@ -146,6 +146,43 @@ export type AbilityPriority =
 
 export type QuickAdjustmentKey = "lastRunReset" | "lapFocus" | "biasSync";
 
+/** `races/*.json` の `analysis.lapType` と同一キー */
+export type RaceStoredLapType = "late_accelerated" | "early_pressured" | "even_pace" | "neutral";
+
+/**
+ * 結果確定後に蓄積するレース質・枠順バイアス（fetch スクリプトが JSON に書く想定）
+ */
+/** 同日・同場・同 surface の他レース／保存済み daily_baseline による参照ライン */
+export type RacePeerBaselineSummary = {
+  peerRaceCount?: number;
+  avgPaceBalancePeer?: number;
+  avgMedianFinal3fPeer?: number;
+  avgMeanMarginPeer?: number;
+  /** ディスク上のピアが無く daily_baseline.json を参照した */
+  fallbackFromFile?: boolean;
+  savedDayRaceCount?: number;
+  savedAvgPaceBalance?: number;
+};
+
+export type RaceAnalysisSnapshot = {
+  bias?: {
+    innerOuter?: number;
+    frontCloser?: number;
+    innerShare?: number;
+    outerSashiShare?: number;
+  };
+  lapType?: RaceStoredLapType;
+  paceBalance?: number;
+  /** フィールド全頭の上がり3F中央値（秒） */
+  medianFinal3fSec?: number;
+  /** 全頭の勝ち馬からの平均着差（秒換算） */
+  meanMarginFieldSec?: number;
+  lapStructureLabel?: string;
+  peerBaseline?: RacePeerBaselineSummary;
+  source?: string;
+  computedAt?: string;
+};
+
 export type RaceCondition = {
   venue: string;
   courseKey?: string;
@@ -192,6 +229,11 @@ export type RaceCondition = {
   softmaxTemperature?: number;
   /** 直前補正（クイックトグル） */
   quickAdjustments?: Partial<Record<QuickAdjustmentKey, boolean>>;
+  /**
+   * 過去に同一レースで確定したラップ質・バイアス（または手入力）。
+   * `section200mSec` が無い preview でも lapType 適性を評価できる。
+   */
+  raceAnalysis?: RaceAnalysisSnapshot;
 };
 
 export type BuyLabel = BuyLabelLingo;
@@ -274,6 +316,8 @@ export type HorseScoreResult = {
   pastRunInsight: string;
   /** ラップ形状一致ボーナス。データ不足で判定不能のとき 0 */
   lapShapeFitBonus: number;
+  /** 蓄積 `raceAnalysis` に基づく適性・バイアス一致ボーナス */
+  raceAnalysisBonus: number;
   /** 消耗戦での減速耐性（持続力）ボーナス */
   lapSustainBonus: number;
   /** 上がりの質（時計＋順位）ボーナス */

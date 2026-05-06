@@ -39,6 +39,7 @@ import { computeContextualBonuses } from "./contextualBonuses";
 import { BUY_LABELS } from "./lingoConstants";
 import { ADJUSTMENT_STRENGTH } from "./adjustments";
 import { computeCourseTraitHits } from "./courseTraitResolver";
+import { computeRaceAnalysisBonus } from "./storedRaceAnalysisBonus";
 
 export { extractStrongAbilities } from "./strongAbilities";
 export {
@@ -305,6 +306,7 @@ export function evaluateRace(
     // ラップ形状一致
     const lapFit = computeLapShapeFit(h, condition);
     const lapShapeFitBonus = lapFit.reliable ? lapFit.score : 0;
+    const raceAnalysisBonus = computeRaceAnalysisBonus(h, condition, lapFit.reliable);
 
     return {
       horseId: h.horseId,
@@ -339,6 +341,7 @@ export function evaluateRace(
       lapFocusBonus: 0,
       adjustmentBadges: [],
       lapShapeFitBonus: round1(lapShapeFitBonus),
+      raceAnalysisBonus: round1(raceAnalysisBonus),
       lapSustainBonus: round1(lapFit.sustainBonus),
       lapQualityBonus: round1(lapFit.qualityBonus),
       stepPatternBonus: round1(classBreakdown.stepPatternBonus),
@@ -419,7 +422,8 @@ export function evaluateRace(
     r.courseTraitBonus = courseTraitBonus;
     r.courseTraitReasons = courseTraitReasons;
     const classCombined = round1(clamp(cBonus + r.stepPatternBonus, -4.5, 5.5));
-    const lapStack = r.lapShapeFitBonus + r.lapSustainBonus + r.lapQualityBonus;
+    const lapStack =
+      r.lapShapeFitBonus + r.raceAnalysisBonus + r.lapSustainBonus + r.lapQualityBonus;
     r.evaluationBaselineScore = combineFinalEvaluationScore(
       relScore,
       pBonus,
