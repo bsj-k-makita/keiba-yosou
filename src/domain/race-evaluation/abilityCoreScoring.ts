@@ -1,4 +1,4 @@
-import { ABILITY_KEYS, type HorseAbility, type WeightSet } from "./abilityTypes";
+import { ABILITY_KEYS, type HorseAbility, type RaceCondition, type WeightSet } from "./abilityTypes";
 import { reproducibilityDelta, riskPenaltyPoints } from "./evaluationSignals";
 import { getEffectiveEvaluationSignals } from "./resolveEvaluationSignals";
 import { calcHorseScore, meanAbilityScore } from "./weightResolver";
@@ -32,43 +32,63 @@ export function conditionScore(horse: HorseAbility, finalWeights: WeightSet): nu
   return calcHorseScore(horse, finalWeights);
 }
 
-// データなしフォールバック: 基礎45% + 条件55%（条件感度を高めるため条件寄りに）
-const RACE_ADJ_BASE = 0.45;
-const RACE_ADJ_COND = 0.55;
-// MAX性能あり: 基礎35% + 条件45% + MAX20%
-const RACE_ADJ_BASE_MAX = 0.35;
-const RACE_ADJ_COND_MAX = 0.45;
-const RACE_ADJ_MAXPERF = 0.20;
+type MixWeights = {
+  base: number;
+  condition: number;
+  maxPerf: number;
+};
+
+const MIX_BY_STRENGTH: Record<RaceCondition["adjustmentStrength"], { withoutMax: MixWeights; withMax: MixWeights }> = {
+  weak: {
+    withoutMax: { base: 0.45, condition: 0.55, maxPerf: 0 },
+    withMax: { base: 0.35, condition: 0.45, maxPerf: 0.20 },
+  },
+  middle: {
+    withoutMax: { base: 0.30, condition: 0.70, maxPerf: 0 },
+    withMax: { base: 0.20, condition: 0.65, maxPerf: 0.15 },
+  },
+  strong: {
+    withoutMax: { base: 0.10, condition: 0.90, maxPerf: 0 },
+    withMax: { base: 0.08, condition: 0.82, maxPerf: 0.10 },
+  },
+};
 
 /**
- * レース内相対化の前の合成分（フォールバック: 基礎 60% ＋ 今回条件 40%）
+ * レース内相対化の前の合成分。
+ * 補正強度に応じて intrinsic と条件適性の比率を切り替える。
  */
 export function raceAdjustedMix(
   basePortion: number,
   conditionPortion: number,
+  strength: RaceCondition["adjustmentStrength"] = "middle",
 ): number {
-  return RACE_ADJ_BASE * basePortion + RACE_ADJ_COND * conditionPortion;
+  const mix = MIX_BY_STRENGTH[strength].withoutMax;
+  return mix.base * basePortion + mix.condition * conditionPortion;
 }
 
 /**
  * 相対化の入力。precomputed な intrinsic と conditionScore を受け取る。
- * maxPerf が reliable のとき: 基礎50% + 条件30% + MAX20%
- * それ以外: 基礎60% + 条件40%（従来と同等）
+ * maxPerf が reliable の場合は強度別の withMax 配合を使い、
+ * 非 reliable 時は withoutMax 配合を使う。
  */
 export function raceAdjustedInput(
   intrinsicScore: number,
   conditionScoreValue: number,
   maxPerf?: MaxPerfResult,
   classLevelBonus: number = 0,
+  strength: RaceCondition["adjustmentStrength"] = "middle",
 ): number {
   const classMix = classLevelBonus * 0.9;
+  const profile = MIX_BY_STRENGTH[strength];
   if (maxPerf?.reliable) {
+    const mix = profile.withMax;
     return (
-      RACE_ADJ_BASE_MAX * intrinsicScore +
-      RACE_ADJ_COND_MAX * conditionScoreValue +
-      RACE_ADJ_MAXPERF * maxPerf.score +
+      mix.base * intrinsicScore +
+      mix.condition * conditionScoreValue +
+      mix.maxPerf * maxPerf.score +
       classMix
     );
   }
-  return RACE_ADJ_BASE * intrinsicScore + RACE_ADJ_COND * conditionScoreValue + classMix;
+  const mix = profile.withoutMax;
+  return mix.base * intrinsicScore + mix.condition * conditionScoreValue + classMix;
 }

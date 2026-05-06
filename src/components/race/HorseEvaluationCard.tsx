@@ -47,8 +47,6 @@ type Props = {
   grades: AbilityGradeRow;
   /** 0〜100：適合度（今回向き）用。レーダー表示には使わない */
   demand0to100: Record<AbilityKey, number>;
-  /** 条件ウェイト反映後の按分（レーダー形状のリアルタイム更新用） */
-  weightedRadar: Record<AbilityKey, number>;
   allHorses: HorseAbility[];
   condition: RaceCondition;
   compact?: boolean;
@@ -70,7 +68,6 @@ export function HorseEvaluationCard({
   result,
   grades,
   demand0to100,
-  weightedRadar,
   allHorses,
   condition,
   compact = false,
@@ -199,25 +196,12 @@ export function HorseEvaluationCard({
         <h3 className="horse-card__ability-title">基本能力</h3>
         <div className="horse-card__ability-main">
           <div className="horse-card__radar-hero" aria-label="能力バランス">
-            <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", flexWrap: "wrap" }}>
-              <div style={{ textAlign: "center" }}>
-                <div className="horse-card__radar-svg-wrap">
-                  <RadarChart horse={hMap} size={200} />
-                </div>
-                <p style={{ fontSize: "0.7em", color: "#6c757d", margin: "2px 0 0" }}>素の能力</p>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div className="horse-card__radar-svg-wrap">
-                  <RadarChart values={weightedRadar} size={200} />
-                </div>
-                <p style={{ fontSize: "0.7em", color: "#0071e3", margin: "2px 0 0" }}>
-                  条件ウェイト反映（寄与按分）
-                  {condition.abilityPriority ? ` · ${condition.abilityPriority}プリ` : ""}
-                </p>
-              </div>
+            <div className="horse-card__radar-svg-wrap">
+              <RadarChart horse={hMap} size={200} />
             </div>
-            <p className="horse-card__radar-note" title="現在の条件ウェイトに対する能力寄与の形">
-              スライダー・競馬場・重点項目（2倍）で右パネルが変化します。
+            <p className="horse-card__radar-caption">素の能力（5項目の相対バランス）</p>
+            <p className="horse-card__radar-note">
+              条件・スライダー・重点項目の反映はスコア側にのみ適用されています。
             </p>
             <p className="horse-card__radar-shape">{radarShape.line}</p>
           </div>

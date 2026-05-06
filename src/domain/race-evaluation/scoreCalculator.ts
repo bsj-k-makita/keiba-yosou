@@ -66,6 +66,19 @@ function conditionImpactBonusFromDiff(
     return round1(clamp(scoreDiff * 1.8, -6, 6));
   }
   if (strength === "middle") {
+    return round1(clamp(scoreDiff * 4.8, -16, 16));
+  }
+  return round1(clamp(scoreDiff * 8.0, -36, 36));
+}
+
+function weakTierImpactFromDiff(
+  scoreDiff: number,
+  strength: keyof typeof ADJUSTMENT_STRENGTH,
+): number {
+  if (strength === "weak") {
+    return round1(clamp(scoreDiff * 1.8, -6, 6));
+  }
+  if (strength === "middle") {
     return round1(clamp(scoreDiff * 3.5, -12, 12));
   }
   return round1(clamp(scoreDiff * 6.0, -25, 25));
@@ -142,7 +155,13 @@ export function evaluateRace(
     // raceAdjustedInput: precomputed intrinsic + conditionScore + maxPerf
     const cond = round1(conditionScore(h, finalWeights));
     const rAdj = round1(
-      raceAdjustedInput(intrinsic, cond, maxPerf, classBreakdown.classBonus + classBreakdown.stepPatternBonus),
+      raceAdjustedInput(
+        intrinsic,
+        cond,
+        maxPerf,
+        classBreakdown.classBonus + classBreakdown.stepPatternBonus,
+        condition.adjustmentStrength,
+      ),
     );
 
     const baseScore = round1(rawBase);
@@ -197,8 +216,10 @@ export function evaluateRace(
     };
   });
 
+  const relativeMode = condition.adjustmentStrength === "strong" ? "preserve_absolute" : "normalized";
   const rel = computeRaceRelativeScores(
     results.map((r) => ({ horseId: r.horseId, raceAdjustedInput: r.raceAdjustedInput })),
+    relativeMode,
   );
   for (const h of evalHorses) {
     const r = results.find((x) => x.horseId === h.horseId);
@@ -223,7 +244,7 @@ export function evaluateRace(
       contextual.paceBalanceBonus +
       contextual.tripContextBonus;
     const conditionImpactBonus = conditionImpactBonusFromDiff(r.scoreDiff, condition.adjustmentStrength);
-    const weakTierImpact = round1(clamp(r.scoreDiff * 1.8, -6, 6));
+    const weakTierImpact = weakTierImpactFromDiff(r.scoreDiff, condition.adjustmentStrength);
     const dScaled = round1(dBonus * strengthMult);
     const contextualScaled = round1(contextualTotal * strengthMult);
     r.raceRelativeScore = relScore;

@@ -87,6 +87,13 @@
   --c-panel-border: var(--color-silver-mist);
   --c-bet-ticket-bg: var(--color-snow);
   --c-bet-ticket-border: var(--color-silver-mist);
+  /* フォーム・アラート等（フォールバック無しでテーマ追従させる） */
+  --c-bg: #f8f9fb;
+  --c-surface-alt: #eef1f7;
+  --c-yellow-bg: #fffbeb;
+  --c-text-sub: #555;
+  --ev-pos: #14804a;
+  --ev-neg: #c62828;
   --font-pop: var(--font-ui);
 
   --r-xs: 4px;
@@ -184,6 +191,12 @@
   --c-panel-border: #424245;
   --c-bet-ticket-bg: #2c2c2e;
   --c-bet-ticket-border: #424245;
+  --c-bg: #2c2c2e;
+  --c-surface-alt: #3a3a3c;
+  --c-yellow-bg: rgba(255, 179, 64, 0.16);
+  --c-text-sub: var(--color-graphite);
+  --ev-pos: #4ade80;
+  --ev-neg: #f87171;
 }
 
 * {
@@ -1305,11 +1318,23 @@ samp {
   color: var(--c-text-3);
 }
 
-.horse-card__radar-note {
-  margin: 6px 0 0;
+.horse-card__radar-caption {
+  margin: 2px 0 0;
   font-size: 11px;
   line-height: 1.35;
   color: var(--c-text-3);
+  letter-spacing: -0.04px;
+}
+
+.horse-card__radar-note {
+  margin: 8px 0 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  background: var(--c-pale);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--c-text-2);
   letter-spacing: -0.04px;
 }
 
@@ -1427,6 +1452,12 @@ samp {
   border: 1px solid #fed7aa;
 }
 
+:root[data-theme="dark"] .horse-card__special-badge {
+  color: #fcd34d;
+  background: rgba(252, 211, 77, 0.12);
+  border-color: rgba(252, 211, 77, 0.35);
+}
+
 .horse-card__special-badge[data-kind="temperament"] {
   color: var(--c-red);
   background: var(--c-red-bg);
@@ -1464,7 +1495,7 @@ samp {
   padding: 8px 10px;
   border: 1px dashed var(--c-border);
   border-radius: var(--r-sm);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--c-chip-bg);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1574,6 +1605,31 @@ samp {
   border-color: #d1d5db;
 }
 
+:root[data-theme="dark"] .horse-card__ability-grade[data-grade="S"] {
+  color: #fcd34d;
+  background: rgba(252, 211, 77, 0.14);
+  border-color: rgba(252, 211, 77, 0.4);
+}
+
+:root[data-theme="dark"] .horse-card__ability-grade[data-grade="A+"],
+:root[data-theme="dark"] .horse-card__ability-grade[data-grade="A"] {
+  color: #6ee7b7;
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+:root[data-theme="dark"] .horse-card__ability-grade[data-grade="B"] {
+  color: var(--c-blue-bright);
+  background: rgba(10, 132, 255, 0.16);
+  border-color: rgba(10, 132, 255, 0.35);
+}
+
+:root[data-theme="dark"] .horse-card__ability-grade[data-grade="C"] {
+  color: var(--color-ink);
+  background: rgba(163, 163, 171, 0.22);
+  border-color: var(--c-border-m);
+}
+
 /* Radar */
 .horse-card__radar-hero {
   display: block;
@@ -1604,6 +1660,31 @@ samp {
 .radar__axlab {
   font-family: var(--font-ui);
   dominant-baseline: middle;
+  fill: var(--c-text-2);
+}
+
+.radar__grid {
+  stroke: var(--c-border);
+  stroke-width: 0.75;
+}
+
+.radar__grid--outer {
+  stroke: var(--c-border-m);
+  stroke-width: 1;
+}
+
+.radar__spoke {
+  stroke: var(--c-border);
+}
+
+.radar__area {
+  fill: var(--c-blue-bg);
+  stroke: var(--c-blue);
+}
+
+.radar__vertex {
+  fill: var(--c-blue);
+  stroke: var(--c-white);
 }
 
 .radar {
@@ -1947,14 +2028,6 @@ samp {
   background: var(--c-pale);
   border-radius: var(--r-sm);
   border: 1px solid var(--c-border);
-}
-
-.horse-card__radar-note {
-  margin: 8px 0 4px;
-  padding: 8px 10px;
-  background: var(--c-pale);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-sm);
 }
 
 .horse-card__radar-legendline {
@@ -2629,6 +2702,30 @@ samp {
   .view-tabs {
     position: static;
     top: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+    row-gap: 10px;
+    padding: 10px 0 12px;
+    border-bottom: none;
+    margin-top: 8px;
+  }
+
+  .view-tabs__tab {
+    flex: 1 1 calc(50% - 8px);
+    min-width: calc(50% - 8px);
+    box-sizing: border-box;
+    text-align: center;
+    min-height: 42px;
+  }
+
+  .adj-panel__chips {
+    gap: 10px;
+    row-gap: 10px;
+  }
+
+  .adj-panel__chips .chip {
+    min-height: 40px;
+    padding: 8px 14px;
   }
 }
 
@@ -3012,11 +3109,28 @@ samp {
   }
 }
 
-/* ===== Grade pills ===== */
+/* ===== Grade pills（一覧表用・下の .grade-pill--* と併用） ===== */
 .grade-pill--s { background: #ffeaea; color: #c00; }
 .grade-pill--a { background: #fff3cc; color: #996600; }
 .grade-pill--b { background: #e8f4ff; color: #0060bb; }
 .grade-pill--c { background: #f0f0f0; color: #666; }
+
+:root[data-theme="dark"] .grade-pill--s {
+  background: rgba(248, 113, 113, 0.18);
+  color: #fca5a5;
+}
+:root[data-theme="dark"] .grade-pill--a {
+  background: rgba(252, 211, 77, 0.14);
+  color: #fcd34d;
+}
+:root[data-theme="dark"] .grade-pill--b {
+  background: rgba(10, 132, 255, 0.18);
+  color: var(--c-blue-bright);
+}
+:root[data-theme="dark"] .grade-pill--c {
+  background: rgba(163, 163, 171, 0.2);
+  color: var(--color-ink);
+}
 
 /* ===== Result Panel ===== */
 .result-panel {
@@ -3172,7 +3286,7 @@ samp {
 }
 
 .result-panel__mark-row--miss {
-  border-color: #ddd;
+  border-color: var(--c-border);
   background: var(--c-surface, #fff);
   opacity: 0.7;
 }
@@ -3390,6 +3504,10 @@ samp {
 }
 
 .bet-panel__quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: stretch;
   margin: 0 0 12px;
 }
 
@@ -3415,6 +3533,186 @@ samp {
   transform: translateY(1px) scale(0.99);
 }
 
+.bet-panel__kelly-label {
+  font-size: 0.85em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.bet-panel__kelly-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.bet-panel__kelly-opt {
+  padding: 6px 12px;
+  font-size: 0.82em;
+  border-radius: 4px;
+  border: 1px solid var(--c-border, #ced4da);
+  cursor: pointer;
+  font-weight: 500;
+  background: transparent;
+  color: inherit;
+  min-height: 40px;
+  flex: 1 1 auto;
+  min-width: min(100%, 7.5rem);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.bet-panel__kelly-opt--active {
+  font-weight: 700;
+  background: #2980b9;
+  color: #fff;
+  border-color: #2980b9;
+}
+
+.bet-panel__kelly-hint {
+  font-size: 0.75em;
+  color: var(--c-text-3, #6c757d);
+  margin: 8px 0 0;
+  line-height: 1.45;
+}
+
+.bet-panel__chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.bet-panel__track-bias {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--c-border);
+  background: var(--c-pale);
+  color: var(--c-text);
+}
+
+.bet-panel__track-bias h4 {
+  margin: 0 0 8px;
+  font-size: 0.9em;
+  font-weight: 700;
+  color: var(--c-text);
+}
+
+.bet-panel__track-bias-desc {
+  margin: 0 0 8px;
+  font-size: 0.78em;
+  color: var(--c-text-3);
+  line-height: 1.4;
+}
+
+.bet-panel__track-bias .bet-panel__chip-row button {
+  min-height: 36px;
+  padding: 5px 10px;
+}
+
+.bet-panel__ev-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--c-border);
+}
+
+.bet-panel__ev-title {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  color: var(--c-text);
+}
+
+.bet-panel__ev-desc {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--c-text);
+}
+
+.bet-panel__ev-bias-active {
+  color: var(--c-blue-dark);
+}
+
+.bet-panel__ev-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -6px;
+  padding: 0 6px 4px;
+}
+
+.bet-panel__ev-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-body);
+  min-width: 720px;
+}
+
+.bet-panel__ev-table th,
+.bet-panel__ev-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--c-border);
+  vertical-align: middle;
+}
+
+.bet-panel__ev-table th {
+  text-align: left;
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  color: var(--c-text);
+  white-space: nowrap;
+  background: var(--c-white);
+  border-bottom: 2px solid var(--c-border-m);
+}
+
+.bet-panel__ev-table tbody td {
+  color: var(--c-text);
+}
+
+.bet-panel__ev-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.bet-panel__ev-num strong {
+  font-weight: 800;
+}
+
+.bet-panel__ev-adj {
+  margin-left: 0.25em;
+  font-size: 0.86em;
+  font-weight: 700;
+  color: var(--c-blue-dark);
+}
+
+.bet-panel__ev-est {
+  font-size: 0.92em;
+  font-weight: 600;
+  color: var(--c-text);
+}
+
+.bet-panel__ev-kelly {
+  text-align: right;
+  font-weight: 700;
+  color: var(--c-blue-dark);
+}
+
+.bet-panel__ev-no-bet {
+  margin: 10px 0 0;
+  font-size: var(--font-size-body);
+  color: var(--c-text-2);
+}
+
+.bet-panel__ev-summary {
+  margin-top: 10px;
+  font-size: var(--font-size-body);
+  color: var(--c-text-2);
+}
+
+.bet-panel__ev-summary p {
+  margin: 0;
+}
+
 .bet-panel__summary {
   display: flex;
   gap: 12px;
@@ -3426,6 +3724,41 @@ samp {
   margin: 0;
   font-size: var(--font-size-body);
   color: var(--c-text-2);
+}
+
+@media (max-width: 640px) {
+  .bet-panel {
+    padding: 14px 12px;
+    margin-top: 16px;
+    border-radius: 10px;
+  }
+
+  .bet-panel__controls {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .bet-panel__quick-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bet-panel__quick-btn {
+    width: 100%;
+  }
+
+  .bet-panel__summary {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bet-panel__chip-row {
+    gap: 8px 10px;
+  }
+
+  .bet-panel__track-bias .bet-panel__chip-row button {
+    min-height: 40px;
+  }
 }
 
 .bet-panel__tickets {

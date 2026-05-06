@@ -10,9 +10,7 @@ import {
   evaluateRace,
   findSameTypePeers,
   getFinalWeights,
-  weightedAbilityRadarPercent,
   weightsToDemand0to100,
-  type AbilityKey,
   type RaceCondition,
 } from "../../domain/race-evaluation";
 import { RaceAdjustmentPanel, loadGlobalProfile } from "./RaceAdjustmentPanel";
@@ -228,15 +226,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   );
 
   const demand0to100 = useMemo(() => weightsToDemand0to100(finalW), [finalW]);
-
-  const weightedRadarByHorse = useMemo(() => {
-    const w = getFinalWeights(condition ?? NEUTRAL_CONDITION);
-    const m = new Map<string, Record<AbilityKey, number>>();
-    for (const h of horses) {
-      m.set(h.horseId, weightedAbilityRadarPercent(h, w));
-    }
-    return m;
-  }, [horses, condition]);
 
   const [conditionOpen, setConditionOpen] = useState(false);
 
@@ -514,7 +503,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                       result={r}
                       grades={grades}
                       demand0to100={demand0to100}
-                      weightedRadar={weightedRadarByHorse.get(r.horseId)!}
                       allHorses={horses}
                       condition={condition}
                       compact={cardDensity === "compact"}

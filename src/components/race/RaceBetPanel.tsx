@@ -29,32 +29,12 @@ const VALUE_RANK_STYLE: Record<string, { bg: string; color: string; label: strin
   S: { bg: "#c0392b", color: "#fff", label: "S" },
   A: { bg: "#e67e22", color: "#fff", label: "A" },
   B: { bg: "#27ae60", color: "#fff", label: "B" },
-  C: { bg: "#7f8c8d", color: "#fff", label: "C" },
-  D: { bg: "#bdc3c7", color: "#555", label: "D" },
+  C: { bg: "#4b5d54", color: "#fff", label: "C" },
+  D: { bg: "#374151", color: "#f9fafb", label: "D" },
 };
 
-/**
- * 期待値ヒートマップ: EVに応じた行の背景色グラデーション。
- * EV ≥ 1.25  → 濃緑（「激アツ」バッジ付与）
- * 1.10 ≤ EV < 1.25 → 薄緑
- * 1.00 ≤ EV < 1.10 → 極薄緑
- * EV < 1.00  → 彩度を落としたグレー
- */
-function evHeatmapStyle(ev: number, valueRank: string): CSSProperties {
-  if (ev >= 1.25 || valueRank === "S") {
-    return { background: "rgba(39,174,96,0.20)", borderLeft: "4px solid #1e8449" };
-  }
-  if (ev >= 1.10) {
-    return { background: "rgba(39,174,96,0.10)", borderLeft: "3px solid #27ae60" };
-  }
-  if (ev >= 1.00) {
-    return { background: "rgba(39,174,96,0.05)", borderLeft: "3px solid #a9dfbf" };
-  }
-  return { background: "rgba(127,140,141,0.06)", borderLeft: "3px solid transparent" };
-}
-
 /** EVテーブル。実質EV列とランク列は valueScore ベースの帯（JSON の value_rank より数値を優先）。 */
-function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; color: string } {
+function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; color?: string } {
   const vr = valueRankFromEffectiveEv(inv.valueScore ?? 0);
   if (vr === "S" || vr === "A") {
     return { text: "【期待値高】", color: "#c0392b" };
@@ -63,9 +43,9 @@ function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; 
     return { text: "【期待値あり】", color: "#27ae60" };
   }
   if (vr === "C") {
-    return { text: "【期待値控えめ】", color: "#7f8c8d" };
+    return { text: "【期待値控えめ】" };
   }
-  return { text: "【期待値低】", color: "#95a5a6" };
+  return { text: "【期待値低】" };
 }
 
 /**
@@ -247,23 +227,22 @@ function EvSection({
       {/* CSS アニメーション定義（お宝馬バッジ用） */}
       <style>{`
         @keyframes ev-pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          0%, 100% { filter: brightness(1); }
+          50% { filter: brightness(1.15); }
         }
       `}</style>
 
       <h3 className="bet-panel__ev-title">AIオッズ評価（実質期待値）</h3>
       <p className="bet-panel__ev-desc">
         実質期待値 = (予測確率 × オッズ) − マージン（頭数16+: 0.20、通常: 0.15）。ランク S は実質EV 10 以上（帯再計算）。
-        ★ヒートマップ: 🔥激アツ(EV≥1.25・濃緑)、薄緑(EV≥1.10)、淡緑(EV≥1.00)、グレー(EV&lt;1.00)。
+        ハイライトは実質EVの色（緑／赤）、ランク、馬名横の🔥激アツ等のバッジで判別します。
         資金の割合・推奨額は予算に対する目安です。上部の買い目選定とは別ロジックです。
-        {biasActive && (
-          <strong style={{ color: "#2980b9" }}> ⚡ 馬場バイアス補正適用中（枠番補正）</strong>
-        )}
+          {biasActive && <strong className="bet-panel__ev-bias-active"> ⚡ 馬場バイアス補正適用中（枠番補正）</strong>}
       </p>
 
-      <table className="bet-panel__ev-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
+      <div className="bet-panel__ev-table-wrap">
+        <table className="bet-panel__ev-table">
+          <thead>
           <tr>
             <th>馬番</th>
             <th>馬名</th>
@@ -285,27 +264,21 @@ function EvSection({
             const displayRank = adjusted ? adjustedRank : inv.valueRank;
             const kelly = (inv.kellyWeight ?? 0) * kellyFraction;
             const recommendedAmount = Math.floor((budget * kelly) / 100) * 100;
-            const isBuy = inv.betType !== "見送り";
             const judgment = expectationJudgmentLabel({ ...inv, valueRank: displayRank });
 
             return (
-              <tr
-                key={row.horseId}
-                style={{
-                  opacity: isBuy ? 1 : 0.45,
-                  ...evHeatmapStyle(ev, displayRank),
-                }}
-              >
+              <tr key={row.horseId}>
                 <td style={{ textAlign: "center" }}>{row.gate}番</td>
                 <td>
                   {row.horseName}
                   <EvSpecialBadge rank={displayRank} ev={ev} />
                 </td>
-                <td style={{ textAlign: "right", fontWeight: "bold", color: ev >= 1.0 ? "#27ae60" : "#e74c3c" }}>
-                  {ev.toFixed(2)}
-                  {adjusted && (
-                    <span style={{ fontSize: "0.7em", color: "#2980b9", marginLeft: "0.2em" }}>↑補</span>
-                  )}
+                <td
+                  className="bet-panel__ev-num"
+                  style={{ color: ev >= 1.0 ? "var(--ev-pos)" : "var(--ev-neg)" }}
+                >
+                  <strong>{ev.toFixed(2)}</strong>
+                  {adjusted && <span className="bet-panel__ev-adj">↑補</span>}
                 </td>
                 <td style={{ textAlign: "center" }}>
                   <EvRankBadge rank={displayRank} />
@@ -315,24 +288,29 @@ function EvSection({
                 </td>
                 <td style={{ textAlign: "right" }}>
                   {inv.actualOdds.toFixed(1)}倍
-                  {inv.oddsSource === "estimated" && (
-                    <span style={{ fontSize: "0.75em", color: "#95a5a6" }}> 推定</span>
-                  )}
+                  {inv.oddsSource === "estimated" && <span className="bet-panel__ev-est"> 推定</span>}
                 </td>
-                <td style={{ textAlign: "right", color: kelly > 0 ? "#2980b9" : "#bdc3c7" }}>
+                <td className={kelly > 0 ? "bet-panel__ev-kelly" : undefined}>
                   {kelly > 0 ? `${(kelly * 100).toFixed(1)}%` : "—"}
                 </td>
                 <td style={{ textAlign: "right", fontWeight: kelly > 0 ? "bold" : "normal" }}>
                   {recommendedAmount > 0 ? `${recommendedAmount.toLocaleString()}円` : "—"}
                 </td>
-                <td style={{ textAlign: "center", color: judgment.color, fontWeight: "bold" }}>
+                <td
+                  style={{
+                    textAlign: "center",
+                    ...(judgment.color ? { color: judgment.color } : {}),
+                    fontWeight: "bold",
+                  }}
+                >
                   {judgment.text}
                 </td>
               </tr>
             );
           })}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
 
       {candidates.length === 0 ? (
         <p className="bet-panel__ev-no-bet">
@@ -385,20 +363,9 @@ function TrackBiasQuickPanel({
   }
 
   return (
-    <div
-      className="bet-panel__track-bias"
-      style={{
-        padding: "10px 12px",
-        background: "var(--surface-2, #f8f9fa)",
-        borderRadius: "6px",
-        marginBottom: "12px",
-        border: "1px solid var(--border, #dee2e6)",
-      }}
-    >
-      <h4 style={{ margin: "0 0 8px", fontSize: "0.9em", fontWeight: "bold" }}>
-        ⚡ 当日馬場傾向（クイック入力）
-      </h4>
-      <p style={{ margin: "0 0 8px", fontSize: "0.78em", color: "#6c757d" }}>
+    <div className="bet-panel__track-bias">
+      <h4>⚡ 当日馬場傾向（クイック入力）</h4>
+      <p className="bet-panel__track-bias-desc">
         変更するとEVが即リアルタイム補正されます。詳細は「条件設定」パネルで調整。
       </p>
 
@@ -407,7 +374,7 @@ function TrackBiasQuickPanel({
         <span style={{ fontSize: "0.82em", fontWeight: "bold", marginRight: "6px" }}>
           枠バイアス: {biasLabel(userBias)}
         </span>
-        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "4px" }}>
+        <div className="bet-panel__chip-row">
           {(
             [
               { label: "内有利（強）", value: -1.0 },
@@ -430,7 +397,7 @@ function TrackBiasQuickPanel({
                 fontWeight: Math.abs(userBias - value) < 0.05 ? "bold" : "normal",
                 background: Math.abs(userBias - value) < 0.05 ? "#2980b9" : "transparent",
                 color: Math.abs(userBias - value) < 0.05 ? "#fff" : "inherit",
-                borderColor: Math.abs(userBias - value) < 0.05 ? "#2980b9" : "#ced4da",
+                borderColor: Math.abs(userBias - value) < 0.05 ? "#2980b9" : "var(--c-border)",
               }}
             >
               {label}
@@ -444,7 +411,7 @@ function TrackBiasQuickPanel({
         <span style={{ fontSize: "0.82em", fontWeight: "bold", marginRight: "6px" }}>
           展開傾向:
         </span>
-        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "4px" }}>
+        <div className="bet-panel__chip-row">
           {(
             [
               { label: "前残り",     value: "front_favor" },
@@ -465,7 +432,7 @@ function TrackBiasQuickPanel({
                 fontWeight: currentBias === value ? "bold" : "normal",
                 background: currentBias === value ? "#e67e22" : "transparent",
                 color: currentBias === value ? "#fff" : "inherit",
-                borderColor: currentBias === value ? "#e67e22" : "#ced4da",
+                borderColor: currentBias === value ? "#e67e22" : "var(--c-border)",
               }}
             >
               {label}
@@ -548,33 +515,21 @@ export function RaceBetPanel({ sorted, horses, condition, onConditionChange }: P
         </label>
         {/* ケリー分率セレクター */}
         <div className="bet-panel__control" role="group" aria-label="ケリー分率設定">
-          <span style={{ fontSize: "0.85em", display: "block", marginBottom: "4px" }}>
-            ケリー分率（リスク調整）
-          </span>
-          <div style={{ display: "flex", gap: "6px" }}>
+          <span className="bet-panel__kelly-label">ケリー分率（リスク調整）</span>
+          <div className="bet-panel__kelly-row">
             {KELLY_FRACTION_OPTIONS.map((opt) => (
               <button
                 key={opt.key}
                 type="button"
+                className={`bet-panel__kelly-opt${kellyFractionKey === opt.key ? " bet-panel__kelly-opt--active" : ""}`}
                 onClick={() => setKellyFractionKey(opt.key)}
-                style={{
-                  padding: "4px 10px",
-                  fontSize: "0.82em",
-                  borderRadius: "4px",
-                  border: "1px solid",
-                  cursor: "pointer",
-                  fontWeight: kellyFractionKey === opt.key ? "bold" : "normal",
-                  background: kellyFractionKey === opt.key ? "#2980b9" : "transparent",
-                  color: kellyFractionKey === opt.key ? "#fff" : "inherit",
-                  borderColor: kellyFractionKey === opt.key ? "#2980b9" : "#ced4da",
-                }}
                 title={`${opt.label}: ケリー比率を×${opt.value}倍に調整（${(opt.value * 100).toFixed(0)}%適用）`}
               >
                 {opt.label}
               </button>
             ))}
           </div>
-          <p style={{ fontSize: "0.75em", color: "#6c757d", margin: "4px 0 0" }}>
+          <p className="bet-panel__kelly-hint">
             {kellyFractionKey === "full" && "フルケリー: 理論上最大効率。ドローダウンが大きいため上級者向け。"}
             {kellyFractionKey === "half" && "ハーフケリー: フルの半分。ドローダウンを抑えながら効率的な複利成長。"}
             {kellyFractionKey === "quarter" && "クォーターケリー（推奨）: 保守的設定。長期安定運用に最適。"}
@@ -609,7 +564,6 @@ export function RaceBetPanel({ sorted, horses, condition, onConditionChange }: P
             setBudgetInput("3000");
             setKellyFractionKey("quarter");
           }}
-          style={{ marginLeft: "6px" }}
         >
           少額（3千円）クォーターケリー
         </button>

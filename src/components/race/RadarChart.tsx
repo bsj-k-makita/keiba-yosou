@@ -40,8 +40,6 @@ function labelPos(i: number): { x: number; y: number; textAnchor: "start" | "mid
 type Props = {
   /** 生の能力値 0〜100 */
   horse?: Record<AbilityKey, number>;
-  /** 指定時は horse より優先（加重比率シェイプ等） */
-  values?: Record<AbilityKey, number>;
   /** 既定 1.5〜2x 想定。旧100相当なら 180 前後。 */
   size?: number;
 };
@@ -49,8 +47,8 @@ type Props = {
 /**
  * 能力5項目のみのレーダー（混在オーバーレイをしない）
  */
-export function RadarChart({ horse, values, size = 192 }: Props) {
-  const series = values ?? horse ?? ({} as Record<AbilityKey, number>);
+export function RadarChart({ horse, size = 192 }: Props) {
+  const series = horse ?? ({} as Record<AbilityKey, number>);
   const keys = ABILITY_KEYS;
   const rings = [0.25, 0.5, 0.75, 1];
   const points = keys.map((k, i) => ({ key: k, ...pt(clamp01(series[k] ?? 0), i) }));
@@ -61,16 +59,12 @@ export function RadarChart({ horse, values, size = 192 }: Props) {
       width={size}
       height={size}
       role="img"
-      aria-label={
-        values != null
-          ? "条件ウェイト反映後の能力寄与バランス（合計100の按分）"
-          : "5つの能力の相対的な形（0〜100を端までに正規化）"
-      }
+      aria-label="5つの能力の相対的な形（0〜100を端までに正規化）"
     >
       {rings.map((r) => (
         <polygon
           key={r}
-          className="radar__grid"
+          className={`radar__grid${r === 1 ? " radar__grid--outer" : ""}`}
           points={keys.map((_k, i) => {
             const a = -Math.PI / 2 + (2 * Math.PI * i) / 5;
             const x = CX + R_MAX * r * Math.cos(a);
@@ -78,8 +72,6 @@ export function RadarChart({ horse, values, size = 192 }: Props) {
             return `${x},${y}`;
           }).join(" ")}
           fill="none"
-          stroke={r === 1 ? "#b7b7bd" : "#d8d8de"}
-          strokeWidth={r === 1 ? 1 : 0.75}
         />
       ))}
       {keys.map((k, i) => {
@@ -89,11 +81,11 @@ export function RadarChart({ horse, values, size = 192 }: Props) {
         return (
           <line
             key={k}
+            className="radar__spoke"
             x1={CX}
             y1={CY}
             x2={x2}
             y2={y2}
-            stroke="#d2d2d7"
             strokeWidth={0.8}
           />
         );
@@ -108,7 +100,6 @@ export function RadarChart({ horse, values, size = 192 }: Props) {
             y={y + 0.1}
             textAnchor={textAnchor}
             className="radar__axlab"
-            fill="#4a4a4f"
             fontSize={8}
             fontWeight={600}
           >
@@ -118,9 +109,8 @@ export function RadarChart({ horse, values, size = 192 }: Props) {
       })}
 
       <path
+        className="radar__area"
         d={pathD(keys, (k) => series[k] ?? 0)}
-        fill="rgba(0,113,227,0.18)"
-        stroke="#0071e3"
         strokeWidth={2.2}
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -128,11 +118,10 @@ export function RadarChart({ horse, values, size = 192 }: Props) {
       {points.map((p) => (
         <circle
           key={p.key}
+          className="radar__vertex"
           cx={p.x}
           cy={p.y}
           r={2.4}
-          fill="#0071e3"
-          stroke="#ffffff"
           strokeWidth={1.1}
         />
       ))}

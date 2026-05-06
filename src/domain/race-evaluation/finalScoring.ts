@@ -12,6 +12,10 @@ const REL_MIN = 30;
 const REL_MAX = 90;
 const Z_SCALE = 12;
 const STD_FLOOR = 1.5;
+const REL_STRONG_MIN = 0;
+const REL_STRONG_MAX = 100;
+
+export type RelativeScoreMode = "normalized" | "preserve_absolute";
 
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
@@ -34,10 +38,22 @@ function stddev(nums: number[], m: number): number {
  */
 export function computeRaceRelativeScores(
   rows: readonly { horseId: string; raceAdjustedInput: number }[],
+  mode: RelativeScoreMode = "normalized",
 ): Map<string, number> {
   const out = new Map<string, number>();
   if (rows.length === 0) return out;
   const values = rows.map((r) => r.raceAdjustedInput);
+  if (mode === "preserve_absolute") {
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = max - min;
+    for (const { horseId, raceAdjustedInput: x } of rows) {
+      const t = span < 1e-9 ? 0.5 : (x - min) / span;
+      const rel = REL_STRONG_MIN + t * (REL_STRONG_MAX - REL_STRONG_MIN);
+      out.set(horseId, round1(rel));
+    }
+    return out;
+  }
   const m = mean(values);
   const s = stddev(values, m);
 
