@@ -11,6 +11,7 @@ import {
   findSameTypePeers,
   getFinalWeights,
   weightsToDemand0to100,
+  type QuickAdjustmentKey,
   type RaceCondition,
 } from "../../domain/race-evaluation";
 import { RaceAdjustmentPanel, loadGlobalProfile } from "./RaceAdjustmentPanel";
@@ -18,6 +19,7 @@ import { HorseEvaluationCard } from "./HorseEvaluationCard";
 import { FutureRaceInsightsStub, RaceEvaluationSummary } from "./RaceEvaluationSummary";
 import { RaceConclusionPanel } from "./RaceConclusionPanel";
 import { RaceNavBar } from "./RaceNavBar";
+import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
 import { HorseListTable } from "./HorseListTable";
 import { RaceResultPanel } from "./RaceResultPanel";
 import { RaceBetPanel } from "./RaceBetPanel";
@@ -68,6 +70,7 @@ type CarryOverCondition = Pick<
   | "trackBiasStrength01"
   | "userTrackBias"
   | "abilityFocus"
+  | "quickAdjustments"
   | "softmaxTemperature"
 >;
 
@@ -95,6 +98,7 @@ function saveCarryOverCondition(raceInfo: RaceEvaluationData["raceInfo"], condit
     trackBiasStrength01: condition.trackBiasStrength01,
     userTrackBias: condition.userTrackBias,
     abilityFocus: condition.abilityFocus,
+    quickAdjustments: condition.quickAdjustments,
     softmaxTemperature: condition.softmaxTemperature,
   };
   try {
@@ -337,6 +341,17 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     setCondition(next);
   }, []);
 
+  const handleToggleQuickAdjustment = useCallback((key: QuickAdjustmentKey) => {
+    userEditedRef.current = true;
+    setCondition((prev) => ({
+      ...prev,
+      quickAdjustments: {
+        ...prev.quickAdjustments,
+        [key]: !(prev.quickAdjustments?.[key] ?? false),
+      },
+    }));
+  }, []);
+
   const TABS: { key: ViewTab; label: string }[] = [
     { key: "list", label: "出馬表" },
     { key: "ai", label: "AI予想" },
@@ -353,6 +368,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         results,
         viewModel: pipeline.viewModel,
         onConditionChange: handleConditionPanelChange,
+        onQuickAdjustmentToggle: handleToggleQuickAdjustment,
       }}
     >
     <div className="app">
@@ -367,6 +383,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
           {raceInfo.groundLabel ? <span>🟢 馬場：{raceInfo.groundLabel}</span> : null}
           {raceInfo.weather ? <span>{weatherIcon} {raceInfo.weather}</span> : null}
         </p>
+        <NetkeibaRaceLinks raceId={race.raceId} />
       </header>
 
       {/* レースナビゲーション */}
@@ -443,21 +460,34 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 <h2 className="app__section-title app__section-title--pop">
                   出馬表 {horses.length > 0 ? `（${horses.length}頭）` : ""}
                 </h2>
+                <div className="view-density" role="group" aria-label="一覧表示設定">
+                  <button
+                    type="button"
+                    className={`view-density__btn${tableCompact ? " view-density__btn--active" : ""}`}
+                    onClick={() => setTableCompact((v) => !v)}
+                    aria-pressed={tableCompact}
+                  >
+                    コンパクト表示
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-density__btn${tableSummary ? " view-density__btn--active" : ""}`}
+                    onClick={() => setTableSummary((v) => !v)}
+                    aria-pressed={tableSummary}
+                  >
+                    サマリー表示
+                  </button>
+                </div>
+              </div>
+              <div className="quick-adjust" role="group" aria-label="直前補正クイックトグル">
                 <button
                   type="button"
-                  className={`view-density__btn${tableCompact ? " view-density__btn--active" : ""}`}
-                  onClick={() => setTableCompact((v) => !v)}
-                  aria-pressed={tableCompact}
+                  className={`view-density__btn${condition.quickAdjustments?.lastRunReset ? " view-density__btn--active" : ""}`}
+                  onClick={() => handleToggleQuickAdjustment("lastRunReset")}
+                  aria-pressed={condition.quickAdjustments?.lastRunReset ?? false}
+                  title="前走でバイアス・展開・末脚と着順のギャップなど『不利』があった馬へ、手動で最終スコアを上乗せ（+12）します。データ由来の「バイアス逆行救済」とは別のオプションです。"
                 >
-                  コンパクト表示
-                </button>
-                <button
-                  type="button"
-                  className={`view-density__btn${tableSummary ? " view-density__btn--active" : ""}`}
-                  onClick={() => setTableSummary((v) => !v)}
-                  aria-pressed={tableSummary}
-                >
-                  サマリー表示
+                  前走加点（不利時）
                 </button>
               </div>
               <HorseListTable
@@ -525,6 +555,17 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                     コンパクト
                   </button>
                 </div>
+              </div>
+              <div className="quick-adjust" role="group" aria-label="直前補正クイックトグル">
+                <button
+                  type="button"
+                  className={`view-density__btn${condition.quickAdjustments?.lastRunReset ? " view-density__btn--active" : ""}`}
+                  onClick={() => handleToggleQuickAdjustment("lastRunReset")}
+                  aria-pressed={condition.quickAdjustments?.lastRunReset ?? false}
+                  title="前走でバイアス・展開・末脚と着順のギャップなど『不利』があった馬へ、手動で最終スコアを上乗せ（+12）します。データ由来の「バイアス逆行救済」とは別のオプションです。"
+                >
+                  前走加点（不利時）
+                </button>
               </div>
               <div className={`app__grid${cardDensity === "compact" ? " app__grid--compact" : ""}`}>
                 {sorted.map((r) => {

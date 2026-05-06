@@ -37,35 +37,31 @@ const VALUE_RANK_STYLE: Record<string, { bg: string; color: string; label: strin
   D: { bg: "#374151", color: "#f9fafb", label: "D" },
 };
 
-/** EVテーブル。実質EV列とランク列は valueScore ベースの帯（JSON の value_rank より数値を優先）。 */
+/** オッズ補正スコア帯に応じた短文ラベル（value_rank より数値を優先）。 */
 function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; color?: string } {
   const vr = valueRankFromEffectiveEv(inv.valueScore ?? 0);
   if (vr === "S" || vr === "A") {
-    return { text: "【期待値高】", color: "#c0392b" };
+    return { text: "【スコア高】", color: "#c0392b" };
   }
   if (vr === "B") {
-    return { text: "【期待値あり】", color: "#27ae60" };
+    return { text: "【スコア中】", color: "#27ae60" };
   }
   if (vr === "C") {
-    return { text: "【期待値控えめ】" };
+    return { text: "【スコア控えめ】" };
   }
-  return { text: "【期待値低】" };
+  return { text: "【スコア低】" };
 }
 
 /**
- * 期待値バッジ: ランクに応じた「お宝馬」「期待値高」バッジを返す。
- * S: お宝馬（点滅アニメーション付き）
- * A: 期待値高
- * B: 期待値あり
+ * 補正スコアが高い馬向けバッジ（オッズ×確率ベース）。
  */
 function EvSpecialBadge({ rank, ev }: { rank: string; ev: number }) {
-  // EV ≥ 1.25 → 激アツ（Sランク相当 or EV数値で判定）
   if (rank === "S" || ev >= 1.25) {
     return (
       <>
         <span
           className="ev-badge ev-badge--gekiatu"
-          title="EV 激アツ: EV 1.25以上の最高評価"
+          title="スコア激アツ: 補正スコア 1.25 以上"
           style={{
             display: "inline-block",
             padding: "0.1em 0.5em",
@@ -83,7 +79,7 @@ function EvSpecialBadge({ rank, ev }: { rank: string; ev: number }) {
         {rank === "S" && (
           <span
             className="ev-badge ev-badge--treasure"
-            title="EV Sランク: 最高評価の期待値馬"
+            title="S帯: 補正スコアが最上位クラス"
             style={{
               display: "inline-block",
               padding: "0.1em 0.4em",
@@ -106,7 +102,7 @@ function EvSpecialBadge({ rank, ev }: { rank: string; ev: number }) {
     return (
       <span
         className="ev-badge ev-badge--high"
-        title="EV Aランク: 高い期待値"
+        title="A帯: 補正スコアが高め"
         style={{
           display: "inline-block",
           padding: "0.1em 0.4em",
@@ -118,7 +114,7 @@ function EvSpecialBadge({ rank, ev }: { rank: string; ev: number }) {
           marginLeft: "0.3em",
         }}
       >
-        期待値高
+        スコア高
       </span>
     );
   }
@@ -210,9 +206,9 @@ function EvSection({
         }
       `}</style>
 
-      <h3 className="bet-panel__ev-title">AIオッズ評価（実質期待値）</h3>
+      <h3 className="bet-panel__ev-title">AIオッズ評価（補正スコア）</h3>
       <p className="bet-panel__ev-desc">
-        実質期待値 = (補正後確率 × オッズ) − マージン。強設定では温度を半減して確率を尖らせます（現在有効T={softmaxTemperature.toFixed(1)}）。
+        補正スコア = (補正後の勝率 × オッズ) − マージン。強設定では温度を半減して確率を尖らせます（現在有効T={softmaxTemperature.toFixed(1)}）。
         低温ほど上位馬へ確率が集中し、推奨配分額が大きく動きます。
       </p>
 
@@ -222,13 +218,13 @@ function EvSection({
           <tr>
             <th>馬番</th>
             <th>馬名</th>
-            <th>実質EV</th>
+            <th>補正スコア</th>
             <th>ランク</th>
             <th>確率</th>
             <th>オッズ</th>
             <th>推奨配分</th>
             <th>推奨額</th>
-            <th>期待値判断</th>
+            <th>スコア判断</th>
           </tr>
         </thead>
         <tbody>
@@ -291,7 +287,7 @@ function EvSection({
 
       {candidates.length === 0 ? (
         <p className="bet-panel__ev-no-bet">
-          オッズ期待値で「見送り」以外の馬がいません（推奨割合の対象なし）。
+          補正スコア上、「見送り」以外の馬がいません（推奨割合の対象なし）。
         </p>
       ) : (
         <div className="bet-panel__ev-summary">
@@ -344,7 +340,7 @@ function TrackBiasQuickPanel({
     <div className="bet-panel__track-bias">
       <h4>⚡ 当日馬場傾向（クイック入力）</h4>
       <p className="bet-panel__track-bias-desc">
-        変更するとEVが即リアルタイム補正されます。詳細は「条件設定」パネルで調整。
+        変更するとオッズ補正スコアが即リアルタイム更新されます。詳細は「条件設定」パネルで調整。
       </p>
 
       {/* 枠バイアス（内外） */}
@@ -449,7 +445,7 @@ export function RaceBetPanel({ sorted, horses, condition, viewModel, onCondition
         if (amount <= 0) return null;
         return {
           gate: row.gate,
-          line: `馬番${row.gate}：複勝 ${amount.toLocaleString()}円（EV ${ev.toFixed(2)} / P ${(p * 100).toFixed(1)}%）`,
+          line: `馬番${row.gate}：複勝 ${amount.toLocaleString()}円（スコア ${ev.toFixed(2)} / P ${(p * 100).toFixed(1)}%）`,
           amount,
         };
       })

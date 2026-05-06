@@ -90,6 +90,14 @@ export type EntryEvaluationBlock = {
   /** 動的補正を弱めた参照点（パイプライン JSON に無い場合あり） */
   evaluationBaselineScore?: number;
   evaluationAdjustmentDelta?: number;
+  /** 直前補正の総加点 */
+  lastMinuteAdjustmentBonus?: number;
+  /** 前走不利リセット補正 */
+  lastRunResetBonus?: number;
+  /** ラップ適性重視補正 */
+  lapFocusBonus?: number;
+  /** カード表示用の補正バッジ */
+  adjustmentBadges?: string[];
   /** ラップ形状一致ボーナス。判定不能のとき 0 */
   lapShapeFitBonus: number;
   /** 消耗戦での持続力ボーナス */
@@ -189,6 +197,11 @@ export type RaceEntryEvaluation = {
   /** オッズ歪みに基づく短評入力。存在時は短評生成で優先利用。 */
   investment?: InvestmentCommentInput;
   pastRuns?: PastRunRecord[];
+  was_bias_disadvantaged?: boolean;
+  l2_top_speed?: number;
+  bias_mismatch?: boolean;
+  pace_mismatch?: boolean;
+  l2_sustain_ratio?: number;
 
   evaluation: EntryEvaluationBlock;
 };

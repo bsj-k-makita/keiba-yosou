@@ -51,6 +51,59 @@ function normalizeSex(v) {
   return undefined;
 }
 
+/**
+ * db.netkeiba 戦績表 thead から列インデックスを解決する。
+ */
+function buildDbResultHeaderIndex($) {
+  const labels = $("table.db_h_race_results thead tr th")
+    .toArray()
+    .map((th, i) => ({ i, label: $(th).text().replace(/\s+/g, "").trim() }));
+
+  const find = (keywords) => {
+    for (const kw of keywords) {
+      const hit = labels.find((x) => x.label.includes(kw));
+      if (hit) return hit.i;
+    }
+    return -1;
+  };
+
+  return {
+    date: find(["日付"]),
+    kaisai: find(["開催"]),
+    raceName: find(["レース名"]),
+    fieldSize: find(["頭数"]),
+    waku: find(["枠番", "枠"]),
+    place: find(["着順"]),
+    distance: find(["距離"]),
+    margin: find(["着差"]),
+    passing: find(["通過"]),
+    agari: find(["上り"]),
+  };
+}
+
+function venueFromKaisai(raw) {
+  const vens = ["東京", "中山", "阪神", "京都", "中京", "新潟", "福島", "小倉", "札幌", "函館"];
+  const t = String(raw ?? "").replace(/\s+/g, "");
+  for (const v of vens) {
+    if (t.includes(v)) return v;
+  }
+  return undefined;
+}
+
+function surfaceFromDistanceCol(raw) {
+  const t = String(raw ?? "");
+  if (t.startsWith("ダ") || t.includes("ダ")) return "ダート";
+  return "芝";
+}
+
+function parseFinal3fFromAgari(raw) {
+  const t = String(raw ?? "")
+    .trim()
+    .replace(/[^\d.]/g, "");
+  const n = parseFloat(t);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 function parseHorseProfile($) {
   const text = $("body").text().replace(/\s+/g, " ");
   const sexAge =
@@ -110,6 +163,7 @@ export async function fetchPastRunsForHorse(horseId, opts = {}) {
   const url = `https://db.netkeiba.com/horse/result/${encodeURIComponent(horseId)}/`;
   const html = fetchUtf8(url);
   const $ = load(html);
+  const hi = buildDbResultHeaderIndex($);
   const rows = $("table.db_h_race_results tbody tr").toArray().slice(0, 5);
   const horseProfile = parseHorseProfile($);
   const pastRuns = [];
@@ -117,20 +171,41 @@ export async function fetchPastRunsForHorse(horseId, opts = {}) {
 
   for (const tr of rows) {
     const tds = $(tr).find("td");
-    if (tds.length < 20) continue;
+    if (tds.length < 12) continue;
 
-    const dateText = tds.eq(0).text().trim();
-    const raceLink = tds.eq(4).find("a[href*='/race/']").attr("href") || "";
-    const raceName = tds.eq(4).find("a").first().text().replace(/\s+/g, " ").trim();
+    const dateText = hi.date >= 0 ? tds.eq(hi.date).text().trim() : "";
+    const raceCell = hi.raceName >= 0 ? tds.eq(hi.raceName) : tds.eq(4);
+    const raceLink = raceCell.find("a[href*='/race/']").attr("href") || "";
+    const raceName = raceCell.find("a").first().text().replace(/\s+/g, " ").trim();
     let raceId = "";
     const mRace = raceLink.match(/\/race\/(\d{12})\//);
     if (mRace) raceId = mRace[1];
 
-    const placeStr = tds.eq(11).text().trim().replace(/[^\d]/g, "");
+    const placeStr =
+      hi.place >= 0 ? tds.eq(hi.place).text().trim().replace(/[^\d]/g, "") : "";
     const place = placeStr ? parseInt(placeStr, 10) : undefined;
-    const chText = tds.eq(19).text().trim();
+    const chText = hi.margin >= 0 ? tds.eq(hi.margin).text().trim() : "";
     let marginToWinnerSec = parseChakusaToSeconds(chText);
     if (place === 1) marginToWinnerSec = 0;
+
+    const kaisaiRaw = hi.kaisai >= 0 ? tds.eq(hi.kaisai).text() : "";
+    const venue = venueFromKaisai(kaisaiRaw);
+    const distRaw = hi.distance >= 0 ? tds.eq(hi.distance).text() : "";
+    const surface = surfaceFromDistanceCol(distRaw);
+    const fieldSizeRaw = hi.fieldSize >= 0 ? tds.eq(hi.fieldSize).text().trim().replace(/[^\d]/g, "") : "";
+    const fieldSize = fieldSizeRaw ? parseInt(fieldSizeRaw, 10) : undefined;
+    const wakuRaw = hi.waku >= 0 ? tds.eq(hi.waku).text().trim().replace(/[^\d]/g, "") : "";
+    const waku = wakuRaw ? parseInt(wakuRaw, 10) : undefined;
+    const passingRaw =
+      hi.passing >= 0
+        ? tds
+            .eq(hi.passing)
+            .text()
+            .replace(/\s+/g, "")
+            .trim()
+        : "";
+    const passingOrder = passingRaw || undefined;
+    const final3fSec = hi.agari >= 0 ? parseFinal3fFromAgari(tds.eq(hi.agari).text()) : undefined;
 
     let section200mSec = undefined;
     if (raceId) {
@@ -158,6 +233,12 @@ export async function fetchPastRunsForHorse(horseId, opts = {}) {
       ...(place != null && !Number.isNaN(place) ? { place } : {}),
       ...(marginToWinnerSec != null ? { marginToWinnerSec } : {}),
       ...(section200mSec ? { section200mSec } : {}),
+      ...(venue ? { venue } : {}),
+      ...(surface ? { surface } : {}),
+      ...(fieldSize != null && !Number.isNaN(fieldSize) ? { fieldSize } : {}),
+      ...(waku != null && !Number.isNaN(waku) ? { waku } : {}),
+      ...(passingOrder ? { passingOrder } : {}),
+      ...(final3fSec != null ? { final3fSec } : {}),
     });
   }
 

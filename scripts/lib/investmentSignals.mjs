@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { enrichEntriesWithRaceFeatures } from "./raceFeatureEngineering.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const STRATEGIC_WEIGHTS = JSON.parse(
@@ -410,6 +411,7 @@ function calcPopularityBiasDecay(prob, odds) {
  *   3. 人気バイアス減衰: 過剰人気馬の期待値を自動的に抑制
  */
 export function enrichInvestmentSignalsInRaceData(data) {
+  enrichEntriesWithRaceFeatures(data);
   const entries = Array.isArray(data?.entries) ? data.entries : [];
   if (entries.length === 0) return data;
   const fieldSize = entries.length;

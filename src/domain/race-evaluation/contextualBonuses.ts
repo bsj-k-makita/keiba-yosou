@@ -128,8 +128,10 @@ function computeGateBiasBonus(horse: HorseAbility, condition: RaceCondition, fie
   const turnAmp = clamp(1 + Math.max(0, (condition.turnCount ?? 2) - 2) * 0.15, 1, 1.6);
 
   // 内外バイアス指定時の効きを明確化するため、レンジ上限を引き上げる。
-  const bonus = insideAdv * trackBias.direction * 3.6 * trackBias.strength01 * turnAmp;
-  return round1(clamp(bonus, -6, 6));
+  const biasSyncMultiplier = 5;
+  const bonus = insideAdv * trackBias.direction * 3.6 * trackBias.strength01 * turnAmp * biasSyncMultiplier;
+  const maxAbs = 30;
+  return round1(clamp(bonus, -maxAbs, maxAbs));
 }
 
 function computeGateStyleSynergyBonus(

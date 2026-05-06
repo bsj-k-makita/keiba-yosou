@@ -18,6 +18,7 @@
     "fetch-results": "node scripts/fetch-race-results.mjs",
     "apply-trip-context": "node scripts/apply-trip-context.mjs",
     "enrich-investment-signals": "node scripts/enrich-investment-signals.mjs --all",
+    "update-bias-master": "node scripts/enrich-investment-signals.mjs --bias-update",
     "backfill-index-grade": "node scripts/backfill-index-race-grade.mjs"
   },
   "dependencies": {

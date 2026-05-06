@@ -11,6 +11,7 @@ import {
   type RaceGradeLabel,
 } from "../../lib/race-data";
 import { buildRacePreviewDataFromRace, evaluateRace, type RacePreviewBadgeType } from "../../domain/race-evaluation";
+import { NetkeibaRaceLinks } from "../../components/race/NetkeibaRaceLinks";
 
 function surfaceBadgeClass(surface: string): string {
   return surface === "芝" ? "race-badge race-badge--turf" : "race-badge race-badge--dirt";
@@ -462,9 +463,12 @@ export function RacesListPage() {
                   const gradeBadge =
                     raceGradeBadgeFromIndex(item.raceGrade) ?? raceGradeFromName(item.raceName);
                   return (
+                <div
+                  className={`rl-race-card-wrap${isFeaturedRow(item) ? " rl-race-card-wrap--featured" : ""}`}
+                >
                 <Link
                   to={`/race/${item.raceId}`}
-                  className={`rl-race-row${isFeaturedRow(item) ? " rl-race-row--featured" : ""}`}
+                  className="rl-race-row"
                   title={item.raceName ?? item.raceId}
                 >
                   <div className="rl-race-row__top">
@@ -506,6 +510,8 @@ export function RacesListPage() {
                     </div>
                   </div>
                 </Link>
+                <NetkeibaRaceLinks raceId={item.raceId} variant="cardBar" />
+                </div>
                   );
                 })()}
               </li>

@@ -116,6 +116,16 @@ export type HorseAbility = {
   pedigree?: HorsePedigree;
   signals?: HorseEvaluationSignals;
   investment?: InvestmentCommentInput;
+  /** 前走が当時のトラックバイアスと逆行していたか（巻き返し補正に使用） */
+  was_bias_disadvantaged?: boolean;
+  /** 過去L2区間（残り400-200m）の最大パフォーマンスを 0〜1 で正規化（旧JSONの0〜100も読込側で吸収） */
+  l2_top_speed?: number;
+  /** 前走でバイアス不一致があったか（外部取り込み揺れ対応） */
+  bias_mismatch?: boolean;
+  /** 前走でペース不一致があったか（外部取り込み揺れ対応） */
+  pace_mismatch?: boolean;
+  /** L2からL1にかけての減速耐性（0-1） */
+  l2_sustain_ratio?: number;
   /** 直近1走目が先頭。4〜6 本の 200m 通過が揃うと展開分類・再現性推定に使う */
   pastRuns?: PastRunRecord[];
 };
@@ -133,6 +143,8 @@ export type AbilityPriority =
   | "kick"     // キレ（瞬発）勝負
   | "power"    // パワー/急坂重視
   | null;
+
+export type QuickAdjustmentKey = "lastRunReset" | "lapFocus" | "biasSync";
 
 export type RaceCondition = {
   venue: string;
@@ -178,6 +190,8 @@ export type RaceCondition = {
    * 標準は 8。strong では内部的に半減（8 -> 4）し、1強を作りやすくする。
    */
   softmaxTemperature?: number;
+  /** 直前補正（クイックトグル） */
+  quickAdjustments?: Partial<Record<QuickAdjustmentKey, boolean>>;
 };
 
 export type BuyLabel = BuyLabelLingo;
@@ -243,6 +257,14 @@ export type HorseScoreResult = {
   evaluationBaselineScore: number;
   /** finalEvaluationScore − evaluationBaselineScore */
   evaluationAdjustmentDelta: number;
+  /** 直前補正の総加点 */
+  lastMinuteAdjustmentBonus: number;
+  /** 前走不利リセット補正の加点 */
+  lastRunResetBonus: number;
+  /** ラップ適性重視補正の加点 */
+  lapFocusBonus: number;
+  /** カード表示用バッジ */
+  adjustmentBadges: string[];
   finalRank?: number;
   mark?: "◎" | "○" | "▲" | "△" | "☆" | "";
   buyLabel: BuyLabel;

@@ -26,6 +26,11 @@ export function raceDataToHorses(data: RaceEvaluationData): EnrichedRaceHorse[] 
     frameNumber: e.frameNumber,
     signals: e.evaluationSignals,
     investment: e.investment,
+    was_bias_disadvantaged: e.was_bias_disadvantaged,
+    l2_top_speed: e.l2_top_speed,
+    bias_mismatch: e.bias_mismatch,
+    pace_mismatch: e.pace_mismatch,
+    l2_sustain_ratio: e.l2_sustain_ratio,
     pastRuns: e.pastRuns,
   }));
 }

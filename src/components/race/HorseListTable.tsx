@@ -13,6 +13,7 @@ import {
   getLapProfileVisual,
 } from "./evaluationTags";
 import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
+import { netkeibaHorseResultUrl } from "../../lib/netkeibaUrls";
 
 type Props = {
   sorted: HorseScoreResult[];
@@ -135,7 +136,7 @@ export function HorseListTable({
             <th className="horse-list__th horse-list__th--gate">馬番</th>
             {!summaryMode && <th className="horse-list__th horse-list__th--radar">能力</th>}
             <th className="horse-list__th horse-list__th--name">{summaryMode ? "馬名" : "馬名 / 短評"}</th>
-            <th className="horse-list__th horse-list__th--score">{summaryMode ? "EV" : "スコア"}</th>
+            <th className="horse-list__th horse-list__th--score">スコア</th>
             {!summaryMode && <th className="horse-list__th horse-list__th--grades" title="能力軸ごとの等級">能力等級</th>}
             <th className="horse-list__th horse-list__th--buy">買い</th>
             {!summaryMode && <th className="horse-list__th horse-list__th--role">役割</th>}
@@ -234,6 +235,18 @@ export function HorseListTable({
                   <div className="horse-list__name-wrap">
                     <div className="horse-list__name-row">
                       <span className="horse-list__horse-name">{horse.horseName}</span>
+                      {horse.horseId ? (
+                        <a
+                          href={netkeibaHorseResultUrl(horse.horseId)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="netkeiba-horse-link"
+                          title="netkeiba で戦績を開く"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          戦績
+                        </a>
+                      ) : null}
                       <span className="horse-list__style">{horse.runningStyle}</span>
                     </div>
                     {!summaryMode && <p className="horse-list__comment">{comment}</p>}

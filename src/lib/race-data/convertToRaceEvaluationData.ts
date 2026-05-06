@@ -37,6 +37,10 @@ function n(v: unknown): number | undefined {
   return typeof v === "number" && Number.isFinite(v) ? v : undefined;
 }
 
+function b(v: unknown): boolean | undefined {
+  return typeof v === "boolean" ? v : undefined;
+}
+
 function round1(x: number): number {
   return Math.round(x * 10) / 10;
 }
@@ -203,6 +207,11 @@ function toEnrichedHorse(e: AnalysisHorseEntry): EnrichedRaceHorse {
     gate: um,
     frameNumber: wk,
     pastRuns: e.pastRuns,
+    was_bias_disadvantaged: b(e.was_bias_disadvantaged) ?? b(e.wasBiasDisadvantaged),
+    l2_top_speed: n(e.l2_top_speed) ?? n(e.l2TopSpeed),
+    bias_mismatch: b(e.bias_mismatch),
+    pace_mismatch: b(e.pace_mismatch),
+    l2_sustain_ratio: n(e.l2_sustain_ratio) ?? n(e.l2SustainRatio),
     signals: toEvaluationSignals(e),
     investment: toInvestmentInput(e),
   };
@@ -282,6 +291,14 @@ function toCondition(doc: Record<string, unknown>, pack: ReturnType<typeof merge
           ? raw["courseTopology"]
           : undefined,
       userTrackBias: n(raw["userTrackBias"]),
+      quickAdjustments:
+        raw["quickAdjustments"] != null && typeof raw["quickAdjustments"] === "object"
+          ? {
+              lastRunReset: b((raw["quickAdjustments"] as Record<string, unknown>)["lastRunReset"]),
+              lapFocus: b((raw["quickAdjustments"] as Record<string, unknown>)["lapFocus"]),
+              biasSync: b((raw["quickAdjustments"] as Record<string, unknown>)["biasSync"]),
+            }
+          : undefined,
     };
   }
   return {
@@ -414,6 +431,10 @@ function toRaceEntryFromPreserved(
       finalEvaluationScore: recomputed?.finalEvaluationScore ?? 0,
       evaluationBaselineScore: recomputed?.evaluationBaselineScore ?? 0,
       evaluationAdjustmentDelta: recomputed?.evaluationAdjustmentDelta ?? 0,
+      lastMinuteAdjustmentBonus: recomputed?.lastMinuteAdjustmentBonus ?? 0,
+      lastRunResetBonus: recomputed?.lastRunResetBonus ?? 0,
+      lapFocusBonus: recomputed?.lapFocusBonus ?? 0,
+      adjustmentBadges: recomputed?.adjustmentBadges ?? [],
       lapShapeFitBonus: recomputed?.lapShapeFitBonus ?? 0,
       lapSustainBonus: recomputed?.lapSustainBonus ?? 0,
       lapQualityBonus: recomputed?.lapQualityBonus ?? 0,
@@ -431,6 +452,11 @@ function toRaceEntryFromPreserved(
     },
     evaluationSignals: h.signals,
     investment: h.investment,
+    was_bias_disadvantaged: h.was_bias_disadvantaged,
+    l2_top_speed: h.l2_top_speed,
+    bias_mismatch: h.bias_mismatch,
+    pace_mismatch: h.pace_mismatch,
+    l2_sustain_ratio: h.l2_sustain_ratio,
     pastRuns: h.pastRuns,
   };
 }

@@ -4,6 +4,7 @@ import type { RaceCondition } from "../../domain/race-evaluation/abilityTypes";
 import { BIAS_ADJUSTMENTS, PACE_ADJUSTMENTS } from "../../domain/race-evaluation/adjustments";
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
 import { fetchRaceResultByApi, getRaceResultById } from "../../lib/race-data";
+import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
 
 // ===== localStorage helpers (手動入力の保存) =====
 
@@ -229,6 +230,7 @@ export function RaceResultPanel({ raceId, sorted, horses, condition, onApplySugg
   return (
     <div className="result-panel">
       <h2 className="app__section-title">結果確認・予想フィードバック</h2>
+      <NetkeibaRaceLinks raceId={raceId} />
 
       {/* 自動取得済みバナー */}
       {autoResult ? (

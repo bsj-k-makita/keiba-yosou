@@ -11,8 +11,8 @@ type Props = {
 export function EvHeatmap({ rows }: Props) {
   if (rows.length === 0) return null;
   return (
-    <div className="ev-heatmap" aria-label="期待値ヒートマップ">
-      <h4 className="ev-heatmap__title">期待値ヒートマップ</h4>
+    <div className="ev-heatmap" aria-label="オッズ補正スコアヒートマップ">
+      <h4 className="ev-heatmap__title">スコアヒートマップ</h4>
       <div className="ev-heatmap__grid">
         {rows.map((row) => {
           const ev = row.effectiveEv;

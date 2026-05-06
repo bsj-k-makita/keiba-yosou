@@ -56,9 +56,136 @@ function round1(n: number): number {
 }
 
 const MAX_COURSE_TRAIT_TOTAL = 8.5;
+const LAST_RUN_RESET_BONUS = 12.0;
+const LAP_FOCUS_MAX_BONUS = 15.0;
+/** 前走トラックバイアス逆行（`was_bias_disadvantaged`）の次走補正。着順に依らず素点系へ反映 */
+const BIAS_DISADVANTAGE_RECOVERY_BONUS = 7.0;
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
+}
+
+function inferCourseL2Demand01(condition: RaceCondition): number {
+  const key = `${condition.venue} ${condition.courseKey ?? ""}`.toLowerCase();
+  const dist = condition.distance ?? 0;
+  const turf = condition.surface !== "ダート";
+  let base =
+    key.includes("東京") || key.includes("阪神")
+      ? 0.85
+      : key.includes("京都")
+        ? 0.8
+        : key.includes("中京") || key.includes("新潟")
+          ? 0.72
+          : 0.62;
+  if (condition.pace === "slow" || condition.pace === "no_front_runner") base += 0.08;
+  if (condition.trackSpeed === "fast") base += 0.04;
+  if (condition.trackSpeed === "slow") base -= 0.05;
+  /** 東京芝 1400〜1600 の瞬発マイルは L2（残り400〜200m）負荷が相対的に高い */
+  if (key.includes("東京") && turf && dist >= 1400 && dist <= 1600) base += 0.07;
+  return clamp(base, 0.45, 0.95);
+}
+
+function inferLastRunDisadvantageFromPastRuns(horse: HorseAbility): boolean {
+  const last = horse.pastRuns?.[0];
+  if (last == null) return false;
+  const fastCloserBeaten =
+    last.final3fRank != null &&
+    last.place != null &&
+    last.final3fRank <= 3 &&
+    last.place >= 8;
+  const closeLossWithPoorOrder =
+    last.marginToWinnerSec != null &&
+    last.place != null &&
+    last.marginToWinnerSec <= 0.7 &&
+    last.place >= 6;
+  return fastCloserBeaten || closeLossWithPoorOrder;
+}
+
+function hasBiasDisadvantage(horse: HorseAbility): boolean {
+  return (
+    horse.was_bias_disadvantaged === true ||
+    horse.bias_mismatch === true ||
+    inferLastRunDisadvantageFromPastRuns(horse)
+  );
+}
+
+function normalizeStoredL2Top01(raw: number): number {
+  if (!Number.isFinite(raw)) return 0;
+  /** JSON が 0〜1 のときそのまま、旧データの 0〜100 も許容 */
+  if (raw > 1.01) return clamp(raw / 100, 0, 1);
+  return clamp(raw, 0, 1);
+}
+
+function resolveL2Metrics(horse: HorseAbility): {
+  hasData: boolean;
+  topSpeed01: number;
+  sustain01: number;
+} {
+  const topFromField =
+    horse.l2_top_speed != null && Number.isFinite(horse.l2_top_speed)
+      ? normalizeStoredL2Top01(horse.l2_top_speed)
+      : null;
+  const sustainFromField =
+    horse.l2_sustain_ratio != null && Number.isFinite(horse.l2_sustain_ratio)
+      ? clamp(horse.l2_sustain_ratio, 0, 1)
+      : null;
+
+  let topDerived = 0;
+  let sustainDerived = 0.5;
+  let hasDerived = false;
+  for (const run of horse.pastRuns ?? []) {
+    const sec = run.section200mSec;
+    if (sec == null || sec.length < 4) continue;
+    const l2 = sec[sec.length - 2];
+    const l1 = sec[sec.length - 1];
+    if (l2 == null || l1 == null || l2 <= 0 || l1 <= 0) continue;
+    hasDerived = true;
+    const l2Perf = clamp((13.5 - l2) / 2.7, 0, 1);
+    const sustain = clamp((l2 / l1 - 0.85) / 0.15, 0, 1);
+    if (l2Perf > topDerived) {
+      topDerived = l2Perf;
+      sustainDerived = sustain;
+    }
+  }
+
+  const topSpeed01 = topFromField ?? topDerived;
+  const sustain01 = sustainFromField ?? (hasDerived ? sustainDerived : 0.5);
+  return {
+    hasData: topFromField != null || sustainFromField != null || hasDerived,
+    topSpeed01,
+    sustain01,
+  };
+}
+
+function lapFocusBlendWeights(condition: RaceCondition): {
+  topW: number;
+  sustainW: number;
+  demandShift: number;
+  bonusCap: number;
+} {
+  const v = `${condition.venue ?? ""} ${condition.courseKey ?? ""}`;
+  const dist = condition.distance ?? 0;
+  const turf = condition.surface !== "ダート";
+  if (v.includes("東京") && turf && dist >= 1400 && dist <= 1600) {
+    return { topW: 0.9, sustainW: 0.1, demandShift: 0.04, bonusCap: LAP_FOCUS_MAX_BONUS * 1.12 };
+  }
+  if (v.includes("京都") && turf && dist >= 3000) {
+    return { topW: 0.2, sustainW: 0.8, demandShift: -0.03, bonusCap: LAP_FOCUS_MAX_BONUS * 1.2 };
+  }
+  if (turf && dist >= 3200) {
+    return { topW: 0.25, sustainW: 0.75, demandShift: -0.04, bonusCap: LAP_FOCUS_MAX_BONUS * 1.2 };
+  }
+  return { topW: 0.75, sustainW: 0.25, demandShift: 0, bonusCap: LAP_FOCUS_MAX_BONUS };
+}
+
+function computeLapFocusBonus(horse: HorseAbility, condition: RaceCondition): number {
+  const metrics = resolveL2Metrics(horse);
+  if (!metrics.hasData) return 0;
+  const w = lapFocusBlendWeights(condition);
+  const horseL2Profile = metrics.topSpeed01 * w.topW + metrics.sustain01 * w.sustainW;
+  const demand = clamp(inferCourseL2Demand01(condition) + w.demandShift, 0.45, 0.95);
+  const match = clamp(1 - Math.abs(horseL2Profile - demand), 0, 1);
+  return round1(clamp(w.bonusCap * match * horseL2Profile, 0, w.bonusCap));
 }
 
 function conditionImpactBonusFromDiff(
@@ -207,6 +334,10 @@ export function evaluateRace(
       finalEvaluationScore: 0,
       evaluationBaselineScore: 0,
       evaluationAdjustmentDelta: 0,
+      lastMinuteAdjustmentBonus: 0,
+      lastRunResetBonus: 0,
+      lapFocusBonus: 0,
+      adjustmentBadges: [],
       lapShapeFitBonus: round1(lapShapeFitBonus),
       lapSustainBonus: round1(lapFit.sustainBonus),
       lapQualityBonus: round1(lapFit.qualityBonus),
@@ -241,6 +372,8 @@ export function evaluateRace(
       evalHorses.length,
       styleSignalFactor,
     );
+    const biasDisadvantageRecoveryBonus =
+      h.was_bias_disadvantaged === true ? BIAS_DISADVANTAGE_RECOVERY_BONUS : 0;
     const contextualTotal =
       contextual.pedigreeBonus +
       contextual.gateBiasBonus +
@@ -249,7 +382,22 @@ export function evaluateRace(
       contextual.trendBonus +
       contextual.paceBalanceBonus +
       contextual.tripContextBonus;
-    const conditionImpactBonus = conditionImpactBonusFromDiff(r.scoreDiff, condition.adjustmentStrength);
+    let conditionImpactBonus = conditionImpactBonusFromDiff(r.scoreDiff, condition.adjustmentStrength);
+    const adjustmentBadges: string[] = [];
+    let lastRunResetBonus = 0;
+    let lapFocusBonus = 0;
+    lapFocusBonus = computeLapFocusBonus(h, condition);
+    conditionImpactBonus = round1(conditionImpactBonus + lapFocusBonus);
+    if (lapFocusBonus > 0.1) {
+      adjustmentBadges.push("ラップ適合");
+    }
+    if (condition.quickAdjustments?.lastRunReset && hasBiasDisadvantage(h)) {
+      lastRunResetBonus = LAST_RUN_RESET_BONUS;
+      adjustmentBadges.push("前走不利解消");
+    }
+    if (biasDisadvantageRecoveryBonus > 0.1) {
+      adjustmentBadges.push("バイアス逆行救済");
+    }
     const weakTierImpact = weakTierImpactFromDiff(r.scoreDiff, condition.adjustmentStrength);
     const dScaled = round1(dBonus * strengthMult);
     const contextualScaled = round1(contextualTotal * strengthMult);
@@ -292,7 +440,15 @@ export function evaluateRace(
       contextualScaled,
       conditionImpactBonus,
     );
-    r.finalEvaluationScore = round1(r.finalEvaluationScore + courseTraitBonus);
+    r.finalEvaluationScore = round1(
+      r.finalEvaluationScore + courseTraitBonus + lastRunResetBonus + biasDisadvantageRecoveryBonus,
+    );
+    r.lastRunResetBonus = round1(lastRunResetBonus);
+    r.lapFocusBonus = round1(lapFocusBonus);
+    r.lastMinuteAdjustmentBonus = round1(
+      lastRunResetBonus + lapFocusBonus + biasDisadvantageRecoveryBonus,
+    );
+    r.adjustmentBadges = adjustmentBadges;
     r.evaluationAdjustmentDelta = round1(r.finalEvaluationScore - r.evaluationBaselineScore);
   }
 

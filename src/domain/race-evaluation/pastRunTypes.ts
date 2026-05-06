@@ -32,6 +32,18 @@ export type PastRunRecord = {
   final3fSec?: number;
   /** 上がり順位（1 が最速）。 */
   final3fRank?: number;
+  /** 開催競馬場（例: 東京）。戦績「開催」列から */
+  venue?: string;
+  /** 芝 / ダート（距離列の種別から） */
+  surface?: "芝" | "ダート";
+  /** 頭数 */
+  fieldSize?: number;
+  /** 枠番（1〜8） */
+  waku?: number;
+  /** 通過順（例: 8-8-7-4）。コーナー位置の分解に使用 */
+  passingOrder?: string;
+  /** passingOrder の別名（外部JSON揺れ） */
+  cornerPassing?: string;
   /** 0〜1: 不利度。大外を回す/前が壁など、値が大きいほど不利を受けた。 */
   tripTrouble01?: number;
   /** 0〜1: 展開利・馬場恩恵。値が大きいほど恩恵を受けた。 */

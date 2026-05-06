@@ -3,15 +3,17 @@ import { readFileSync, writeFileSync, readdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { enrichInvestmentSignalsInRaceData } from "./lib/investmentSignals.mjs";
+import { updateBiasMasterFromNetwork } from "./lib/biasMaster.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 const RACES_DIR = join(ROOT, "src/data/races");
 
 function parseArgs(argv) {
-  const out = { all: false, raceIds: [] };
+  const out = { all: false, biasUpdate: false, raceIds: [] };
   for (const a of argv) {
     if (a === "--all") out.all = true;
+    else if (a === "--bias-update") out.biasUpdate = true;
     else if (!a.startsWith("-")) out.raceIds.push(a.replace(/\.json$/, ""));
   }
   return out;
@@ -37,11 +39,26 @@ function processRace(raceId) {
   return false;
 }
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv.slice(2));
+
+  if (args.biasUpdate) {
+    process.stderr.write("Updating bias_master.json from index.json (netkeiba result pages)…\n");
+    const res = await updateBiasMasterFromNetwork({});
+    process.stdout.write(
+      `bias_master: updatedAt=${res.updatedAt}, mergedEntries=${Object.keys(res.entries ?? {}).length}, fetchedRaces=${res.fetchedRaces}\n`,
+    );
+  }
+
   const raceIds = args.all ? listRaceIds() : args.raceIds;
   if (raceIds.length === 0) {
-    process.stderr.write("Usage: node scripts/enrich-investment-signals.mjs --all | <raceId> [raceId...]\n");
+    if (args.biasUpdate) {
+      process.stdout.write("done (bias-only).\n");
+      return;
+    }
+    process.stderr.write(
+      "Usage: node scripts/enrich-investment-signals.mjs [--bias-update] --all | <raceId> [raceId...]\n",
+    );
     process.exit(1);
   }
   let updated = 0;
@@ -52,4 +69,7 @@ function main() {
   process.stdout.write(`done. updated ${updated}/${raceIds.length} race files.\n`);
 }
 
-main();
+main().catch((e) => {
+  process.stderr.write(String(e?.stack ?? e) + "\n");
+  process.exit(1);
+});

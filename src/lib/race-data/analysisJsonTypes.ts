@@ -107,6 +107,17 @@ export type AnalysisHorseEntry = {
   };
   /** 直近が先頭。取得スクリプトで拡張予定 */
   pastRuns?: PastRunRecord[];
+  /** 前走がバイアス逆行だったか */
+  was_bias_disadvantaged?: boolean;
+  wasBiasDisadvantaged?: boolean;
+  /** 過去L2（400-200m）最大パフォーマンス */
+  l2_top_speed?: number;
+  l2TopSpeed?: number;
+  /** 追加の揺れキー */
+  bias_mismatch?: boolean;
+  pace_mismatch?: boolean;
+  l2_sustain_ratio?: number;
+  l2SustainRatio?: number;
   evaluationSignals?: HorseEvaluationSignals;
   /** 気性難（折り合い不安）の補助キー */
   temperamentConcern01?: number;

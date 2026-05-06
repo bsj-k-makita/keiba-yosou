@@ -40,6 +40,7 @@ import {
   getLapProfileVisual,
 } from "./evaluationTags";
 import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
+import { netkeibaHorseResultUrl } from "../../lib/netkeibaUrls";
 
 type Props = {
   gate?: number;
@@ -126,7 +127,10 @@ export function HorseEvaluationCard({
   const weightedRadar = viewModel?.byHorseId.get(horse.horseId)?.weightedRadar;
   const hMap = useMemo(() => weightedRadar ?? horseToRadarMap(horse), [horse, weightedRadar]);
   const radarShape = useMemo(() => inferRadarShape(horse), [horse]);
-  const effectiveEv = viewModel?.byHorseId.get(horse.horseId)?.effectiveEv ?? horse.investment?.valueScore;
+  const effectiveEv = useMemo(
+    () => viewModel?.byHorseId.get(horse.horseId)?.effectiveEv ?? horse.investment?.valueScore,
+    [horse.horseId, horse.investment?.valueScore, viewModel],
+  );
   const effectiveEvHot =
     effectiveEv != null && Number.isFinite(effectiveEv) && effectiveEv > 1.25;
   const evBand =
@@ -170,6 +174,10 @@ export function HorseEvaluationCard({
       title: reasons.join("\n"),
     };
   }, [result.courseTraitBonus, result.courseTraitReasons]);
+  const quickAdjustmentBadges = useMemo(
+    () => (result.adjustmentBadges ?? []).filter((badge) => badge.length > 0),
+    [result.adjustmentBadges],
+  );
 
   return (
     <article
@@ -194,6 +202,18 @@ export function HorseEvaluationCard({
         )}
         <div className="horse-card__name-row">
           <span className="horse-card__title">{horse.horseName}</span>
+          {horse.horseId ? (
+            <a
+              href={netkeibaHorseResultUrl(horse.horseId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="netkeiba-horse-link"
+              title="netkeiba で戦績・過去走を開く（追加取得なし）"
+              onClick={(e) => e.stopPropagation()}
+            >
+              戦績
+            </a>
+          ) : null}
           <span className="horse-card__style-badge" title={UI.RUNNING_STYLE}>
             {horse.runningStyle}
           </span>
@@ -339,8 +359,17 @@ export function HorseEvaluationCard({
             {marketAlert}
           </p>
         ) : null}
-        {connectionBadges.length > 0 || courseTraitBadge != null ? (
+        {connectionBadges.length > 0 || courseTraitBadge != null || quickAdjustmentBadges.length > 0 ? (
           <div className="horse-card__special-badges">
+            {quickAdjustmentBadges.map((badge) => (
+              <span
+                key={`quick-${badge}`}
+                className="horse-card__special-badge"
+                data-kind="quick-adjustment"
+              >
+                {badge}
+              </span>
+            ))}
             {courseTraitBadge ? (
               <span className="horse-card__special-badge" data-kind="course-trait" title={courseTraitBadge.title}>
                 {courseTraitBadge.text}

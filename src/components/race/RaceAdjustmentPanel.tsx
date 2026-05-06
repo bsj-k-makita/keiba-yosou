@@ -247,7 +247,7 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
       <div className="adj-panel__group">
         <h3>能力重視プリセット</h3>
         <p style={{ fontSize: "0.78em", color: "#6c757d", margin: "0 0 6px" }}>
-          選択した能力ウェイトを 1.5 倍にして再正規化します。全馬の期待値とスコアが即座に更新されます。
+          選択した能力ウェイトを 1.5 倍にして再正規化します。全馬の評価スコアが即座に更新されます。
         </p>
         <div className="adj-panel__chips">
           {ABILITY_PRESETS.map(({ priority, label, description }) => (
