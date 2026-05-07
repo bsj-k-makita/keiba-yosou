@@ -2271,7 +2271,7 @@ samp {
 .rl-hero__inner {
   max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: 32px 22px 28px;
+  padding: 64px 22px 56px;
   position: relative;
   z-index: 1;
   display: flex;
@@ -2279,6 +2279,11 @@ samp {
   justify-content: space-between;
   gap: 20px;
   flex-wrap: wrap;
+}
+
+.rl-hero--has-image .rl-hero__inner {
+  min-height: 448px;
+  align-items: center;
 }
 
 .rl-hero__content {
@@ -4434,7 +4439,12 @@ samp {
     flex-direction: column;
     justify-content: flex-start;
     gap: 16px;
-    padding: 24px 20px 24px;
+    padding: 48px 20px 48px;
+  }
+
+  .rl-hero--has-image .rl-hero__inner {
+    min-height: 0;
+    align-items: stretch;
   }
 
   /* 縦並び時は flex-basis を高さに使わず自然な高さにする */
@@ -4603,7 +4613,7 @@ img[loading="lazy"] {
 
 /* KV画像あり: ヒーローの高さを確保して写真を見せる */
 .rl-hero--has-image {
-  min-height: 220px;
+  min-height: 440px;
 }
 
 .rl-hero--has-image .rl-hero__title {
