@@ -354,6 +354,9 @@ export function RacesListPage() {
   if (rows == null) {
     return (
       <div className="rl-page rl-page--loading" aria-busy="true">
+        <div className="rl-spinner" aria-hidden="true">
+          <span>🏇</span>
+        </div>
         <p className="rl-loading-text">レース一覧を読み込み中…</p>
       </div>
     );
@@ -361,53 +364,58 @@ export function RacesListPage() {
 
   return (
     <div className="rl-page">
-      {/* ページヘッダ */}
-      <div className="rl-header">
-        <p className="rl-header__label">Race Schedule</p>
-        <h1 className="rl-header__title">レース一覧</h1>
-        <section className="rl-hit-summary" aria-label="直近30レース的中率サマリー">
-          <div className="rl-hit-summary__head">
-            <p className="rl-hit-summary__title">
-              {hitStats != null && hitStats.sampleSize > 0
-                ? `直近${hitStats.sampleSize}R 的中率サマリー`
-                : "直近レース 的中率サマリー"}
-            </p>
-            <button
-              type="button"
-              className="rl-hit-summary__fetch-btn"
-              onClick={() => void handleBulkFetchResults()}
-              disabled={bulkLoading || activeRaces.length === 0}
-            >
-              {bulkLoading ? "結果一括取得中…" : "結果一括取得"}
-            </button>
+      {/* ヒーローバナー */}
+      <div className="rl-hero rl-hero--has-image" role="banner">
+        <div className="rl-hero__inner">
+          <div className="rl-hero__content">
+            <p className="rl-hero__eyebrow">AI競馬予想</p>
+            <h1 className="rl-hero__title">今週のレースを<br />AIが分析</h1>
+            <p className="rl-hero__sub">データサイエンスで勝利をつかもう</p>
           </div>
-          {bulkMessage ? <p className="rl-hit-summary__status">{bulkMessage}</p> : null}
-          {hitStatsLoading ? (
-            <p className="rl-hit-summary__empty">集計中…</p>
-          ) : hitStats == null || hitStats.sampleSize === 0 ? (
-            <p className="rl-hit-summary__empty">結果データが不足しているため、表示できません。</p>
-          ) : (
-            <>
-              <p className="rl-hit-summary__favorite">
-                本命馬券内率: <strong>{formatHitRate(hitStats.marks[0]!)}</strong>
+          <section className="rl-hit-summary rl-hit-summary--hero" aria-label="直近30レース的中率サマリー">
+            <div className="rl-hit-summary__head">
+              <p className="rl-hit-summary__title">
+                {hitStats != null && hitStats.sampleSize > 0
+                  ? `直近${hitStats.sampleSize}R 的中率`
+                  : "AI的中率"}
               </p>
-              <div className="rl-hit-summary__rows">
-                {hitStats.marks.map((m) => {
-                  const rate = m.total > 0 ? (m.hit / m.total) * 100 : 0;
-                  return (
-                    <div className="rl-hit-summary__row" key={m.mark}>
-                      <span className="rl-hit-summary__mark">{m.mark}</span>
-                      <div className="rl-hit-summary__track">
-                        <div className="rl-hit-summary__fill" style={{ width: `${Math.max(0, Math.min(100, rate))}%` }} />
+              <button
+                type="button"
+                className="rl-hit-summary__fetch-btn"
+                onClick={() => void handleBulkFetchResults()}
+                disabled={bulkLoading || activeRaces.length === 0}
+              >
+                {bulkLoading ? "取得中…" : "結果取得"}
+              </button>
+            </div>
+            {bulkMessage ? <p className="rl-hit-summary__status">{bulkMessage}</p> : null}
+            {hitStatsLoading ? (
+              <p className="rl-hit-summary__empty">集計中…</p>
+            ) : hitStats == null || hitStats.sampleSize === 0 ? (
+              <p className="rl-hit-summary__empty">結果データ不足</p>
+            ) : (
+              <>
+                <p className="rl-hit-summary__favorite">
+                  本命馬券内率: <strong>{formatHitRate(hitStats.marks[0]!)}</strong>
+                </p>
+                <div className="rl-hit-summary__rows">
+                  {hitStats.marks.map((m) => {
+                    const rate = m.total > 0 ? (m.hit / m.total) * 100 : 0;
+                    return (
+                      <div className="rl-hit-summary__row" key={m.mark}>
+                        <span className="rl-hit-summary__mark">{m.mark}</span>
+                        <div className="rl-hit-summary__track">
+                          <div className="rl-hit-summary__fill" style={{ width: `${Math.max(0, Math.min(100, rate))}%` }} />
+                        </div>
+                        <span className="rl-hit-summary__value">{rate.toFixed(0)}%</span>
                       </div>
-                      <span className="rl-hit-summary__value">{rate.toFixed(0)}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </section>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </section>
+        </div>
       </div>
 
       {/* 日付タブ */}

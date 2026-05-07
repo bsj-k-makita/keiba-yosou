@@ -78,7 +78,7 @@ export function RaceDetailPage() {
     <div>
       <nav className="app__nav" aria-label="パンくず">
         <Link to="/races" className="app__back-link">
-          ← レース一覧
+          ← レース一覧に戻る
         </Link>
       </nav>
       <RaceDetailView key={race.raceId} race={race} raceIndex={raceIndex} />

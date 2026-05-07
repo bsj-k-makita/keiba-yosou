@@ -31,8 +31,9 @@ function AppNav({
         <img
           className="app-nav__logo-img"
           src="/logo.png"
-          alt=""
+          alt="競馬AI分析"
           decoding="async"
+          loading="lazy"
         />
         <span className="app-nav__logo-text">競馬AI分析</span>
       </Link>
@@ -44,7 +45,7 @@ function AppNav({
           aria-label={`テーマ切替（現在: ${theme === "dark" ? "ダーク" : "ライト"}）`}
           title={`現在: ${theme === "dark" ? "ダーク" : "ライト"}`}
         >
-          {theme === "dark" ? "☀ LIGHT" : "🌙 DARK"}
+          {theme === "dark" ? "☀️ ライト" : "🌙 ダーク"}
         </button>
       </div>
     </nav>
