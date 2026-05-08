@@ -2613,7 +2613,7 @@ samp {
 
 .rl-race-row {
   display: grid;
-  grid-template-columns: 48px 1fr auto;
+  grid-template-columns: max-content 1fr auto;
   align-items: center;
   gap: 0 12px;
   padding: 14px 16px;
@@ -2657,6 +2657,8 @@ samp {
 .rl-race-row__feature {
   display: inline-flex;
   align-items: center;
+  white-space: nowrap;
+  word-break: keep-all;
   min-height: 22px;
   padding: 0 10px;
   border-radius: var(--r-pill);
