@@ -2245,7 +2245,7 @@ samp {
   background: linear-gradient(135deg, #0a3b3d 0%, #0e4749 25%, #1c5d5f 55%, #0f766e 80%, #115e59 100%);
 }
 
-/* KV画像あり: public/hero-kv.jpg が配置されると適用 */
+/* KV画像あり: public/hero-kv.jpg */
 .rl-hero--has-image {
   background:
     linear-gradient(105deg,
@@ -2255,7 +2255,7 @@ samp {
       rgba(6, 35, 34, 0.55) 80%,
       rgba(4, 25, 24, 0.65) 100%
     ),
-    url('/hero-kv.jpg') 70% 35% / cover no-repeat;
+    url('/hero-kv.jpg') 56% 24% / cover no-repeat;
 }
 
 .rl-hero::after {
@@ -2282,7 +2282,7 @@ samp {
 }
 
 .rl-hero--has-image .rl-hero__inner {
-  min-height: 448px;
+  min-height: 520px;
   align-items: center;
 }
 
@@ -4478,7 +4478,7 @@ samp {
       rgba(3, 20, 20, 0.65) 80%,
       rgba(2, 14, 14, 0.72) 100%
     ),
-    url('/hero-kv.jpg') 70% 35% / cover no-repeat;
+    url('/hero-kv.jpg') 56% 24% / cover no-repeat;
 }
 
 :root[data-theme="dark"] .rl-race-card-wrap:hover {
@@ -4615,7 +4615,7 @@ img[loading="lazy"] {
 
 /* KV画像あり: ヒーローの高さを確保して写真を見せる */
 .rl-hero--has-image {
-  min-height: 440px;
+  min-height: 520px;
 }
 
 .rl-hero--has-image .rl-hero__title {
@@ -4629,7 +4629,7 @@ img[loading="lazy"] {
 
 @media (max-width: 640px) {
   .rl-hero--has-image {
-    min-height: 0;
-    background-position: right 20% !important;
+    min-height: 320px;
+    background-position: 58% 18% !important;
   }
 }
