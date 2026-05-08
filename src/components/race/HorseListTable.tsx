@@ -230,6 +230,7 @@ export function HorseListTable({
                   <td className="horse-list__td horse-list__td--radar">
                     <RadarChart
                       horse={radarMap as Parameters<typeof RadarChart>[0]["horse"]}
+                      grades={grades}
                       size={149}
                     />
                   </td>

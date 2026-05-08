@@ -61,9 +61,24 @@ const LAST_RUN_RESET_BONUS = 12.0;
 const LAP_FOCUS_MAX_BONUS = 15.0;
 /** 前走トラックバイアス逆行（`was_bias_disadvantaged`）の次走補正。着順に依らず素点系へ反映 */
 const BIAS_DISADVANTAGE_RECOVERY_BONUS = 7.0;
+/**
+ * 能力値を主軸にするため、最終評価の「適性起因の逆転幅」を制限する。
+ * final = raceRelativeScore + clamp(finalRaw - raceRelativeScore, -MAX, +MAX)
+ */
+const MAX_APTITUDE_SWING_FINAL = 8.0;
+const MAX_APTITUDE_SWING_BASELINE = 6.0;
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
+}
+
+function capAptitudeSwing(
+  relativeScore: number,
+  rawScore: number,
+  maxSwing: number,
+): number {
+  const swing = rawScore - relativeScore;
+  return round1(relativeScore + clamp(swing, -maxSwing, maxSwing));
 }
 
 function inferCourseL2Demand01(condition: RaceCondition): number {
@@ -424,7 +439,7 @@ export function evaluateRace(
     const classCombined = round1(clamp(cBonus + r.stepPatternBonus, -4.5, 5.5));
     const lapStack =
       r.lapShapeFitBonus + r.raceAnalysisBonus + r.lapSustainBonus + r.lapQualityBonus;
-    r.evaluationBaselineScore = combineFinalEvaluationScore(
+    const baselineRaw = combineFinalEvaluationScore(
       relScore,
       pBonus,
       lapStack,
@@ -434,7 +449,7 @@ export function evaluateRace(
       contextualTotal,
       weakTierImpact,
     );
-    r.finalEvaluationScore = combineFinalEvaluationScore(
+    const finalRaw = combineFinalEvaluationScore(
       relScore,
       pBonus,
       lapStack,
@@ -444,8 +459,21 @@ export function evaluateRace(
       contextualScaled,
       conditionImpactBonus,
     );
-    r.finalEvaluationScore = round1(
-      r.finalEvaluationScore + courseTraitBonus + lastRunResetBonus + biasDisadvantageRecoveryBonus,
+    const baselineWithExtras = round1(
+      baselineRaw + courseTraitBonus + lastRunResetBonus + biasDisadvantageRecoveryBonus,
+    );
+    const finalWithExtras = round1(
+      finalRaw + courseTraitBonus + lastRunResetBonus + biasDisadvantageRecoveryBonus,
+    );
+    r.evaluationBaselineScore = capAptitudeSwing(
+      relScore,
+      baselineWithExtras,
+      MAX_APTITUDE_SWING_BASELINE,
+    );
+    r.finalEvaluationScore = capAptitudeSwing(
+      relScore,
+      finalWithExtras,
+      MAX_APTITUDE_SWING_FINAL,
     );
     r.lastRunResetBonus = round1(lastRunResetBonus);
     r.lapFocusBonus = round1(lapFocusBonus);

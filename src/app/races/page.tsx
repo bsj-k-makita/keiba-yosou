@@ -197,7 +197,6 @@ export function RacesListPage() {
   const [hitStatsLoading, setHitStatsLoading] = useState(true);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkMessage, setBulkMessage] = useState<string | null>(null);
-  const [valueDetectedMap, setValueDetectedMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let live = true;
@@ -315,33 +314,6 @@ export function RacesListPage() {
       live = false;
     };
   }, [activeRaces, previewMap]);
-
-  useEffect(() => {
-    if (activeRaces.length === 0) return;
-    const missing = activeRaces.map((r) => r.raceId).filter((id) => valueDetectedMap[id] == null);
-    if (missing.length === 0) return;
-    let live = true;
-    void (async () => {
-      const rows = await Promise.all(
-        missing.map(async (raceId): Promise<[string, boolean] | null> => {
-          const race = await getRaceEvaluationById(raceId);
-          if (!race) return null;
-          const hit = race.entries.some((entry) => {
-            const rank = entry.investment?.valueRank;
-            const ev = entry.investment?.valueScore ?? 0;
-            // Sランク基準で抽出。valueRank未付与データのフォールバックとして EV>=1.25 をS相当とみなす。
-            return rank === "S" || ev >= 1.25;
-          });
-          return [raceId, hit];
-        }),
-      );
-      if (!live) return;
-      setValueDetectedMap((prev) => ({ ...prev, ...Object.fromEntries(rows.filter((r): r is [string, boolean] => r != null)) }));
-    })();
-    return () => {
-      live = false;
-    };
-  }, [activeRaces, valueDetectedMap]);
 
   if (err != null) {
     return (
@@ -489,9 +461,6 @@ export function RacesListPage() {
                       <div className="rl-race-row__lead">
                         {badge ? (
                           <span className={`rl-race-row__feature rl-race-row__feature--${badge.tone}`}>{badge.label}</span>
-                        ) : null}
-                        {valueDetectedMap[item.raceId] ? (
-                          <span className="rl-race-row__feature rl-race-row__feature--value">🔥 お宝レース</span>
                         ) : null}
                       </div>
                     </div>
