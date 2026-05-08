@@ -424,6 +424,9 @@ function normalizeBrowserRows(rows) {
   return { byHorseNo, byHorseId };
 }
 
+const SP_MOBILE_UA =
+  "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
+
 async function createBrowserOddsFetcher() {
   let chromium;
   try {
@@ -431,74 +434,144 @@ async function createBrowserOddsFetcher() {
   } catch {
     return null;
   }
-  const channel = process.env.ODDS_BROWSER_CHANNEL || "chrome";
-  const browser = await chromium.launch({
-    headless: true,
-    channel,
+  const launchOpts = { headless: true };
+  const ch = process.env.ODDS_BROWSER_CHANNEL;
+  if (ch && ch !== "0") launchOpts.channel = ch;
+  const browser = await chromium.launch(launchOpts);
+  const context = await browser.newContext({
+    userAgent: SP_MOBILE_UA,
+    viewport: { width: 390, height: 844 },
   });
-  const context = await browser.newContext();
   const page = await context.newPage();
-  let blockedByUpstream = false;
 
   return {
     async fetchRaceOdds(raceId) {
-      if (blockedByUpstream) return { byHorseNo: new Map(), byHorseId: new Map() };
-      const url = `https://race.netkeiba.com/race/shutuba.html?race_id=${raceId}`;
-      try {
-        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
-      } catch (e) {
-        const msg = String(e?.message || e || "");
-        if (msg.includes("ERR_HTTP_RESPONSE_CODE_FAILURE")) {
-          blockedByUpstream = true;
-          process.stderr.write("browser source blocked by upstream. fallback to http source for this run.\n");
-          return { byHorseNo: new Map(), byHorseId: new Map() };
+      const urls = [
+        `https://race.sp.netkeiba.com/?pid=odds_view&race_id=${raceId}`,
+        `https://race.sp.netkeiba.com/race/shutuba.html?race_id=${raceId}`,
+      ];
+      let lastErr = null;
+      for (const url of urls) {
+        try {
+          await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
+        } catch (e) {
+          lastErr = e;
+          continue;
         }
-        throw e;
-      }
-      await page.waitForTimeout(1200);
-      const rows = await page.evaluate(() => {
-        const parseNoFromId = (id) => {
-          const m = String(id ?? "").match(/_(\d{1,2})$/);
-          if (!m) return null;
-          const n = Number.parseInt(m[1], 10);
-          return Number.isFinite(n) && n >= 1 ? n : null;
-        };
-        const parseOdds = (s) => {
-          const m = String(s ?? "").replace(/\s+/g, "").match(/^(\d+\.\d)$/);
-          return m ? Number.parseFloat(m[1]) : null;
-        };
-        const parsePopularity = (s) => {
-          const m = String(s ?? "").replace(/\s+/g, "").match(/^(\d{1,2})$/);
-          return m ? Number.parseInt(m[1], 10) : null;
-        };
-        const out = [];
-        const rows = Array.from(document.querySelectorAll("tr.HorseList"));
-        for (const tr of rows) {
-          const horseAnchor = tr.querySelector('a[href*="/horse/"]');
-          const href = horseAnchor?.getAttribute("href") ?? "";
-          const horseId = (href.match(/horse\/(\d+)/) ?? [])[1] ?? "";
-          const cells = tr.querySelectorAll("td");
-          const noText = cells.length > 1 ? (cells[1]?.textContent ?? "") : "";
-          let horseNo = Number.parseInt(noText.replace(/[^\d]/g, ""), 10);
-          if (!Number.isFinite(horseNo) || horseNo < 1) {
-            horseNo =
-              parseNoFromId(tr.querySelector('span[id^="uno-1_"]')?.id) ??
-              parseNoFromId(tr.querySelector('span[id^="odds-1_"]')?.id) ??
-              parseNoFromId(tr.querySelector('span[id^="ninki-1_"]')?.id) ??
-              NaN;
+        await page
+          .waitForFunction(
+            () => {
+              const rows = Array.from(document.querySelectorAll('tr[id^="ninki-data-"]'));
+              const visibleRows = rows.filter((tr) => tr.offsetParent !== null && !tr.classList.contains("Cancel"));
+              const useNinki = rows.length >= 4;
+              if (!useNinki) {
+                let n = 0;
+                for (const el of document.querySelectorAll("tr.HorseList span[id^=\"odds-1_\"]")) {
+                  const t = (el.textContent || "").replace(/\s+/g, "").trim();
+                  if (/^\d+\.\d+$/.test(t)) n += 1;
+                }
+                return n >= 2;
+              }
+              if (visibleRows.length === 0) return false;
+              let ready = 0;
+              for (const tr of visibleRows) {
+                const slot = String(tr.id || "").replace("ninki-data-", "");
+                if (!slot) continue;
+                const uma = (document.querySelector(`#ninki-no_${slot}`)?.textContent || "").replace(/\s+/g, "").trim();
+                const odds = (document.querySelector(`#odds-1_${slot}`)?.textContent || "").replace(/\s+/g, "").trim();
+                if (/^\d{1,2}$/.test(uma) && /^\d+\.\d+$/.test(odds)) ready += 1;
+              }
+              return ready >= Math.max(visibleRows.length - 1, 8);
+            },
+            { timeout: 38000 },
+          )
+          .catch(() => {});
+        await page.waitForTimeout(600);
+        const rows = await page.evaluate(() => {
+          const parseOdds = (s) => {
+            const t = String(s ?? "").replace(/\s+/g, "").trim();
+            if (!t || t.startsWith("-") || t.includes("取下") || t.includes("取消")) return null;
+            const m = t.match(/^(\d+(?:\.\d+)?)$/);
+            return m ? Number.parseFloat(m[1]) : null;
+          };
+          const parsePopularity = (s) => {
+            const m = String(s ?? "").replace(/\s+/g, "").match(/^(\d{1,2})$/);
+            return m ? Number.parseInt(m[1], 10) : null;
+          };
+          const parseNoFromId = (id) => {
+            const m = String(id ?? "").match(/_(\d{1,2})$/);
+            if (!m) return null;
+            const n = Number.parseInt(m[1], 10);
+            return Number.isFinite(n) && n >= 1 ? n : null;
+          };
+          const out = [];
+
+          const ninkiRows = Array.from(document.querySelectorAll('tr[id^="ninki-data-"]'));
+          if (ninkiRows.length > 0) {
+            for (const tr of ninkiRows) {
+              const slot = String(tr.id || "").replace("ninki-data-", "");
+              if (!slot) continue;
+              const oddsEl = document.querySelector(`#odds-1_${slot}`);
+              const umaEl = document.querySelector(`#ninki-no_${slot}`);
+              const oddsText = oddsEl?.textContent ?? "";
+              const umabanText = umaEl?.textContent ?? "";
+              let horseNo = parsePopularity(umabanText);
+              const odds = parseOdds(oddsText);
+              const ninkiCell = tr.querySelector("td.Ninki");
+              const popularity = parsePopularity((ninkiCell?.textContent ?? "").trim());
+              let horseId = "";
+              const horseAnchor = tr.querySelector('a[href*="horse"], a[href*="horse_profile"]');
+              const href = horseAnchor?.getAttribute("href") ?? "";
+              const idQ = href.match(/[?&]id=(\d+)/);
+              const idPath = href.match(/horse\/(\d+)/);
+              if (idQ) horseId = idQ[1];
+              else if (idPath) horseId = idPath[1];
+              if (odds == null && popularity == null && !Number.isFinite(horseNo)) continue;
+              out.push({
+                horseNo: Number.isFinite(horseNo) && horseNo >= 1 ? horseNo : null,
+                horseId: horseId.length > 0 ? horseId : null,
+                odds,
+                popularity: Number.isFinite(popularity) && popularity >= 1 ? popularity : null,
+              });
+            }
+            if (out.length > 0) return out;
           }
-          const oddsText = tr.querySelector('span[id^="odds-1_"]')?.textContent ?? "";
-          const ninkiText = tr.querySelector('span[id^="ninki-1_"]')?.textContent ?? "";
-          out.push({
-            horseNo: Number.isFinite(horseNo) && horseNo >= 1 ? horseNo : null,
-            horseId: horseId.length > 0 ? horseId : null,
-            odds: parseOdds(oddsText),
-            popularity: parsePopularity(ninkiText),
-          });
+
+          const horseList = Array.from(document.querySelectorAll("tr.HorseList"));
+          for (const tr of horseList) {
+            const horseAnchor = tr.querySelector('a[href*="/horse/"]');
+            const href = horseAnchor?.getAttribute("href") ?? "";
+            const horseId = (href.match(/horse\/(\d+)/) ?? [])[1] ?? "";
+            const cells = tr.querySelectorAll("td");
+            const noText = cells.length > 1 ? (cells[1]?.textContent ?? "") : "";
+            let horseNo = Number.parseInt(noText.replace(/[^\d]/g, ""), 10);
+            if (!Number.isFinite(horseNo) || horseNo < 1) {
+              horseNo =
+                parseNoFromId(tr.querySelector('span[id^="uno-1_"]')?.id) ??
+                parseNoFromId(tr.querySelector('span[id^="odds-1_"]')?.id) ??
+                parseNoFromId(tr.querySelector('span[id^="ninki-1_"]')?.id) ??
+                NaN;
+            }
+            const oddsText = tr.querySelector('span[id^="odds-1_"]')?.textContent ?? "";
+            const ninkiText = tr.querySelector('span[id^="ninki-1_"]')?.textContent ?? "";
+            out.push({
+              horseNo: Number.isFinite(horseNo) && horseNo >= 1 ? horseNo : null,
+              horseId: horseId.length > 0 ? horseId : null,
+              odds: parseOdds(oddsText),
+              popularity: parsePopularity(ninkiText),
+            });
+          }
+          return out;
+        });
+        const normalized = normalizeBrowserRows(rows);
+        if (normalized.byHorseNo.size > 0 || normalized.byHorseId.size > 0) {
+          return normalized;
         }
-        return out;
-      });
-      return normalizeBrowserRows(rows);
+      }
+      if (lastErr) {
+        process.stderr.write(`browser fetch failed ${raceId}: ${lastErr?.message || lastErr}\n`);
+      }
+      return { byHorseNo: new Map(), byHorseId: new Map() };
     },
     async close() {
       await context.close();

@@ -137,6 +137,11 @@ export type AnalysisHorseEntry = {
   /** 期待値短評用（snake_case / camelCase どちらも許容） */
   predicted_probability?: number;
   predictedProbability?: number;
+  /** netkeiba 等の単勝実オッズ（market系） */
+  market_win_odds?: number;
+  marketWinOdds?: number;
+  market_win_odds_source?: "actual" | "estimated";
+  marketWinOddsSource?: "actual" | "estimated";
   actual_odds?: number;
   actualOdds?: number;
   estimated_actual_odds?: number;

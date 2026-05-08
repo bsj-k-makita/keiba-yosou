@@ -219,7 +219,10 @@ function toEvaluationSignals(e: AnalysisHorseEntry): HorseEvaluationSignals | un
 
 function toInvestmentInput(e: AnalysisHorseEntry): InvestmentCommentInput | undefined {
   const predictedProbability = n(e.predicted_probability) ?? n(e.predictedProbability);
+  const marketWinOdds = n(e.market_win_odds) ?? n(e.marketWinOdds);
+  const marketWinOddsSourceRaw = e.market_win_odds_source ?? e.marketWinOddsSource;
   const actualOdds =
+    marketWinOdds ??
     n(e.actual_odds) ??
     n(e.actualOdds) ??
     n(e.estimated_actual_odds) ??
@@ -245,8 +248,10 @@ function toInvestmentInput(e: AnalysisHorseEntry): InvestmentCommentInput | unde
     predictedProbability,
     actualOdds,
     oddsSource:
-      (e.odds_source ?? e.oddsSource) === "actual" || (e.odds_source ?? e.oddsSource) === "estimated"
-        ? (e.odds_source ?? e.oddsSource)
+      marketWinOddsSourceRaw === "actual" || marketWinOddsSourceRaw === "estimated"
+        ? marketWinOddsSourceRaw
+        : (e.odds_source ?? e.oddsSource) === "actual" || (e.odds_source ?? e.oddsSource) === "estimated"
+          ? (e.odds_source ?? e.oddsSource)
         : n(e.estimated_actual_odds) != null || n(e.estimatedActualOdds) != null
           ? "estimated"
           : undefined,

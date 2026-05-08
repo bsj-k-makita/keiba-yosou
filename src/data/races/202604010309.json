@@ -8,7 +8,8 @@
     "surface": "芝",
     "distance": 1200,
     "groundLabel": null,
-    "weather": null
+    "weather": null,
+    "netkeibaGradeType": 18
   },
   "entries": [
     {
@@ -17,7 +18,7 @@
       "horseNumber": 1,
       "sex": "牝",
       "age": 3,
-      "jockey": "原田和",
+      "jockey": "丸田",
       "trainer": "和田雄",
       "weight": 55,
       "runningStyle": "好位",
@@ -28,15 +29,18 @@
         "sustain": 32,
         "power": 43
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.21,
-      "estimated_actual_odds": 4.86,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.13,
+      "estimated_actual_odds": 3.15,
       "odds_source": "estimated",
-      "market_popularity": 11,
-      "market_win_odds": 12.78,
-      "value_score": 1.02,
-      "value_rank": "C",
+      "market_popularity": 4,
+      "market_win_odds": 8.3,
+      "value_score": 0.26,
+      "value_rank": "D",
+      "kelly_weight": 0,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -47,6 +51,8 @@
       "risk_factors": [
         "末脚のキレ負け"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-04-26",
@@ -64,7 +70,13 @@
             11.7,
             11.8,
             12.3
-          ]
+          ],
+          "venue": "東京",
+          "surface": "芝",
+          "fieldSize": 8,
+          "waku": 8,
+          "passingOrder": "8-8",
+          "final3fSec": 34.4
         },
         {
           "date": "2026-04-11",
@@ -80,7 +92,13 @@
             11.9,
             11.9,
             12.2
-          ]
+          ],
+          "venue": "中山",
+          "surface": "ダート",
+          "fieldSize": 16,
+          "waku": 4,
+          "passingOrder": "11-12",
+          "final3fSec": 38.2
         },
         {
           "date": "2025-12-10",
@@ -96,7 +114,12 @@
             12.5,
             13.1,
             13.7
-          ]
+          ],
+          "surface": "ダート",
+          "fieldSize": 12,
+          "waku": 3,
+          "passingOrder": "10-10-10",
+          "final3fSec": 39.8
         },
         {
           "date": "2025-11-04",
@@ -112,7 +135,12 @@
             12.8,
             13,
             12.8
-          ]
+          ],
+          "surface": "ダート",
+          "fieldSize": 12,
+          "waku": 3,
+          "passingOrder": "1-1-1",
+          "final3fSec": 40.7
         },
         {
           "date": "2025-10-13",
@@ -130,10 +158,20 @@
             13.6,
             13.4,
             13.8
-          ]
+          ],
+          "surface": "ダート",
+          "fieldSize": 11,
+          "waku": 8,
+          "passingOrder": "6-7-5-5",
+          "final3fSec": 42.2
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.4138,
+      "l2_sustain_ratio": 0.8125,
+      "marketWinOdds": 8.3,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 4
     },
     {
       "horseId": "2023100617",
@@ -141,7 +179,7 @@
       "horseNumber": 2,
       "sex": "牝",
       "age": 3,
-      "jockey": "富田",
+      "jockey": "菊沢",
       "trainer": "北出",
       "weight": 55,
       "runningStyle": "好位",
@@ -152,17 +190,20 @@
         "sustain": 61,
         "power": 72
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.19,
-      "estimated_actual_odds": 6.33,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.23,
+      "estimated_actual_odds": 59.58,
       "odds_source": "estimated",
-      "market_popularity": 14,
-      "market_win_odds": 16.67,
-      "value_score": 1.2,
-      "value_rank": "A",
-      "confidence_rank": "C",
-      "bet_type": "見送り",
+      "market_popularity": 13,
+      "market_win_odds": 156.8,
+      "value_score": 12.18,
+      "value_rank": "S",
+      "kelly_weight": 0.05,
+      "confidence_rank": "B",
+      "bet_type": "ヒモ穴",
       "value_change": "STABLE",
       "key_factors": [
         "馬場対応力",
@@ -171,6 +212,8 @@
       "risk_factors": [
         "先行力不足"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 0.9,
       "pastRuns": [
         {
           "date": "2026-04-25",
@@ -186,7 +229,13 @@
             11.4,
             11.7,
             12
-          ]
+          ],
+          "venue": "福島",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 1,
+          "passingOrder": "1-1",
+          "final3fSec": 35.3
         },
         {
           "date": "2026-01-18",
@@ -202,7 +251,13 @@
             12.3,
             12.3,
             12.8
-          ]
+          ],
+          "venue": "京都",
+          "surface": "ダート",
+          "fieldSize": 10,
+          "waku": 2,
+          "passingOrder": "2-2",
+          "final3fSec": 37.4
         },
         {
           "date": "2026-01-05",
@@ -218,10 +273,21 @@
             12.6,
             12.3,
             12.5
-          ]
+          ],
+          "venue": "京都",
+          "surface": "ダート",
+          "fieldSize": 14,
+          "waku": 1,
+          "passingOrder": "1-1",
+          "final3fSec": 37.4
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.4751,
+      "l2_sustain_ratio": 0.5625,
+      "marketWinOdds": 156.8,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 13
     },
     {
       "horseId": "2023100796",
@@ -229,7 +295,7 @@
       "horseNumber": 3,
       "sex": "牡",
       "age": 3,
-      "jockey": "荻野極",
+      "jockey": "野中",
       "trainer": "清水英",
       "weight": 57,
       "runningStyle": "好位",
@@ -240,17 +306,20 @@
         "sustain": 73,
         "power": 23
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.27,
-      "estimated_actual_odds": 2.58,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.41,
+      "estimated_actual_odds": 26.83,
       "odds_source": "estimated",
-      "market_popularity": 6,
-      "market_win_odds": 6.79,
-      "value_score": 0.7,
-      "value_rank": "D",
-      "confidence_rank": "B",
-      "bet_type": "見送り",
+      "market_popularity": 12,
+      "market_win_odds": 70.6,
+      "value_score": 9.75,
+      "value_rank": "A",
+      "kelly_weight": 0.09,
+      "confidence_rank": "A",
+      "bet_type": "相手",
       "value_change": "STABLE",
       "key_factors": [
         "持続力",
@@ -259,6 +328,8 @@
       "risk_factors": [
         "馬場適性不足"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 0.9,
       "pastRuns": [
         {
           "date": "2026-04-05",
@@ -274,7 +345,13 @@
             11.3,
             11.6,
             11.6
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 14,
+          "waku": 5,
+          "passingOrder": "11-11",
+          "final3fSec": 34.6
         },
         {
           "date": "2025-11-16",
@@ -290,7 +367,13 @@
             11.9,
             11.9,
             11.8
-          ]
+          ],
+          "venue": "福島",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 3,
+          "passingOrder": "5-5",
+          "final3fSec": 35.8
         },
         {
           "date": "2025-10-19",
@@ -307,7 +390,13 @@
             11.5,
             11.2,
             11
-          ]
+          ],
+          "venue": "東京",
+          "surface": "芝",
+          "fieldSize": 8,
+          "waku": 3,
+          "passingOrder": "2-2",
+          "final3fSec": 34.1
         },
         {
           "date": "2025-07-20",
@@ -323,7 +412,13 @@
             11,
             11.2,
             11.9
-          ]
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 12,
+          "waku": 6,
+          "passingOrder": "8-7",
+          "final3fSec": 34.4
         },
         {
           "date": "2025-06-22",
@@ -339,134 +434,21 @@
             12.2,
             12,
             11.8
-          ]
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 12,
+          "waku": 5,
+          "passingOrder": "4-4",
+          "final3fSec": 35.5
         }
       ],
-      "pedigree": {}
-    },
-    {
-      "horseId": "2023101077",
-      "horseName": "アンジュラフィーユ",
-      "horseNumber": 4,
-      "sex": "牝",
-      "age": 3,
-      "jockey": "西村淳",
-      "trainer": "藤野",
-      "weight": 55,
-      "runningStyle": "好位",
-      "abilities": {
-        "speed": 34,
-        "stamina": 45,
-        "kick": 56,
-        "sustain": 67,
-        "power": 78
-      },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.3,
-      "estimated_actual_odds": 1.1,
-      "odds_source": "estimated",
-      "market_popularity": 2,
-      "market_win_odds": 2.7,
-      "value_score": 0.33,
-      "value_rank": "D",
-      "confidence_rank": "B",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "馬場対応力",
-        "持続力"
-      ],
-      "risk_factors": [
-        "先行力不足"
-      ],
-      "pastRuns": [
-        {
-          "date": "2026-04-26",
-          "raceId": "202608030203",
-          "raceName": "3歳未勝利",
-          "raceClass": "未勝利",
-          "place": 8,
-          "marginToWinnerSec": 0.6,
-          "section200mSec": [
-            12.2,
-            10.6,
-            10.8,
-            10.9,
-            11.4,
-            11.6
-          ]
-        },
-        {
-          "date": "2026-03-29",
-          "raceId": "202607010604",
-          "raceName": "3歳未勝利",
-          "raceClass": "未勝利",
-          "place": 3,
-          "marginToWinnerSec": 0.2,
-          "section200mSec": [
-            12.3,
-            10.6,
-            11.4,
-            11.8,
-            11.3,
-            11.4
-          ]
-        },
-        {
-          "date": "2026-01-12",
-          "raceId": "202608010503",
-          "raceName": "3歳未勝利",
-          "raceClass": "未勝利",
-          "place": 6,
-          "marginToWinnerSec": 1,
-          "section200mSec": [
-            12.4,
-            11.1,
-            12,
-            12.8,
-            13.1,
-            12.7,
-            12.5
-          ]
-        },
-        {
-          "date": "2025-12-07",
-          "raceId": "202509050203",
-          "raceName": "2歳未勝利",
-          "raceClass": "未勝利",
-          "place": 7,
-          "marginToWinnerSec": 1.2,
-          "section200mSec": [
-            12.2,
-            10.6,
-            10.9,
-            11.5,
-            11.5,
-            11.4,
-            12.1
-          ]
-        },
-        {
-          "date": "2025-11-22",
-          "raceId": "202508040505",
-          "raceName": "2歳新馬",
-          "raceClass": "新馬",
-          "place": 2,
-          "marginToWinnerSec": 0.5,
-          "section200mSec": [
-            12,
-            11.2,
-            11.4,
-            12.1,
-            12.4,
-            12.2,
-            11.7,
-            11.4
-          ]
-        }
-      ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.8322,
+      "l2_sustain_ratio": 0.8125,
+      "marketWinOdds": 70.6,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 12
     },
     {
       "horseId": "2023102027",
@@ -485,17 +467,20 @@
         "sustain": 77,
         "power": 27
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.37,
-      "estimated_actual_odds": 1.1,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.6,
+      "estimated_actual_odds": 10.15,
       "odds_source": "estimated",
-      "market_popularity": 1,
-      "market_win_odds": 1.85,
-      "value_score": 0.41,
-      "value_rank": "D",
-      "confidence_rank": "A",
-      "bet_type": "見送り",
+      "market_popularity": 10,
+      "market_win_odds": 26.7,
+      "value_score": 5.33,
+      "value_rank": "B",
+      "kelly_weight": 0.12,
+      "confidence_rank": "S",
+      "bet_type": "軸",
       "value_change": "STABLE",
       "key_factors": [
         "持続力",
@@ -504,6 +489,8 @@
       "risk_factors": [
         "馬場適性不足"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 0.9,
       "pastRuns": [
         {
           "date": "2026-03-22",
@@ -519,7 +506,13 @@
             10.9,
             11.4,
             12.3
-          ]
+          ],
+          "venue": "阪神",
+          "surface": "芝",
+          "fieldSize": 11,
+          "waku": 1,
+          "passingOrder": "3-3",
+          "final3fSec": 34.4
         },
         {
           "date": "2026-02-28",
@@ -535,7 +528,13 @@
             11.2,
             11.3,
             11.8
-          ]
+          ],
+          "venue": "阪神",
+          "surface": "芝",
+          "fieldSize": 9,
+          "waku": 3,
+          "passingOrder": "8-8",
+          "final3fSec": 34.1
         },
         {
           "date": "2026-02-08",
@@ -551,7 +550,13 @@
             11.6,
             11.7,
             11.7
-          ]
+          ],
+          "venue": "小倉",
+          "surface": "芝",
+          "fieldSize": 15,
+          "waku": 1,
+          "passingOrder": "8-6",
+          "final3fSec": 35.1
         },
         {
           "date": "2025-06-28",
@@ -567,10 +572,21 @@
             11.8,
             11.9,
             12
-          ]
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 3,
+          "passingOrder": "2-2",
+          "final3fSec": 35.5
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.7314,
+      "l2_sustain_ratio": 0.625,
+      "marketWinOdds": 26.7,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 10
     },
     {
       "horseId": "2023102440",
@@ -578,7 +594,7 @@
       "horseNumber": 6,
       "sex": "牡",
       "age": 3,
-      "jockey": "荻野極",
+      "jockey": "丸山",
       "trainer": "田島",
       "weight": 57,
       "runningStyle": "好位",
@@ -589,17 +605,20 @@
         "sustain": 21,
         "power": 32
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.23,
-      "estimated_actual_odds": 4.38,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.24,
+      "estimated_actual_odds": 9.04,
       "odds_source": "estimated",
-      "market_popularity": 10,
-      "market_win_odds": 11.53,
-      "value_score": 1.01,
+      "market_popularity": 9,
+      "market_win_odds": 23.8,
+      "value_score": 1.88,
       "value_rank": "C",
+      "kelly_weight": 0.03,
       "confidence_rank": "B",
-      "bet_type": "見送り",
+      "bet_type": "相手",
       "value_change": "STABLE",
       "key_factors": [
         "末脚性能",
@@ -608,6 +627,8 @@
       "risk_factors": [
         "持続力不足"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 0.94,
       "pastRuns": [
         {
           "date": "2026-03-15",
@@ -623,7 +644,13 @@
             11.3,
             11.4,
             11.7
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 15,
+          "waku": 2,
+          "passingOrder": "1-1",
+          "final3fSec": 35.3
         },
         {
           "date": "2025-12-21",
@@ -639,7 +666,13 @@
             12.4,
             12.2,
             12.2
-          ]
+          ],
+          "venue": "中山",
+          "surface": "ダート",
+          "fieldSize": 16,
+          "waku": 2,
+          "passingOrder": "1-1",
+          "final3fSec": 36.8
         },
         {
           "date": "2025-10-26",
@@ -656,10 +689,21 @@
             11.7,
             11.4,
             11.8
-          ]
+          ],
+          "venue": "東京",
+          "surface": "芝",
+          "fieldSize": 18,
+          "waku": 7,
+          "passingOrder": "5-5",
+          "final3fSec": 34.9
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.6656,
+      "l2_sustain_ratio": 0.6875,
+      "marketWinOdds": 23.8,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 9
     },
     {
       "horseId": "2023102819",
@@ -667,7 +711,7 @@
       "horseNumber": 7,
       "sex": "牡",
       "age": 3,
-      "jockey": "上里",
+      "jockey": "ゴンサルベ",
       "trainer": "大和田",
       "weight": 57,
       "runningStyle": "好位",
@@ -678,15 +722,18 @@
         "sustain": 43,
         "power": 54
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.18,
-      "estimated_actual_odds": 6.84,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.13,
+      "estimated_actual_odds": 60,
       "odds_source": "estimated",
-      "market_popularity": 15,
-      "market_win_odds": 18,
-      "value_score": 1.23,
-      "value_rank": "A",
+      "market_popularity": 14,
+      "market_win_odds": 304.5,
+      "value_score": 7.21,
+      "value_rank": "B",
+      "kelly_weight": 0.03,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -697,6 +744,8 @@
       "risk_factors": [
         "スタミナ不安"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 0.94,
       "pastRuns": [
         {
           "date": "2026-04-11",
@@ -712,7 +761,13 @@
             11.9,
             11.9,
             12.2
-          ]
+          ],
+          "venue": "中山",
+          "surface": "ダート",
+          "fieldSize": 16,
+          "waku": 7,
+          "passingOrder": "2-5",
+          "final3fSec": 39.7
         },
         {
           "date": "2025-09-21",
@@ -728,7 +783,13 @@
             12.4,
             13,
             14.3
-          ]
+          ],
+          "venue": "中山",
+          "surface": "ダート",
+          "fieldSize": 16,
+          "waku": 2,
+          "passingOrder": "7-7",
+          "final3fSec": 38.2
         },
         {
           "date": "2025-07-06",
@@ -744,7 +805,13 @@
             11.8,
             12.5,
             11.7
-          ]
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 10,
+          "waku": 3,
+          "passingOrder": "3-3",
+          "final3fSec": 36.9
         },
         {
           "date": "2025-06-22",
@@ -760,10 +827,21 @@
             12.2,
             12,
             11.8
-          ]
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 12,
+          "waku": 8,
+          "passingOrder": "5-7",
+          "final3fSec": 36.9
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.3534,
+      "l2_sustain_ratio": 1,
+      "marketWinOdds": 304.5,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 14
     },
     {
       "horseId": "2023102872",
@@ -771,7 +849,7 @@
       "horseNumber": 8,
       "sex": "牡",
       "age": 3,
-      "jockey": "角田和",
+      "jockey": "横山琉",
       "trainer": "中尾",
       "weight": 57,
       "runningStyle": "好位",
@@ -782,17 +860,20 @@
         "sustain": 47,
         "power": 58
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.24,
-      "estimated_actual_odds": 3.91,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.15,
+      "estimated_actual_odds": 1.25,
       "odds_source": "estimated",
-      "market_popularity": 9,
-      "market_win_odds": 10.3,
-      "value_score": 0.94,
-      "value_rank": "C",
-      "confidence_rank": "B",
-      "bet_type": "相手",
+      "market_popularity": 1,
+      "market_win_odds": 3.3,
+      "value_score": 0.04,
+      "value_rank": "D",
+      "kelly_weight": 0,
+      "confidence_rank": "C",
+      "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
         "先行力",
@@ -801,6 +882,8 @@
       "risk_factors": [
         "スタミナ不安"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-04-11",
@@ -816,7 +899,13 @@
             11.3,
             11.4,
             11.5
-          ]
+          ],
+          "venue": "阪神",
+          "surface": "芝",
+          "fieldSize": 15,
+          "waku": 8,
+          "passingOrder": "2-2",
+          "final3fSec": 35.8
         },
         {
           "date": "2026-03-28",
@@ -833,7 +922,13 @@
             11.6,
             11.6,
             12.4
-          ]
+          ],
+          "venue": "阪神",
+          "surface": "芝",
+          "fieldSize": 11,
+          "waku": 6,
+          "passingOrder": "6-5",
+          "final3fSec": 37.3
         },
         {
           "date": "2026-01-12",
@@ -849,7 +944,13 @@
             11.6,
             11.1,
             11.3
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 11,
+          "waku": 6,
+          "passingOrder": "2-2",
+          "final3fSec": 34.2
         },
         {
           "date": "2025-12-20",
@@ -865,7 +966,13 @@
             11.9,
             11.4,
             11.6
-          ]
+          ],
+          "venue": "中京",
+          "surface": "芝",
+          "fieldSize": 9,
+          "waku": 5,
+          "passingOrder": "9-9",
+          "final3fSec": 33.9
         },
         {
           "date": "2025-08-30",
@@ -881,10 +988,21 @@
             11.9,
             12.4,
             12.1
-          ]
+          ],
+          "venue": "札幌",
+          "surface": "芝",
+          "fieldSize": 13,
+          "waku": 6,
+          "passingOrder": "6-6",
+          "final3fSec": 36.4
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.8665,
+      "l2_sustain_ratio": 0.875,
+      "marketWinOdds": 3.3,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 1
     },
     {
       "horseId": "2023103037",
@@ -892,7 +1010,7 @@
       "horseNumber": 9,
       "sex": "牡",
       "age": 3,
-      "jockey": "原",
+      "jockey": "長浜",
       "trainer": "青木",
       "weight": 57,
       "runningStyle": "好位",
@@ -903,15 +1021,18 @@
         "sustain": 23,
         "power": 34
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.27,
-      "estimated_actual_odds": 1.76,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.28,
+      "estimated_actual_odds": 2.77,
       "odds_source": "estimated",
-      "market_popularity": 4,
-      "market_win_odds": 4.64,
-      "value_score": 0.48,
+      "market_popularity": 3,
+      "market_win_odds": 7.3,
+      "value_score": 0.63,
       "value_rank": "D",
+      "kelly_weight": 0,
       "confidence_rank": "B",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -922,6 +1043,8 @@
       "risk_factors": [
         "持続力不足"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-03-15",
@@ -937,7 +1060,13 @@
             11.3,
             11.4,
             11.7
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 15,
+          "waku": 5,
+          "passingOrder": "10-9",
+          "final3fSec": 34.2
         },
         {
           "date": "2026-01-12",
@@ -953,7 +1082,13 @@
             11.6,
             11.1,
             11.3
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 11,
+          "waku": 5,
+          "passingOrder": "10-9",
+          "final3fSec": 33.4
         },
         {
           "date": "2025-12-28",
@@ -969,7 +1104,13 @@
             12.4,
             12.8,
             13.2
-          ]
+          ],
+          "venue": "中山",
+          "surface": "ダート",
+          "fieldSize": 11,
+          "waku": 3,
+          "passingOrder": "2-1",
+          "final3fSec": 40.6
         },
         {
           "date": "2025-12-13",
@@ -985,7 +1126,13 @@
             11.4,
             11,
             11.5
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 13,
+          "waku": 7,
+          "passingOrder": "4-2",
+          "final3fSec": 34.2
         },
         {
           "date": "2025-11-16",
@@ -1001,10 +1148,21 @@
             11.9,
             11.9,
             11.8
-          ]
+          ],
+          "venue": "福島",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 2,
+          "passingOrder": "12-15",
+          "final3fSec": 35.3
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 1,
+      "l2_sustain_ratio": 0.75,
+      "marketWinOdds": 7.3,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 3
     },
     {
       "horseId": "2023103528",
@@ -1012,7 +1170,7 @@
       "horseNumber": 10,
       "sex": "牝",
       "age": 3,
-      "jockey": "丹内",
+      "jockey": "西塚",
       "trainer": "杉浦",
       "weight": 55,
       "runningStyle": "好位",
@@ -1023,17 +1181,20 @@
         "sustain": 67,
         "power": 78
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.3,
-      "estimated_actual_odds": 1.38,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.37,
+      "estimated_actual_odds": 11.13,
       "odds_source": "estimated",
-      "market_popularity": 3,
-      "market_win_odds": 3.64,
-      "value_score": 0.41,
-      "value_rank": "D",
-      "confidence_rank": "B",
-      "bet_type": "見送り",
+      "market_popularity": 11,
+      "market_win_odds": 29.3,
+      "value_score": 3.56,
+      "value_rank": "B",
+      "kelly_weight": 0.07,
+      "confidence_rank": "A",
+      "bet_type": "相手",
       "value_change": "STABLE",
       "key_factors": [
         "馬場対応力",
@@ -1042,6 +1203,8 @@
       "risk_factors": [
         "先行力不足"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 0.9,
       "pastRuns": [
         {
           "date": "2026-04-12",
@@ -1057,7 +1220,13 @@
             11.8,
             11.4,
             11.5
-          ]
+          ],
+          "venue": "福島",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 5,
+          "passingOrder": "3-3",
+          "final3fSec": 34.4
         },
         {
           "date": "2025-12-28",
@@ -1073,7 +1242,13 @@
             11.5,
             11.7,
             12.2
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 6,
+          "passingOrder": "9-8",
+          "final3fSec": 34.8
         },
         {
           "date": "2025-12-14",
@@ -1089,7 +1264,13 @@
             11.9,
             11.8,
             11.7
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 3,
+          "passingOrder": "10-8",
+          "final3fSec": 35
         },
         {
           "date": "2025-11-16",
@@ -1106,7 +1287,13 @@
             11.9,
             11.5,
             11.6
-          ]
+          ],
+          "venue": "東京",
+          "surface": "芝",
+          "fieldSize": 18,
+          "waku": 6,
+          "passingOrder": "16-14",
+          "final3fSec": 34.3
         },
         {
           "date": "2025-09-28",
@@ -1124,10 +1311,21 @@
             11.9,
             11.2,
             11.1
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 8,
+          "waku": 6,
+          "passingOrder": "6-6-8",
+          "final3fSec": 36.6
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.7983,
+      "l2_sustain_ratio": 0.75,
+      "marketWinOdds": 29.3,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 11
     },
     {
       "horseId": "2023104528",
@@ -1135,7 +1333,7 @@
       "horseNumber": 11,
       "sex": "牡",
       "age": 3,
-      "jockey": "松若",
+      "jockey": "小沢",
       "trainer": "小椋",
       "weight": 57,
       "runningStyle": "好位",
@@ -1146,15 +1344,18 @@
         "sustain": 44,
         "power": 55
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.19,
-      "estimated_actual_odds": 5.83,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.14,
+      "estimated_actual_odds": 3.61,
       "odds_source": "estimated",
-      "market_popularity": 13,
-      "market_win_odds": 15.35,
-      "value_score": 1.11,
-      "value_rank": "B",
+      "market_popularity": 6,
+      "market_win_odds": 9.5,
+      "value_score": 0.36,
+      "value_rank": "D",
+      "kelly_weight": 0,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -1165,6 +1366,8 @@
       "risk_factors": [
         "スタミナ不安"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-02-08",
@@ -1180,7 +1383,13 @@
             11.6,
             11.7,
             11.7
-          ]
+          ],
+          "venue": "小倉",
+          "surface": "芝",
+          "fieldSize": 15,
+          "waku": 5,
+          "passingOrder": "3-2",
+          "final3fSec": 37.8
         },
         {
           "date": "2026-01-24",
@@ -1196,7 +1405,13 @@
             11.3,
             11.6,
             11.6
-          ]
+          ],
+          "venue": "小倉",
+          "surface": "芝",
+          "fieldSize": 12,
+          "waku": 7,
+          "passingOrder": "2-2",
+          "final3fSec": 35.2
         },
         {
           "date": "2025-12-06",
@@ -1212,7 +1427,13 @@
             11.6,
             10.9,
             11.4
-          ]
+          ],
+          "venue": "阪神",
+          "surface": "芝",
+          "fieldSize": 8,
+          "waku": 4,
+          "passingOrder": "1-1",
+          "final3fSec": 33.9
         },
         {
           "date": "2025-11-22",
@@ -1228,7 +1449,13 @@
             11,
             11.6,
             12.4
-          ]
+          ],
+          "venue": "京都",
+          "surface": "芝",
+          "fieldSize": 18,
+          "waku": 3,
+          "passingOrder": "1-1",
+          "final3fSec": 35
         },
         {
           "date": "2025-09-27",
@@ -1244,10 +1471,21 @@
             12.1,
             11.4,
             11.6
-          ]
+          ],
+          "venue": "阪神",
+          "surface": "芝",
+          "fieldSize": 14,
+          "waku": 7,
+          "passingOrder": "4-3",
+          "final3fSec": 35
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 1,
+      "l2_sustain_ratio": 0.6875,
+      "marketWinOdds": 9.5,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 6
     },
     {
       "horseId": "2023105317",
@@ -1255,7 +1493,7 @@
       "horseNumber": 12,
       "sex": "牝",
       "age": 3,
-      "jockey": "三浦",
+      "jockey": "斎藤",
       "trainer": "斎藤誠",
       "weight": 55,
       "runningStyle": "好位",
@@ -1266,15 +1504,18 @@
         "sustain": 23,
         "power": 34
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.27,
-      "estimated_actual_odds": 2.17,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": true,
+      "predicted_probability": 0.28,
+      "estimated_actual_odds": 3.19,
       "odds_source": "estimated",
       "market_popularity": 5,
-      "market_win_odds": 5.7,
-      "value_score": 0.59,
+      "market_win_odds": 8.4,
+      "value_score": 0.74,
       "value_rank": "D",
+      "kelly_weight": 0,
       "confidence_rank": "B",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -1285,6 +1526,8 @@
       "risk_factors": [
         "持続力不足"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-04-19",
@@ -1302,7 +1545,13 @@
             11.6,
             11.1,
             11.8
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 10,
+          "waku": 2,
+          "passingOrder": "1-1-1",
+          "final3fSec": 34.8
         },
         {
           "date": "2026-03-14",
@@ -1321,7 +1570,13 @@
             12.8,
             12.1,
             12.6
-          ]
+          ],
+          "venue": "中京",
+          "surface": "ダート",
+          "fieldSize": 16,
+          "waku": 1,
+          "passingOrder": "1-1-1-1",
+          "final3fSec": 40.1
         },
         {
           "date": "2025-12-21",
@@ -1338,7 +1593,13 @@
             12.6,
             12.4,
             12.3
-          ]
+          ],
+          "venue": "中京",
+          "surface": "ダート",
+          "fieldSize": 16,
+          "waku": 7,
+          "passingOrder": "11-12",
+          "final3fSec": 37.5
         },
         {
           "date": "2025-11-22",
@@ -1357,7 +1618,13 @@
             12.9,
             13.3,
             13.1
-          ]
+          ],
+          "venue": "福島",
+          "surface": "ダート",
+          "fieldSize": 14,
+          "waku": 5,
+          "passingOrder": "1-1-1-1",
+          "final3fSec": 39.3
         },
         {
           "date": "2025-11-02",
@@ -1374,10 +1641,21 @@
             12.1,
             12,
             12.4
-          ]
+          ],
+          "venue": "東京",
+          "surface": "ダート",
+          "fieldSize": 14,
+          "waku": 8,
+          "passingOrder": "1-1",
+          "final3fSec": 37.5
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.8665,
+      "l2_sustain_ratio": 0.8125,
+      "marketWinOdds": 8.4,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 5
     },
     {
       "horseId": "2023106190",
@@ -1396,16 +1674,19 @@
         "sustain": 34,
         "power": 45
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.24,
-      "estimated_actual_odds": 3.46,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.13,
+      "estimated_actual_odds": 1.71,
       "odds_source": "estimated",
-      "market_popularity": 8,
-      "market_win_odds": 9.1,
-      "value_score": 0.83,
+      "market_popularity": 2,
+      "market_win_odds": 4.5,
+      "value_score": 0.07,
       "value_rank": "D",
-      "confidence_rank": "B",
+      "kelly_weight": 0,
+      "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
@@ -1415,6 +1696,8 @@
       "risk_factors": [
         "末脚のキレ負け"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-04-11",
@@ -1430,7 +1713,13 @@
             11.6,
             11.3,
             11.7
-          ]
+          ],
+          "venue": "福島",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 3,
+          "passingOrder": "2-2",
+          "final3fSec": 34.4
         },
         {
           "date": "2026-03-15",
@@ -1447,7 +1736,13 @@
             11.7,
             11.7,
             12.1
-          ]
+          ],
+          "venue": "中京",
+          "surface": "芝",
+          "fieldSize": 18,
+          "waku": 3,
+          "passingOrder": "2-2",
+          "final3fSec": 35.6
         },
         {
           "date": "2025-07-26",
@@ -1464,10 +1759,21 @@
             12.5,
             11.3,
             11.1
-          ]
+          ],
+          "venue": "新潟",
+          "surface": "芝",
+          "fieldSize": 18,
+          "waku": 5,
+          "passingOrder": "2-2",
+          "final3fSec": 40.5
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.7314,
+      "l2_sustain_ratio": 0.8125,
+      "marketWinOdds": 4.5,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 2
     },
     {
       "horseId": "2023106256",
@@ -1475,7 +1781,7 @@
       "horseNumber": 14,
       "sex": "牝",
       "age": 3,
-      "jockey": "武藤",
+      "jockey": "石川",
       "trainer": "武藤",
       "weight": 55,
       "runningStyle": "好位",
@@ -1486,15 +1792,18 @@
         "sustain": 45,
         "power": 56
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "predicted_probability": 0.21,
-      "estimated_actual_odds": 5.34,
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.14,
+      "estimated_actual_odds": 7.52,
       "odds_source": "estimated",
-      "market_popularity": 12,
-      "market_win_odds": 14.05,
-      "value_score": 1.12,
-      "value_rank": "B",
+      "market_popularity": 8,
+      "market_win_odds": 19.8,
+      "value_score": 0.9,
+      "value_rank": "D",
+      "kelly_weight": 0,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -1505,6 +1814,8 @@
       "risk_factors": [
         "スタミナ不安"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-04-05",
@@ -1520,7 +1831,13 @@
             11.3,
             11.6,
             11.6
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 14,
+          "waku": 8,
+          "passingOrder": "13-13",
+          "final3fSec": 34.3
         },
         {
           "date": "2026-03-15",
@@ -1536,7 +1853,13 @@
             11.3,
             11.4,
             11.7
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 15,
+          "waku": 5,
+          "passingOrder": "4-4",
+          "final3fSec": 35.1
         },
         {
           "date": "2026-01-11",
@@ -1552,7 +1875,13 @@
             12.7,
             12.2,
             12.4
-          ]
+          ],
+          "venue": "中山",
+          "surface": "ダート",
+          "fieldSize": 16,
+          "waku": 8,
+          "passingOrder": "7-8",
+          "final3fSec": 40.6
         },
         {
           "date": "2025-12-28",
@@ -1568,7 +1897,13 @@
             12.4,
             12.8,
             13.2
-          ]
+          ],
+          "venue": "中山",
+          "surface": "ダート",
+          "fieldSize": 11,
+          "waku": 7,
+          "passingOrder": "5-5",
+          "final3fSec": 39.8
         },
         {
           "date": "2025-09-20",
@@ -1584,10 +1919,21 @@
             11.4,
             11.3,
             11.6
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 13,
+          "waku": 3,
+          "passingOrder": "6-4",
+          "final3fSec": 34.6
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.7983,
+      "l2_sustain_ratio": 0.6875,
+      "marketWinOdds": 19.8,
+      "market_observed_at": "2026-05-08T07:43:57.925Z",
+      "marketPopularity": 8
     },
     {
       "horseId": "2023106269",
@@ -1595,7 +1941,7 @@
       "horseNumber": 15,
       "sex": "牡",
       "age": 3,
-      "jockey": "菊沢",
+      "jockey": "小崎",
       "trainer": "伊藤大",
       "weight": 57,
       "runningStyle": "好位",
@@ -1608,14 +1954,17 @@
       },
       "market_win_odds_source": "estimated",
       "market_popularity_source": "estimated",
-      "predicted_probability": 0.25,
-      "estimated_actual_odds": 3.01,
+      "was_bias_disadvantaged": false,
+      "pace_mismatch": false,
+      "predicted_probability": 0.37,
+      "estimated_actual_odds": 1.44,
       "odds_source": "estimated",
-      "market_popularity": 7,
-      "market_win_odds": 7.93,
-      "value_score": 0.75,
+      "market_popularity": 3,
+      "market_win_odds": 3.78,
+      "value_score": 0.38,
       "value_rank": "D",
-      "confidence_rank": "B",
+      "kelly_weight": 0,
+      "confidence_rank": "A",
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
@@ -1625,6 +1974,8 @@
       "risk_factors": [
         "馬場適性不足"
       ],
+      "ev_margin_applied": 0.15,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-04-25",
@@ -1640,7 +1991,13 @@
             11.4,
             11.7,
             12
-          ]
+          ],
+          "venue": "福島",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 2,
+          "passingOrder": "13-13",
+          "final3fSec": 34.5
         },
         {
           "date": "2026-03-08",
@@ -1658,7 +2015,13 @@
             11.8,
             11.1,
             12
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 11,
+          "waku": 6,
+          "passingOrder": "3-2-2",
+          "final3fSec": 35.8
         },
         {
           "date": "2026-02-14",
@@ -1675,7 +2038,13 @@
             11.6,
             11,
             11.5
-          ]
+          ],
+          "venue": "東京",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 1,
+          "passingOrder": "9-9",
+          "final3fSec": 33.8
         },
         {
           "date": "2025-12-28",
@@ -1691,7 +2060,13 @@
             11.5,
             11.7,
             12.2
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 5,
+          "passingOrder": "2-2",
+          "final3fSec": 35.4
         },
         {
           "date": "2025-12-07",
@@ -1707,10 +2082,18 @@
             11.6,
             11.5,
             11.5
-          ]
+          ],
+          "venue": "中山",
+          "surface": "芝",
+          "fieldSize": 16,
+          "waku": 6,
+          "passingOrder": "3-3",
+          "final3fSec": 34.7
         }
       ],
-      "pedigree": {}
+      "pedigree": {},
+      "l2_top_speed": 0.9358,
+      "l2_sustain_ratio": 0.6875
     }
   ]
 }
