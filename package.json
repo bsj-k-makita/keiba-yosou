@@ -12,6 +12,7 @@
     "fetch-past-runs": "node scripts/fetch-past-runs.mjs",
     "fetch-live-odds": "node scripts/fetch-live-odds.mjs --all --source=auto --retries=3 --retry-wait=30000",
     "generate-latest-odds-csv": "node scripts/generate-latest-odds-csv.mjs --all --out=data/latest-odds.csv --source=jra",
+    "odds-csv-date": "node scripts/generate-latest-odds-csv.mjs --source=jra --out=data/latest-odds.csv",
     "refresh-latest-odds": "node scripts/refresh-latest-odds.mjs --source=jra",
     "reset-market-odds": "node scripts/reset-market-odds.mjs",
     "apply-external-odds": "node scripts/apply-external-odds.mjs",

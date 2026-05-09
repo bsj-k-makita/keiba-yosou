@@ -1,4 +1,5 @@
 import type { HorseAbility, RaceCondition } from "./abilityTypes";
+import { inferStartStraightDistM } from "./courseGeometry";
 
 export type CourseTrait =
   | "SHORT_RUN_IN"
@@ -37,6 +38,8 @@ const COURSE_TRAIT_MASTER: Record<string, readonly CourseTrait[]> = {
   KYOTO_T1600: ["INNER_ADVAN"],
   KYOTO_T1600_IN: ["INNER_ADVAN"],
   KYOTO_T1600_OUT: ["LONG_RUN_IN", "DOWNHILL_ACCELERATION"],
+  KYOTO_T2000: ["LONG_RUN_IN", "DOWNHILL_ACCELERATION"],
+  KYOTO_T2200: ["DOUBLE_HILL_ENDURANCE"],
   KYOTO_T3200: ["DOUBLE_YODO_HILL"],
   CHUKYO_T1200: ["OUTER_ADVAN"],
   CHUKYO_T2000: ["STAMINA_CONTEST"],
@@ -304,6 +307,25 @@ export function computeCourseTraitHits(
       label: "枠番×脚質シナジー",
       reason: `馬番外寄り: 馬番${gateNum} × ${style}（OUTER_ADVAN）`,
       bonus: round1(clamp(raw, 0, MAX_TRAIT_BONUS)),
+    });
+  }
+
+  // ── 初角までの直線長（マスタ由来の LONG/SHORT から推定）による隊列形成 ─────────────────
+  const startM = inferStartStraightDistM(condition);
+  if (startM != null && startM >= 380 && styleIsFront && gateNum >= 11) {
+    const raw = 3.4 * mult;
+    hits.push({
+      label: "初角長・外寄り前残り",
+      reason: `推定初角直線が長め・馬番${gateNum}×${style}（隊列が詰まりにくい）`,
+      bonus: round1(clamp(raw, 0, MAX_TRAIT_BONUS)),
+    });
+  }
+  if (startM != null && startM <= 200 && styleIsFront && gateNum >= 13) {
+    const raw = -4.2 * mult;
+    hits.push({
+      label: "初角短・外前ロス",
+      reason: `推定初角直線が短め・馬番${gateNum}×${style}（内へのプレッシャー）`,
+      bonus: round1(clamp(raw, -MAX_TRAIT_BONUS, 0)),
     });
   }
 

@@ -13,14 +13,18 @@ export function clampSoftmaxTemperature(input: number | undefined): number {
   return clamp(raw, 2.0, 16.0);
 }
 
+/** アプリ表示の勝率 softmax で常に使う温度（旧「補正強度=強」時の 8→4 半減に相当） */
+export const FIXED_SOFTMAX_TEMPERATURE = 4;
+
+/**
+ * 勝率の softmax 温度。UI は廃止し、常に尖った分布（T=4）を使用する。
+ * `softmaxTemperature` / `adjustmentStrength` は後方互換のため受け取るが無視する。
+ */
 export function effectiveSoftmaxTemperature(
-  baseTemperature: number | undefined,
-  strength: "weak" | "middle" | "strong",
+  _baseTemperature: number | undefined,
+  _strength: "weak" | "middle" | "strong",
 ): number {
-  const base = clampSoftmaxTemperature(baseTemperature);
-  // 強設定は温度を半減し、確率分布を1強に寄せる（8 -> 4 の設計意図）。
-  if (strength === "strong") return clampSoftmaxTemperature(base * 0.5);
-  return base;
+  return FIXED_SOFTMAX_TEMPERATURE;
 }
 
 /**

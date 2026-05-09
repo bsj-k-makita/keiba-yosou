@@ -15,6 +15,7 @@ import {
 } from "./adjustments";
 import { applyVenuePhysicalFactorAdjustments } from "./venuePhysicalFactors";
 import { getStrategicBaseWeights } from "./strategicWeights";
+import type { PaceSeverityKind } from "./paceSeverity";
 
 function emptyDelta(): WeightSet {
   return { speed: 0, stamina: 0, kick: 0, sustain: 0, power: 0 };
@@ -141,6 +142,45 @@ export function getFinalWeights(condition: RaceCondition): WeightSet {
   const clamped = clampWeights(merged);
   const normalized = normalizeWeights(clamped);
   return applyAbilityFocusDoubling(normalized, condition);
+}
+
+/**
+ * ペース激化指数に応じて、末脚・先行の能力ウェイトを微調整（脚質連動の動的ウェイト）。
+ */
+export function amplifyWeightsForPaceSeverity(
+  weights: WeightSet,
+  horse: HorseAbility,
+  severity: PaceSeverityKind,
+): WeightSet {
+  if (severity === "neutral") return weights;
+
+  const style = horse.runningStyle;
+  const out: WeightSet = { ...weights };
+  const AMP = 1.2;
+
+  if (severity === "high" && (style === "差し" || style === "追込")) {
+    out.kick *= AMP;
+    out.sustain *= AMP;
+    out.stamina *= AMP;
+  } else if (
+    severity === "slow" &&
+    (style === "逃げ" || style === "先行" || style === "好位")
+  ) {
+    out.speed *= AMP;
+    out.sustain *= AMP;
+    out.stamina *= 1.15;
+  }
+
+  return normalizeWeights(clampWeights(out));
+}
+
+export function getFinalWeightsForHorse(
+  condition: RaceCondition,
+  horse: HorseAbility,
+  severity: PaceSeverityKind,
+): WeightSet {
+  const base = getFinalWeights(condition);
+  return amplifyWeightsForPaceSeverity(base, horse, severity);
 }
 
 export function calcHorseScore(horse: HorseAbility, weights: WeightSet): number {

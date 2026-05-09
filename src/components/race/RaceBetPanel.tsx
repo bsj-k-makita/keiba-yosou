@@ -9,7 +9,7 @@ import {
 import { buildBetPlan, type BetMode } from "./betBuilder";
 import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
 import { EvHeatmap } from "./EvHeatmap";
-import { effectiveSoftmaxTemperature } from "../../lib/pipeline/normalization";
+import { FIXED_SOFTMAX_TEMPERATURE } from "../../lib/pipeline/normalization";
 
 type Props = {
   sorted: HorseScoreResult[];
@@ -179,23 +179,16 @@ function EvSection({
   rows,
   budget,
   kellyFraction,
-  condition,
   viewModel,
 }: {
   rows: EvRow[];
   budget: number;
   kellyFraction: number;
-  condition: RaceCondition;
   viewModel?: RaceEvaluationViewModel;
 }) {
   // 見送りを除いた購入候補
   const candidates = rows.filter((r) => r.investment.betType !== "見送り");
   const runtimeMargin = rows.length >= 16 ? 0.20 : 0.15;
-  const softmaxTemperature = effectiveSoftmaxTemperature(
-    condition.softmaxTemperature,
-    condition.adjustmentStrength,
-  );
-
   return (
     <div className="bet-panel__ev-section">
       {/* CSS アニメーション定義（お宝馬バッジ用） */}
@@ -208,8 +201,8 @@ function EvSection({
 
       <h3 className="bet-panel__ev-title">AIオッズ評価（補正スコア）</h3>
       <p className="bet-panel__ev-desc">
-        補正スコア = (補正後の勝率 × オッズ) − マージン。強設定では温度を半減して確率を尖らせます（現在有効T={softmaxTemperature.toFixed(1)}）。
-        低温ほど上位馬へ確率が集中し、推奨配分額が大きく動きます。
+        補正スコア = (補正後の勝率 × オッズ) − マージン。勝率の softmax は常に T={FIXED_SOFTMAX_TEMPERATURE}
+        （尖り固定）で正規化しています。
       </p>
 
       <div className="bet-panel__ev-table-wrap">
@@ -325,60 +318,17 @@ function TrackBiasQuickPanel({
   condition: RaceCondition;
   onConditionChange: (next: RaceCondition) => void;
 }) {
-  const userBias = condition.userTrackBias ?? 0;
   const currentBias = condition.bias ?? "flat";
-
-  function biasLabel(v: number): string {
-    if (v <= -0.8) return "内有利(強)";
-    if (v <= -0.3) return "内有利(弱)";
-    if (v >= 0.8) return "外有利(強)";
-    if (v >= 0.3) return "外有利(弱)";
-    return "フラット";
-  }
+  const favN = condition.favoredHorseNumbers?.length ?? 0;
+  const disN = condition.disfavoredHorseNumbers?.length ?? 0;
 
   return (
     <div className="bet-panel__track-bias">
       <h4>⚡ 当日馬場傾向（クイック入力）</h4>
       <p className="bet-panel__track-bias-desc">
-        変更するとオッズ補正スコアが即リアルタイム更新されます。詳細は「条件設定」パネルで調整。
+        変更するとオッズ補正スコアが即リアルタイム更新されます。馬番ごとの有利・不利は「補正パネル」詳細の 1〜18
+        ボタンで指定してください（現在: 有利{favN}件・不利{disN}件）。
       </p>
-
-      {/* 枠バイアス（内外） */}
-      <div style={{ marginBottom: "8px" }}>
-        <span style={{ fontSize: "0.82em", fontWeight: "bold", marginRight: "6px" }}>
-          枠バイアス: {biasLabel(userBias)}
-        </span>
-        <div className="bet-panel__chip-row">
-          {(
-            [
-              { label: "内有利（強）", value: -1.0 },
-              { label: "内有利",       value: -0.5 },
-              { label: "フラット",     value: 0 },
-              { label: "外有利",       value: 0.5 },
-              { label: "外有利（強）", value: 1.0 },
-            ] as const
-          ).map(({ label, value }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => onConditionChange({ ...condition, userTrackBias: value })}
-              style={{
-                padding: "3px 8px",
-                fontSize: "0.78em",
-                borderRadius: "4px",
-                border: "1px solid",
-                cursor: "pointer",
-                fontWeight: Math.abs(userBias - value) < 0.05 ? "bold" : "normal",
-                background: Math.abs(userBias - value) < 0.05 ? "#2980b9" : "transparent",
-                color: Math.abs(userBias - value) < 0.05 ? "#fff" : "inherit",
-                borderColor: Math.abs(userBias - value) < 0.05 ? "#2980b9" : "var(--c-border)",
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* 展開バイアス（前残り/差し決着） */}
       <div>
@@ -481,13 +431,7 @@ export function RaceBetPanel({ sorted, horses, condition, viewModel, onCondition
           <TrackBiasQuickPanel condition={condition} onConditionChange={onConditionChange} />
         )}
         {evRows.length > 0 && (
-          <EvSection
-            rows={evRows}
-            budget={budget}
-            kellyFraction={kellyFractionValue}
-            condition={condition}
-            viewModel={viewModel}
-          />
+          <EvSection rows={evRows} budget={budget} kellyFraction={kellyFractionValue} viewModel={viewModel} />
         )}
       </section>
     );
@@ -644,13 +588,7 @@ export function RaceBetPanel({ sorted, horses, condition, viewModel, onCondition
               effectiveEv: viewModel?.byHorseId.get(row.horseId)?.effectiveEv ?? row.investment.valueScore ?? null,
             }))}
           />
-          <EvSection
-            rows={evRows}
-            budget={budget}
-            kellyFraction={kellyFractionValue}
-            condition={condition}
-            viewModel={viewModel}
-          />
+          <EvSection rows={evRows} budget={budget} kellyFraction={kellyFractionValue} viewModel={viewModel} />
         </>
       )}
     </section>

@@ -27,6 +27,7 @@ import { RaceAdjustProvider } from "./RaceAdjustContext";
 import { getHorsesFromRaceData, getRaceEvaluationById, getRaceResultById, type RaceEvaluationData } from "../../lib/race-data";
 import type { RaceIndexItem } from "../../lib/race-data";
 import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
+import { FIXED_SOFTMAX_TEMPERATURE } from "../../lib/pipeline/normalization";
 
 const NEUTRAL_CONDITION: RaceCondition = {
   venue: "東京",
@@ -36,7 +37,6 @@ const NEUTRAL_CONDITION: RaceCondition = {
   bias: "flat",
   pace: "middle",
   adjustmentStrength: "middle",
-  softmaxTemperature: 8.0,
 };
 
 type ViewTab = "list" | "ai" | "cards" | "bets" | "result";
@@ -68,10 +68,13 @@ type CarryOverCondition = Pick<
   | "pace"
   | "adjustmentStrength"
   | "trackBiasStrength01"
-  | "userTrackBias"
   | "abilityFocus"
   | "quickAdjustments"
-  | "softmaxTemperature"
+  | "paceInference"
+  | "meetingPhase"
+  | "favoredHorseNumbers"
+  | "disfavoredHorseNumbers"
+  | "trackCushion01"
 >;
 
 function carryOverStorageKey(raceInfo: RaceEvaluationData["raceInfo"]): string {
@@ -96,10 +99,13 @@ function saveCarryOverCondition(raceInfo: RaceEvaluationData["raceInfo"], condit
     pace: condition.pace,
     adjustmentStrength: condition.adjustmentStrength,
     trackBiasStrength01: condition.trackBiasStrength01,
-    userTrackBias: condition.userTrackBias,
     abilityFocus: condition.abilityFocus,
     quickAdjustments: condition.quickAdjustments,
-    softmaxTemperature: condition.softmaxTemperature,
+    paceInference: condition.paceInference,
+    meetingPhase: condition.meetingPhase,
+    favoredHorseNumbers: condition.favoredHorseNumbers,
+    disfavoredHorseNumbers: condition.disfavoredHorseNumbers,
+    trackCushion01: condition.trackCushion01,
   };
   try {
     localStorage.setItem(carryOverStorageKey(raceInfo), JSON.stringify(payload));
@@ -156,6 +162,22 @@ function loadManualTop3HorseIds(raceId: string): string[] {
   }
 }
 
+function markPriority(mark: string | undefined): number {
+  if (mark === "◎") return 0;
+  if (mark === "○") return 1;
+  if (mark === "▲") return 2;
+  if (mark === "☆") return 3;
+  if (mark === "△") return 4;
+  return 5;
+}
+
+function hokkakePriority(role: string | undefined): number {
+  if (role === "△1安定") return 0;
+  if (role === "△2物理") return 1;
+  if (role === "△3狙い") return 2;
+  return 3;
+}
+
 export function RaceDetailView({ race, raceIndex }: Props) {
   const [tab, setTab] = useState<ViewTab>("list");
   const [cardDensity, setCardDensity] = useState<CardDensity>("regular");
@@ -176,7 +198,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       raceName: race.condition.raceName ?? race.raceInfo.raceName,
       surface: race.condition.surface ?? race.raceInfo.surface,
       section200mSec: race.condition.section200mSec ?? inferredSection,
-      softmaxTemperature: globalProfile?.softmaxTemperature ?? carryOver?.softmaxTemperature ?? race.condition.softmaxTemperature ?? 8.0,
     };
   }, [horses, race.condition, race.raceId, race.raceInfo]);
   const [condition, setCondition] = useState<RaceCondition>(initialCondition);
@@ -267,21 +288,13 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         : lapType === LAP_STRUCTURE.NEUTRAL
           ? "ラップタイプ: 中間（判定弱）"
           : `ラップタイプ: ${lapType}`;
-    const userBias = condition.userTrackBias ?? 0;
-    const softmaxTemperature = condition.softmaxTemperature ?? 8.0;
-    const userBiasText =
-      userBias <= -0.8
-        ? "手動補正: 内有利(強)"
-        : userBias <= -0.3
-          ? "手動補正: 内有利"
-          : userBias >= 0.8
-            ? "手動補正: 外有利(強)"
-            : userBias >= 0.3
-              ? "手動補正: 外有利"
-              : "手動補正なし";
+    const favN = condition.favoredHorseNumbers?.length ?? 0;
+    const disN = condition.disfavoredHorseNumbers?.length ?? 0;
+    const gatePickText =
+      favN + disN > 0 ? `ゲート指定: 有利${favN}・不利${disN}` : "ゲート指定なし";
     return {
-      conditionOneLine: `${condition.venue} · ${g} · ${clock} · ${b} · ${p} · 強度${s} · T${softmaxTemperature.toFixed(1)} · ${userBiasText} · ${lapText}`,
-      conditionMetaLine: `${condition.venue} / ${g} / ${clock} / ${b} / ${p} / 強度${s} / 温度T=${softmaxTemperature.toFixed(1)} / ユーザーバイアス${userBias.toFixed(1)} / ${lapText}`,
+      conditionOneLine: `${condition.venue} · ${g} · ${clock} · ${b} · ${p} · 強度${s} · 勝率T${FIXED_SOFTMAX_TEMPERATURE}固定 · ${gatePickText} · ${lapText}`,
+      conditionMetaLine: `${condition.venue} / ${g} / ${clock} / ${b} / ${p} / 強度${s} / 勝率正規化T=${FIXED_SOFTMAX_TEMPERATURE}固定 / ${gatePickText} / ${lapText}`,
     };
   }, [condition]);
 
@@ -289,6 +302,17 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     if (condition == null) return [];
     const order = new Map(results.map((r, i) => [r.horseId, i] as const));
     return [...results].sort((a, b) => {
+      const ma = markPriority(a.mark);
+      const mb = markPriority(b.mark);
+      if (ma !== mb) return ma - mb;
+
+      // △同士は役割ラベルの順（安定→物理→展開→その他）で並べる。
+      if (a.mark === "△" && b.mark === "△") {
+        const ha = hokkakePriority(a.hokkakeRole);
+        const hb = hokkakePriority(b.hokkakeRole);
+        if (ha !== hb) return ha - hb;
+      }
+
       const da = (a.finalRank ?? a.adjustedRank ?? 99) - (b.finalRank ?? b.adjustedRank ?? 99);
       if (da !== 0) return da;
       return order.get(a.horseId)! - order.get(b.horseId)!;

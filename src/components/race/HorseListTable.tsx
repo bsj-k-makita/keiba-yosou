@@ -167,7 +167,8 @@ export function HorseListTable({
             const gate = "gate" in horse ? (horse as HorseAbility & { gate?: number }).gate : undefined;
             const frameNumber = "frameNumber" in horse ? (horse as HorseAbility & { frameNumber?: number }).frameNumber : undefined;
             const frameColor = getFrameColor(frameNumber);
-            const isDismiss = r.buyLabel === BUY_LABELS.DISMISS;
+            const hasMark = (r.mark ?? "") !== "";
+            const isDismissMasked = r.buyLabel === BUY_LABELS.DISMISS && !hasMark;
             const lapBonus =
               (r.lapShapeFitBonus ?? 0) +
               (r.raceAnalysisBonus ?? 0) +
@@ -198,8 +199,9 @@ export function HorseListTable({
                   if (el) rowRefs.current.set(r.horseId, el);
                   else rowRefs.current.delete(r.horseId);
                 }}
-                className={`horse-list__row${isDismiss ? " horse-list__row--dismiss" : ""}`}
+                className={`horse-list__row${isDismissMasked ? " horse-list__row--dismiss" : ""}`}
                 data-buylabel={r.buyLabel}
+                data-has-mark={hasMark ? "1" : undefined}
                 data-ev-hot={vm?.evHot ? "1" : undefined}
                 onClick={() => onSelectHorse?.(r.horseId)}
                 style={{ cursor: onSelectHorse ? "pointer" : undefined }}
@@ -282,7 +284,7 @@ export function HorseListTable({
 
                 {/* 買いラベル */}
                 <td className="horse-list__td horse-list__td--buy">
-                  <span className={`horse-list__buy-label${isDismiss ? " horse-list__buy-label--dismiss" : ""}`}>
+                  <span className={`horse-list__buy-label${isDismissMasked ? " horse-list__buy-label--dismiss" : ""}`}>
                     {r.buyLabel}
                   </span>
                   {marketAlert ? (

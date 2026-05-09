@@ -47,6 +47,17 @@ function b(v: unknown): boolean | undefined {
   return typeof v === "boolean" ? v : undefined;
 }
 
+function parseNumArrayInRange(v: unknown, max: number): readonly number[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  const gates = v
+    .map((x) => (typeof x === "number" ? x : Number(String(x))))
+    .filter((n) => Number.isFinite(n))
+    .map((n) => Math.round(n as number))
+    .filter((n) => n >= 1 && n <= max);
+  const uniq = [...new Set(gates)].sort((a, b) => a - b);
+  return uniq.length > 0 ? uniq : undefined;
+}
+
 function round1(x: number): number {
   return Math.round(x * 10) / 10;
 }
@@ -384,6 +395,18 @@ function toCondition(doc: Record<string, unknown>, pack: ReturnType<typeof merge
           ? raw["courseTopology"]
           : undefined,
       userTrackBias: n(raw["userTrackBias"]),
+      trackCushion01: n(raw["trackCushion01"]),
+      paceInference: raw["paceInference"] === "manual" ? "manual" : undefined,
+      meetingPhase:
+        raw["meetingPhase"] === "opening" || raw["meetingPhase"] === "mid" || raw["meetingPhase"] === "closing"
+          ? raw["meetingPhase"]
+          : undefined,
+      favoredGateNumbers: parseNumArrayInRange(raw["favoredGateNumbers"], 8),
+      disfavoredGateNumbers: parseNumArrayInRange(raw["disfavoredGateNumbers"], 8),
+      favoredHorseNumbers: parseNumArrayInRange(raw["favoredHorseNumbers"], 36),
+      disfavoredHorseNumbers: parseNumArrayInRange(raw["disfavoredHorseNumbers"], 36),
+      openingMeetingWeek: b(raw["openingMeetingWeek"]),
+      closingMeetingWeek: b(raw["closingMeetingWeek"]),
       quickAdjustments:
         raw["quickAdjustments"] != null && typeof raw["quickAdjustments"] === "object"
           ? {

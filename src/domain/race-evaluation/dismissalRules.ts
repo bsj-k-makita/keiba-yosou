@@ -8,6 +8,7 @@ import {
   weightsToDemand0to100,
 } from "./fitScore";
 import { getFinalWeights } from "./weightResolver";
+import { venueRepeaterDismissRescue } from "./venueRepeater";
 
 const SCORE_DIFF_NEG_THRESHOLD = 1.0;
 
@@ -49,7 +50,10 @@ export function collectDismissIds(
       kickInTopFraction: kickTopMap.get(h.horseId),
     });
     const paceBad = paceFit === PACE_FIT.BAD;
-    const sig = countDismissConditions(h, r, n, fitLevel, paceBad);
+    let sig = countDismissConditions(h, r, n, fitLevel, paceBad);
+    if (venueRepeaterDismissRescue(h, condition)) {
+      sig -= 1;
+    }
     if (sig >= 2) set.add(h.horseId);
   }
   return set;

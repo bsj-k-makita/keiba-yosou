@@ -128,10 +128,13 @@ export function applyVenuePhysicalFactorAdjustments(base: WeightSet, condition: 
   const cushion = condition.trackCushion01;
   const hasCushion = cushion != null && Number.isFinite(cushion);
   const firm = hasCushion ? clamp01(cushion) : null;
-  /** 柔らかい馬場ほど坂・踏み込み負荷を増幅（実質 1.5 倍方向）。硬いほど軽減。 */
+  /**
+   * 柔らかい馬場ほど坂・踏み込み負荷を増幅。急坂コースでは係数を上げ、柔軟時は最大 ~1.5 相当まで。
+   */
   let hillMult = 1;
   if (firm != null) {
-    hillMult = 1 + (1 - firm) * 0.5;
+    const softAmp = factor.uphill >= 1.8 ? 0.65 : 0.5;
+    hillMult = 1 + (1 - firm) * softAmp;
   }
 
   if (factor.straight > 500) {

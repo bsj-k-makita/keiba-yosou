@@ -81,6 +81,63 @@ function profileDistanceFit01(horse: HorseAbility, targetDistance: number): numb
  * - 能力配分を代理にした「血統的な距離傾向」
  * を合成して最終点に加算する（おおむね -4.0 〜 +4.0）。
  */
+function venueRough(condition: RaceCondition): string {
+  return `${condition.courseKey ?? ""} ${condition.venue ?? ""}`.toLowerCase();
+}
+
+function isToughVenue(courseText: string): boolean {
+  return courseText.includes("中京") || courseText.includes("中山");
+}
+
+function isStretchStaminaCourse(courseText: string, distance: number, turf: boolean): boolean {
+  if (!turf || distance < 2300 || distance > 2500) return false;
+  return courseText.includes("東京");
+}
+
+function lastRunDistanceM(horse: HorseAbility): number | null {
+  const last = horse.pastRuns?.[0];
+  if (!last) return null;
+  const d = last.raceDistance;
+  if (d != null && Number.isFinite(d) && d > 0) return d;
+  const sec = last.section200mSec;
+  if (sec && sec.length >= 4) return sec.length * 200;
+  return null;
+}
+
+/**
+ * 距離短縮・延長のバイアス（タフコースや長距離芝での「伸び代／負荷」）。
+ * 既存の距離適性ボーナスとは独立に小さめのスカラーを加算する想定。
+ */
+export function computeDistanceChangeBias(horse: HorseAbility, condition: RaceCondition): number {
+  const target = condition.distance;
+  if (target == null || !Number.isFinite(target) || target <= 0) return 0;
+
+  const last = lastRunDistanceM(horse);
+  if (last == null || !Number.isFinite(last) || last <= 0) return 0;
+
+  const delta = target - last;
+  const key = venueRough(condition);
+  const turf = condition.surface !== "ダート";
+  let bonus = 0;
+
+  // 短縮: スタミナ要求度が高い舞台で前走より距離が短いと立ち回りやすい
+  if (delta <= -200) {
+    const amp = isToughVenue(key) ? 1.35 : 1.0;
+    bonus += Math.min(3.4, Math.abs(delta) / 220) * 2.2 * amp;
+  }
+
+  // 延長: スピード寄りプロファイルがタフな長距離芝へ伸ばすケースはリスク
+  if (delta >= 200) {
+    const profile = profileDistanceFit01(horse, target);
+    const speedy = profile < 0.46;
+    if (speedy && isStretchStaminaCourse(key, target, turf)) {
+      bonus -= Math.min(3.6, delta / 260) * 2.4;
+    }
+  }
+
+  return round1(Math.max(-4, Math.min(4, bonus)));
+}
+
 export function computeDistanceFitBonus(
   horse: HorseAbility,
   condition: RaceCondition,
@@ -97,6 +154,7 @@ export function computeDistanceFitBonus(
   const pastCentered = (past.value - 0.5) * 2;
   const profileCentered = (profile - 0.5) * 2;
 
-  const bonus = pastCentered * 2.5 * pastReliability + profileCentered * 1.5;
+  const bonus =
+    pastCentered * 2.5 * pastReliability + profileCentered * 1.5 + computeDistanceChangeBias(horse, condition);
   return round1(Math.max(-4, Math.min(4, bonus)));
 }

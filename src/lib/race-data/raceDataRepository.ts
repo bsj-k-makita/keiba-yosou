@@ -8,7 +8,7 @@ import indexJson from "../../data/index.json";
 const raceJsonLoaders = import.meta.glob<{ default: unknown }>("../../data/races/*.json");
 const resultJsonLoaders = import.meta.glob<{ default: unknown }>("../../data/results/*.json");
 
-const evaluationCache = new Map<string, RaceEvaluationData>();
+/** レース JSON 更新・HMR 後も古い表示が残らないよう、評価データはキャッシュしない */
 const resultCache = new Map<string, RaceResultData | null>();
 const resultFetchInFlight = new Map<string, Promise<RaceResultData | null>>();
 
@@ -53,9 +53,23 @@ export async function getRaceIndex(): Promise<RaceIndexItem[]> {
 }
 
 /**
- * 生のレース JSON（1 ファイル分）。`races/{raceId}.json`。
+ * 開発時は fetch + cache bust でディスク更新をそのまま反映（import のモジュールキャッシュを避ける）。
+ * 本番ビルドでは import.meta.glob のまま（ビルド時点の JSON がバンドルされる）。
  */
-export async function getRaceById(raceId: string): Promise<unknown | null> {
+async function loadRaceJsonRaw(raceId: string): Promise<unknown | null> {
+  if (import.meta.env.DEV) {
+    try {
+      const safeId = encodeURIComponent(raceId);
+      const base = new URL(`../../data/races/${safeId}.json`, import.meta.url);
+      const sep = base.href.includes("?") ? "&" : "?";
+      const res = await fetch(`${base.href}${sep}_=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) return null;
+      return (await res.json()) as unknown;
+    } catch {
+      // fall through
+    }
+  }
+
   const rel = `../../data/races/${raceId}.json`;
   const load = raceJsonLoaders[rel];
   if (load == null) return null;
@@ -64,18 +78,22 @@ export async function getRaceById(raceId: string): Promise<unknown | null> {
 }
 
 /**
+ * 生のレース JSON（1 ファイル分）。`races/{raceId}.json`。
+ */
+export async function getRaceById(raceId: string): Promise<unknown | null> {
+  return loadRaceJsonRaw(raceId);
+}
+
+/**
  * raceId に対応する能力評価データを取得する。無ければ null。
  */
 export async function getRaceEvaluationById(
   raceId: string,
 ): Promise<RaceEvaluationData | null> {
-  const hit = evaluationCache.get(raceId);
-  if (hit != null) return hit;
   const raw = await getRaceById(raceId);
   if (raw == null) return null;
   const data = convertToRaceEvaluationData(raw);
   assertRaceDataQuality(data);
-  evaluationCache.set(raceId, data);
   return data;
 }
 

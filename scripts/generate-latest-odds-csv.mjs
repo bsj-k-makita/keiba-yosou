@@ -4,7 +4,14 @@
  *
  * 優先ソース:
  * 1) JRA系外部API（JRA_ODDS_API_BASE_URL が設定されている場合）
- * 2) netkeiba 単勝オッズ（type=b1）を代替利用
+ * 2) JRA公式サイト（sp.jra.jp）を Playwright で取得（API 未設定または未取得時）
+ * 3) netkeiba 単勝オッズ（type=b1、source=auto のフォールバック）
+ *
+ * 対象レースの指定（どれか一つ）:
+ * - --date=YYYY-MM-DD … src/data/index.json のその開催日の全レース（日単位バッチ向け）
+ * - --all … index の全レース
+ * - --raceId=12桁 … 単発（複数回指定可）。--date より優先
+ * - 上記なし … index 内の最新日だけ
  *
  * 出力CSVヘッダ:
  * raceId,horseNumber,actualOdds,marketWinOdds,marketPopularity,observedAt,source
@@ -16,11 +23,30 @@ import { load } from "cheerio";
 import { gunzipSync, inflateRawSync, inflateSync } from "zlib";
 import { fetchUtf8, fetchSpUtf8, sleep } from "./lib/netkeibaFetch.mjs";
 import { loadLocalEnv } from "./lib/loadEnvFiles.mjs";
+import { resolveRaceNavigationContext } from "./lib/raceIdResolver.mjs";
+import { createJraOfficialOddsSession, fetchJraOfficialWinOddsForRace } from "./lib/jraDriver.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 const INDEX_PATH = join(ROOT, "src/data/index.json");
 loadLocalEnv(ROOT);
+
+/** netkeiba の race_id は12桁。ドキュメントの「…」はプレースホルダなのでそのまま渡さないこと。 */
+function validateExplicitRaceIds(ids) {
+  for (const raw of ids) {
+    const id = String(raw ?? "").trim();
+    if (/^[…⋯]+$/.test(id) || /^\.{2,3}$/.test(id)) {
+      throw new Error(
+        `Invalid --raceId: "${raw}" is a placeholder (…). Pass the real 12-digit race id, e.g. --raceId=202605020511`,
+      );
+    }
+    if (!/^\d{12}$/.test(id)) {
+      throw new Error(
+        `--raceId must be 12 digits (netkeiba race_id). Got "${raw}". Example: --raceId=202605020511`,
+      );
+    }
+  }
+}
 
 function parseArgs(argv) {
   let outPath = "data/latest-odds.csv";
@@ -28,12 +54,15 @@ function parseArgs(argv) {
   let all = false;
   let sleepMs = 250;
   let source = "jra";
+  /** @type {string[]} */
+  const explicitRaceIds = [];
   for (const arg of argv) {
     if (arg.startsWith("--out=")) outPath = arg.slice("--out=".length).trim();
     else if (arg.startsWith("--date=")) date = arg.slice("--date=".length).trim();
     else if (arg === "--all") all = true;
     else if (arg.startsWith("--sleep=")) sleepMs = Math.max(100, Number(arg.slice(8)) || 250);
     else if (arg.startsWith("--source=")) source = arg.slice("--source=".length).trim();
+    else if (arg.startsWith("--raceId=")) explicitRaceIds.push(arg.slice("--raceId=".length).trim());
   }
   if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     throw new Error(`invalid --date: ${date}`);
@@ -47,6 +76,7 @@ function parseArgs(argv) {
     all,
     sleepMs,
     source,
+    explicitRaceIds,
   };
 }
 
@@ -78,14 +108,47 @@ function rowsToCsv(rows) {
   return `${lines.join("\n")}\n`;
 }
 
-function raceIdsFromIndex({ date, all }) {
+function raceIdsFromIndex(args) {
+  if (args.explicitRaceIds.length > 0) {
+    return args.explicitRaceIds.map((id) => String(id).trim()).filter(Boolean);
+  }
   const index = JSON.parse(readFileSync(INDEX_PATH, "utf8"));
   const rows = Array.isArray(index) ? index : [];
-  if (all) return rows.map((r) => r.raceId).filter(Boolean);
-  if (date) return rows.filter((r) => r.date === date).map((r) => r.raceId).filter(Boolean);
+  if (args.all) return rows.map((r) => r.raceId).filter(Boolean);
+  if (args.date) return rows.filter((r) => r.date === args.date).map((r) => r.raceId).filter(Boolean);
   const dates = [...new Set(rows.map((r) => r.date).filter(Boolean))].sort();
   const latestDate = dates[dates.length - 1];
   return rows.filter((r) => r.date === latestDate).map((r) => r.raceId).filter(Boolean);
+}
+
+function printHelp() {
+  process.stdout.write(`Usage: node scripts/generate-latest-odds-csv.mjs [options]
+
+Options:
+  --out=<path>       Output CSV path (default: data/latest-odds.csv)
+  --date=YYYY-MM-DD  All races on that date from src/data/index.json (day batch)
+  --all              All races in index.json
+  --raceId=12digits  One race (repeatable). Overrides --date when given.
+  --source=jra|auto|netkeiba
+  --sleep=ms         Delay between races (default 250)
+  -h, --help         This message
+
+Examples:
+  npm run odds-csv-date -- --date=2026-05-10
+  node scripts/generate-latest-odds-csv.mjs --date=2026-05-10 --source=jra --out=data/latest-odds.csv
+`);
+}
+
+function stripInternalCsvFields(row) {
+  const { _excluded, ...rest } = row;
+  void _excluded;
+  return rest;
+}
+
+async function fetchFromJraOfficialPlaywright(raceId, session, root) {
+  const ctx = resolveRaceNavigationContext(raceId, root);
+  const raw = session ? await session.fetchRows(ctx) : await fetchJraOfficialWinOddsForRace(ctx);
+  return raw.map(stripInternalCsvFields);
 }
 
 function parseJsonpBody(text) {
@@ -376,40 +439,71 @@ function parseNetkeibaB1Odds(raceId) {
 }
 
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  if (argv.includes("--help") || argv.includes("-h")) {
+    printHelp();
+    return;
+  }
+  const args = parseArgs(argv);
+  if (args.explicitRaceIds.length > 0) validateExplicitRaceIds(args.explicitRaceIds);
   const raceIds = raceIdsFromIndex(args);
-  if (raceIds.length === 0) throw new Error("no race ids");
-  if (args.source !== "netkeiba" && !process.env.JRA_ODDS_API_BASE_URL) {
+  if (raceIds.length === 0) {
     throw new Error(
-      "JRA_ODDS_API_BASE_URL is required for --source=jra/auto. Set env or run with --source=netkeiba.",
+      "no race ids for this selection. Check src/data/index.json or use --date / --all / --raceId=",
     );
   }
+
+  const useApi = Boolean(process.env.JRA_ODDS_API_BASE_URL);
+  /** @type {Awaited<ReturnType<typeof createJraOfficialOddsSession>> | null} */
+  let jraSession = null;
+  const obtainPlaywrightSession = async () => {
+    if (raceIds.length <= 1) return null;
+    if (!jraSession) jraSession = await createJraOfficialOddsSession();
+    return jraSession;
+  };
 
   const allRows = [];
   let byJra = 0;
   let byNetkeiba = 0;
   let jraMissRaces = 0;
-  for (const raceId of raceIds) {
-    if (args.source !== "netkeiba") {
-      const jraRows = await fetchFromJraLikeApi(raceId);
-      if (jraRows.length > 0) {
-        allRows.push(...jraRows);
-        byJra += jraRows.length;
-        await sleep(args.sleepMs);
-        continue;
+  try {
+    for (const raceId of raceIds) {
+      if (args.source !== "netkeiba") {
+        let jraRows = [];
+        if (useApi) {
+          jraRows = await fetchFromJraLikeApi(raceId);
+        }
+        if (jraRows.length === 0) {
+          try {
+            const sess = await obtainPlaywrightSession();
+            jraRows = await fetchFromJraOfficialPlaywright(raceId, sess, ROOT);
+          } catch (e) {
+            process.stderr.write(`JRA official odds failed ${raceId}: ${e?.message || e}\n`);
+            jraRows = [];
+          }
+        }
+        if (jraRows.length > 0) {
+          allRows.push(...jraRows);
+          byJra += jraRows.length;
+          if (jraSession) await jraSession.politeGap();
+          else await sleep(args.sleepMs);
+          continue;
+        }
+        jraMissRaces += 1;
+        if (args.source === "jra") {
+          await sleep(args.sleepMs);
+          continue;
+        }
       }
-      jraMissRaces += 1;
-      if (args.source === "jra") {
-        await sleep(args.sleepMs);
-        continue;
+      if (args.source !== "jra") {
+        const netkeibaRows = parseNetkeibaB1Odds(raceId);
+        allRows.push(...netkeibaRows);
+        byNetkeiba += netkeibaRows.length;
       }
+      await sleep(args.sleepMs);
     }
-    if (args.source !== "jra") {
-      const netkeibaRows = parseNetkeibaB1Odds(raceId);
-      allRows.push(...netkeibaRows);
-      byNetkeiba += netkeibaRows.length;
-    }
-    await sleep(args.sleepMs);
+  } finally {
+    if (jraSession) await jraSession.close();
   }
 
   const outDir = dirname(args.outPath);

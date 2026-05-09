@@ -27,7 +27,10 @@ export function assertRaceDataQuality(data: RaceEvaluationData): void {
 
   if (total >= 8 && withPastRuns === 0) {
     throw new Error(
-      "過去走データが1件も取得できていません。評価を停止しました。データ再取得後に再度お試しください。",
+      [
+        "このレースの JSON 内で、どの馬も pastRuns が空です（画面の評価処理は netkeiba へ再取得しません）。",
+        "出馬表スクレイプ時に過去走が保存されていない状態です。scripts/fetch-races-from-netkeiba.mjs を --skip-past-runs 無しで対象日だけ再取得してください。",
+      ].join(" "),
     );
   }
 

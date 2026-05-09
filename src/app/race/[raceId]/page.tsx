@@ -1,54 +1,86 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getRaceEvaluationById, getRaceIndex, type RaceEvaluationData, type RaceIndexItem } from "../../../lib/race-data";
 import { RaceDetailView } from "../../../components/race/RaceDetailView";
+
+/** 開発時: JSON を書き換えたあとも画面が追従するよう間隔（ms）。本番ではポーリングしない。 */
+const DEV_RACE_POLL_MS = 4000;
 
 export function RaceDetailPage() {
   const { raceId = "" } = useParams();
   const [race, setRace] = useState<RaceEvaluationData | null>(null);
   const [raceIndex, setRaceIndex] = useState<RaceIndexItem[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     let live = true;
     void getRaceIndex().then((idx) => {
       if (live) setRaceIndex(idx);
     });
-    return () => { live = false; };
+    return () => {
+      live = false;
+    };
   }, []);
 
   useEffect(() => {
     let live = true;
-    void (async () => {
+    initialLoadDone.current = false;
+
+    const loadOnce = async (isInitial: boolean) => {
       if (raceId.length === 0) {
-        if (live) {
+        if (live && isInitial) {
           setLoadError("レースIDがありません。");
           setRace(null);
         }
         return;
       }
-      setLoadError(null);
-      let data: RaceEvaluationData | null = null;
+      if (isInitial) {
+        setLoadError(null);
+      }
       try {
-        data = await getRaceEvaluationById(raceId);
+        const data = await getRaceEvaluationById(raceId);
+        if (!live) return;
+        if (data == null) {
+          if (isInitial) {
+            setLoadError("レースデータが見つかりません。");
+            setRace(null);
+          }
+          return;
+        }
+        setLoadError(null);
+        setRace(data);
+        initialLoadDone.current = true;
       } catch (error) {
-        if (live) {
+        if (!live) return;
+        if (isInitial || !initialLoadDone.current) {
           const msg = error instanceof Error ? error.message : "レース情報の取得に失敗しました。";
           setLoadError(msg);
           setRace(null);
         }
-        return;
       }
-      if (!live) return;
-      if (data == null) {
-        setLoadError("レースデータが見つかりません。");
-        setRace(null);
-        return;
+    };
+
+    void loadOnce(true);
+
+    let interval: ReturnType<typeof setInterval> | undefined;
+    if (import.meta.env.DEV) {
+      interval = setInterval(() => {
+        void loadOnce(false);
+      }, DEV_RACE_POLL_MS);
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void loadOnce(false);
       }
-      setRace(data);
-    })();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       live = false;
+      if (interval != null) clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [raceId]);
 
@@ -81,6 +113,11 @@ export function RaceDetailPage() {
           ← レース一覧に戻る
         </Link>
       </nav>
+      {import.meta.env.DEV ? (
+        <p className="app__meta app__meta--devhint" aria-live="polite">
+          開発モード: レースJSONの変更は約 {DEV_RACE_POLL_MS / 1000} 秒ごとに自動反映されます（別タブから戻ったときも再読込）。
+        </p>
+      ) : null}
       <RaceDetailView key={race.raceId} race={race} raceIndex={raceIndex} />
     </div>
   );

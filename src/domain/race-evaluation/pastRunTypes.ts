@@ -48,4 +48,6 @@ export type PastRunRecord = {
   tripTrouble01?: number;
   /** 0〜1: 展開利・馬場恩恵。値が大きいほど恩恵を受けた。 */
   tripBenefit01?: number;
+  /** 当該走の騎手名（乗り替わり・継続騎乗判定用。未設定時は鞍上強化ロジックをスキップ） */
+  jockey?: string;
 };

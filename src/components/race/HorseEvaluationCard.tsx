@@ -66,6 +66,8 @@ export function HorseEvaluationCard({
   const panelId = `${id}-detail`;
 
   const mark = result.mark ?? "";
+  const hasMark = mark !== "";
+  const isDismissMasked = result.buyLabel === BUY_LABELS.DISMISS && !hasMark;
   const frameNumber = "frameNumber" in horse ? (horse as HorseAbility & { frameNumber?: number }).frameNumber : undefined;
   const frameColor = getFrameColor(frameNumber);
 
@@ -123,6 +125,9 @@ export function HorseEvaluationCard({
     (result.gateBiasBonus ?? 0) +
     (result.gateStyleSynergyBonus ?? 0) +
     (result.connectionsBonus ?? 0) +
+    (result.jockeyRiderBonus ?? 0) +
+    (result.heavyWeightPowerBonus ?? 0) +
+    (result.staminaTestBonus ?? 0) +
     (result.trendBonus ?? 0) +
     (result.paceBalanceBonus ?? 0) +
     (result.tripContextBonus ?? 0);
@@ -152,11 +157,32 @@ export function HorseEvaluationCard({
     () => (result.adjustmentBadges ?? []).filter((badge) => badge.length > 0),
     [result.adjustmentBadges],
   );
+  const hokkakeBadge = useMemo(() => {
+    if (!result.hokkakeRole) return null;
+    if (result.hokkakeRole === "△1安定") {
+      return { text: "△[安定]", title: "安定度・データ厚め（複勝の軸にしやすいヒモ）" };
+    }
+    if (result.hokkakeRole === "△2物理") {
+      return { text: "△[物理]", title: "コース特性・馬体重など物理条件との一致が強いヒモ" };
+    }
+    return { text: "△[展開]", title: "このレースのペース想定で恩恵が大きいヒモ（狙い・末脚）" };
+  }, [result.hokkakeRole]);
+  const jockeyUpgradeBadge = useMemo(() => {
+    const v = result.jockeyRiderBonus ?? 0;
+    if (v < 8) return null;
+    return `[鞍上強化 +${v.toFixed(1)}]`;
+  }, [result.jockeyRiderBonus]);
+  const ambitionBadge = useMemo(() => {
+    if (!result.jockeyAmbitionFlag) return null;
+    return { text: "[勝負気配]", title: "前走より鞍上が大きく強化（賞金志向の乗り替わり）" };
+  }, [result.jockeyAmbitionFlag]);
 
   return (
     <article
       className={`horse-card${compact ? " horse-card--compact" : ""}${effectiveEvHot ? " horse-card--ev-gold" : ""}`}
       data-buylabel={result.buyLabel}
+      data-has-mark={hasMark ? "1" : undefined}
+      data-dismiss-masked={isDismissMasked ? "1" : undefined}
       data-ev-hot={effectiveEvHot ? "1" : undefined}
       data-ev-band={evBand}
     >
@@ -191,6 +217,24 @@ export function HorseEvaluationCard({
           <span className="horse-card__style-badge" title={UI.RUNNING_STYLE}>
             {horse.runningStyle}
           </span>
+          {hokkakeBadge ? (
+            <span
+              className="horse-card__role-badge horse-card__role-badge--axis"
+              title={hokkakeBadge.title}
+            >
+              {hokkakeBadge.text}
+            </span>
+          ) : null}
+          {ambitionBadge ? (
+            <span className="horse-card__special-badge" data-kind="positive" title={ambitionBadge.title}>
+              {ambitionBadge.text}
+            </span>
+          ) : null}
+          {jockeyUpgradeBadge ? (
+            <span className="horse-card__special-badge" data-kind="positive" title="ジョッキー文脈の加点">
+              {jockeyUpgradeBadge}
+            </span>
+          ) : null}
           {rankMoveBadge ? (
             <span
               className={
@@ -456,7 +500,10 @@ export function HorseEvaluationCard({
             {result.pedigreeBonus.toFixed(1)} / 枠 {result.gateBiasBonus >= 0 ? "+" : ""}
             {result.gateBiasBonus.toFixed(1)} / 枠×脚質 {result.gateStyleSynergyBonus >= 0 ? "+" : ""}
             {result.gateStyleSynergyBonus.toFixed(1)} / 陣営 {result.connectionsBonus >= 0 ? "+" : ""}
-            {result.connectionsBonus.toFixed(1)} / 傾向 {result.trendBonus >= 0 ? "+" : ""}
+            {result.connectionsBonus.toFixed(1)} / 鞍上 {result.jockeyRiderBonus != null && result.jockeyRiderBonus >= 0 ? "+" : ""}
+            {(result.jockeyRiderBonus ?? 0).toFixed(1)} / 馬格 {result.heavyWeightPowerBonus != null && result.heavyWeightPowerBonus >= 0 ? "+" : ""}
+            {(result.heavyWeightPowerBonus ?? 0).toFixed(1)} / 耐久 {result.staminaTestBonus != null && result.staminaTestBonus >= 0 ? "+" : ""}
+            {(result.staminaTestBonus ?? 0).toFixed(1)} / 傾向 {result.trendBonus >= 0 ? "+" : ""}
             {result.trendBonus.toFixed(1)} / 前後傾 {result.paceBalanceBonus >= 0 ? "+" : ""}
             {result.paceBalanceBonus.toFixed(1)} / 不利恩恵 {result.tripContextBonus >= 0 ? "+" : ""}
             {result.tripContextBonus.toFixed(1)}）

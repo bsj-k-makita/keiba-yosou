@@ -95,43 +95,88 @@ function computePedigreeBonus(horse: HorseAbility, condition: RaceCondition): nu
   return round1(clamp(bonus, -4, 4));
 }
 
+/** ピンポイント指定（馬番／旧枠）の加点／減点。馬場傾向チャップによるグラデーションに加算。 */
+const PINPOINT_FAV_GATE_BONUS = 8;
+const PINPOINT_DIS_GATE_PENALTY = -8;
+
+function horseGateNumber(horse: HorseAbility): number | null {
+  const g = (horse as HorseAbility & { gate?: number }).gate;
+  if (g != null && Number.isFinite(g) && g >= 1 && g <= 36) return Math.round(g);
+  return null;
+}
+
+function computePinpointGateBonus(horse: HorseAbility, condition: RaceCondition): number {
+  const hn = horseGateNumber(horse);
+  const favH = condition.favoredHorseNumbers ?? [];
+  const disH = condition.disfavoredHorseNumbers ?? [];
+  if (hn != null) {
+    if (favH.includes(hn)) return PINPOINT_FAV_GATE_BONUS;
+    if (disH.includes(hn)) return PINPOINT_DIS_GATE_PENALTY;
+  }
+  const frame = horse.frameNumber;
+  if (frame == null || !Number.isFinite(frame) || frame <= 0) return 0;
+  const fi = Math.round(frame);
+  const fav = condition.favoredGateNumbers ?? [];
+  const dis = condition.disfavoredGateNumbers ?? [];
+  if (fav.includes(fi)) return PINPOINT_FAV_GATE_BONUS;
+  if (dis.includes(fi)) return PINPOINT_DIS_GATE_PENALTY;
+  return 0;
+}
+
 function defaultTrackBiasStrength01(condition: RaceCondition): number {
   if (condition.bias === "inside_favor" || condition.bias === "outside_favor") return 0.65;
   return 0;
 }
 
+/**
+ * 枠加点・枠×脚質の内外方向（馬場傾向チャップのみ。旧スライダーは廃止）。
+ */
 function resolveTrackBias(condition: RaceCondition): { direction: number; strength01: number; isManualNeutral: boolean } {
-  const user = condition.userTrackBias;
-  if (user != null && Number.isFinite(user)) {
-    const clamped = clamp(user, -1, 1);
-    // user: -1 内有利, +1 外有利
+  if (condition.bias === "inside_favor") {
     return {
-      direction: -clamped,
-      strength01: Math.abs(clamped),
-      isManualNeutral: Math.abs(clamped) < 0.05,
+      direction: 1,
+      strength01: clamp(condition.trackBiasStrength01 ?? defaultTrackBiasStrength01(condition), 0, 1),
+      isManualNeutral: false,
     };
   }
-  if (condition.bias === "inside_favor") return { direction: 1, strength01: clamp(condition.trackBiasStrength01 ?? defaultTrackBiasStrength01(condition), 0, 1), isManualNeutral: false };
-  if (condition.bias === "outside_favor") return { direction: -1, strength01: clamp(condition.trackBiasStrength01 ?? defaultTrackBiasStrength01(condition), 0, 1), isManualNeutral: false };
-  return { direction: 0, strength01: 0, isManualNeutral: false };
+  if (condition.bias === "outside_favor") {
+    return {
+      direction: -1,
+      strength01: clamp(condition.trackBiasStrength01 ?? defaultTrackBiasStrength01(condition), 0, 1),
+      isManualNeutral: false,
+    };
+  }
+  return {
+    direction: 0,
+    strength01: 0,
+    /** 「フラット」のときだけ枠×脚質を物理寄りに（内外プリセット無しの意図） */
+    isManualNeutral: condition.bias === "flat",
+  };
 }
 
 function computeGateBiasBonus(horse: HorseAbility, condition: RaceCondition, fieldSize: number): number {
+  const pinpoint = computePinpointGateBonus(horse, condition);
+  const maxAbs = 38;
+
   const frame = horse.frameNumber;
-  if (frame == null || !Number.isFinite(frame) || frame <= 0) return 0;
+  if (frame == null || !Number.isFinite(frame) || frame <= 0) {
+    return round1(clamp(pinpoint, -maxAbs, maxAbs));
+  }
 
   const maxFrame = Math.max(1, Math.min(8, Math.ceil(fieldSize / 2)));
   const frame01 = maxFrame <= 1 ? 0.5 : clamp((frame - 1) / (maxFrame - 1), 0, 1);
   const insideAdv = (1 - frame01 - 0.5) * 2; // 内枠 +1, 外枠 -1
   const trackBias = resolveTrackBias(condition);
-  if (trackBias.strength01 <= 0) return 0;
+  // 馬場傾向がフラット等でグラデーションが無いときでも、馬番／枠ピンポイントは必ず効かせる
+  if (trackBias.strength01 <= 0) {
+    return round1(clamp(pinpoint, -maxAbs, maxAbs));
+  }
   const turnAmp = clamp(1 + Math.max(0, (condition.turnCount ?? 2) - 2) * 0.15, 1, 1.6);
 
   // 内外バイアス指定時の効きを明確化するため、レンジ上限を引き上げる。
   const biasSyncMultiplier = 5;
-  const bonus = insideAdv * trackBias.direction * 3.6 * trackBias.strength01 * turnAmp * biasSyncMultiplier;
-  const maxAbs = 30;
-  return round1(clamp(bonus, -maxAbs, maxAbs));
+  const sliderBonus = insideAdv * trackBias.direction * 3.6 * trackBias.strength01 * turnAmp * biasSyncMultiplier;
+  return round1(clamp(sliderBonus + pinpoint, -maxAbs, maxAbs));
 }
 
 function computeGateStyleSynergyBonus(

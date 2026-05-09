@@ -5,7 +5,13 @@ import type {
 } from "./abilityTypes";
 import { assignBuyLabels } from "./buyLabel";
 import { collectDismissIds } from "./dismissalRules";
-import { assignMarks, fillRequiredMarks } from "./markAssigner";
+import {
+  assignCompleteMarks,
+  assignHokkakeRoles,
+  assignMarks,
+  applyCornerLeadFavoritePromotion,
+  applyStabilityRescueMarks,
+} from "./markAssigner";
 import { generateScoreReason } from "./reasonGenerator";
 import {
   baseAbilityCore,
@@ -20,7 +26,7 @@ import { applyLongshotMarkGuard } from "./longshotGuard";
 import {
   calcHorseScore,
   getBaseWeights,
-  getFinalWeights,
+  getFinalWeightsForHorse,
 } from "./weightResolver";
 import { extractStrongAbilities } from "./strongAbilities";
 import { combineFinalEvaluationScore, computeRaceRelativeScores } from "./finalScoring";
@@ -45,14 +51,32 @@ import { ADJUSTMENT_STRENGTH } from "./adjustments";
 import { computeCourseTraitHits } from "./courseTraitResolver";
 import { computeStructuralPhysicalHits } from "./structuralPhysicalBonuses";
 import { computeRaceAnalysisBonus } from "./storedRaceAnalysisBonus";
+import { inferPaceSeverityKind, resolveEffectiveRacePace } from "./paceSeverity";
+import { computeJockeyRiderBonuses, sumJockeyRiderBonuses } from "./jockeyContext";
+import { computeStabilityScore } from "./stabilityScore";
+import {
+  estimateFourthCornerRanking,
+  fourthCornerAbilityBiasMultiplier,
+  fourthCornerPredictionBonus,
+} from "./estimatedFourthCorner";
+import {
+  COURSE_SHAPE_FIT_RATIO,
+  FRAME_GATE_WEIGHT_RATIO,
+} from "./evaluationBlendWeights";
+import {
+  resolveVenuePhysicalFactorKey,
+  VENUE_PHYSICAL_FACTORS,
+} from "./venuePhysicalFactors";
 
 export { extractStrongAbilities } from "./strongAbilities";
 export {
   applyAdjustments,
+  amplifyWeightsForPaceSeverity,
   clampWeights,
   calcHorseScore,
   getBaseWeights,
   getFinalWeights,
+  getFinalWeightsForHorse,
   normalizeWeights,
 } from "./weightResolver";
 export { baseAbilityCore, raceAdjustedInput, intrinsicAbilityWithAdjustments } from "./abilityCoreScoring";
@@ -91,6 +115,30 @@ function capAptitudeSwing(
 ): number {
   const swing = rawScore - relativeScore;
   return round1(relativeScore + clamp(swing, -maxSwing, maxSwing));
+}
+
+function computeHeavyWeightPowerBonus(horse: HorseAbility, condition: RaceCondition): number {
+  const kg = horse.bodyWeightKg;
+  if (kg == null || !Number.isFinite(kg) || kg < 500) return 0;
+  const venueText = `${condition.venue ?? ""} ${condition.courseKey ?? ""}`;
+  const hokkaido = /札幌|函館/.test(venueText);
+  const dirt = condition.surface === "ダート";
+  if (!hokkaido && !dirt) return 0;
+  const base = 1.4 + Math.max(0, (kg - 500) * 0.02);
+  const powerAmp = Math.max(0, (horse.power - 50) * 0.02);
+  return round1(clamp(base + powerAmp, 0, 3.8));
+}
+
+function computeStaminaTestBonus(horse: HorseAbility, condition: RaceCondition): number {
+  const venueText = `${condition.venue ?? ""} ${condition.courseKey ?? ""}`;
+  const dist = condition.distance ?? 0;
+  const staminaTest =
+    (/中山/.test(venueText) && dist >= 1800) ||
+    (/中京/.test(venueText) && dist >= 1800) ||
+    (/東京/.test(venueText) && dist >= 2300);
+  if (!staminaTest) return 0;
+  const raw = ((horse.stamina + horse.power + horse.sustain) / 3 - 48) * 0.08;
+  return round1(clamp(raw, -2.2, 3.2));
 }
 
 function inferCourseL2Demand01(condition: RaceCondition): number {
@@ -194,6 +242,15 @@ function lapFocusBlendWeights(condition: RaceCondition): {
   const v = `${condition.venue ?? ""} ${condition.courseKey ?? ""}`;
   const dist = condition.distance ?? 0;
   const turf = condition.surface !== "ダート";
+  const physKey = resolveVenuePhysicalFactorKey(condition);
+  const straight = physKey ? VENUE_PHYSICAL_FACTORS[physKey]?.straight ?? null : null;
+  /** 直線が長い（東京・新潟外など）→最高速（L2）寄り、短い小回り→粘り・持続寄り */
+  if (straight != null && straight >= 520) {
+    return { topW: 0.92, sustainW: 0.08, demandShift: 0.05, bonusCap: LAP_FOCUS_MAX_BONUS * 1.15 };
+  }
+  if (straight != null && straight <= 315) {
+    return { topW: 0.28, sustainW: 0.72, demandShift: -0.05, bonusCap: LAP_FOCUS_MAX_BONUS * 1.18 };
+  }
   if (v.includes("東京") && turf && dist >= 1400 && dist <= 1600) {
     return { topW: 0.9, sustainW: 0.1, demandShift: 0.04, bonusCap: LAP_FOCUS_MAX_BONUS * 1.12 };
   }
@@ -279,17 +336,20 @@ export function evaluateRace(
   condition: RaceCondition,
 ): HorseScoreResult[] {
   const evalHorses = horses.map((h) => blendAbilityWithPastRuns(h));
+  const effectivePace = resolveEffectiveRacePace(condition, evalHorses);
+  const evalCondition: RaceCondition = { ...condition, pace: effectivePace };
+  const paceSeverity = inferPaceSeverityKind(evalHorses, evalCondition);
+  const fourthCornerByHorse = estimateFourthCornerRanking(evalHorses, evalCondition);
   const styleSignalFactor = computeStyleSignalFactor(evalHorses);
   const kickTopMap = computeKickInTopFractionMap(evalHorses);
-  const paceScenarioAmp = computePaceScenarioAmplifier(condition);
-  const baseWeights = getBaseWeights(condition);
-  const finalWeights = getFinalWeights(condition);
-  const strengthMult = ADJUSTMENT_STRENGTH[condition.adjustmentStrength];
+  const paceScenarioAmp = computePaceScenarioAmplifier(evalCondition);
+  const baseWeights = getBaseWeights(evalCondition);
+  const strengthMult = ADJUSTMENT_STRENGTH[evalCondition.adjustmentStrength];
 
   // 今日のレースラップ形状（敗因分解・ラップ形状一致に使う）
   const raceLapShape =
-    condition.section200mSec != null && condition.section200mSec.length >= 4
-      ? classifyLapStructure(condition.section200mSec)
+    evalCondition.section200mSec != null && evalCondition.section200mSec.length >= 4
+      ? classifyLapStructure(evalCondition.section200mSec)
       : null;
   const effectiveRaceLapShape =
     raceLapShape != null && raceLapShape !== LAP_STRUCTURE.NEUTRAL
@@ -297,15 +357,16 @@ export function evaluateRace(
       : null;
 
   // 第3層: 今日のレース分類（瞬発戦・持続戦・消耗戦）
-  const todayLapKind = classifyTodayLapKind(condition);
+  const todayLapKind = classifyTodayLapKind(evalCondition);
 
   const results: HorseScoreResult[] = evalHorses.map((h) => {
     const rawBase = calcHorseScore(h, baseWeights);
+    const finalWeights = getFinalWeightsForHorse(evalCondition, h, paceSeverity);
     const rawAdj = calcHorseScore(h, finalWeights);
     const bCore = baseAbilityCore(h);
     const eff = getEffectiveEvaluationSignals(h);
     const repro = round1(reproducibilityDelta(eff));
-    const classBreakdown = computeClassLevelBonus(h, condition);
+    const classBreakdown = computeClassLevelBonus(h, evalCondition);
 
     // 敗因分解適用のリスクペナルティ
     const risk = round1(computeAdjustedRiskPenalty(h.pastRuns, effectiveRaceLapShape, eff));
@@ -319,14 +380,16 @@ export function evaluateRace(
 
     // raceAdjustedInput: precomputed intrinsic + conditionScore + maxPerf
     const cond = round1(conditionScore(h, finalWeights));
+    const cornerRank = fourthCornerByHorse.get(h.horseId)?.estimatedRank ?? 99;
+    const cornerAbilityBias = fourthCornerAbilityBiasMultiplier(cornerRank, evalCondition);
     const rAdj = round1(
       raceAdjustedInput(
         intrinsic,
         cond,
         maxPerf,
         classBreakdown.classBonus + classBreakdown.stepPatternBonus,
-        condition.adjustmentStrength,
-      ),
+        evalCondition.adjustmentStrength,
+      ) * cornerAbilityBias,
     );
 
     const baseScore = round1(rawBase);
@@ -338,9 +401,9 @@ export function evaluateRace(
     const variance = computeVariance(h.pastRuns);
 
     // 第2層: ラップ形状一致 + staminaResilience フラグ
-    const lapFit = computeLapShapeFit(h, condition);
+    const lapFit = computeLapShapeFit(h, evalCondition);
     const lapShapeFitBonus = lapFit.reliable ? lapFit.score : 0;
-    const raceAnalysisBonus = computeRaceAnalysisBonus(h, condition, lapFit.reliable);
+    const raceAnalysisBonus = computeRaceAnalysisBonus(h, evalCondition, lapFit.reliable);
 
     // 第3層: 消耗戦×耐性フラグの強力な適性バフ
     const staminaResilienceBonus = computeStaminaResilienceBonus(
@@ -357,6 +420,7 @@ export function evaluateRace(
       baseAbilityCore: round1(bCore),
       intrinsicAbilityScore: intrinsic,
       raceAdjustedInput: rAdj,
+      estimatedFourthCornerRank: cornerRank,
       conditionFitDelta,
       reproducibilityDelta: repro,
       riskPenalty: risk,
@@ -368,6 +432,10 @@ export function evaluateRace(
       gateBiasBonus: 0,
       gateStyleSynergyBonus: 0,
       connectionsBonus: 0,
+      jockeyRiderBonus: 0,
+      jockeyAmbitionFlag: false,
+      heavyWeightPowerBonus: 0,
+      staminaTestBonus: 0,
       trendBonus: 0,
       paceBalanceBonus: 0,
       tripContextBonus: 0,
@@ -400,11 +468,13 @@ export function evaluateRace(
       oddsDistortionFlag: false,
       oddsDistortionScore01: 0,
       oddsDistortionReasons: [],
+      stabilityScore: 0,
+      paceSeverityKind: paceSeverity,
     };
   });
 
   const relativeMode =
-    condition.adjustmentStrength === "strong" ? "absolute_delta" : "normalized";
+    evalCondition.adjustmentStrength === "strong" ? "absolute_delta" : "normalized";
   const rel = computeRaceRelativeScores(
     results.map((r) => ({ horseId: r.horseId, raceAdjustedInput: r.raceAdjustedInput })),
     relativeMode,
@@ -413,49 +483,69 @@ export function evaluateRace(
     const r = results.find((x) => x.horseId === h.horseId);
     if (!r) continue;
     const relScore = rel.get(h.horseId) ?? 0;
-    const paceEval = computePaceFitEvaluation(h, condition, {
+    const paceEval = computePaceFitEvaluation(h, evalCondition, {
       kickInTopFraction: kickTopMap.get(h.horseId),
     });
     const pBonus = round1(paceEval.bonus * styleSignalFactor * paceScenarioAmp);
-    const dBonus = computeDistanceFitBonus(h, condition);
+    const dBonus = computeDistanceFitBonus(h, evalCondition);
     const cBonus = r.classLevelBonus;
     const vPenalty = variancePenaltyPoints(computeVariance(h.pastRuns));
     const contextual = computeContextualBonuses(
       h,
-      condition,
+      evalCondition,
       evalHorses.length,
       styleSignalFactor,
     );
     const biasDisadvantageRecoveryBonus =
       h.was_bias_disadvantaged === true ? BIAS_DISADVANTAGE_RECOVERY_BONUS : 0;
+    const jockeyBd = computeJockeyRiderBonuses(h, condition);
+    const jockeySum = sumJockeyRiderBonuses(jockeyBd);
+    const heavyWeightPowerBonus = computeHeavyWeightPowerBonus(h, evalCondition);
+    const staminaTestBonus = computeStaminaTestBonus(h, evalCondition);
+    r.jockeyRiderBonus = jockeySum;
+    r.jockeyAmbitionFlag = jockeyBd.ambitionFlag;
+    r.heavyWeightPowerBonus = heavyWeightPowerBonus;
+    r.staminaTestBonus = staminaTestBonus;
     const contextualTotal =
       contextual.pedigreeBonus +
-      contextual.gateBiasBonus +
-      contextual.gateStyleSynergyBonus +
+      contextual.gateBiasBonus * FRAME_GATE_WEIGHT_RATIO +
+      contextual.gateStyleSynergyBonus * FRAME_GATE_WEIGHT_RATIO +
       contextual.connectionsBonus +
       contextual.trendBonus +
       contextual.paceBalanceBonus +
-      contextual.tripContextBonus;
-    let conditionImpactBonus = conditionImpactBonusFromDiff(r.scoreDiff, condition.adjustmentStrength);
+      contextual.tripContextBonus +
+      jockeySum +
+      heavyWeightPowerBonus +
+      staminaTestBonus;
+    let conditionImpactBonus = conditionImpactBonusFromDiff(r.scoreDiff, evalCondition.adjustmentStrength);
     const adjustmentBadges: string[] = [];
     let lastRunResetBonus = 0;
     let lapFocusBonus = 0;
-    lapFocusBonus = computeLapFocusBonus(h, condition);
+    lapFocusBonus = computeLapFocusBonus(h, evalCondition);
+    if (jockeyBd.reasons.length > 0) {
+      for (const tx of jockeyBd.reasons.slice(0, 3)) adjustmentBadges.push(tx);
+    }
+    if (heavyWeightPowerBonus > 0.1) {
+      adjustmentBadges.push(`HEAVY_WEIGHT_POWER_BONUS +${heavyWeightPowerBonus.toFixed(1)}`);
+    }
+    if (staminaTestBonus > 0.1) {
+      adjustmentBadges.push(`STAMINA_TEST_BONUS +${staminaTestBonus.toFixed(1)}`);
+    }
     conditionImpactBonus = round1(conditionImpactBonus + lapFocusBonus);
     if (lapFocusBonus > 0.1) {
       adjustmentBadges.push("ラップ適合");
     }
-    if (condition.quickAdjustments?.lastRunReset && hasBiasDisadvantage(h)) {
+    if (evalCondition.quickAdjustments?.lastRunReset && hasBiasDisadvantage(h)) {
       lastRunResetBonus = LAST_RUN_RESET_BONUS;
       adjustmentBadges.push("前走不利解消");
     }
     if (biasDisadvantageRecoveryBonus > 0.1) {
       adjustmentBadges.push("バイアス逆行救済");
     }
-    const weakTierImpact = weakTierImpactFromDiff(r.scoreDiff, condition.adjustmentStrength);
+    const weakTierImpact = weakTierImpactFromDiff(r.scoreDiff, evalCondition.adjustmentStrength);
     const dScaled = round1(dBonus * strengthMult);
     const contextualScaled = round1(contextualTotal * strengthMult);
-    const traitHits = [...computeCourseTraitHits(h, condition), ...computeStructuralPhysicalHits(h, condition)];
+    const traitHits = [...computeCourseTraitHits(h, evalCondition), ...computeStructuralPhysicalHits(h, evalCondition)];
     const traitSum = traitHits.reduce((sum, hit) => sum + hit.bonus, 0);
     const courseTraitBonusRaw = round1(clamp(traitSum, -MAX_COURSE_TRAIT_TOTAL, MAX_COURSE_TRAIT_TOTAL));
     const courseTraitReasons = traitHits.map((hit) => {
@@ -496,13 +586,16 @@ export function evaluateRace(
       adjustmentBadges.push("耐性バフ");
     }
     const classCombined = round1(clamp(cBonus + r.stepPatternBonus, -4.5, 5.5));
+    const cornerPredBonus = fourthCornerPredictionBonus(
+      fourthCornerByHorse.get(h.horseId)?.estimatedRank ?? 99,
+    );
+    const lapShapeScaled =
+      (r.lapShapeFitBonus + r.raceAnalysisBonus) * COURSE_SHAPE_FIT_RATIO +
+      r.lapSustainBonus +
+      r.lapQualityBonus;
     // 既存ラップ枠 +16.8 内に staminaResilienceBonus を合算しクランプ。
     const lapStack = clamp(
-      r.lapShapeFitBonus +
-        r.raceAnalysisBonus +
-        r.lapSustainBonus +
-        r.lapQualityBonus +
-        cappedResilienceBonus,
+      lapShapeScaled + cappedResilienceBonus,
       -10,
       LAP_STACK_TOTAL_CAP,
     );
@@ -515,6 +608,7 @@ export function evaluateRace(
       vPenalty,
       contextualTotal,
       weakTierImpact,
+      cornerPredBonus,
     );
     const finalRaw = combineFinalEvaluationScore(
       relScore,
@@ -525,6 +619,7 @@ export function evaluateRace(
       vPenalty,
       contextualScaled,
       conditionImpactBonus,
+      cornerPredBonus,
     );
     const baselineWithExtras = round1(
       baselineRaw + r.courseTraitBonus + lastRunResetBonus + biasDisadvantageRecoveryBonus,
@@ -549,6 +644,7 @@ export function evaluateRace(
     );
     r.adjustmentBadges = adjustmentBadges;
     r.evaluationAdjustmentDelta = round1(r.finalEvaluationScore - r.evaluationBaselineScore);
+    r.stabilityScore = computeStabilityScore(h, evalCondition, paceEval.token);
   }
 
   assignRanksForScore(results, "baseScore", "baseRank");
@@ -569,25 +665,49 @@ export function evaluateRace(
   }
 
   assignMarks(results);
+  const cornerRankMap = new Map(
+    [...fourthCornerByHorse].map(([id, est]) => [id, est.estimatedRank] as const),
+  );
+  applyCornerLeadFavoritePromotion(results, evalHorses, cornerRankMap);
   applyLongshotMarkGuard(evalHorses, results);
-  const dismissIds = collectDismissIds(evalHorses, results, condition);
+  const dismissIds = collectDismissIds(evalHorses, results, evalCondition);
   assignBuyLabels(results, dismissIds, evalHorses);
   for (const r of results) {
     if (r.buyLabel === BUY_LABELS.DISMISS) {
       r.mark = "";
     }
   }
-  fillRequiredMarks(results);
+  applyStabilityRescueMarks(results);
+  assignHokkakeRoles(results, evalHorses, paceSeverity);
+  assignCompleteMarks(results, dismissIds);
 
-  // 最終安全策: 消し馬には印を付けない。
+  // 最終安全策: 構造的消し（dismissIds）のみ印・ヒモ役をクリア。6位以下の buyLabel DISMISS でも △ は残す。
   for (const r of results) {
-    if (r.buyLabel === BUY_LABELS.DISMISS) {
+    if (dismissIds.has(r.horseId)) {
       r.mark = "";
+      r.hokkakeRole = undefined;
+    }
+  }
+
+  // 条件変更で構造消し集合が変わったときも、◎〜△ と △ 複数が欠けないよう再割当（ヒモ役も構造消し後に付け直す）
+  assignHokkakeRoles(results, evalHorses, paceSeverity);
+  assignCompleteMarks(results, dismissIds);
+
+  // △ は「連下（相手）」として扱う。消しラベルのまま残さない。
+  for (const r of results) {
+    if (r.mark === "△" && r.buyLabel === BUY_LABELS.DISMISS) {
+      r.buyLabel = BUY_LABELS.GROUP;
     }
   }
 
   for (const r of results) {
-    r.reason = generateScoreReason(r, condition, finalWeights);
+    const h = horseById.get(r.horseId);
+    const fw =
+      h != null
+        ? getFinalWeightsForHorse(evalCondition, h, paceSeverity)
+        : undefined;
+    r.reason =
+      fw != null ? generateScoreReason(r, evalCondition, fw) : generateScoreReason(r, evalCondition, getBaseWeights(evalCondition));
   }
 
   return results;

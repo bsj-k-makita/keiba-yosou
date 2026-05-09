@@ -218,8 +218,7 @@ export type RaceCondition = {
   /** コース形態。未設定時は venue / courseKey から推定。 */
   courseTopology?: "flat" | "uphill" | "downhill_to_flat";
   /**
-   * ユーザー手動バイアス（-1〜+1）。
-   * -1: 極端な内有利, 0: フラット, +1: 極端な外有利
+   * @deprecated 旧スライダー。評価では無視し、馬番クリック（`favoredHorseNumbers` 等）を使用。
    */
   userTrackBias?: number;
   /**
@@ -228,12 +227,41 @@ export type RaceCondition = {
    */
   abilityPriority?: AbilityPriority;
   /**
-   * Softmax温度（2〜16）。
-   * 標準は 8。strong では内部的に半減（8 -> 4）し、1強を作りやすくする。
+   * @deprecated 勝率 softmax はパイプラインで常に T=4 固定。JSON互換のため残す。
    */
   softmaxTemperature?: number;
   /** 直前補正（クイックトグル） */
   quickAdjustments?: Partial<Record<QuickAdjustmentKey, boolean>>;
+  /** 開幕週の馬場を明示すると4角バイアスが強コース側に寄る（未設定はヒューリスティックのみ） */
+  openingMeetingWeek?: boolean;
+  /** 最終週・馬場消化後を明示すると後方脚質の4角寄りを強める（未設定はヒューリスティックのみ） */
+  closingMeetingWeek?: boolean;
+  /**
+   * 開催時期の明示（UI）。設定時は `openingMeetingWeek` / `closingMeetingWeek` より優先して解釈する。
+   * 未設定時は従来どおりフラグ＋レース名・クッションのヒューリスティックを使用。
+   */
+  meetingPhase?: "opening" | "mid" | "closing";
+  /**
+   * @deprecated 枠番1〜8の旧指定。未設定時のみ `favoredHorseNumbers` のフォールバックに使う。
+   */
+  favoredGateNumbers?: readonly number[];
+  /**
+   * @deprecated 枠番1〜8の旧指定。
+   */
+  disfavoredGateNumbers?: readonly number[];
+  /**
+   * 馬番（ゲート番号）ごとのピンポイント加点。スライダー廃止後の手動ゲート補正の主入力。
+   */
+  favoredHorseNumbers?: readonly number[];
+  /**
+   * 馬番（ゲート番号）ごとのピンポイント減点。
+   */
+  disfavoredHorseNumbers?: readonly number[];
+  /**
+   * `middle` / 空 のときに脚質からペースを推計するか。
+   * `manual` のときはユーザーが選んだ `pace` をそのまま使い（ミドルなら激化推計しない）。
+   */
+  paceInference?: "auto" | "manual";
   /**
    * 過去に同一レースで確定したラップ質・バイアス（または手入力）。
    * `section200mSec` が無い preview でも lapType 適性を評価できる。
@@ -259,6 +287,8 @@ export type HorseScoreResult = {
   intrinsicAbilityScore: number;
   /** baseAbilityCore×0.6 + adjustedScore×0.4。相対化の入力。 */
   raceAdjustedInput: number;
+  /** 初角〜4角想定の通過順位（1が最先行）。印ロジック・4角補正に使用 */
+  estimatedFourthCornerRank?: number;
   /**
    * 今回の正規化重みでの加重合計 − intrinsic（調整後基礎）
    */
@@ -285,6 +315,14 @@ export type HorseScoreResult = {
   gateStyleSynergyBonus: number;
   /** 騎手・調教師の対象コース実績による補正 */
   connectionsBonus: number;
+  /** 鞍上強化・舞台職人・継続乗りなど騎手文脈の直接加点 */
+  jockeyRiderBonus?: number;
+  /** 大きな鞍上昇格（勝負気配）。表示用 */
+  jockeyAmbitionFlag?: boolean;
+  /** 馬格×馬場（北海道/ダート）でのパワー加点 */
+  heavyWeightPowerBonus?: number;
+  /** 急坂・スタミナ要求コースでの耐久適性加点 */
+  staminaTestBonus?: number;
   /** 年齢・馬体重など傾向データによる補正 */
   trendBonus: number;
   /** 前後傾差に対する適性（末脚と持続力の分離）補正 */
@@ -314,6 +352,12 @@ export type HorseScoreResult = {
   adjustmentBadges: string[];
   finalRank?: number;
   mark?: "◎" | "○" | "▲" | "△" | "☆" | "";
+  /** 複勝安定度インデックス（0〜100 目安）。救済ヒモ選出に利用 */
+  stabilityScore?: number;
+  /** 自動推計したペース激化度（表示・ヒモ△3狙いに利用） */
+  paceSeverityKind?: "high" | "slow" | "neutral";
+  /** △ヒモ穴の個性ラベル（メインの `mark` と併用） */
+  hokkakeRole?: "△1安定" | "△2物理" | "△3狙い";
   buyLabel: BuyLabel;
   reason: string;
   strongAbilities: AbilityKey[];

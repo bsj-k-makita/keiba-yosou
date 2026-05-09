@@ -28,17 +28,19 @@ function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
 }
 
-function biasText(v: number): string {
-  if (v <= -0.8) return "内有利（強）";
-  if (v <= -0.3) return "内有利（弱）";
-  if (v >= 0.8) return "外有利（強）";
-  if (v >= 0.3) return "外有利（弱）";
-  return "補正なし";
-}
-
 type GlobalProfile = Pick<
   RaceCondition,
-  "ground" | "trackSpeed" | "bias" | "pace" | "adjustmentStrength" | "userTrackBias" | "abilityPriority" | "softmaxTemperature"
+  | "ground"
+  | "trackSpeed"
+  | "bias"
+  | "pace"
+  | "adjustmentStrength"
+  | "abilityPriority"
+  | "paceInference"
+  | "meetingPhase"
+  | "favoredHorseNumbers"
+  | "disfavoredHorseNumbers"
+  | "trackCushion01"
 >;
 
 function saveGlobalProfile(condition: RaceCondition): void {
@@ -48,9 +50,12 @@ function saveGlobalProfile(condition: RaceCondition): void {
     bias: condition.bias,
     pace: condition.pace,
     adjustmentStrength: condition.adjustmentStrength,
-    userTrackBias: condition.userTrackBias,
     abilityPriority: condition.abilityPriority,
-    softmaxTemperature: condition.softmaxTemperature,
+    paceInference: condition.paceInference,
+    meetingPhase: condition.meetingPhase,
+    favoredHorseNumbers: condition.favoredHorseNumbers,
+    disfavoredHorseNumbers: condition.disfavoredHorseNumbers,
+    trackCushion01: condition.trackCushion01,
   };
   try {
     localStorage.setItem(GLOBAL_PROFILE_KEY, JSON.stringify(profile));
@@ -77,6 +82,45 @@ export function loadGlobalProfile(): Partial<GlobalProfile> | null {
   }
 }
 
+/** 渗透計目安（高いほど柔軟）→ trackCushion01（低いほど柔・坂負荷大） */
+function jraPenetrationToTrackCushion01(raw: number): number {
+  return clamp((11.6 - raw) / 4.8, 0, 1);
+}
+
+function trackCushion01ToJraPenetration(c01: number | undefined): string {
+  if (c01 == null || !Number.isFinite(c01)) return "";
+  const v = clamp(11.6 - clamp(c01, 0, 1) * 4.8, 7.0, 12.5);
+  return v.toFixed(1);
+}
+
+/** 馬番 1〜18: 中立 → 有利 → 不利 → 中立 */
+function cycleHorseGate(num: number, condition: RaceCondition): RaceCondition {
+  const fav = new Set(condition.favoredHorseNumbers ?? []);
+  const dis = new Set(condition.disfavoredHorseNumbers ?? []);
+  if (!fav.has(num) && !dis.has(num)) {
+    fav.add(num);
+  } else if (fav.has(num)) {
+    fav.delete(num);
+    dis.add(num);
+  } else {
+    dis.delete(num);
+  }
+  return {
+    ...condition,
+    favoredHorseNumbers: fav.size > 0 ? [...fav].sort((a, b) => a - b) : undefined,
+    disfavoredHorseNumbers: dis.size > 0 ? [...dis].sort((a, b) => a - b) : undefined,
+  };
+}
+
+function clearHorseGatePinpoints(condition: RaceCondition): RaceCondition {
+  const next = { ...condition };
+  delete next.favoredHorseNumbers;
+  delete next.disfavoredHorseNumbers;
+  delete next.favoredGateNumbers;
+  delete next.disfavoredGateNumbers;
+  return next;
+}
+
 function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
   switch (key) {
     case "standard":
@@ -87,8 +131,9 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         bias: "flat",
         pace: "middle",
         adjustmentStrength: "middle",
-        userTrackBias: 0,
-        softmaxTemperature: 8.0,
+        favoredHorseNumbers: undefined,
+        disfavoredHorseNumbers: undefined,
+        paceInference: undefined,
       };
     case "front_hold":
       return {
@@ -98,8 +143,6 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         bias: "front_favor",
         pace: "high",
         adjustmentStrength: "middle",
-        userTrackBias: 0,
-        softmaxTemperature: 7.0,
       };
     case "closer_reach":
       return {
@@ -109,8 +152,6 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         bias: "closer_favor",
         pace: "slow",
         adjustmentStrength: "middle",
-        userTrackBias: 0,
-        softmaxTemperature: 9.0,
       };
     case "fast_clock":
       return {
@@ -119,8 +160,6 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         bias: "flat",
         pace: "middle",
         adjustmentStrength: "middle",
-        userTrackBias: 0,
-        softmaxTemperature: 6.5,
       };
     case "slow_clock":
       return {
@@ -129,8 +168,6 @@ function applyQuickPreset(key: QuickKey, base: RaceCondition): RaceCondition {
         bias: "flat",
         pace: "middle",
         adjustmentStrength: "middle",
-        userTrackBias: 0,
-        softmaxTemperature: 10.0,
       };
     default:
       return base;
@@ -144,7 +181,10 @@ function detectQuickPreset(condition: RaceCondition): QuickKey | null {
     condition.bias === "flat" &&
     condition.pace === "middle"
   ) {
-    if (condition.adjustmentStrength === "middle" && Math.abs(condition.userTrackBias ?? 0) < 0.05) {
+    if (
+      condition.adjustmentStrength === "middle" &&
+      !(condition.favoredHorseNumbers?.length || condition.disfavoredHorseNumbers?.length)
+    ) {
       return "standard";
     }
   }
@@ -177,9 +217,6 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
       return false;
     }
   });
-  const userBias = clamp(condition.userTrackBias ?? 0, -1, 1);
-  const softmaxTemperature = clamp(condition.softmaxTemperature ?? 8.0, 2.0, 16.0);
-
   const strengthKeys = Object.keys(ADJUSTMENT_STRENGTH) as Array<
     keyof typeof ADJUSTMENT_STRENGTH
   >;
@@ -375,6 +412,48 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
           </fieldset>
 
           <fieldset>
+            <legend>クッション値（渗透計・目安）</legend>
+            <p className="adj-panel__help" style={{ fontSize: "0.78em", color: "#6c757d", margin: "0 0 6px" }}>
+              JRA の渗透計に近い目安（例 9.5）。数値が高いほど柔軟で坂・踏み込み負荷が乗りやすい想定として扱います。未入力時は坂連動なし。
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+              <input
+                type="number"
+                step={0.1}
+                min={7}
+                max={12.5}
+                placeholder="例 9.5"
+                value={trackCushion01ToJraPenetration(condition.trackCushion01)}
+                onChange={(e) => {
+                  const t = e.target.value.trim();
+                  if (t === "") {
+                    const next = { ...condition };
+                    delete next.trackCushion01;
+                    onChange(next);
+                    return;
+                  }
+                  const raw = Number.parseFloat(t);
+                  if (!Number.isFinite(raw)) return;
+                  onChange({ ...condition, trackCushion01: jraPenetrationToTrackCushion01(raw) });
+                }}
+                aria-label="クッション値"
+                style={{ width: "7rem" }}
+              />
+              <button
+                type="button"
+                className="chip"
+                onClick={() => {
+                  const next = { ...condition };
+                  delete next.trackCushion01;
+                  onChange(next);
+                }}
+              >
+                クリア
+              </button>
+            </div>
+          </fieldset>
+
+          <fieldset>
             <legend>時計傾向</legend>
             <div className="adj-panel__chips">
               {Object.entries(TRACK_SPEED_ADJUSTMENTS).map(([id, def]) => (
@@ -396,6 +475,40 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
           </fieldset>
 
           <fieldset>
+            <legend>開催時期（4角・後方脚質）</legend>
+            <p className="adj-panel__help" style={{ fontSize: "0.78em", color: "#6c757d", margin: "0 0 6px" }}>
+              開幕は前寄り・最終週は差し伸びやすい寄りに内部補正。「おまかせ」はレース名・クッション等の自動判定を使います。
+            </p>
+            <div className="adj-panel__chips">
+              {(
+                [
+                  { id: undefined, label: "おまかせ" },
+                  { id: "opening" as const, label: "開幕直後" },
+                  { id: "mid" as const, label: "中盤" },
+                  { id: "closing" as const, label: "最終週寄り" },
+                ] as const
+              ).map(({ id, label }) => (
+                <button
+                  key={label}
+                  type="button"
+                  className={`chip ${(condition.meetingPhase ?? undefined) === id ? "chip--active" : ""}`}
+                  onClick={() => {
+                    const next = { ...condition };
+                    if (id === undefined) {
+                      delete next.meetingPhase;
+                    } else {
+                      next.meetingPhase = id;
+                    }
+                    onChange(next);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
             <legend>馬場傾向</legend>
             <div className="adj-panel__chips">
               {Object.entries(BIAS_ADJUSTMENTS).map(([id, def]) => (
@@ -410,60 +523,82 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
               ))}
             </div>
             <div className="adj-panel__user-bias">
-              <p className="adj-panel__user-bias-label">
-                枠バイアス補正（手動）: {userBias.toFixed(1)}（{biasText(userBias)}）
+              <p className="adj-panel__user-bias-label">馬番ゲート補正（1〜18）</p>
+              <p className="adj-panel__user-bias-help" style={{ marginTop: "4px", marginBottom: "6px" }}>
+                各番をクリックして「中立 → この馬番を有利（赤）→ 不利（青）→ 中立」と切り替えます。上の「馬場傾向」（内有利・外有利など）によるグラデーションに加算されます。番号に色がついていないとき、内有利／外有利なら端の番号がハイライトされます。
               </p>
-              <div className="adj-panel__gate-grid" aria-label="ゲートバイアス可視化">
+              <div className="adj-panel__gate-grid" role="group" aria-label="馬番ゲート補正">
                 {Array.from({ length: 18 }, (_, idx) => {
                   const gate = idx + 1;
-                  const isInner = gate <= 3;
-                  const isOuter = gate >= 16;
-                  const glowInner = userBias <= -0.3 && isInner;
-                  const glowOuter = userBias >= 0.3 && isOuter;
+                  const fav = condition.favoredHorseNumbers?.includes(gate) ?? false;
+                  const dis = condition.disfavoredHorseNumbers?.includes(gate) ?? false;
+                  const presetGlowInner =
+                    !fav &&
+                    !dis &&
+                    condition.bias === "inside_favor" &&
+                    gate <= 3;
+                  const presetGlowOuter =
+                    !fav &&
+                    !dis &&
+                    condition.bias === "outside_favor" &&
+                    gate >= 16;
+                  const cls = [
+                    "adj-panel__gate-cell",
+                    fav ? "adj-panel__gate-cell--pick-fav" : "",
+                    dis ? "adj-panel__gate-cell--pick-dis" : "",
+                    presetGlowInner || presetGlowOuter ? "adj-panel__gate-cell--glow" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ");
                   return (
-                    <span
-                      key={`gate-grid-${gate}`}
-                      className={`adj-panel__gate-cell${glowInner || glowOuter ? " adj-panel__gate-cell--glow" : ""}`}
+                    <button
+                      key={`horse-gate-${gate}`}
+                      type="button"
+                      className={cls}
+                      title="クリックで切替: 中立→有利→不利→中立"
+                      onClick={() => onChange(cycleHorseGate(gate, condition))}
                     >
                       {gate}
-                    </span>
+                    </button>
                   );
                 })}
               </div>
-              <p className="adj-panel__user-bias-help">
-                内外の有利不利を手動で上書きします（-1.0=内有利、+1.0=外有利、0.0=補正なし）。
-              </p>
-              <input
-                type="range"
-                min={-1}
-                max={1}
-                step={0.1}
-                value={userBias}
-                onChange={(e) =>
-                  onChange({
-                    ...condition,
-                    userTrackBias: Number.parseFloat(e.target.value),
-                  })
-                }
-                aria-label="ユーザー馬場バイアス"
-              />
-              <div className="adj-panel__chips">
-                {[-1, -0.5, 0, 0.5, 1].map((v) => (
-                  <button
-                    key={`user-bias-${v}`}
-                    type="button"
-                    className={`chip ${Math.abs(userBias - v) < 0.05 ? "chip--active" : ""}`}
-                    onClick={() => onChange({ ...condition, userTrackBias: v })}
-                  >
-                    {v.toFixed(1)}
-                  </button>
-                ))}
+              <div className="adj-panel__chips" style={{ marginTop: "4px" }}>
+                <button type="button" className="chip" onClick={() => onChange(clearHorseGatePinpoints(condition))}>
+                  ゲート指定クリア
+                </button>
               </div>
             </div>
           </fieldset>
 
           <fieldset>
             <legend>展開想定</legend>
+            <label
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "8px",
+                alignItems: "center",
+                fontSize: "0.85em",
+                marginBottom: "10px",
+              }}
+            >
+              <span>ペース反映:</span>
+              <select
+                value={condition.paceInference ?? "auto"}
+                onChange={(e) => {
+                  const v = e.target.value as "auto" | "manual";
+                  onChange({
+                    ...condition,
+                    paceInference: v === "auto" ? undefined : "manual",
+                  });
+                }}
+                aria-label="ペース自動推計か手動固定か"
+              >
+                <option value="auto">自動（ミドル時は脚質から推計）</option>
+                <option value="manual">手動（選んだ展開をそのまま）</option>
+              </select>
+            </label>
             <div className="adj-panel__chips">
               {Object.entries(PACE_ADJUSTMENTS).map(([id, def]) => (
                 <button
@@ -489,39 +624,6 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
                   onClick={() => onChange({ ...condition, adjustmentStrength: k })}
                 >
                   {k === "weak" ? "弱" : k === "middle" ? "中" : "強"}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend>Softmax温度（勝率の尖り）</legend>
-            <p className="adj-panel__user-bias-help">
-              ベース温度。強設定時は内部で半減（8→4）。低いほど1強化。現在 T={softmaxTemperature.toFixed(1)}
-            </p>
-            <input
-              type="range"
-              min={2}
-              max={16}
-              step={0.5}
-              value={softmaxTemperature}
-              onChange={(e) =>
-                onChange({
-                  ...condition,
-                  softmaxTemperature: Number.parseFloat(e.target.value),
-                })
-              }
-              aria-label="Softmax温度"
-            />
-            <div className="adj-panel__chips">
-              {[4, 6, 8, 10, 12].map((v) => (
-                <button
-                  key={`softmax-temp-${v}`}
-                  type="button"
-                  className={`chip ${Math.abs(softmaxTemperature - v) < 0.26 ? "chip--active" : ""}`}
-                  onClick={() => onChange({ ...condition, softmaxTemperature: v })}
-                >
-                  T={v}
                 </button>
               ))}
             </div>

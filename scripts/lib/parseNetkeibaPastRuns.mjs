@@ -76,9 +76,29 @@ function buildDbResultHeaderIndex($) {
     place: find(["着順"]),
     distance: find(["距離"]),
     margin: find(["着差"]),
-    passing: find(["通過"]),
+    passing: find(["通過", "通過順"]),
     agari: find(["上り"]),
   };
+}
+
+/** ヘッダから解けた列インデックスに応じた最小 td 数（古い「12列固定」による行全スキップを防ぐ） */
+function minTdCountForRow(hi) {
+  const idxs = Object.values(hi).filter((x) => typeof x === "number" && x >= 0);
+  return idxs.length ? Math.max(...idxs) + 1 : 12;
+}
+
+/** db_h_race_results 以外クラス名が変わった場合のフォールバック */
+function findHorseResultTableRows($) {
+  const direct = $("table.db_h_race_results tbody tr").toArray();
+  if (direct.length) return direct;
+  return $("table")
+    .filter((_, el) => {
+      const head = $(el).find("thead").text().replace(/\s+/g, "");
+      return head.includes("レース名") && (head.includes("着順") || head.includes("開催"));
+    })
+    .first()
+    .find("tbody tr")
+    .toArray();
 }
 
 function venueFromKaisai(raw) {
@@ -92,6 +112,7 @@ function venueFromKaisai(raw) {
 
 function surfaceFromDistanceCol(raw) {
   const t = String(raw ?? "");
+  if (t.startsWith("障") || t.includes("障")) return "ダート";
   if (t.startsWith("ダ") || t.includes("ダ")) return "ダート";
   return "芝";
 }
@@ -102,6 +123,86 @@ function parseFinal3fFromAgari(raw) {
     .replace(/[^\d.]/g, "");
   const n = parseFloat(t);
   return Number.isFinite(n) ? n : undefined;
+}
+
+function extractRaceIdFromHref(href) {
+  const m = String(href ?? "").match(/\/race\/(\d{12})\//);
+  return m ? m[1] : "";
+}
+
+function parseRaceSummaryLine(raw) {
+  const s = String(raw ?? "").replace(/\s+/g, " ").trim();
+  if (!s) return {};
+  const dm = s.match(/(\d{4}[./]\d{1,2}[./]\d{1,2})/);
+  const vm = s.match(/(東京|中山|阪神|京都|中京|新潟|福島|小倉|札幌|函館)\s*\d{1,2}R/);
+  const sm = s.match(/(芝|ダ|障)\s*(\d{3,4})m/i);
+  return {
+    date: dm ? normalizeDate(dm[1]) : null,
+    venue: vm ? vm[1] : undefined,
+    surface: sm ? surfaceFromDistanceCol(sm[1]) : undefined,
+    raceDistance: sm ? parseInt(sm[2], 10) : undefined,
+  };
+}
+
+function parseJockeyFromSpResultLine(raw) {
+  const s = String(raw ?? "").replace(/\s+/g, " ").trim();
+  const m = s.match(/\)\s*([^\(\)]+)\(\d{2}\.\d\)/);
+  return m ? m[1].trim() : undefined;
+}
+
+function parsePlaceFromSpResultLine(raw) {
+  const t = String(raw ?? "").replace(/\s+/g, "").trim();
+  const m = t.match(/^(\d{1,2})/);
+  if (!m) return undefined;
+  const n = parseInt(m[1], 10);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function parseSpHorseResultCards($) {
+  const rows = $("#ResultsList li .LinkBox_Item02").toArray().slice(0, 5);
+  const out = [];
+  for (const row of rows) {
+    const anchor = $(row);
+    const href = anchor.attr("href") ?? "";
+    const raceId = extractRaceIdFromHref(href);
+    const raceName = anchor.find(".Set_RaceName").first().text().replace(/\s+/g, " ").trim();
+    const ps = anchor.find(".List_TextBox p");
+    const line1 = ps.eq(0).text();
+    const line2 = ps.eq(1).text();
+    const summary = parseRaceSummaryLine(line1);
+    const place = parsePlaceFromSpResultLine(line2);
+    const jockey = parseJockeyFromSpResultLine(line2);
+    out.push({
+      ...(summary.date ? { date: summary.date } : {}),
+      ...(raceId ? { raceId } : {}),
+      ...(raceName ? { raceName } : {}),
+      ...(raceName ? { raceClass: inferRaceClass(raceName) } : {}),
+      ...(place != null ? { place } : {}),
+      ...(summary.venue ? { venue: summary.venue } : {}),
+      ...(summary.surface ? { surface: summary.surface } : {}),
+      ...(summary.raceDistance != null ? { raceDistance: summary.raceDistance } : {}),
+      ...(jockey ? { jockey } : {}),
+    });
+  }
+  return out;
+}
+
+function fetchRaceLap200mWithFallback(raceId) {
+  // 現在のネットワーク環境では db.netkeiba.com が 400 を返すことがあるため sp へフォールバック。
+  const urls = [
+    `https://db.netkeiba.com/race/${raceId}/`,
+    `https://db.sp.netkeiba.com/race/${raceId}/`,
+  ];
+  for (const url of urls) {
+    try {
+      const html = fetchUtf8(url);
+      const lap = parseRaceLedgerLap200m(html);
+      if (lap && lap.length >= 4) return lap;
+    } catch {
+      // try next
+    }
+  }
+  return null;
 }
 
 function parseHorseProfile($) {
@@ -160,26 +261,36 @@ function parseHorseProfile($) {
 export async function fetchPastRunsForHorse(horseId, opts = {}) {
   const sleepMs = opts.sleepMs ?? 400;
   const raceLapCache = opts.raceLapCache ?? new Map();
-  const url = `https://db.netkeiba.com/horse/result/${encodeURIComponent(horseId)}/`;
-  const html = fetchUtf8(url);
+  const urls = [
+    `https://db.netkeiba.com/horse/result/${encodeURIComponent(horseId)}/`,
+    `https://db.sp.netkeiba.com/horse/result/${encodeURIComponent(horseId)}/`,
+  ];
+  let html = "";
+  for (const url of urls) {
+    try {
+      html = fetchUtf8(url);
+      if (String(html ?? "").length >= 1000) break;
+    } catch {
+      // next URL
+    }
+  }
   const $ = load(html);
   const hi = buildDbResultHeaderIndex($);
-  const rows = $("table.db_h_race_results tbody tr").toArray().slice(0, 5);
+  const needCells = minTdCountForRow(hi);
+  const rows = findHorseResultTableRows($).slice(0, 5);
   const horseProfile = parseHorseProfile($);
   const pastRuns = [];
   const raceIdsFetched = [];
 
   for (const tr of rows) {
     const tds = $(tr).find("td");
-    if (tds.length < 12) continue;
+    if (tds.length < needCells) continue;
 
     const dateText = hi.date >= 0 ? tds.eq(hi.date).text().trim() : "";
     const raceCell = hi.raceName >= 0 ? tds.eq(hi.raceName) : tds.eq(4);
     const raceLink = raceCell.find("a[href*='/race/']").attr("href") || "";
     const raceName = raceCell.find("a").first().text().replace(/\s+/g, " ").trim();
-    let raceId = "";
-    const mRace = raceLink.match(/\/race\/(\d{12})\//);
-    if (mRace) raceId = mRace[1];
+    const raceId = extractRaceIdFromHref(raceLink);
 
     const placeStr =
       hi.place >= 0 ? tds.eq(hi.place).text().trim().replace(/[^\d]/g, "") : "";
@@ -211,12 +322,7 @@ export async function fetchPastRunsForHorse(horseId, opts = {}) {
     if (raceId) {
       if (!raceLapCache.has(raceId)) {
         await sleep(sleepMs);
-        try {
-          const rhtml = fetchUtf8(`https://db.netkeiba.com/race/${raceId}/`);
-          raceLapCache.set(raceId, parseRaceLedgerLap200m(rhtml));
-        } catch {
-          raceLapCache.set(raceId, null);
-        }
+        raceLapCache.set(raceId, fetchRaceLap200mWithFallback(raceId));
         raceIdsFetched.push(raceId);
       }
       const lap = raceLapCache.get(raceId);
@@ -240,6 +346,22 @@ export async function fetchPastRunsForHorse(horseId, opts = {}) {
       ...(passingOrder ? { passingOrder } : {}),
       ...(final3fSec != null ? { final3fSec } : {}),
     });
+  }
+
+  if (pastRuns.length === 0) {
+    const mobileRows = parseSpHorseResultCards($);
+    for (const run of mobileRows) {
+      pastRuns.push(run);
+      const raceId = run.raceId;
+      if (!raceId) continue;
+      if (!raceLapCache.has(raceId)) {
+        await sleep(sleepMs);
+        raceLapCache.set(raceId, fetchRaceLap200mWithFallback(raceId));
+        raceIdsFetched.push(raceId);
+      }
+      const lap = raceLapCache.get(raceId);
+      if (lap && lap.length) run.section200mSec = lap;
+    }
   }
 
   return { pastRuns, raceIdsFetched, horseProfile };

@@ -138,6 +138,34 @@ function validateEntries(entries, raceId) {
   }
 }
 
+/**
+ * `makeJobs` で組み立てる race_id の 12 桁仕様（先頭4=年、その次2桁=場系コード先頭）。
+ * RaceData02 の DOM 揺れで `.eq(1)` がレース名由来の長文になることがあるため、確実な競馬場名に寄せる。
+ */
+function venueFromNetkeibaRaceId(raceId) {
+  const id = String(raceId ?? "");
+  if (!/^\d{12}$/.test(id)) return null;
+  const head = id.slice(4, 6);
+  const PREFIX_TO_VENUE = {
+    "03": "福島",
+    "04": "新潟",
+    "05": "東京",
+    "08": "京都",
+  };
+  return PREFIX_TO_VENUE[head] ?? null;
+}
+
+/** DOM / title から既知競馬場名のみ拾う（補助） */
+function venueFromKnownPlaceNames(rawVenue, titleText) {
+  const KNOWN = ["札幌", "函館", "福島", "新潟", "東京", "中山", "阪神", "京都", "中京", "小倉"];
+  const blob = `${rawVenue ?? ""} ${titleText ?? ""}`.replace(/\s+/g, " ");
+  for (const v of KNOWN) {
+    if (blob.includes(v)) return v;
+  }
+  const t = String(rawVenue ?? "").trim();
+  return t.length ? t : "—";
+}
+
 function parseShutuba(html, { raceId, date }) {
   const $ = load(html);
   const observedAt = new Date().toISOString();
@@ -147,7 +175,11 @@ function parseShutuba(html, { raceId, date }) {
     throw new Error("ページ取得失敗または非表示");
   }
 
-  const raceName = $("h1.RaceName").text().replace(/\s+/g, " ").trim();
+  let raceName = $("h1.RaceName").text().replace(/\s+/g, " ").trim();
+  if (!raceName.length) {
+    const tm = $("title").text().match(/^(.+?)出馬表/);
+    if (tm) raceName = tm[1].replace(/\s+/g, " ").trim();
+  }
   const raceData01 = $(".RaceData01").text().replace(/\s+/g, " ");
   const wholeText = $("body").text().replace(/\s+/g, " ");
   // 例: 芝1600m / ダ1700m / 障3170m (芝 ダート) — 障害は `RaceEvaluation` の surface が芝|ダのため ダート に寄せる
@@ -172,7 +204,17 @@ function parseShutuba(html, { raceId, date }) {
   if (!Number.isFinite(raceNumber) || raceNumber < 1 || raceNumber > 12) {
     throw new Error("R番号を取得できません");
   }
-  const venue = $(".RaceData02 span").eq(1).text().trim() || "—";
+  let venue = $(".RaceData02 span").eq(1).text().trim() || "—";
+  if (venue === "—") {
+    const vm = $("title").text().match(/日\s*(.+?)(\d+)R/);
+    if (vm) venue = vm[1].trim() || "—";
+  }
+  const idVenue = venueFromNetkeibaRaceId(raceId);
+  if (idVenue != null) {
+    venue = idVenue;
+  } else {
+    venue = venueFromKnownPlaceNames(venue, $("title").text());
+  }
 
   const gradeType = parseNetkeibaGradeType($);
   const raceGradeLabel = gradeType != null ? netkeibaGradeTypeToRaceGrade(gradeType) : undefined;
@@ -264,8 +306,98 @@ function parseShutuba(html, { raceId, date }) {
     const v = parseInt(m[1], 10);
     return Number.isFinite(v) ? v : undefined;
   };
+
+  /** race.sp.netkeiba.com は1行5セル（Horse_Info 内に馬・騎手など集約） */
+  const parseSpShutubaRow = ($tr) => {
+    const tds = $tr.children("td");
+    if (tds.length >= 7 || tds.length === 0 || !$tr.find("td.Horse_Info").length) return null;
+
+    const oddsId = $tr.find('span[id^="odds-1_"]').first().attr("id");
+    const umabanMatch = String(oddsId ?? "").match(/_(\d{1,2})$/);
+    const umaban = umabanMatch ? parseInt(umabanMatch[1], 10) : undefined;
+    if (!Number.isFinite(umaban) || umaban < 1) return null;
+
+    const wakuTd = tds.first();
+    const wakuCls = wakuTd.attr("class") ?? "";
+    const wakuFromCls = wakuCls.match(/Waku(\d)/);
+    const rawWaku = wakuFromCls
+      ? parseInt(wakuFromCls[1], 10)
+      : parseInt(wakuTd.text().trim().replace(/[^\d]/g, ""), 10);
+    const wakuValid = Number.isFinite(rawWaku) && rawWaku >= 1 && rawWaku <= 8;
+
+    const modalA = $tr.find('a[href*="horse_id="]').first();
+    const dbA = $tr.find('a[href*="db.sp.netkeiba.com/horse/"], a[href*="/horse/"]').first();
+    const a = modalA.length ? modalA : dbA;
+    const href = a.attr("href") ?? "";
+    let horseId = null;
+    const mq = href.match(/horse_id=(\d+)/);
+    if (mq) horseId = mq[1];
+    else {
+      const mm = href.match(/\/horse\/(\d+)/);
+      if (mm) horseId = mm[1];
+    }
+    if (!horseId) return null;
+
+    const horseName = (a.attr("title") || a.text()).replace(/\s+/g, " ").trim();
+    if (!horseName) return null;
+
+    const sexAgeText = $tr.find("dd.Age").text().trim();
+    const { sex, age } = parseSexAge(sexAgeText);
+
+    const jockeyA = $tr.find("dd.Jockey a").first();
+    const jText = jockeyA.text().replace(/\s+/g, " ").trim();
+    const jEm = jockeyA.find("em").first().text().trim();
+    const wMatch = jText.match(/(\d{1,2}(?:\.\d)?)\s*$/);
+    let wVal = wMatch ? parseFloat(wMatch[1]) : 57.0;
+    if (Number.isNaN(wVal)) wVal = 57.0;
+    let jockey = jEm;
+    if (!jockey) {
+      jockey = jText
+        .replace(/(\d{1,2}(?:\.\d)?)\s*$/, "")
+        .replace(/^[☆△▲▼◆★・\s]+/u, "")
+        .trim();
+    }
+    if (!jockey) jockey = "—";
+
+    const trainer =
+      $tr.find('a[href*="/trainer/"]').first().text().replace(/\s+/g, " ").trim() || undefined;
+
+    const weightTdText = $tr.find("td.Weight").text().trim();
+    const bodyWeightKg = parseBodyWeight(weightTdText);
+
+    const ab = hashAbilities(horseId);
+    const market = parseOddsAndPopularity($tr, tds, umaban);
+    return {
+      horseId,
+      horseName,
+      frameNumber: wakuValid ? rawWaku : undefined,
+      horseNumber: umaban,
+      sex,
+      age,
+      jockey: jockey.length > 0 ? jockey : "—",
+      trainer,
+      weight: wVal,
+      bodyWeightKg,
+      runningStyle: "好位",
+      abilities: ab,
+      ...market,
+    };
+  };
+
+  const firstHorseRow = $("tr.HorseList").first();
+  const useSpShutubaLayout =
+    firstHorseRow.length > 0 &&
+    firstHorseRow.children("td").length > 0 &&
+    firstHorseRow.children("td").length < 7 &&
+    firstHorseRow.find("td.Horse_Info").length > 0;
+
   $("tr.HorseList").each((_, el) => {
     const $tr = $(el);
+    if (useSpShutubaLayout) {
+      const row = parseSpShutubaRow($tr);
+      if (row) entries.push(row);
+      return;
+    }
     const tds = $tr.children("td");
     if (tds.length < 7) return;
     const rawWaku = parseInt(tds.eq(0).text().trim().replace(/[^\d]/g, ""), 10);
@@ -378,7 +510,8 @@ async function enrichEntriesWithPastRuns(entries, raceLapCache) {
           };
         }
         process.stderr.write(`${entry.pastRuns.length} runs\n`);
-        successCount += 1;
+        // 例外が出なかっただけでは「成功」としない（HTML構造変化で空配列だけ返ることがある）
+        if (entry.pastRuns.length > 0) successCount += 1;
         done = true;
         break;
       } catch (e) {
@@ -412,7 +545,7 @@ function shouldFailByPastRunQuality(data, stats) {
       ? ageKnown.reduce((s, e) => s + Number(e.age), 0) / ageKnown.length
       : 3;
 
-  // 完全に空は常にNG。重賞/古馬中心は取得率も要求する。
+  // successCount = 直近5走が1件でも取れた頭数。完全に0は常にNG。重賞/古馬は取得率も要求。
   if (stats.successCount === 0) return true;
   if ((isGradedOrOpen || avgAge >= 4.5) && successRate < 0.6) return true;
   return false;

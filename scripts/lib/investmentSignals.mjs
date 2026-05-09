@@ -179,14 +179,16 @@ function calcDynamicEvMargin(raceInfo, fieldSize, condition) {
     const trackSpeed = String(condition.trackSpeed ?? "standard");
     const bias = String(condition.bias ?? "flat");
     const pace = String(condition.pace ?? "middle");
-    const userTrackBias = parseNumeric(condition.userTrackBias ?? 0) ?? 0;
     const abilityPriority = condition.abilityPriority;
+    const hasHorseGatePick =
+      (Array.isArray(condition.favoredHorseNumbers) && condition.favoredHorseNumbers.length > 0) ||
+      (Array.isArray(condition.disfavoredHorseNumbers) && condition.disfavoredHorseNumbers.length > 0);
 
     if (ground !== "good") detailCount++;
     if (trackSpeed !== "standard") detailCount++;
     if (bias !== "flat") detailCount++;
     if (pace !== "middle") detailCount++;
-    if (Math.abs(userTrackBias) >= 0.3) detailCount++;
+    if (hasHorseGatePick) detailCount++;
     if (abilityPriority) detailCount++;
 
     // 1補正につき 0.01 削減（最大 0.06 削減）、下限は 0.08
@@ -327,31 +329,6 @@ function computeValueChange(previousOdds, nextOdds) {
 }
 
 /**
- * 当日トラックバイアス補正係数（枠番ベース）。
- * userTrackBias: -1=内有利(強) ～ 0=フラット ～ +1=外有利(強)
- * gateNumber: 馬番（1〜18）
- *
- * 計算式: P_corrected = P × BiasMultiplier
- * 内有利(bias<0) → 内枠(1〜3番)に ×1.1〜1.15、外枠に ×0.85〜0.9
- * 外有利(bias>0) → 外枠に ×1.1〜1.15、内枠に ×0.85〜0.9
- */
-function calcGateBiasMultiplier(gateNumber, fieldSize, userTrackBias) {
-  if (!Number.isFinite(userTrackBias) || Math.abs(userTrackBias) < 0.05) return 1.0;
-  if (!Number.isFinite(gateNumber) || gateNumber <= 0) return 1.0;
-
-  const size = Math.max(8, fieldSize || 12);
-  // ゲート番号の相対位置（0.0=最内, 1.0=最外）
-  const relativePos = (gateNumber - 1) / Math.max(size - 1, 1);
-
-  // 最大補正幅: バイアス強度1.0時に ±15%（内外の差は最大30%）
-  const MAX_CORRECTION = 0.15;
-  // 内有利(bias<0)なら内枠(relativePos~0)を加点、外枠を減点
-  const correction = -userTrackBias * (relativePos - 0.5) * MAX_CORRECTION * 2;
-
-  return clamp(1.0 + correction, 0.75, 1.30);
-}
-
-/**
  * 展開バイアス補正係数（脚質ベース）。
  * biasSetting: "front_favor" | "closer_favor" | その他(フラット)
  *
@@ -407,7 +384,7 @@ function calcPopularityBiasDecay(prob, odds) {
  *
  * 拡張ロジック（v2）:
  *   1. 動的EVマージン: レース種別（新馬/重賞等）と頭数に応じてマージンを変動
- *   2. トラックバイアス補正: condition.userTrackBias と脚質バイアスを確率に適用
+ *   2. トラックバイアス補正: 馬番ピック（favoredHorseNumbers 等）と脚質バイアスを確率に適用
  *   3. 人気バイアス減衰: 過剰人気馬の期待値を自動的に抑制
  */
 export function enrichInvestmentSignalsInRaceData(data) {
@@ -416,23 +393,27 @@ export function enrichInvestmentSignalsInRaceData(data) {
   if (entries.length === 0) return data;
   const fieldSize = entries.length;
   const condition = data.condition ?? {};
-  const userTrackBias = parseNumeric(condition.userTrackBias ?? data.userTrackBias) ?? 0;
   const biasSetting = String(condition.bias ?? "flat");
   const adjustmentStrength = String(condition.adjustmentStrength ?? "middle");
 
   // --- ゲートバイアスのスコア直接加算 ---
-  // 「内有利」設定時: 1-3番枠に +2.5pt、「外有利」設定時: 外枠に +2.5pt をSoftmax前スコアに加算
   const GATE_BONUS_PTS = 2.5;
-  function calcGateBonusPoints(gateNumber, fieldSize_, userBias) {
-    if (Math.abs(userBias) < 0.3) return 0; // 弱いバイアスは加算しない
+  function calcGateBonusPoints(gateNumber, fieldSize_, cond) {
+    const c = cond ?? {};
+    const fav = Array.isArray(c.favoredHorseNumbers) ? c.favoredHorseNumbers : [];
+    const dis = Array.isArray(c.disfavoredHorseNumbers) ? c.disfavoredHorseNumbers : [];
+    const gn = Number(gateNumber);
+    if (fav.some((n) => Number(n) === gn)) return GATE_BONUS_PTS;
+    if (dis.some((n) => Number(n) === gn)) return -GATE_BONUS_PTS;
+
+    const userBias = parseNumeric(c.userTrackBias ?? data.userTrackBias) ?? 0;
+    if (Math.abs(userBias) < 0.3) return 0;
     const innerGates = 3;
     const outerGates = Math.max(fieldSize_ - 3, 3);
     if (userBias < -0.3) {
-      // 内有利: 1-3番枠にボーナス
       return gateNumber <= innerGates ? GATE_BONUS_PTS * Math.abs(userBias) : 0;
     }
     if (userBias > 0.3) {
-      // 外有利: 最外3枠にボーナス
       return gateNumber > outerGates ? GATE_BONUS_PTS * Math.abs(userBias) : 0;
     }
     return 0;
@@ -440,12 +421,13 @@ export function enrichInvestmentSignalsInRaceData(data) {
 
   const scores = entries.map((e, i) => {
     const gateNumber = parseNumeric(e.horseNumber ?? e.gate) ?? (i + 1);
-    const gateBonus = calcGateBonusPoints(gateNumber, fieldSize, userTrackBias);
+    const gateBonus = calcGateBonusPoints(gateNumber, fieldSize, condition);
     return scoreFromAbilities(e, data, gateBonus);
   });
 
   // --- Softmax温度: 補正強度「強」のとき T=4（鋭い評価差）、それ以外は T=8 ---
-  const softmaxTemp = adjustmentStrength === "strong" ? 4 : 8;
+  // アプリ本体と同様、勝率 softmax は常に T=4（尖り固定）
+  const softmaxTemp = 4;
   const rawProbs = softmax(scores, softmaxTemp);
   const modelRanks = toRank(scores);
 

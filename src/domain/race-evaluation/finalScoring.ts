@@ -1,4 +1,5 @@
 import { PACE_FIT, type PaceFitToken } from "./lingoConstants";
+import { ABILITY_RELATIVE_BLEND } from "./evaluationBlendWeights";
 
 /** 展開適合（◎〜×）の加点。能力5軸は変更しない。 */
 const PACE_BONUS: Record<PaceFitToken, number> = {
@@ -117,20 +118,22 @@ export function combineFinalEvaluationScore(
   variancePenalty: number = 0,
   contextualBonus: number = 0,
   conditionImpactBonus: number = 0,
+  fourthCornerPredictionBonus: number = 0,
 ): number {
   return round1(
     Math.max(
       0,
       Math.min(
         100,
-        relative +
+        relative * ABILITY_RELATIVE_BLEND +
           paceBonus +
           lapShapeFitBonus +
           distanceFitBonus +
           classLevelBonus +
           conditionImpactBonus +
           contextualBonus -
-          variancePenalty,
+          variancePenalty +
+          fourthCornerPredictionBonus,
       ),
     ),
   );
