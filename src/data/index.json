@@ -3029,7 +3029,7 @@
     "venue": "新潟",
     "raceNumber": 1,
     "raceName": "4歳以上障害未勝利",
-    "surface": "芝",
+    "surface": "ダート",
     "distance": 2890
   },
   {
@@ -3056,8 +3056,9 @@
     "venue": "新潟",
     "raceNumber": 4,
     "raceName": "4歳以上障害OP",
-    "surface": "芝",
-    "distance": 2890
+    "surface": "ダート",
+    "distance": 2890,
+    "netkeibaGradeType": 5
   },
   {
     "raceId": "202604010305",
@@ -3233,7 +3234,7 @@
     "date": "2026-05-09",
     "venue": "東京",
     "raceNumber": 11,
-    "raceName": "エプソムカップ",
+    "raceName": "エプソムC",
     "surface": "芝",
     "distance": 1800,
     "netkeibaGradeType": 3,
@@ -3690,5 +3691,14 @@
     "surface": "ダート",
     "distance": 1800,
     "netkeibaGradeType": 5
+  },
+  {
+    "raceId": "202608030612",
+    "date": "2026-05-10",
+    "venue": "京都",
+    "raceNumber": 12,
+    "raceName": "4歳以上2勝クラス",
+    "surface": "ダート",
+    "distance": 1400
   }
 ]

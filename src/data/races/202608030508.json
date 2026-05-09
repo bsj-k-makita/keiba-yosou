@@ -7,8 +7,8 @@
     "raceName": "4歳以上1勝クラス",
     "surface": "ダート",
     "distance": 1400,
-    "groundLabel": null,
-    "weather": null
+    "groundLabel": "良",
+    "weather": "曇"
   },
   "entries": [
     {
@@ -19,7 +19,7 @@
       "sex": "牝",
       "age": 5,
       "jockey": "川田",
-      "trainer": "佐藤 悠太",
+      "trainer": "佐藤悠",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -34,11 +34,11 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.13,
-      "estimated_actual_odds": 1.1,
+      "estimated_actual_odds": 1.41,
       "odds_source": "estimated",
       "market_popularity": 1,
-      "market_win_odds": 2.2,
-      "value_score": -0.06,
+      "market_win_odds": 3.7,
+      "value_score": -0.02,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -170,11 +170,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 3.7,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 1,
       "l2_top_speed": 0.4751,
-      "l2_sustain_ratio": 0.75,
-      "marketWinOdds": 2.2,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 1
+      "l2_sustain_ratio": 0.75
     },
     {
       "horseId": "2022105857",
@@ -183,8 +183,8 @@
       "horseNumber": 2,
       "sex": "牝",
       "age": 4,
-      "jockey": "西村",
-      "trainer": "柴田 卓",
+      "jockey": "西村淳",
+      "trainer": "柴田",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -199,13 +199,13 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.12,
-      "estimated_actual_odds": 30.67,
+      "estimated_actual_odds": 11.86,
       "odds_source": "estimated",
-      "market_popularity": 12,
-      "market_win_odds": 80.7,
-      "value_score": 3.32,
-      "value_rank": "B",
-      "kelly_weight": 0.02,
+      "market_popularity": 13,
+      "market_win_odds": 31.2,
+      "value_score": 1.22,
+      "value_rank": "C",
+      "kelly_weight": 0.01,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -217,7 +217,7 @@
         "持続力不足"
       ],
       "ev_margin_applied": 0.2,
-      "popularity_decay_applied": 0.96,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-03-01",
@@ -335,11 +335,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 31.2,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 13,
       "l2_top_speed": 0.6984,
-      "l2_sustain_ratio": 0.9688,
-      "marketWinOdds": 80.7,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 12
+      "l2_sustain_ratio": 0.9688
     },
     {
       "horseId": "2022105011",
@@ -348,8 +348,8 @@
       "horseNumber": 3,
       "sex": "牝",
       "age": 4,
-      "jockey": "北村",
-      "trainer": "佐藤 悠太",
+      "jockey": "北村友",
+      "trainer": "佐藤悠",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -364,13 +364,13 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.13,
-      "estimated_actual_odds": 17.25,
+      "estimated_actual_odds": 8.06,
       "odds_source": "estimated",
-      "market_popularity": 10,
-      "market_win_odds": 45.4,
-      "value_score": 1.96,
-      "value_rank": "C",
-      "kelly_weight": 0.02,
+      "market_popularity": 9,
+      "market_win_odds": 21.2,
+      "value_score": 0.85,
+      "value_rank": "D",
+      "kelly_weight": 0,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -382,7 +382,7 @@
         "末脚のキレ負け"
       ],
       "ev_margin_applied": 0.2,
-      "popularity_decay_applied": 0.96,
+      "popularity_decay_applied": 1,
       "pastRuns": [
         {
           "date": "2026-02-14",
@@ -502,11 +502,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 21.2,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 9,
       "l2_top_speed": 0.4443,
-      "l2_sustain_ratio": 1,
-      "marketWinOdds": 45.4,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 10
+      "l2_sustain_ratio": 1
     },
     {
       "horseId": "2022102388",
@@ -516,7 +516,7 @@
       "sex": "牝",
       "age": 4,
       "jockey": "池添",
-      "trainer": "宮地 貴稔",
+      "trainer": "宮地",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -531,11 +531,11 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.26,
-      "estimated_actual_odds": 1.44,
+      "estimated_actual_odds": 1.82,
       "odds_source": "estimated",
       "market_popularity": 2,
-      "market_win_odds": 3.8,
-      "value_score": 0.17,
+      "market_win_odds": 4.8,
+      "value_score": 0.27,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "B",
@@ -668,11 +668,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 4.8,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 2,
       "l2_top_speed": 0.4751,
-      "l2_sustain_ratio": 0.7187,
-      "marketWinOdds": 3.8,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 2
+      "l2_sustain_ratio": 0.7187
     },
     {
       "horseId": "2021105976",
@@ -681,8 +681,8 @@
       "horseNumber": 5,
       "sex": "牝",
       "age": 5,
-      "jockey": "角田",
-      "trainer": "松永 幹夫",
+      "jockey": "角田和",
+      "trainer": "松永幹",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -697,13 +697,13 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.13,
-      "estimated_actual_odds": 35.95,
+      "estimated_actual_odds": 13.91,
       "odds_source": "estimated",
-      "market_popularity": 13,
-      "market_win_odds": 94.6,
-      "value_score": 4.23,
-      "value_rank": "B",
-      "kelly_weight": 0.02,
+      "market_popularity": 14,
+      "market_win_odds": 36.6,
+      "value_score": 1.56,
+      "value_rank": "C",
+      "kelly_weight": 0.01,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -715,7 +715,7 @@
         "持続力不足"
       ],
       "ev_margin_applied": 0.2,
-      "popularity_decay_applied": 0.95,
+      "popularity_decay_applied": 0.97,
       "pastRuns": [
         {
           "date": "2026-03-28",
@@ -842,11 +842,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 36.6,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 14,
       "l2_top_speed": 0.0941,
-      "l2_sustain_ratio": 1,
-      "marketWinOdds": 94.6,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 13
+      "l2_sustain_ratio": 1
     },
     {
       "horseId": "2021104242",
@@ -856,7 +856,7 @@
       "sex": "牝",
       "age": 5,
       "jockey": "田山",
-      "trainer": "高橋 義忠",
+      "trainer": "高橋忠",
       "weight": 54,
       "runningStyle": "好位",
       "abilities": {
@@ -871,11 +871,11 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.13,
-      "estimated_actual_odds": 7.49,
+      "estimated_actual_odds": 3.69,
       "odds_source": "estimated",
-      "market_popularity": 5,
-      "market_win_odds": 19.7,
-      "value_score": 0.77,
+      "market_popularity": 4,
+      "market_win_odds": 9.7,
+      "value_score": 0.28,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -1011,11 +1011,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 9.7,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 4,
       "l2_top_speed": 0.9358,
-      "l2_sustain_ratio": 0.6875,
-      "marketWinOdds": 19.7,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 5
+      "l2_sustain_ratio": 0.6875
     },
     {
       "horseId": "2022101053",
@@ -1025,7 +1025,7 @@
       "sex": "牝",
       "age": 4,
       "jockey": "菱田",
-      "trainer": "高柳 大輔",
+      "trainer": "高柳大",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -1040,11 +1040,11 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": false,
       "predicted_probability": 0.3,
-      "estimated_actual_odds": 26.18,
+      "estimated_actual_odds": 23.33,
       "odds_source": "estimated",
-      "market_popularity": 11,
-      "market_win_odds": 68.9,
-      "value_score": 6.87,
+      "market_popularity": 16,
+      "market_win_odds": 61.4,
+      "value_score": 6.1,
       "value_rank": "B",
       "kelly_weight": 0.06,
       "confidence_rank": "B",
@@ -1173,11 +1173,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 61.4,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 16,
       "l2_top_speed": 0.7983,
-      "l2_sustain_ratio": 1,
-      "marketWinOdds": 68.9,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 11
+      "l2_sustain_ratio": 1
     },
     {
       "horseId": "2021106942",
@@ -1187,7 +1187,7 @@
       "sex": "牝",
       "age": 5,
       "jockey": "酒井",
-      "trainer": "高橋 康之",
+      "trainer": "高橋康",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -1202,13 +1202,13 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.14,
-      "estimated_actual_odds": 10.07,
+      "estimated_actual_odds": 4.6,
       "odds_source": "estimated",
-      "market_popularity": 7,
-      "market_win_odds": 26.5,
-      "value_score": 1.21,
-      "value_rank": "C",
-      "kelly_weight": 0.01,
+      "market_popularity": 5,
+      "market_win_odds": 12.1,
+      "value_score": 0.44,
+      "value_rank": "D",
+      "kelly_weight": 0,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -1333,11 +1333,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 12.1,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 5,
       "l2_top_speed": 0.3835,
-      "l2_sustain_ratio": 1,
-      "marketWinOdds": 26.5,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 7
+      "l2_sustain_ratio": 1
     },
     {
       "horseId": "2022106189",
@@ -1347,7 +1347,7 @@
       "sex": "牝",
       "age": 4,
       "jockey": "中井",
-      "trainer": "笹田 和秀",
+      "trainer": "笹田",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -1362,13 +1362,13 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.28,
-      "estimated_actual_odds": 60,
+      "estimated_actual_odds": 14.44,
       "odds_source": "estimated",
-      "market_popularity": 16,
-      "market_win_odds": 172,
-      "value_score": 14.92,
-      "value_rank": "S",
-      "kelly_weight": 0.06,
+      "market_popularity": 15,
+      "market_win_odds": 38,
+      "value_score": 3.44,
+      "value_rank": "B",
+      "kelly_weight": 0.05,
       "confidence_rank": "B",
       "bet_type": "相手",
       "value_change": "STABLE",
@@ -1498,11 +1498,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 38,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 15,
       "l2_top_speed": 0.2358,
-      "l2_sustain_ratio": 0.875,
-      "marketWinOdds": 172,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 16
+      "l2_sustain_ratio": 0.875
     },
     {
       "horseId": "2021105484",
@@ -1511,8 +1511,8 @@
       "horseNumber": 10,
       "sex": "牝",
       "age": 5,
-      "jockey": "Ｍ．デムーロ",
-      "trainer": "武 幸四郎",
+      "jockey": "Ｍデムーロ",
+      "trainer": "武幸",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -1527,13 +1527,13 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.6,
-      "estimated_actual_odds": 13.57,
+      "estimated_actual_odds": 2.93,
       "odds_source": "estimated",
-      "market_popularity": 9,
-      "market_win_odds": 35.7,
-      "value_score": 7.13,
-      "value_rank": "B",
-      "kelly_weight": 0.13,
+      "market_popularity": 3,
+      "market_win_odds": 7.7,
+      "value_score": 1.38,
+      "value_rank": "C",
+      "kelly_weight": 0.08,
       "confidence_rank": "S",
       "bet_type": "軸",
       "value_change": "STABLE",
@@ -1669,11 +1669,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 7.7,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 3,
       "l2_top_speed": 1,
-      "l2_sustain_ratio": 0.625,
-      "marketWinOdds": 35.7,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 9
+      "l2_sustain_ratio": 0.625
     },
     {
       "horseId": "2022103649",
@@ -1683,7 +1683,7 @@
       "sex": "牝",
       "age": 4,
       "jockey": "松山",
-      "trainer": "茶木 太樹",
+      "trainer": "茶木",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -1698,11 +1698,11 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.17,
-      "estimated_actual_odds": 9.65,
+      "estimated_actual_odds": 10.94,
       "odds_source": "estimated",
-      "market_popularity": 6,
-      "market_win_odds": 25.4,
-      "value_score": 1.39,
+      "market_popularity": 12,
+      "market_win_odds": 28.8,
+      "value_score": 1.59,
       "value_rank": "C",
       "kelly_weight": 0.02,
       "confidence_rank": "C",
@@ -1716,7 +1716,7 @@
         "馬場適性不足"
       ],
       "ev_margin_applied": 0.2,
-      "popularity_decay_applied": 0.97,
+      "popularity_decay_applied": 0.96,
       "pastRuns": [
         {
           "date": "2026-01-12",
@@ -1845,11 +1845,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 28.8,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 12,
       "l2_top_speed": 0.122,
-      "l2_sustain_ratio": 1,
-      "marketWinOdds": 25.4,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 6
+      "l2_sustain_ratio": 1
     },
     {
       "horseId": "2022103469",
@@ -1858,8 +1858,8 @@
       "horseNumber": 12,
       "sex": "牝",
       "age": 4,
-      "jockey": "国分",
-      "trainer": "中尾 秀正",
+      "jockey": "国分恭",
+      "trainer": "中尾",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -1874,13 +1874,13 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.54,
-      "estimated_actual_odds": 47.69,
+      "estimated_actual_odds": 5.21,
       "odds_source": "estimated",
-      "market_popularity": 15,
-      "market_win_odds": 125.5,
-      "value_score": 22.98,
-      "value_rank": "S",
-      "kelly_weight": 0.12,
+      "market_popularity": 7,
+      "market_win_odds": 13.7,
+      "value_score": 2.33,
+      "value_rank": "C",
+      "kelly_weight": 0.09,
       "confidence_rank": "S",
       "bet_type": "軸",
       "value_change": "STABLE",
@@ -2011,11 +2011,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 13.7,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 7,
       "l2_top_speed": 0.4751,
-      "l2_sustain_ratio": 1,
-      "marketWinOdds": 125.5,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 15
+      "l2_sustain_ratio": 1
     },
     {
       "horseId": "2022100200",
@@ -2025,7 +2025,7 @@
       "sex": "牝",
       "age": 4,
       "jockey": "高倉",
-      "trainer": "渡辺 薫彦",
+      "trainer": "渡辺",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -2040,13 +2040,13 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.17,
-      "estimated_actual_odds": 6.65,
+      "estimated_actual_odds": 5.81,
       "odds_source": "estimated",
-      "market_popularity": 4,
-      "market_win_odds": 17.5,
-      "value_score": 0.93,
+      "market_popularity": 8,
+      "market_win_odds": 15.3,
+      "value_score": 0.79,
       "value_rank": "D",
-      "kelly_weight": 0.01,
+      "kelly_weight": 0,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -2175,11 +2175,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 15.3,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 8,
       "l2_top_speed": 0.122,
-      "l2_sustain_ratio": 0.5,
-      "marketWinOdds": 17.5,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 4
+      "l2_sustain_ratio": 0.5
     },
     {
       "horseId": "2021102162",
@@ -2189,7 +2189,7 @@
       "sex": "牝",
       "age": 5,
       "jockey": "藤懸",
-      "trainer": "牧田 和弥",
+      "trainer": "牧田",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -2204,13 +2204,13 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.23,
-      "estimated_actual_odds": 44.69,
+      "estimated_actual_odds": 10.68,
       "odds_source": "estimated",
-      "market_popularity": 14,
-      "market_win_odds": 117.6,
-      "value_score": 9.05,
-      "value_rank": "A",
-      "kelly_weight": 0.05,
+      "market_popularity": 10,
+      "market_win_odds": 28.1,
+      "value_score": 2.09,
+      "value_rank": "C",
+      "kelly_weight": 0.03,
       "confidence_rank": "B",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -2222,7 +2222,7 @@
         "馬場適性不足"
       ],
       "ev_margin_applied": 0.2,
-      "popularity_decay_applied": 0.9,
+      "popularity_decay_applied": 0.93,
       "pastRuns": [
         {
           "date": "2026-02-21",
@@ -2326,11 +2326,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 28.1,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 10,
       "l2_top_speed": 0.5375,
-      "l2_sustain_ratio": 0.75,
-      "marketWinOdds": 117.6,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 14
+      "l2_sustain_ratio": 0.75
     },
     {
       "horseId": "2022101126",
@@ -2339,8 +2339,8 @@
       "horseNumber": 15,
       "sex": "牝",
       "age": 4,
-      "jockey": "鮫島",
-      "trainer": "高橋 一哉",
+      "jockey": "鮫島駿",
+      "trainer": "高橋一",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -2355,15 +2355,15 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.31,
-      "estimated_actual_odds": 1.94,
+      "estimated_actual_odds": 5.02,
       "odds_source": "estimated",
-      "market_popularity": 3,
-      "market_win_odds": 5.1,
-      "value_score": 0.4,
-      "value_rank": "D",
-      "kelly_weight": 0,
+      "market_popularity": 6,
+      "market_win_odds": 13.2,
+      "value_score": 1.27,
+      "value_rank": "C",
+      "kelly_weight": 0.03,
       "confidence_rank": "B",
-      "bet_type": "見送り",
+      "bet_type": "相手",
       "value_change": "STABLE",
       "key_factors": [
         "末脚性能",
@@ -2373,7 +2373,7 @@
         "スタミナ不安"
       ],
       "ev_margin_applied": 0.2,
-      "popularity_decay_applied": 1,
+      "popularity_decay_applied": 0.94,
       "pastRuns": [
         {
           "date": "2026-03-28",
@@ -2489,11 +2489,11 @@
         }
       ],
       "pedigree": {},
+      "marketWinOdds": 13.2,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 6,
       "l2_top_speed": 0.5062,
-      "l2_sustain_ratio": 0.5937,
-      "marketWinOdds": 5.1,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 3
+      "l2_sustain_ratio": 0.5937
     },
     {
       "horseId": "2022106590",
@@ -2503,7 +2503,7 @@
       "sex": "牝",
       "age": 4,
       "jockey": "吉村",
-      "trainer": "柴田 卓",
+      "trainer": "柴田",
       "weight": 56,
       "runningStyle": "好位",
       "abilities": {
@@ -2518,11 +2518,11 @@
       "was_bias_disadvantaged": false,
       "pace_mismatch": true,
       "predicted_probability": 0.12,
-      "estimated_actual_odds": 10.98,
+      "estimated_actual_odds": 10.79,
       "odds_source": "estimated",
-      "market_popularity": 8,
-      "market_win_odds": 28.9,
-      "value_score": 1.12,
+      "market_popularity": 11,
+      "market_win_odds": 28.4,
+      "value_score": 1.09,
       "value_rank": "C",
       "kelly_weight": 0.01,
       "confidence_rank": "C",
@@ -2617,10 +2617,10 @@
         }
       ],
       "pedigree": {},
-      "l2_sustain_ratio": 0.3125,
-      "marketWinOdds": 28.9,
-      "market_observed_at": "2026-05-08T07:46:19.331Z",
-      "marketPopularity": 8
+      "marketWinOdds": 28.4,
+      "market_observed_at": "2026-05-08T22:04:22.935Z",
+      "marketPopularity": 11,
+      "l2_sustain_ratio": 0.3125
     }
   ]
 }
