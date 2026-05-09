@@ -62,6 +62,14 @@ function result(id: string, name: string, rank: number, label: HorseScoreResult[
     lapProfile: "一貫型",
     varianceScore: 0,
     roleHint: "判定不能",
+    enginePeakBonus: 0,
+    staminaResilienceFlag: false,
+    staminaResilienceStrength01: 0,
+    todayLapKind: null,
+    staminaResilienceBonus: 0,
+    oddsDistortionFlag: false,
+    oddsDistortionScore01: 0,
+    oddsDistortionReasons: [],
   };
 }
 

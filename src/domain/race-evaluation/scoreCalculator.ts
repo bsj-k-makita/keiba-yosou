@@ -9,6 +9,7 @@ import { assignMarks, fillRequiredMarks } from "./markAssigner";
 import { generateScoreReason } from "./reasonGenerator";
 import {
   baseAbilityCore,
+  enginePeakAdjustment,
   raceAdjustedInput,
   conditionScore,
 } from "./abilityCoreScoring";
@@ -28,7 +29,12 @@ import {
   paceFitToBonus,
 } from "./finalScoring";
 import { computeDistanceFitBonus } from "./distanceFit";
-import { computePaceFitLevel } from "./paceFit";
+import {
+  classifyTodayLapKind,
+  computePaceFitLevel,
+  computeStaminaResilienceBonus,
+} from "./paceFit";
+import { detectOddsDistortion } from "./oddsDistortion";
 import { computeMaxPerformance, computeVariance, variancePenaltyPoints } from "./maxPerformance";
 import { computeLapShapeFit } from "./lapShapeFit";
 import { computeAdjustedRiskPenalty } from "./lossClassifier";
@@ -59,6 +65,13 @@ function round1(n: number): number {
 const MAX_COURSE_TRAIT_TOTAL = 8.5;
 const LAST_RUN_RESET_BONUS = 12.0;
 const LAP_FOCUS_MAX_BONUS = 15.0;
+/** 第3層 + ラップ系ボーナス（lapShapeFit/raceAnalysis/sustain/quality + staminaResilience）の合算上限。 */
+const LAP_STACK_TOTAL_CAP = 16.8;
+/**
+ * コース特性最大 +8.5 と第3層耐性バフ（最大 +6）が重複ご褒美にならないよう、
+ * 同方向の合算上限を設けて競合を整理する。
+ */
+const COURSE_TRAIT_PLUS_RESILIENCE_CAP = 12.0;
 /** 前走トラックバイアス逆行（`was_bias_disadvantaged`）の次走補正。着順に依らず素点系へ反映 */
 const BIAS_DISADVANTAGE_RECOVERY_BONUS = 7.0;
 /**
@@ -282,6 +295,9 @@ export function evaluateRace(
       ? raceLapShape
       : null;
 
+  // 第3層: 今日のレース分類（瞬発戦・持続戦・消耗戦）
+  const todayLapKind = classifyTodayLapKind(condition);
+
   const results: HorseScoreResult[] = evalHorses.map((h) => {
     const rawBase = calcHorseScore(h, baseWeights);
     const rawAdj = calcHorseScore(h, finalWeights);
@@ -293,7 +309,9 @@ export function evaluateRace(
     // 敗因分解適用のリスクペナルティ
     const risk = round1(computeAdjustedRiskPenalty(h.pastRuns, effectiveRaceLapShape, eff));
 
-    const intrinsic = round1(bCore + repro - risk);
+    // 第1層: 展開不問のエンジン素点バイアス
+    const enginePeak = round1(enginePeakAdjustment(h));
+    const intrinsic = round1(bCore + repro - risk + enginePeak);
 
     // MAX性能
     const maxPerf = computeMaxPerformance(h.pastRuns);
@@ -318,10 +336,16 @@ export function evaluateRace(
     // 分散リスク
     const variance = computeVariance(h.pastRuns);
 
-    // ラップ形状一致
+    // 第2層: ラップ形状一致 + staminaResilience フラグ
     const lapFit = computeLapShapeFit(h, condition);
     const lapShapeFitBonus = lapFit.reliable ? lapFit.score : 0;
     const raceAnalysisBonus = computeRaceAnalysisBonus(h, condition, lapFit.reliable);
+
+    // 第3層: 消耗戦×耐性フラグの強力な適性バフ
+    const staminaResilienceBonus = computeStaminaResilienceBonus(
+      todayLapKind,
+      lapFit.staminaResilience,
+    );
 
     return {
       horseId: h.horseId,
@@ -367,6 +391,14 @@ export function evaluateRace(
       reason: "",
       strongAbilities: extractStrongAbilities(h),
       pastRunInsight: formatPastRunInsight(h.pastRuns),
+      enginePeakBonus: enginePeak,
+      staminaResilienceFlag: lapFit.staminaResilience.flag,
+      staminaResilienceStrength01: round1(lapFit.staminaResilience.strength01),
+      todayLapKind,
+      staminaResilienceBonus: round1(staminaResilienceBonus),
+      oddsDistortionFlag: false,
+      oddsDistortionScore01: 0,
+      oddsDistortionReasons: [],
     };
   });
 
@@ -434,11 +466,31 @@ export function evaluateRace(
     r.trendBonus = contextual.trendBonus;
     r.paceBalanceBonus = contextual.paceBalanceBonus;
     r.tripContextBonus = contextual.tripContextBonus;
-    r.courseTraitBonus = courseTraitBonus;
+    // 第3層 + コース特性が同方向に重なる場合の合算上限。コース特性最大 +8.5 と耐性バフ最大 +6 で
+    // 単独 +14.5 になるが、+12.0 へ抑え込み「重複ご褒美」を避ける。
+    const courseAndResilience = clamp(
+      courseTraitBonus + r.staminaResilienceBonus,
+      0,
+      COURSE_TRAIT_PLUS_RESILIENCE_CAP,
+    );
+    const cappedCourseTraitBonus = clamp(courseAndResilience - r.staminaResilienceBonus, 0, courseTraitBonus);
+    const cappedResilienceBonus = round1(courseAndResilience - cappedCourseTraitBonus);
+    r.courseTraitBonus = round1(cappedCourseTraitBonus);
     r.courseTraitReasons = courseTraitReasons;
+    if (cappedResilienceBonus > 0.1) {
+      adjustmentBadges.push("耐性バフ");
+    }
     const classCombined = round1(clamp(cBonus + r.stepPatternBonus, -4.5, 5.5));
-    const lapStack =
-      r.lapShapeFitBonus + r.raceAnalysisBonus + r.lapSustainBonus + r.lapQualityBonus;
+    // 既存ラップ枠 +16.8 内に staminaResilienceBonus を合算しクランプ。
+    const lapStack = clamp(
+      r.lapShapeFitBonus +
+        r.raceAnalysisBonus +
+        r.lapSustainBonus +
+        r.lapQualityBonus +
+        cappedResilienceBonus,
+      -10,
+      LAP_STACK_TOTAL_CAP,
+    );
     const baselineRaw = combineFinalEvaluationScore(
       relScore,
       pBonus,
@@ -460,10 +512,10 @@ export function evaluateRace(
       conditionImpactBonus,
     );
     const baselineWithExtras = round1(
-      baselineRaw + courseTraitBonus + lastRunResetBonus + biasDisadvantageRecoveryBonus,
+      baselineRaw + r.courseTraitBonus + lastRunResetBonus + biasDisadvantageRecoveryBonus,
     );
     const finalWithExtras = round1(
-      finalRaw + courseTraitBonus + lastRunResetBonus + biasDisadvantageRecoveryBonus,
+      finalRaw + r.courseTraitBonus + lastRunResetBonus + biasDisadvantageRecoveryBonus,
     );
     r.evaluationBaselineScore = capAptitudeSwing(
       relScore,
@@ -487,6 +539,19 @@ export function evaluateRace(
   assignRanksForScore(results, "baseScore", "baseRank");
   assignRanksForScore(results, "adjustedScore", "adjustedRank");
   assignRanksForScore(results, "finalEvaluationScore", "finalRank");
+
+  // 第4層: 「オッズの歪み」検知（ANA 厳密化用）。
+  // viewModel 側で確率ブーストの基準にもなる。確率はこの段階では未確定なので
+  // 0 を渡し、能力 percentile + 近走展開不適合 + 割安オッズの組合せで flag を立てる。
+  const horseById = new Map(evalHorses.map((h) => [h.horseId, h] as const));
+  for (const r of results) {
+    const horse = horseById.get(r.horseId);
+    if (!horse) continue;
+    const distortion = detectOddsDistortion(horse, r, results, 0);
+    r.oddsDistortionFlag = distortion.flag;
+    r.oddsDistortionScore01 = distortion.score01;
+    r.oddsDistortionReasons = distortion.reasons;
+  }
 
   assignMarks(results);
   applyLongshotMarkGuard(evalHorses, results);

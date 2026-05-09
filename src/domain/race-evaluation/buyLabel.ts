@@ -27,7 +27,11 @@ export function assignBuyLabels(
     } else if (rank === 3) {
       r.buyLabel = BUY_LABELS.TAN;
     } else if (rank <= 5) {
-      r.buyLabel = d >= 3 ? BUY_LABELS.ANA : BUY_LABELS.GROUP;
+      // 第4層: 既存の scoreDiff >= 3 に加え、第4層「オッズの歪み」検知を必須化。
+      // 「能力高 × 近走展開不適合 × 割安オッズ」が揃うときのみ穴候補に格上げ。
+      const distortionScore = r.oddsDistortionScore01 ?? 0;
+      const distortionFlag = r.oddsDistortionFlag === true || distortionScore >= 0.55;
+      r.buyLabel = d >= 3 && distortionFlag ? BUY_LABELS.ANA : BUY_LABELS.GROUP;
     } else {
       r.buyLabel = BUY_LABELS.DISMISS;
     }

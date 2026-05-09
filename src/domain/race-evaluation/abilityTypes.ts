@@ -330,6 +330,22 @@ export type HorseScoreResult = {
   varianceScore: number;
   /** 軸向き / 頭向き / データ不足で判定不能 */
   roleHint: "頭" | "軸" | "判定不能";
+  /** 第1層: 展開不問のエンジン素点バイアス（過去走 IDM 相当ピーク・スロー切れ負け緩和） */
+  enginePeakBonus: number;
+  /** 第2層: 消耗戦耐性（底力）フラグが立っているか */
+  staminaResilienceFlag: boolean;
+  /** 第2層: 耐性の強度 0〜1（複数走で確認できるほど高い） */
+  staminaResilienceStrength01: number;
+  /** 第3層: 今日のレース分類（瞬発戦/持続戦/消耗戦）。判定不能で null */
+  todayLapKind: "瞬発戦" | "持続戦" | "消耗戦" | null;
+  /** 第3層: 消耗戦×耐性フラグで付与する適性バフ（既存ラップ枠 +16.8 内に収まる） */
+  staminaResilienceBonus: number;
+  /** 第4層: 「オッズの歪み」=能力高×近走展開不適合×割安オッズ が検出されたか */
+  oddsDistortionFlag: boolean;
+  /** 第4層: 歪みの強度 0〜1。viewModel が Kelly/EV を補正する係数の元 */
+  oddsDistortionScore01: number;
+  /** 第4層: 検出根拠の短文配列（UI 表示用） */
+  oddsDistortionReasons: string[];
 };
 
 /** 将来実装: レース狙い度の入力要因メモ */
