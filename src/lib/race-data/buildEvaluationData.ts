@@ -7,7 +7,10 @@ import {
   weightsToDemand0to100,
 } from "../../domain/race-evaluation";
 import { computeFitScore, fitLevelFromScore } from "../../domain/race-evaluation/fitScore";
-import { computePaceFitLevel } from "../../domain/race-evaluation/paceFit";
+import {
+  computeKickInTopFractionMap,
+  computePaceFitLevel,
+} from "../../domain/race-evaluation/paceFit";
 import type { EnrichedRaceHorse } from "./raceDataToHorses";
 import type { RaceEntryEvaluation, RaceEvaluationData, RaceInfo } from "./raceEvaluationTypes";
 import type { DisplayGrade } from "../../domain/race-evaluation/abilityGrades";
@@ -29,6 +32,7 @@ export function buildEvaluationData(input: BuildInput): RaceEvaluationData {
   const baseHorses: HorseAbility[] = entries;
   const results = evaluateRace(baseHorses, condition);
   const rById = new Map(results.map((r) => [r.horseId, r] as const));
+  const kickTopMap = computeKickInTopFractionMap(baseHorses);
   const finalW = getFinalWeights(condition);
   const demand = weightsToDemand0to100(finalW);
   const relGrades = computeAbilityLetterGrades(baseHorses);
@@ -111,7 +115,9 @@ export function buildEvaluationData(input: BuildInput): RaceEvaluationData {
           roleHint: r.roleHint,
           pastRunInsight: r.pastRunInsight,
           fitLevel: fitLevelFromScore(fitRaw),
-          paceFit: computePaceFitLevel(h, condition),
+          paceFit: computePaceFitLevel(h, condition, {
+            kickInTopFraction: kickTopMap.get(h.horseId),
+          }),
           buyLabel: r.buyLabel,
         },
         evaluationSignals: h.signals,

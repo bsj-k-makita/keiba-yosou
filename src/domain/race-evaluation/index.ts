@@ -28,5 +28,6 @@ export * from "./resolveEvaluationSignals";
 export * from "./contextualBonuses";
 export * from "./racePreview";
 export * from "./courseTraitResolver";
+export * from "./structuralPhysicalBonuses";
 export * from "./oddsDistortion";
 export * from "./lapShapeFit";

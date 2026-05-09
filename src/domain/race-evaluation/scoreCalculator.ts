@@ -23,15 +23,13 @@ import {
   getFinalWeights,
 } from "./weightResolver";
 import { extractStrongAbilities } from "./strongAbilities";
-import {
-  combineFinalEvaluationScore,
-  computeRaceRelativeScores,
-  paceFitToBonus,
-} from "./finalScoring";
+import { combineFinalEvaluationScore, computeRaceRelativeScores } from "./finalScoring";
 import { computeDistanceFitBonus } from "./distanceFit";
 import {
   classifyTodayLapKind,
-  computePaceFitLevel,
+  computeKickInTopFractionMap,
+  computePaceFitEvaluation,
+  computePaceScenarioAmplifier,
   computeStaminaResilienceBonus,
 } from "./paceFit";
 import { detectOddsDistortion } from "./oddsDistortion";
@@ -45,6 +43,7 @@ import { computeContextualBonuses } from "./contextualBonuses";
 import { BUY_LABELS } from "./lingoConstants";
 import { ADJUSTMENT_STRENGTH } from "./adjustments";
 import { computeCourseTraitHits } from "./courseTraitResolver";
+import { computeStructuralPhysicalHits } from "./structuralPhysicalBonuses";
 import { computeRaceAnalysisBonus } from "./storedRaceAnalysisBonus";
 
 export { extractStrongAbilities } from "./strongAbilities";
@@ -281,6 +280,8 @@ export function evaluateRace(
 ): HorseScoreResult[] {
   const evalHorses = horses.map((h) => blendAbilityWithPastRuns(h));
   const styleSignalFactor = computeStyleSignalFactor(evalHorses);
+  const kickTopMap = computeKickInTopFractionMap(evalHorses);
+  const paceScenarioAmp = computePaceScenarioAmplifier(condition);
   const baseWeights = getBaseWeights(condition);
   const finalWeights = getFinalWeights(condition);
   const strengthMult = ADJUSTMENT_STRENGTH[condition.adjustmentStrength];
@@ -412,7 +413,10 @@ export function evaluateRace(
     const r = results.find((x) => x.horseId === h.horseId);
     if (!r) continue;
     const relScore = rel.get(h.horseId) ?? 0;
-    const pBonus = round1(paceFitToBonus(computePaceFitLevel(h, condition)) * styleSignalFactor);
+    const paceEval = computePaceFitEvaluation(h, condition, {
+      kickInTopFraction: kickTopMap.get(h.horseId),
+    });
+    const pBonus = round1(paceEval.bonus * styleSignalFactor * paceScenarioAmp);
     const dBonus = computeDistanceFitBonus(h, condition);
     const cBonus = r.classLevelBonus;
     const vPenalty = variancePenaltyPoints(computeVariance(h.pastRuns));
@@ -451,10 +455,13 @@ export function evaluateRace(
     const weakTierImpact = weakTierImpactFromDiff(r.scoreDiff, condition.adjustmentStrength);
     const dScaled = round1(dBonus * strengthMult);
     const contextualScaled = round1(contextualTotal * strengthMult);
-    const traitHits = computeCourseTraitHits(h, condition);
-    // コース特性は finalEvaluationScore へ直結するが、単独要因での暴走を防ぐため +8.5 に制限。
-    const courseTraitBonus = round1(clamp(traitHits.reduce((sum, hit) => sum + hit.bonus, 0), 0, MAX_COURSE_TRAIT_TOTAL));
-    const courseTraitReasons = traitHits.map((hit) => `${hit.label}: ${hit.reason} (+${hit.bonus.toFixed(1)})`);
+    const traitHits = [...computeCourseTraitHits(h, condition), ...computeStructuralPhysicalHits(h, condition)];
+    const traitSum = traitHits.reduce((sum, hit) => sum + hit.bonus, 0);
+    const courseTraitBonusRaw = round1(clamp(traitSum, -MAX_COURSE_TRAIT_TOTAL, MAX_COURSE_TRAIT_TOTAL));
+    const courseTraitReasons = traitHits.map((hit) => {
+      const sign = hit.bonus >= 0 ? "+" : "";
+      return `${hit.label}: ${hit.reason} (${sign}${hit.bonus.toFixed(1)})`;
+    });
     r.raceRelativeScore = relScore;
     r.paceFitBonus = pBonus;
     r.distanceFitBonus = dBonus;
@@ -466,15 +473,23 @@ export function evaluateRace(
     r.trendBonus = contextual.trendBonus;
     r.paceBalanceBonus = contextual.paceBalanceBonus;
     r.tripContextBonus = contextual.tripContextBonus;
-    // 第3層 + コース特性が同方向に重なる場合の合算上限。コース特性最大 +8.5 と耐性バフ最大 +6 で
-    // 単独 +14.5 になるが、+12.0 へ抑え込み「重複ご褒美」を避ける。
-    const courseAndResilience = clamp(
-      courseTraitBonus + r.staminaResilienceBonus,
-      0,
-      COURSE_TRAIT_PLUS_RESILIENCE_CAP,
-    );
-    const cappedCourseTraitBonus = clamp(courseAndResilience - r.staminaResilienceBonus, 0, courseTraitBonus);
-    const cappedResilienceBonus = round1(courseAndResilience - cappedCourseTraitBonus);
+    // 第3層 + コース特性が同方向に重なる場合の合算上限（特性が正のときのみ耐性バフと競合抑制）。
+    let cappedCourseTraitBonus: number;
+    let cappedResilienceBonus: number;
+    if (courseTraitBonusRaw >= 0) {
+      const courseAndResilience = clamp(
+        courseTraitBonusRaw + r.staminaResilienceBonus,
+        0,
+        COURSE_TRAIT_PLUS_RESILIENCE_CAP,
+      );
+      cappedCourseTraitBonus = round1(
+        clamp(courseAndResilience - r.staminaResilienceBonus, 0, courseTraitBonusRaw),
+      );
+      cappedResilienceBonus = round1(courseAndResilience - cappedCourseTraitBonus);
+    } else {
+      cappedCourseTraitBonus = courseTraitBonusRaw;
+      cappedResilienceBonus = round1(r.staminaResilienceBonus);
+    }
     r.courseTraitBonus = round1(cappedCourseTraitBonus);
     r.courseTraitReasons = courseTraitReasons;
     if (cappedResilienceBonus > 0.1) {

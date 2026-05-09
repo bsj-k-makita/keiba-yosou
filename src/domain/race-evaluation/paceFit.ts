@@ -1,4 +1,5 @@
 import type { HorseAbility, RaceCondition } from "./abilityTypes";
+import { PACE_FIT_EXTREME_BAD_BONUS, paceFitToBonus } from "./finalScoring";
 import { classifyLapStructure, LAP_STRUCTURE } from "./lapStructure";
 import { PACE_FIT, type PaceFitToken, type RunningStyle } from "./lingoConstants";
 
@@ -95,15 +96,96 @@ const BIAS: Record<string, Record<RunningStyle, PaceFitToken>> = {
   },
 };
 
-/**
- * 脚質 × 今回条件（ペース＋バイアス）に基づく展開適合。能力値は変更しない。
- */
-export function computePaceFitLevel(horse: HorseAbility, condition: RaceCondition): PaceFitToken {
+function computeBasePaceFitToken(horse: HorseAbility, condition: RaceCondition): PaceFitToken {
   const rs = horse.runningStyle;
   const pt = paceTier(condition.pace);
   const p = PACE[pt]?.[rs] ?? P_TOK.FIT;
   const b = (BIAS[condition.bias] ?? BIAS.flat)?.[rs] ?? P_TOK.FIT;
   return nToToken(Math.min(tokenToN(p), tokenToN(b)));
+}
+
+export type PaceFitComputeContext = {
+  /**
+   * true = kick がフィールド上位割合内。false のとき「前残り×差し/追込」末脚ゲートで × へ落とす。
+   * 未指定時は末脚ゲートを適用しない（単頭評価・JSON 部分更新との互換）。
+   */
+  kickInTopFraction?: boolean;
+};
+
+/**
+ * 脚質×ペース×バイアスに加え、(1) 前残り×スローの合成厳格化、(2) 末脚レース内順位ゲート、(3) × の極端ペナルティを反映した展開適合。
+ */
+export function computePaceFitEvaluation(
+  horse: HorseAbility,
+  condition: RaceCondition,
+  context?: PaceFitComputeContext,
+): { token: PaceFitToken; bonus: number } {
+  const rs = horse.runningStyle;
+  let token = computeBasePaceFitToken(horse, condition);
+  let compoundExtreme = false;
+
+  const pt = paceTier(condition.pace);
+  if (condition.bias === "front_favor" && pt === "slow") {
+    if (rs === "差し") {
+      token = P_TOK.BAD;
+    }
+    if (rs === "追込") {
+      token = P_TOK.BAD;
+      compoundExtreme = true;
+    }
+  }
+
+  if (
+    condition.bias === "front_favor" &&
+    (rs === "差し" || rs === "追込") &&
+    context?.kickInTopFraction === false
+  ) {
+    token = P_TOK.BAD;
+  }
+
+  let bonus = paceFitToBonus(token);
+  if (compoundExtreme) {
+    bonus = PACE_FIT_EXTREME_BAD_BONUS;
+  }
+  return { token, bonus };
+}
+
+/**
+ * 脚質 × 今回条件（ペース＋バイアス）に基づく展開適合記号（◎〜×）。`context` があるとき末脚ゲートを適用。
+ */
+export function computePaceFitLevel(
+  horse: HorseAbility,
+  condition: RaceCondition,
+  context?: PaceFitComputeContext,
+): PaceFitToken {
+  return computePaceFitEvaluation(horse, condition, context).token;
+}
+
+/**
+ * kick でソートし、上位 `topFraction`（既定 0.2）に入る馬を true とするマップ。同一レース内でのみ意味を持つ。
+ */
+export function computeKickInTopFractionMap(
+  horses: readonly HorseAbility[],
+  topFraction: number = 0.2,
+): Map<string, boolean> {
+  const n = horses.length;
+  const out = new Map<string, boolean>();
+  if (n === 0) return out;
+  const sorted = [...horses].sort((a, b) => b.kick - a.kick || a.horseId.localeCompare(b.horseId));
+  const topCount = Math.max(1, Math.ceil(n * topFraction));
+  const topIds = new Set(sorted.slice(0, topCount).map((h) => h.horseId));
+  for (const h of horses) {
+    out.set(h.horseId, topIds.has(h.horseId));
+  }
+  return out;
+}
+
+/** strong かつ前残り指定時、展開ペナルティ／加点のレバレッジを上げる。 */
+export function computePaceScenarioAmplifier(condition: RaceCondition): number {
+  if (condition.adjustmentStrength === "strong" && condition.bias === "front_favor") {
+    return 1.6;
+  }
+  return 1.0;
 }
 
 // ────────────────────────────────────────────────────────────────

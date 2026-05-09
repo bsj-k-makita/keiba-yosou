@@ -39,6 +39,10 @@ function clampWeightsLocal(weights: WeightSet): WeightSet {
   return out;
 }
 
+function clamp01(n: number): number {
+  return Math.max(0, Math.min(1, n));
+}
+
 function normalizeWeightsLocal(weights: WeightSet): WeightSet {
   let sum = 0;
   for (const key of ABILITY_KEYS) {
@@ -121,6 +125,14 @@ export function applyVenuePhysicalFactorAdjustments(base: WeightSet, condition: 
   const weights: WeightSet = { ...base };
   const distance = condition.distance ?? 1600;
   const surface = condition.surface ?? "芝";
+  const cushion = condition.trackCushion01;
+  const hasCushion = cushion != null && Number.isFinite(cushion);
+  const firm = hasCushion ? clamp01(cushion) : null;
+  /** 柔らかい馬場ほど坂・踏み込み負荷を増幅（実質 1.5 倍方向）。硬いほど軽減。 */
+  let hillMult = 1;
+  if (firm != null) {
+    hillMult = 1 + (1 - firm) * 0.5;
+  }
 
   if (factor.straight > 500) {
     weights.kick += 0.15;
@@ -132,12 +144,26 @@ export function applyVenuePhysicalFactorAdjustments(base: WeightSet, condition: 
   }
 
   if (factor.uphill >= 1.8) {
-    weights.power += 0.15;
-    weights.sustain += 0.05;
-    weights.speed -= 0.1;
+    let pAdd = 0.15 * hillMult;
+    let sAdd = 0.05 * hillMult;
+    let spSub = 0.1 * (firm != null && firm > 0.62 ? 0.65 : 1);
+    if (firm != null && firm > 0.62) {
+      pAdd *= 0.72;
+      sAdd *= 0.72;
+    }
+    weights.power += pAdd;
+    weights.sustain += sAdd;
+    weights.speed -= spSub;
   } else {
-    weights.speed += 0.05;
-    weights.kick += 0.05;
+    let spBoost = 0.05;
+    let kBoost = 0.05;
+    if (firm != null && firm > 0.62) {
+      spBoost += 0.06;
+      kBoost += 0.04;
+      weights.power -= 0.05;
+    }
+    weights.speed += spBoost;
+    weights.kick += kBoost;
   }
 
   if (factor.cornerRadius === "tight") {
@@ -160,6 +186,19 @@ export function applyVenuePhysicalFactorAdjustments(base: WeightSet, condition: 
   if (surface === "ダート") {
     weights.power += 0.1;
     weights.kick -= 0.1;
+  }
+
+  if (firm != null) {
+    if (firm < 0.42) {
+      weights.power += 0.08 * (1 - firm);
+      weights.stamina += 0.06 * (1 - firm);
+      weights.speed -= 0.04 * (1 - firm);
+    }
+    if (firm > 0.68) {
+      weights.speed += 0.07 * firm;
+      weights.power -= 0.05 * firm;
+      weights.kick += 0.03 * firm;
+    }
   }
 
   return normalizeWeightsLocal(clampWeightsLocal(weights));

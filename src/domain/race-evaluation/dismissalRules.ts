@@ -1,6 +1,6 @@
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "./abilityTypes";
 import { FIT_TENDENCY, PACE_FIT } from "./lingoConstants";
-import { computePaceFitLevel } from "./paceFit";
+import { computeKickInTopFractionMap, computePaceFitLevel } from "./paceFit";
 import {
   type FitLevel,
   computeFitScore,
@@ -38,13 +38,16 @@ export function collectDismissIds(
   const w = getFinalWeights(condition);
   const demand0to100 = weightsToDemand0to100(w);
   const n = horses.length;
+  const kickTopMap = computeKickInTopFractionMap(horses);
   const set = new Set<string>();
   for (const h of horses) {
     const r = results.find((x) => x.horseId === h.horseId);
     if (!r) continue;
     const fit = computeFitScore(h, demand0to100);
     const fitLevel = fitLevelFromScore(fit);
-    const paceFit = computePaceFitLevel(h, condition);
+    const paceFit = computePaceFitLevel(h, condition, {
+      kickInTopFraction: kickTopMap.get(h.horseId),
+    });
     const paceBad = paceFit === PACE_FIT.BAD;
     const sig = countDismissConditions(h, r, n, fitLevel, paceBad);
     if (sig >= 2) set.add(h.horseId);

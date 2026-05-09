@@ -196,6 +196,11 @@ export type RaceCondition = {
   /** 当該レース距離（m）。距離適性ボーナス計算に使用。 */
   distance?: number;
   ground: string;
+  /**
+   * トラッククッションの目安（0 に近いほど柔らかい／負荷が乗りやすい、1 に近いほど硬く坂の実質負荷が軽い）。
+   * 未設定時は `venuePhysicalFactors` の坂・直線補正はクッション連動なし。
+   */
+  trackCushion01?: number;
   /** 馬場状態とは別軸の時計傾向。 */
   trackSpeed?: "standard" | "fast" | "slow";
   bias: string;

@@ -8,6 +8,11 @@ const PACE_BONUS: Record<PaceFitToken, number> = {
   [PACE_FIT.BAD]: -5,
 };
 
+/**
+ * 前残り×スロー×追込の合成ペナルティ（トークンは × のまま、点数のみ一段深くする）。
+ */
+export const PACE_FIT_EXTREME_BAD_BONUS = -10;
+
 const REL_MIN = 30;
 const REL_MAX = 90;
 const Z_SCALE = 12;
