@@ -126,6 +126,22 @@ function computePinpointGateBonus(horse: HorseAbility, condition: RaceCondition)
   return 0;
 }
 
+/** 外部・相対化ライン用: 馬番／枠のピンポイント値（-8〜+8） */
+export function getPinpointGateBonus(horse: HorseAbility, condition: RaceCondition): number {
+  return computePinpointGateBonus(horse, condition);
+}
+
+/**
+ * ピンポイント枠を `raceAdjustedInput` に直打ちする加算（相対化前）。不利は負。
+ * 最終 `capAptitudeSwing` で潰れないよう、同額を contextual の gate から二重に入れない（scoreCalculator 側で控除）。
+ */
+export function pinpointGateRaceInputDelta(horse: HorseAbility, condition: RaceCondition): number {
+  const pin = computePinpointGateBonus(horse, condition);
+  if (pin === 0) return 0;
+  const RACE_INPUT_PINPOINT_SCALE = 1.9;
+  return round1(pin * RACE_INPUT_PINPOINT_SCALE);
+}
+
 function defaultTrackBiasStrength01(condition: RaceCondition): number {
   if (condition.bias === "inside_favor" || condition.bias === "outside_favor") return 0.65;
   return 0;
@@ -234,8 +250,12 @@ function computeGateStyleSynergyBonus(
   let bonus = 0;
 
   if (trackBias.isManualNeutral) {
-    // ユーザーがフラット指定した場合は、枠有利不利を抑えて物理ロスのみ残す。
-    const physicalAmp = Math.max(0, turnAmp - 1);
+    // ユーザーがフラット指定した場合は、馬場プリセットの内外グラデは抑え、物理ロスのみ残す。
+    // turnCount 未設定だと turnAmp=1 → max(0,turnAmp-1)=0 になり枠×脚質が丸ごと消えるため、
+    // コーナー数が少ないコースでも最低限の内／外ロスを効かせる床を敷く。
+    const cornerStretch = Math.max(0, turnAmp - 1);
+    const neutralFlatGateFloor = 0.32;
+    const physicalAmp = Math.max(neutralFlatGateFloor, cornerStretch);
     if (horse.runningStyle === "逃げ" || horse.runningStyle === "先行") {
       bonus = insideAdv * 1.2 * physicalAmp;
     } else if (horse.runningStyle === "差し" || horse.runningStyle === "追込") {
@@ -243,7 +263,7 @@ function computeGateStyleSynergyBonus(
     } else {
       bonus = insideAdv * 0.5 * physicalAmp;
     }
-    return round1(clamp(bonus * styleSignalFactor, -1.6, 1.6));
+    return round1(clamp(bonus * styleSignalFactor, -2.4, 2.4));
   }
 
   if (horse.runningStyle === "逃げ" || horse.runningStyle === "先行") {
@@ -355,8 +375,8 @@ function raceTargetPaceDelta(condition: RaceCondition): number {
     const last3 = s[n - 1]! + s[n - 2]! + s[n - 3]!;
     return front3 - last3;
   }
-  if (condition.pace === "high" || condition.pace === "many_front_runners") return 1.2;
-  if (condition.pace === "slow" || condition.pace === "no_front_runner") return -1.2;
+  if (condition.pace === "high" || condition.pace === "many_front_runners") return 1.45;
+  if (condition.pace === "slow" || condition.pace === "no_front_runner") return -1.45;
   return 0;
 }
 

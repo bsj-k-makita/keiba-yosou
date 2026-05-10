@@ -1,4 +1,5 @@
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "./abilityTypes";
+import { pinpointGateRaceInputDelta } from "./contextualBonuses";
 import type { PastRunRecord } from "./pastRunTypes";
 import { classifyLapStructure, LAP_STRUCTURE, type LapStructureKind } from "./lapStructure";
 import {
@@ -479,5 +480,23 @@ export function calibrateRaceAdjustedInputsForFieldClassTier(
     if (!r) continue;
     const delta = (tiers[i]! - mu) * FIELD_CLASS_TIER_CALIBRATION;
     r.raceAdjustedInput = round1(r.raceAdjustedInput + delta);
+  }
+}
+
+/**
+ * ユーザー指定のピンポイント枠・馬番を相対化入力に反映（`capAptitudeSwing` 経由で潰されない）。
+ */
+export function applyPinpointGateRaceAdjustedInputDelta(
+  horses: readonly HorseAbility[],
+  condition: RaceCondition,
+  results: HorseScoreResult[],
+): void {
+  const byId = new Map(horses.map((h) => [h.horseId, h] as const));
+  for (const r of results) {
+    const h = byId.get(r.horseId);
+    if (!h) continue;
+    const d = pinpointGateRaceInputDelta(h, condition);
+    if (d === 0) continue;
+    r.raceAdjustedInput = round1(r.raceAdjustedInput + d);
   }
 }

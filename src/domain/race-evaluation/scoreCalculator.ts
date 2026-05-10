@@ -15,6 +15,7 @@ import {
 import { generateScoreReason } from "./reasonGenerator";
 import {
   baseAbilityCore,
+  compressIntrinsicTailScore,
   enginePeakAdjustment,
   raceAdjustedInput,
   conditionScore,
@@ -47,10 +48,11 @@ import { computeClassLevelBonus } from "./classLevelScore";
 import {
   applyKickL2Emphasis,
   blendAbilityWithPastRuns,
+  applyPinpointGateRaceAdjustedInputDelta,
   calibrateRaceAdjustedInputsForFieldClassTier,
   computeCourseProfileMatchBonus,
 } from "./performanceAbility";
-import { computeContextualBonuses } from "./contextualBonuses";
+import { computeContextualBonuses, getPinpointGateBonus } from "./contextualBonuses";
 import { BUY_LABELS } from "./lingoConstants";
 import { ADJUSTMENT_STRENGTH } from "./adjustments";
 import { computeCourseTraitHits } from "./courseTraitResolver";
@@ -158,9 +160,9 @@ function inferCourseL2Demand01(condition: RaceCondition): number {
         : key.includes("中京") || key.includes("新潟")
           ? 0.72
           : 0.62;
-  if (condition.pace === "slow" || condition.pace === "no_front_runner") base += 0.08;
-  if (condition.trackSpeed === "fast") base += 0.04;
-  if (condition.trackSpeed === "slow") base -= 0.05;
+  if (condition.pace === "slow" || condition.pace === "no_front_runner") base += 0.09;
+  if (condition.trackSpeed === "fast") base += 0.085;
+  if (condition.trackSpeed === "slow") base -= 0.095;
   /** 東京芝 1400〜1600 の瞬発マイルは L2（残り400〜200m）負荷が相対的に高い */
   if (key.includes("東京") && turf && dist >= 1400 && dist <= 1600) base += 0.07;
   return clamp(base, 0.45, 0.95);
@@ -380,7 +382,7 @@ export function evaluateRace(
 
     // 第1層: 展開不問のエンジン素点バイアス
     const enginePeak = round1(enginePeakAdjustment(h));
-    const intrinsic = round1(bCore + repro - risk + enginePeak);
+    const intrinsic = compressIntrinsicTailScore(round1(bCore + repro - risk + enginePeak));
 
     // MAX性能
     const maxPerf = computeMaxPerformance(h.pastRuns);
@@ -484,6 +486,7 @@ export function evaluateRace(
   });
 
   calibrateRaceAdjustedInputsForFieldClassTier(evalHorses, results);
+  applyPinpointGateRaceAdjustedInputDelta(evalHorses, evalCondition, results);
 
   const relativeMode =
     evalCondition.adjustmentStrength === "strong" ? "absolute_delta" : "normalized";
@@ -508,6 +511,9 @@ export function evaluateRace(
       evalHorses.length,
       styleSignalFactor,
     );
+    /** ピンポイント枠は raceAdjustedInput に直打ち済み。ここでは二重計上しない。 */
+    const pinGate = getPinpointGateBonus(h, evalCondition);
+    const gateBiasForContextual = contextual.gateBiasBonus - pinGate;
     const biasDisadvantageRecoveryBonus =
       h.was_bias_disadvantaged === true ? BIAS_DISADVANTAGE_RECOVERY_BONUS : 0;
     const jockeyBd = computeJockeyRiderBonuses(h, condition);
@@ -520,7 +526,7 @@ export function evaluateRace(
     r.staminaTestBonus = staminaTestBonus;
     const contextualTotal =
       contextual.pedigreeBonus +
-      contextual.gateBiasBonus * FRAME_GATE_WEIGHT_RATIO +
+      gateBiasForContextual * FRAME_GATE_WEIGHT_RATIO +
       contextual.gateStyleSynergyBonus * FRAME_GATE_WEIGHT_RATIO +
       contextual.connectionsBonus +
       contextual.trendBonus +

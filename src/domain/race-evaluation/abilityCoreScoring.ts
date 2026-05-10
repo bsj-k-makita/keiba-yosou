@@ -141,6 +141,15 @@ export function intrinsicAbilityWithAdjustments(horse: HorseAbility): number {
 }
 
 /**
+ * 突出した素点の尾を軽く圧縮し、条件・枠不利などが順位に乗りやすくする（レース内相对比較向け）。
+ */
+export function compressIntrinsicTailScore(intrinsic: number): number {
+  if (intrinsic <= 79.5) return intrinsic;
+  const excess = intrinsic - 79.5;
+  return round1(79.5 + excess * 0.62);
+}
+
+/**
  * 条件に依存しない素点。weight は既に正規化済みを想定。
  */
 export function conditionScore(horse: HorseAbility, finalWeights: WeightSet): number {

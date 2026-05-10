@@ -14,31 +14,31 @@ export const GROUND_ADJUSTMENTS: Record<string, AdjustmentDefinition> = {
   yielding: {
     label: "稍重",
     adjustment: {
-      speed: -0.04,
-      stamina: 0.07,
-      kick: -0.05,
-      sustain: 0.05,
-      power: 0.08,
+      speed: -0.055,
+      stamina: 0.095,
+      kick: -0.07,
+      sustain: 0.065,
+      power: 0.105,
     },
   },
   heavy: {
     label: "重",
     adjustment: {
-      speed: -0.09,
-      stamina: 0.14,
-      kick: -0.12,
-      sustain: 0.08,
-      power: 0.16,
+      speed: -0.12,
+      stamina: 0.185,
+      kick: -0.155,
+      sustain: 0.105,
+      power: 0.205,
     },
   },
   bad: {
     label: "不良",
     adjustment: {
-      speed: -0.14,
-      stamina: 0.20,
-      kick: -0.17,
-      sustain: 0.10,
-      power: 0.22,
+      speed: -0.185,
+      stamina: 0.265,
+      kick: -0.225,
+      sustain: 0.135,
+      power: 0.285,
     },
   },
 };
@@ -57,21 +57,21 @@ export const TRACK_SPEED_ADJUSTMENTS: Record<string, AdjustmentDefinition> = {
   fast: {
     label: "時計が速い",
     adjustment: {
-      speed: 0.10,
-      stamina: -0.07,
-      kick: 0.14,
-      sustain: 0.03,
-      power: -0.10,
+      speed: 0.145,
+      stamina: -0.1,
+      kick: 0.2,
+      sustain: 0.045,
+      power: -0.145,
     },
   },
   slow: {
     label: "時計がかかる",
     adjustment: {
-      speed: -0.07,
-      stamina: 0.12,
-      kick: -0.09,
-      sustain: 0.08,
-      power: 0.14,
+      speed: -0.1,
+      stamina: 0.17,
+      kick: -0.125,
+      sustain: 0.115,
+      power: 0.195,
     },
   },
 };
@@ -182,8 +182,9 @@ export const PACE_ADJUSTMENTS: Record<string, AdjustmentDefinition> = {
   },
 };
 
+/** 「弱め」でも馬場・ペース・時計プリセットの差が体感できるよう middle との差をやや縮める */
 export const ADJUSTMENT_STRENGTH = {
-  weak: 1.1,
+  weak: 1.35,
   middle: 2.2,
   strong: 3.4,
 } as const;

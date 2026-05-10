@@ -163,6 +163,13 @@ export function estimateFourthCornerRanking(
       if (style === "逃げ" || style === "先行") score -= 0.22;
     }
 
+    /** 開幕週・明示フェーズ: 内・前寄りの隊列になりやすい想定で 4 角位置を詰める（倍率系 `strongOpen` と整合） */
+    if (isApproxOpeningWeekTrack(condition)) {
+      if (style === "逃げ" || style === "先行") score -= 0.36;
+      if (style === "好位") score -= 0.14;
+      if (style === "差し" || style === "追込") score += 0.34;
+    }
+
     if (factor?.cornerRadius === "tight") {
       if (style === "逃げ" || style === "先行") score -= 0.7;
       if (style === "追込") score += 0.9;
