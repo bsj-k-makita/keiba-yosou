@@ -96,12 +96,34 @@ const BIAS: Record<string, Record<RunningStyle, PaceFitToken>> = {
   },
 };
 
+/**
+ * ペース脚質と馬場傾向脚質を合成。
+ * `bias === flat` は従来どおり保守的に min。
+ * 明示バイアスとペースシナリオが噛み合わないときは bias を優先（max）。
+ */
+function combinePaceAndBiasTokens(condition: RaceCondition, p: PaceFitToken, b: PaceFitToken): PaceFitToken {
+  const pn = tokenToN(p);
+  const bn = tokenToN(b);
+  const bias = condition.bias ?? "flat";
+  if (bias === "flat") {
+    return nToToken(Math.min(pn, bn));
+  }
+  const pt = paceTier(condition.pace);
+  if (bias === "closer_favor" && pt === "slow") {
+    return nToToken(Math.max(pn, bn));
+  }
+  if (bias === "front_favor" && pt === "high") {
+    return nToToken(Math.max(pn, bn));
+  }
+  return nToToken(Math.min(pn, bn));
+}
+
 function computeBasePaceFitToken(horse: HorseAbility, condition: RaceCondition): PaceFitToken {
   const rs = horse.runningStyle;
   const pt = paceTier(condition.pace);
   const p = PACE[pt]?.[rs] ?? P_TOK.FIT;
   const b = (BIAS[condition.bias] ?? BIAS.flat)?.[rs] ?? P_TOK.FIT;
-  return nToToken(Math.min(tokenToN(p), tokenToN(b)));
+  return combinePaceAndBiasTokens(condition, p, b);
 }
 
 export type PaceFitComputeContext = {

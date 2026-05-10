@@ -109,6 +109,26 @@ export function resolveVenuePhysicalFactorKey(condition: RaceCondition): string 
 }
 
 /**
+ * 過去走の開催欄（venue 文字列）から `VENUE_PHYSICAL_FACTORS` のキーを推定する。
+ * プロファイル類似・コース不一致度外視で使用。
+ */
+export function resolvePastRunVenueFactorKey(venue: string | undefined): string | null {
+  if (!venue) return null;
+  const v = venue.trim();
+  if (v.includes("東京")) return "東京";
+  if (v.includes("中山")) return "中山";
+  if (v.includes("京都")) return v.includes("内") ? "京都内" : "京都外";
+  if (v.includes("阪神")) return "阪神外";
+  if (v.includes("中京")) return "中京";
+  if (v.includes("福島")) return "福島";
+  if (v.includes("新潟")) return "新潟外";
+  if (v.includes("小倉")) return "小倉";
+  if (v.includes("函館")) return "函館";
+  if (v.includes("札幌")) return "札幌";
+  return null;
+}
+
+/**
  * 戦略ベースウェイト（`strategicWeights`）を出発点にし、直線・坂・コーナー・距離・芝ダの案ロジックで補正した後、正規化する。
  * 未定義会場は入力ベースをそのまま返す。
  */

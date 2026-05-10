@@ -206,7 +206,15 @@ function computeGateBiasBonus(horse: HorseAbility, condition: RaceCondition, fie
 
   // 内外バイアス指定時の効きを明確化するため、レンジ上限を引き上げる。
   const biasSyncMultiplier = 5;
-  const sliderBonus = insideAdv * trackBias.direction * 3.6 * trackBias.strength01 * turnAmp * biasSyncMultiplier;
+  const outerBiasAmp = condition.bias === "outside_favor" ? 1.28 : 1;
+  const sliderBonus =
+    insideAdv *
+    trackBias.direction *
+    3.6 *
+    trackBias.strength01 *
+    turnAmp *
+    biasSyncMultiplier *
+    outerBiasAmp;
   return round1(clamp(sliderBonus + pinpoint, -maxAbs, maxAbs));
 }
 

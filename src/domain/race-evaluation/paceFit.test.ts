@@ -75,6 +75,14 @@ describe("computePaceFitEvaluation", () => {
     const r = computePaceFitEvaluation(h, c);
     expect(r.token).toBe(PACE_FIT.MAYBE);
   });
+
+  test("差し有利×スローではペースの前有利より馬場バイアスを優先し差しを底上げ", () => {
+    const h = horse("a", "差し", 70);
+    const c = cond({ bias: "closer_favor", pace: "slow" });
+    const r = computePaceFitEvaluation(h, c);
+    expect(r.token).toBe(PACE_FIT.PERFECT);
+    expect(r.bonus).toBeGreaterThan(0);
+  });
 });
 
 describe("computeKickInTopFractionMap", () => {

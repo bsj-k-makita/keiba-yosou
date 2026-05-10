@@ -10,11 +10,12 @@ const ROOT = join(__dirname, "..");
 const RACES_DIR = join(ROOT, "src/data/races");
 
 function parseArgs(argv) {
-  const out = { all: false, biasUpdate: false, raceIds: [] };
+  const out = { all: false, biasUpdate: false, raceIds: [], date: null };
   for (const a of argv) {
     if (a === "--all") out.all = true;
     else if (a === "--bias-update") out.biasUpdate = true;
     else if (a === "--recalc-ability") process.env.ENRICH_RECALC_ABILITY = "1";
+    else if (a.startsWith("--date=")) out.date = a.slice("--date=".length).trim();
     else if (!a.startsWith("-")) out.raceIds.push(a.replace(/\.json$/, ""));
   }
   return out;
@@ -25,6 +26,22 @@ function listRaceIds() {
   return readdirSync(RACES_DIR)
     .filter((f) => f.endsWith(".json"))
     .map((f) => f.replace(/\.json$/, ""));
+}
+
+/** raceInfo.date が一致するレースIDだけ（同一日の再enrich用） */
+function listRaceIdsForDate(dateStr) {
+  if (!existsSync(RACES_DIR)) return [];
+  const ids = [];
+  for (const f of readdirSync(RACES_DIR).filter((x) => x.endsWith(".json"))) {
+    try {
+      const raw = JSON.parse(readFileSync(join(RACES_DIR, f), "utf8"));
+      const d = raw?.meta?.date ?? raw?.raceInfo?.date;
+      if (d === dateStr) ids.push(f.replace(/\.json$/, ""));
+    } catch {
+      // skip
+    }
+  }
+  return ids;
 }
 
 function processRace(raceId) {
@@ -51,14 +68,17 @@ async function main() {
     );
   }
 
-  const raceIds = args.all ? listRaceIds() : args.raceIds;
+  let raceIds = args.all ? listRaceIds() : args.raceIds;
+  if (args.date) {
+    raceIds = listRaceIdsForDate(args.date);
+  }
   if (raceIds.length === 0) {
     if (args.biasUpdate) {
       process.stdout.write("done (bias-only).\n");
       return;
     }
     process.stderr.write(
-      "Usage: node scripts/enrich-investment-signals.mjs [--bias-update] [--recalc-ability] --all | <raceId> [raceId...]\n",
+      "Usage: node scripts/enrich-investment-signals.mjs [--bias-update] [--recalc-ability] [--date=YYYY-MM-DD] --all | <raceId> [raceId...]\n",
     );
     process.exit(1);
   }

@@ -31,6 +31,10 @@ import { getHorsesFromRaceData, getRaceEvaluationById, getRaceResultById, type R
 import type { RaceIndexItem } from "../../lib/race-data";
 import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
 import { FIXED_SOFTMAX_TEMPERATURE } from "../../lib/pipeline/normalization";
+import {
+  buildAbilityOnlyEvaluationCondition,
+  buildDefaultNeutralCondition,
+} from "./neutralRaceCondition";
 
 const NEUTRAL_CONDITION: RaceCondition = {
   venue: "東京",
@@ -187,8 +191,11 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   const [tableSummary, setTableSummary] = useState(false);
 
   const horses = useMemo(() => getHorsesFromRaceData(race), [race]);
+  const inferredSection200mSec = useMemo(
+    () => inferRaceSection200mFromEntries(race.raceId, horses),
+    [race.raceId, horses],
+  );
   const initialCondition = useMemo<RaceCondition>(() => {
-    const inferredSection = inferRaceSection200mFromEntries(race.raceId, horses);
     const carryOver = loadCarryOverCondition(race.raceInfo);
     // グローバルプロファイル（「本日の設定を全レースに適用」）が保存されていれば、
     // per-venue キャリーオーバーより優先して適用する
@@ -199,11 +206,20 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       ...(globalProfile ?? {}),
       raceName: race.condition.raceName ?? race.raceInfo.raceName,
       surface: race.condition.surface ?? race.raceInfo.surface,
-      section200mSec: race.condition.section200mSec ?? inferredSection,
+      section200mSec: race.condition.section200mSec ?? inferredSection200mSec,
     };
-  }, [horses, race.condition, race.raceId, race.raceInfo]);
+  }, [horses, race.condition, race.raceId, race.raceInfo, inferredSection200mSec]);
   const [condition, setCondition] = useState<RaceCondition>(initialCondition);
+  const [abilityOnlyPreview, setAbilityOnlyPreview] = useState(false);
   const userEditedRef = useRef(false);
+
+  const evalCondition = useMemo(
+    () =>
+      abilityOnlyPreview
+        ? buildAbilityOnlyEvaluationCondition(race, inferredSection200mSec)
+        : condition,
+    [abilityOnlyPreview, race, inferredSection200mSec, condition],
+  );
 
   // initialCondition は race JSON の再取得（DEV の定期ポーリング等）で毎回変わりうるが、
   // ここで同期するとユーザー編集中の条件設定が上書きされる。
@@ -226,7 +242,13 @@ export function RaceDetailView({ race, raceIndex }: Props) {
               .map((p) => p.horseId) ?? []);
       const bias = inferBiasFromTop3HorseIds(top3Ids, previousHorses);
       if (!live || bias == null || userEditedRef.current) return;
-      setCondition((prev) => ({ ...prev, bias }));
+      // グローバルプロファイル・キャリーオーバー・「外有利」など明示バイアスは維持する。
+      // 直前レースの自動推定はニュートラル（フラット）のときだけ上書きする。
+      setCondition((prev) => {
+        const current = prev.bias ?? "flat";
+        if (current !== "flat") return prev;
+        return { ...prev, bias };
+      });
     })();
     return () => {
       live = false;
@@ -239,10 +261,10 @@ export function RaceDetailView({ race, raceIndex }: Props) {
 
   const pipeline = useMemo(
     () =>
-      horses.length && condition
-        ? runRaceEvaluationPipeline(horses, condition)
+      horses.length && evalCondition
+        ? runRaceEvaluationPipeline(horses, evalCondition)
         : { results: [], viewModel: { byHorseId: new Map() }, adjustedProbabilities: new Map<string, number>() },
-    [horses, condition],
+    [horses, evalCondition],
   );
   const results = pipeline.results;
 
@@ -250,15 +272,15 @@ export function RaceDetailView({ race, raceIndex }: Props) {
 
   const peers = useMemo(
     () =>
-      condition == null
+      evalCondition == null
         ? findSameTypePeers([], [], NEUTRAL_CONDITION)
-        : findSameTypePeers(horses, results, condition),
-    [horses, results, condition],
+        : findSameTypePeers(horses, results, evalCondition),
+    [horses, results, evalCondition],
   );
 
   const finalW = useMemo(
-    () => getFinalWeights(condition ?? NEUTRAL_CONDITION),
-    [condition],
+    () => getFinalWeights(evalCondition ?? NEUTRAL_CONDITION),
+    [evalCondition],
   );
 
   const demand0to100 = useMemo(() => weightsToDemand0to100(finalW), [finalW]);
@@ -266,22 +288,23 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   const [conditionOpen, setConditionOpen] = useState(false);
 
   const { conditionOneLine, conditionMetaLine } = useMemo(() => {
-    if (condition == null) {
+    const c = evalCondition;
+    if (c == null) {
       return { conditionOneLine: "—", conditionMetaLine: "—" };
     }
-    const g = GROUND_ADJUSTMENTS[condition.ground]?.label ?? condition.ground;
-    const clock = TRACK_SPEED_ADJUSTMENTS[condition.trackSpeed ?? "standard"]?.label ?? "標準時計";
-    const b = BIAS_ADJUSTMENTS[condition.bias]?.label ?? condition.bias;
-    const p = PACE_ADJUSTMENTS[condition.pace]?.label ?? condition.pace;
+    const g = GROUND_ADJUSTMENTS[c.ground]?.label ?? c.ground;
+    const clock = TRACK_SPEED_ADJUSTMENTS[c.trackSpeed ?? "standard"]?.label ?? "標準時計";
+    const b = BIAS_ADJUSTMENTS[c.bias]?.label ?? c.bias;
+    const p = PACE_ADJUSTMENTS[c.pace]?.label ?? c.pace;
     const s =
-      condition.adjustmentStrength === "weak"
+      c.adjustmentStrength === "weak"
         ? "弱"
-        : condition.adjustmentStrength === "middle"
+        : c.adjustmentStrength === "middle"
           ? "中"
           : "強";
     const lapType =
-      condition.section200mSec != null && condition.section200mSec.length >= 4
-        ? classifyLapStructure(condition.section200mSec)
+      c.section200mSec != null && c.section200mSec.length >= 4
+        ? classifyLapStructure(c.section200mSec)
         : null;
     const lapText =
       lapType == null
@@ -289,19 +312,20 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         : lapType === LAP_STRUCTURE.NEUTRAL
           ? "ラップタイプ: 中間（判定弱）"
           : `ラップタイプ: ${lapType}`;
-    const favN = condition.favoredHorseNumbers?.length ?? 0;
-    const disN = condition.disfavoredHorseNumbers?.length ?? 0;
+    const favN = c.favoredHorseNumbers?.length ?? 0;
+    const disN = c.disfavoredHorseNumbers?.length ?? 0;
     const gatePickText =
       favN + disN > 0 ? `ゲート指定: 有利${favN}・不利${disN}` : "ゲート指定なし";
+    const prefix = abilityOnlyPreview ? "【能力のみ】" : "";
     return {
-      conditionOneLine: `${condition.venue} · ${g} · ${clock} · ${b} · ${p} · 強度${s} · 勝率T${FIXED_SOFTMAX_TEMPERATURE}固定 · ${gatePickText} · ${lapText}`,
-      conditionMetaLine: `${condition.venue} / ${g} / ${clock} / ${b} / ${p} / 強度${s} / 勝率正規化T=${FIXED_SOFTMAX_TEMPERATURE}固定 / ${gatePickText} / ${lapText}`,
+      conditionOneLine: `${prefix}${c.venue} · ${g} · ${clock} · ${b} · ${p} · 強度${s} · 勝率T${FIXED_SOFTMAX_TEMPERATURE}固定 · ${gatePickText} · ${lapText}`,
+      conditionMetaLine: `${prefix}${c.venue} / ${g} / ${clock} / ${b} / ${p} / 強度${s} / 勝率正規化T=${FIXED_SOFTMAX_TEMPERATURE}固定 / ${gatePickText} / ${lapText}`,
     };
-  }, [condition]);
+  }, [evalCondition, abilityOnlyPreview]);
 
   /** 出馬票一覧：印順を主軸（◎○▲△☆…）、タイブレークは△役割 → 最終順位 */
   const sorted = useMemo(() => {
-    if (condition == null) return [];
+    if (evalCondition == null) return [];
     const order = new Map(results.map((r, i) => [r.horseId, i] as const));
     return [...results].sort((a, b) => {
       const ma = markPriority(a.mark);
@@ -319,12 +343,12 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       if (da !== 0) return da;
       return order.get(a.horseId)! - order.get(b.horseId)!;
     });
-  }, [condition, results]);
+  }, [evalCondition, results]);
   /** AI予想タブ：補正後スコア降順 */
   const sortedByPtDesc = useMemo(() => {
-    if (condition == null) return [];
+    if (evalCondition == null) return [];
     return [...results].sort((a, b) => b.adjustedScore - a.adjustedScore);
-  }, [condition, results]);
+  }, [evalCondition, results]);
   /** レース全体の補正後スコア最大（比例点数の分母） */
   const maxAdjustedScoreInRace = useMemo(
     () => results.reduce((m, row) => Math.max(m, row.adjustedScore), 0),
@@ -363,22 +387,26 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   // 結果パネルから条件を適用する
   const handleApplySuggest = useCallback((bias: string) => {
     userEditedRef.current = true;
+    setAbilityOnlyPreview(false);
     setCondition((prev) => ({ ...prev, bias }));
     setTab("list");
   }, []);
 
   const handleConditionPanelChange = useCallback((next: RaceCondition) => {
     userEditedRef.current = true;
+    setAbilityOnlyPreview(false);
     setCondition(next);
   }, []);
 
   const handleBetConditionChange = useCallback((next: RaceCondition) => {
     userEditedRef.current = true;
+    setAbilityOnlyPreview(false);
     setCondition(next);
   }, []);
 
   const handleToggleQuickAdjustment = useCallback((key: QuickAdjustmentKey) => {
     userEditedRef.current = true;
+    setAbilityOnlyPreview(false);
     setCondition((prev) => ({
       ...prev,
       quickAdjustments: {
@@ -387,6 +415,12 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       },
     }));
   }, []);
+
+  const handleResetCondition = useCallback(() => {
+    userEditedRef.current = true;
+    setAbilityOnlyPreview(false);
+    setCondition(buildDefaultNeutralCondition(race, inferredSection200mSec));
+  }, [race, inferredSection200mSec]);
 
   const TABS: { key: ViewTab; label: string }[] = [
     { key: "list", label: "出馬表" },
@@ -429,6 +463,45 @@ export function RaceDetailView({ race, raceIndex }: Props) {
 
       {/* 条件アコーディオン */}
       <div className="app__condition-sticky">
+        <div
+          className="condition-quick-actions"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "10px",
+            alignItems: "center",
+            marginBottom: "8px",
+            padding: "8px 12px",
+            borderRadius: "8px",
+            background: "var(--c-surface-2, rgba(0,0,0,0.04))",
+            border: "1px solid var(--c-border, rgba(0,0,0,0.08))",
+          }}
+        >
+          <label
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              cursor: "pointer",
+              fontSize: "0.92em",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={abilityOnlyPreview}
+              onChange={(e) => setAbilityOnlyPreview(e.target.checked)}
+            />
+            能力のみ確認
+          </label>
+          <button type="button" className="view-density__btn" onClick={handleResetCondition}>
+            条件リセット
+          </button>
+          {abilityOnlyPreview ? (
+            <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
+              印・スコアは中立条件で再計算（編集中の設定は保持）
+            </span>
+          ) : null}
+        </div>
         <div className="condition-accordion" id="condition">
           <button
             type="button"
@@ -486,7 +559,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       <div className="detail-layout">
         <div className="detail-main">
           {tab !== "result" && (
-            <RaceConclusionPanel results={results} horses={horses} condition={condition} />
+            <RaceConclusionPanel results={results} horses={horses} condition={evalCondition} />
           )}
 
           {/* 一覧タブ */}
@@ -523,7 +596,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 sorted={sorted}
                 horses={horses}
                 gradesMap={gradesMap}
-                condition={condition}
+                condition={evalCondition}
                 viewModel={pipeline.viewModel}
                 summaryMode={tableSummary}
               />
@@ -633,7 +706,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                         grades={grades}
                         demand0to100={demand0to100}
                         allHorses={horses}
-                        condition={condition}
+                        condition={evalCondition}
                         viewModel={pipeline.viewModel}
                         compact={cardDensity === "compact"}
                         scorePoints100={cardScore100}
@@ -650,7 +723,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             <RaceBetPanel
               sorted={sorted}
               horses={horses}
-              condition={condition}
+              condition={evalCondition}
               viewModel={pipeline.viewModel}
               onConditionChange={handleBetConditionChange}
             />
@@ -672,7 +745,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         <aside className="detail-sidebar">
           <RaceEvaluationSummary
             raceId={race.raceId}
-            condition={condition}
+            condition={evalCondition}
             horses={horses}
             results={results}
             peers={peers}

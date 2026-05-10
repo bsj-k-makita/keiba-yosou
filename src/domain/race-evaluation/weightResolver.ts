@@ -8,7 +8,6 @@ import {
 } from "./abilityTypes";
 import {
   ADJUSTMENT_STRENGTH,
-  BIAS_ADJUSTMENTS,
   GROUND_ADJUSTMENTS,
   PACE_ADJUSTMENTS,
   TRACK_SPEED_ADJUSTMENTS,
@@ -121,6 +120,53 @@ export function normalizeWeights(weights: WeightSet): WeightSet {
   return out;
 }
 
+/**
+ * 馬場傾向（bias）はデルタ加算＋正規化だと変化が薄れるため、
+ * ground / pace / 時計とは別に、正規化後に軸別倍率で効かせる。
+ */
+const BIAS_MULT_BY_STRENGTH: Record<RaceCondition["adjustmentStrength"], number> = {
+  weak: 1.1,
+  middle: 1.22,
+  strong: 1.34,
+};
+
+export function applyBiasMultiplicativeTilt(weights: WeightSet, condition: RaceCondition): WeightSet {
+  const bias = condition.bias ?? "flat";
+  if (bias === "flat") return weights;
+
+  const m = BIAS_MULT_BY_STRENGTH[condition.adjustmentStrength] ?? 1.22;
+  const soften = 1 / Math.sqrt(m);
+  const out: WeightSet = { ...weights };
+
+  switch (bias) {
+    case "closer_favor":
+      out.kick *= m;
+      out.sustain *= 1 + (m - 1) * 0.5;
+      out.speed *= soften;
+      out.power *= soften;
+      break;
+    case "front_favor":
+      out.speed *= m;
+      out.sustain *= 1 + (m - 1) * 0.45;
+      out.kick *= soften;
+      break;
+    case "inside_favor":
+      out.speed *= 1 + (m - 1) * 0.55;
+      out.sustain *= 1 + (m - 1) * 0.35;
+      out.kick *= soften;
+      break;
+    case "outside_favor":
+      out.kick *= 1 + (m - 1) * 0.55;
+      out.sustain *= 1 + (m - 1) * 0.4;
+      out.speed *= soften;
+      break;
+    default:
+      return weights;
+  }
+
+  return normalizeWeights(clampWeights(out));
+}
+
 export function getFinalWeights(condition: RaceCondition): WeightSet {
   const baseRaw = getBaseWeights(condition);
   const base = applyVenuePhysicalFactorAdjustments(baseRaw, condition);
@@ -134,14 +180,14 @@ export function getFinalWeights(condition: RaceCondition): WeightSet {
   const adjustments: WeightSet[] = [
     deltaFrom(GROUND_ADJUSTMENTS, normalizedGround),
     deltaFrom(TRACK_SPEED_ADJUSTMENTS, legacyTrackSpeed),
-    deltaFrom(BIAS_ADJUSTMENTS, condition.bias),
     deltaFrom(PACE_ADJUSTMENTS, condition.pace),
   ];
   const strength = ADJUSTMENT_STRENGTH[condition.adjustmentStrength];
   const merged = applyAdjustments(base, adjustments, strength);
   const clamped = clampWeights(merged);
   const normalized = normalizeWeights(clamped);
-  return applyAbilityFocusDoubling(normalized, condition);
+  const biasTilted = applyBiasMultiplicativeTilt(normalized, condition);
+  return applyAbilityFocusDoubling(biasTilted, condition);
 }
 
 /**

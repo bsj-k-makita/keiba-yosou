@@ -44,7 +44,12 @@ import { computeLapShapeFit, computeRpcPaceMismatchPenalty } from "./lapShapeFit
 import { computeAdjustedRiskPenalty } from "./lossClassifier";
 import { classifyLapStructure, LAP_STRUCTURE } from "./lapStructure";
 import { computeClassLevelBonus } from "./classLevelScore";
-import { applyKickL2Emphasis, blendAbilityWithPastRuns } from "./performanceAbility";
+import {
+  applyKickL2Emphasis,
+  blendAbilityWithPastRuns,
+  calibrateRaceAdjustedInputsForFieldClassTier,
+  computeCourseProfileMatchBonus,
+} from "./performanceAbility";
 import { computeContextualBonuses } from "./contextualBonuses";
 import { BUY_LABELS } from "./lingoConstants";
 import { ADJUSTMENT_STRENGTH } from "./adjustments";
@@ -336,7 +341,7 @@ export function evaluateRace(
   condition: RaceCondition,
 ): HorseScoreResult[] {
   const evalHorses = horses
-    .map((h) => blendAbilityWithPastRuns(h))
+    .map((h) => blendAbilityWithPastRuns(h, condition))
     .map((h) => applyKickL2Emphasis(h, condition));
   const effectivePace = resolveEffectiveRacePace(condition, evalHorses);
   const evalCondition: RaceCondition = { ...condition, pace: effectivePace };
@@ -384,6 +389,7 @@ export function evaluateRace(
     const cond = round1(conditionScore(h, finalWeights));
     const cornerRank = fourthCornerByHorse.get(h.horseId)?.estimatedRank ?? 99;
     const cornerAbilityBias = fourthCornerAbilityBiasMultiplier(cornerRank, evalCondition);
+    const layer3ProfileBonus = round1(computeCourseProfileMatchBonus(h, evalCondition));
     const rAdj = round1(
       raceAdjustedInput(
         intrinsic,
@@ -391,7 +397,9 @@ export function evaluateRace(
         maxPerf,
         classBreakdown.classBonus + classBreakdown.stepPatternBonus,
         evalCondition.adjustmentStrength,
-      ) * cornerAbilityBias,
+      ) *
+        cornerAbilityBias +
+        layer3ProfileBonus,
     );
 
     const baseScore = round1(rawBase);
@@ -474,6 +482,8 @@ export function evaluateRace(
       paceSeverityKind: paceSeverity,
     };
   });
+
+  calibrateRaceAdjustedInputsForFieldClassTier(evalHorses, results);
 
   const relativeMode =
     evalCondition.adjustmentStrength === "strong" ? "absolute_delta" : "normalized";
