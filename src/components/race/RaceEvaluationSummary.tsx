@@ -40,6 +40,17 @@ type HitStats = {
   markRates: MarkRate[];
 };
 
+function pooledHitPercent(markRates: MarkRate[]): number {
+  let hit = 0;
+  let total = 0;
+  for (const r of markRates) {
+    hit += r.hit;
+    total += r.total;
+  }
+  if (total === 0) return 0;
+  return (hit / total) * 100;
+}
+
 async function computeHitStats(limit: number, currentRaceId: string): Promise<HitStats> {
   const index = await getRaceIndex();
   const markRates: MarkRate[] = [
@@ -168,8 +179,12 @@ export function RaceEvaluationSummary({ raceId, condition, horses, results, peer
           <p className="race-summary__dismiss-why">結果データが不足しています</p>
         ) : (
           <>
-            <p className="race-summary__dismiss-why">集計対象: {stats.sampleSize}レース</p>
-            <div className="race-summary__hit-bars" aria-label="印別的中率グラフ">
+            <p className="race-summary__dismiss-why">
+              全体（◎〜▲複勝圏）: <strong>{pooledHitPercent(stats.markRates).toFixed(0)}%</strong>
+              {" · "}
+              集計 {stats.sampleSize}レース（全日程・全競馬場混在・時系列順）
+            </p>
+            <div className="race-summary__hit-bars" aria-label="印別内訳">
               {stats.markRates.map((r) => {
                 const rate = r.total > 0 ? (r.hit / r.total) * 100 : 0;
                 return (

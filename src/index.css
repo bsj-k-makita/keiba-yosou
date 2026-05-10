@@ -2576,6 +2576,13 @@ samp {
   color: var(--c-text);
 }
 
+.rl-hit-summary__sub {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--c-text-2);
+}
+
 .rl-hit-summary__empty {
   margin: 0;
   font-size: var(--font-size-body);
@@ -4808,7 +4815,8 @@ img[loading="lazy"] {
 }
 
 .rl-hit-summary--hero .rl-hit-summary__status,
-.rl-hit-summary--hero .rl-hit-summary__empty {
+.rl-hit-summary--hero .rl-hit-summary__empty,
+.rl-hit-summary--hero .rl-hit-summary__sub {
   color: rgba(255, 255, 255, 0.65);
 }
 

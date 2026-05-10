@@ -149,9 +149,16 @@ async function computeListHitStats(rows: RaceIndexItem[], limit = 30): Promise<L
   return { sampleSize, marks };
 }
 
-function formatHitRate(mark: MarkSummary): string {
-  if (mark.total === 0) return "--";
-  return `${((mark.hit / mark.total) * 100).toFixed(0)}%`;
+/** ◎〜▲ の試行をまとめた全体複勝圏（3着以内）的中率 */
+function formatPooledHitRate(marks: MarkSummary[]): string {
+  let hit = 0;
+  let total = 0;
+  for (const m of marks) {
+    hit += m.hit;
+    total += m.total;
+  }
+  if (total === 0) return "--";
+  return `${((hit / total) * 100).toFixed(0)}%`;
 }
 
 /** index.json の日付一覧（降順） */
@@ -237,6 +244,12 @@ export function RacesListPage() {
     return groupByVenue(rows.filter((r) => r.date === activeDate));
   }, [rows, activeDate]);
 
+  /** 選択中日の全競馬場レース（的中率の一括結果取得用） */
+  const racesOnActiveDate = useMemo(() => {
+    if (!rows || !activeDate) return [];
+    return rows.filter((r) => r.date === activeDate);
+  }, [rows, activeDate]);
+
   const venues = useMemo(() => venueGroups.map((g) => g.venue), [venueGroups]);
   const effectiveVenue = activeVenue != null && venues.includes(activeVenue)
     ? activeVenue
@@ -250,11 +263,11 @@ export function RacesListPage() {
   const activeRaces = venueGroups.find((g) => g.venue === effectiveVenue)?.races ?? [];
 
   async function handleBulkFetchResults() {
-    if (activeRaces.length === 0 || bulkLoading) return;
+    if (racesOnActiveDate.length === 0 || bulkLoading) return;
     setBulkLoading(true);
     setBulkMessage(null);
     const settled = await Promise.allSettled(
-      activeRaces.map(async (r) => {
+      racesOnActiveDate.map(async (r) => {
         const data = await fetchRaceResultByApi(r.raceId);
         return data != null;
       }),
@@ -262,7 +275,9 @@ export function RacesListPage() {
     const success = settled.filter((s) => s.status === "fulfilled" && s.value).length;
     const notFound = settled.filter((s) => s.status === "fulfilled" && !s.value).length;
     const failed = settled.filter((s) => s.status === "rejected").length;
-    setBulkMessage(`取得完了: 成功${success}件 / 未掲載${notFound}件 / 失敗${failed}件`);
+    setBulkMessage(
+      `全日程・全競馬場 ${racesOnActiveDate.length}件: 成功${success} / 未掲載${notFound} / 失敗${failed}`,
+    );
     if (rows != null && rows.length > 0) {
       setHitStatsLoading(true);
       const stats = await computeListHitStats(rows, 30);
@@ -355,9 +370,10 @@ export function RacesListPage() {
                 type="button"
                 className="rl-hit-summary__fetch-btn"
                 onClick={() => void handleBulkFetchResults()}
-                disabled={bulkLoading || activeRaces.length === 0}
+                disabled={bulkLoading || racesOnActiveDate.length === 0}
+                title="選択中の開催日について、全競馬場のレース結果をまとめて取得します"
               >
-                {bulkLoading ? "取得中…" : "結果取得"}
+                {bulkLoading ? "取得中…" : "全日・全場 結果取得"}
               </button>
             </div>
             {bulkMessage ? <p className="rl-hit-summary__status">{bulkMessage}</p> : null}
@@ -368,9 +384,10 @@ export function RacesListPage() {
             ) : (
               <>
                 <p className="rl-hit-summary__favorite">
-                  本命馬券内率: <strong>{formatHitRate(hitStats.marks[0]!)}</strong>
+                  全体複勝圏（◎〜▲）: <strong>{formatPooledHitRate(hitStats.marks)}</strong>
                 </p>
-                <div className="rl-hit-summary__rows">
+                <p className="rl-hit-summary__sub">※直近{hitStats.sampleSize}レースは全日程・全競馬場混在のグローバル順（結果があるレースから最大30件）</p>
+                <div className="rl-hit-summary__rows" aria-label="印別内訳">
                   {hitStats.marks.map((m) => {
                     const rate = m.total > 0 ? (m.hit / m.total) * 100 : 0;
                     return (
