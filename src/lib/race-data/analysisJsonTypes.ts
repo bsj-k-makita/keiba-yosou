@@ -3,7 +3,12 @@
  * 実キー名は揺れ得るため、convert 側で alias 解決する。
  */
 
-import type { HorseEvaluationSignals, PastRunRecord, RaceCondition } from "../../domain/race-evaluation/abilityTypes";
+import type {
+  HorseEvaluationSignals,
+  PastRunRecord,
+  RaceCondition,
+  SuitabilityFlag,
+} from "../../domain/race-evaluation/abilityTypes";
 
 /** ルート or `analysis` / `analysisJson` 配下 */
 export type AnalysisJsonRoot = {
@@ -25,6 +30,8 @@ export type AnalysisJsonRoot = {
   condition?: Partial<RaceCondition> & Record<string, unknown>;
   /** 出走エントリ */
   entries: AnalysisHorseEntry[];
+  /** enrich: 当レースに適用した動的マージン（final_expected_value の減算に使用） */
+  ev_margin_dynamic?: number;
   /** ルートにフラットに置かれたメタ用の揺れ */
   date?: string;
   venue?: string;
@@ -137,6 +144,21 @@ export type AnalysisHorseEntry = {
   /** 期待値短評用（snake_case / camelCase どちらも許容） */
   predicted_probability?: number;
   predictedProbability?: number;
+  /** enrich: 単勝予測勝率（0〜1）、オッズ更新では不変 */
+  predicted_win_rate?: number;
+  predictedWinRate?: number;
+  /** enrich: レース内 0〜100・適性除外の能力指数（ポテンシャル） */
+  ability_index?: number;
+  abilityIndex?: number;
+  /** enrich: 高ポテンシャル×低予測勝率時の理由（短文オブジェクトの配列） */
+  suitability_flags?: SuitabilityFlag[];
+  suitabilityFlags?: SuitabilityFlag[];
+  /** enrich: P×単勝オッズ − 動的マージン（本命の期待値フィールド） */
+  final_expected_value?: number;
+  finalExpectedValue?: number;
+  /** @deprecated 旧式 */
+  expected_value?: number;
+  expectedValue?: number;
   /** netkeiba 等の単勝実オッズ（market系） */
   market_win_odds?: number;
   marketWinOdds?: number;
@@ -146,6 +168,7 @@ export type AnalysisHorseEntry = {
   actualOdds?: number;
   estimated_actual_odds?: number;
   estimatedActualOdds?: number;
+  /** @deprecated 旧 enrich。final_expected_value を優先 */
   value_score?: number;
   valueScore?: number;
   value_rank?: "S" | "A" | "B" | "C" | "D";
@@ -165,4 +188,7 @@ export type AnalysisHorseEntry = {
   riskFactors?: string[];
   odds_source?: "actual" | "estimated";
   oddsSource?: "actual" | "estimated";
+  /** enrich: 脚質ポジションマップ（0=前方〜100=後方） */
+  position_x?: number;
+  positionX?: number;
 };

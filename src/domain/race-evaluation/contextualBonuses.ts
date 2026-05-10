@@ -1,4 +1,5 @@
 import type { HorseAbility, RaceCondition } from "./abilityTypes";
+import { lookupBiasMasterTrackBias } from "./biasMasterLookup";
 import type { PastRunRecord } from "./pastRunTypes";
 
 type ContextualBonusBreakdown = {
@@ -100,7 +101,9 @@ const PINPOINT_FAV_GATE_BONUS = 8;
 const PINPOINT_DIS_GATE_PENALTY = -8;
 
 function horseGateNumber(horse: HorseAbility): number | null {
-  const g = (horse as HorseAbility & { gate?: number }).gate;
+  // 馬番: ドメイン拡張の gate を優先し、無ければ JSON 由来の horseNumber（一覧・評価JSONの揺れ対応）
+  const ex = horse as HorseAbility & { gate?: number; horseNumber?: number };
+  const g = ex.gate ?? ex.horseNumber;
   if (g != null && Number.isFinite(g) && g >= 1 && g <= 36) return Math.round(g);
   return null;
 }
@@ -129,9 +132,13 @@ function defaultTrackBiasStrength01(condition: RaceCondition): number {
 }
 
 /**
- * 枠加点・枠×脚質の内外方向（馬場傾向チャップのみ。旧スライダーは廃止）。
+ * UI の馬場プリセットのみ（`bias_master.json` とは別系統）。
  */
-function resolveTrackBias(condition: RaceCondition): { direction: number; strength01: number; isManualNeutral: boolean } {
+function resolveManualTrackBias(condition: RaceCondition): {
+  direction: number;
+  strength01: number;
+  isManualNeutral: boolean;
+} {
   if (condition.bias === "inside_favor") {
     return {
       direction: 1,
@@ -151,6 +158,30 @@ function resolveTrackBias(condition: RaceCondition): { direction: number; streng
     strength01: 0,
     /** 「フラット」のときだけ枠×脚質を物理寄りに（内外プリセット無しの意図） */
     isManualNeutral: condition.bias === "flat",
+  };
+}
+
+/**
+ * 手動プリセットに、`bias_master.json`（当日・当場・芝ダ）の内外・外差し傾向を合成する。
+ */
+function resolveTrackBias(condition: RaceCondition): { direction: number; strength01: number; isManualNeutral: boolean } {
+  const manual = resolveManualTrackBias(condition);
+  const overlay = lookupBiasMasterTrackBias(condition);
+  if (overlay == null || overlay.strength01 < 0.06) {
+    return manual;
+  }
+
+  if (condition.bias === "inside_favor" || condition.bias === "outside_favor") {
+    return {
+      ...manual,
+      strength01: clamp(Math.max(manual.strength01, overlay.strength01 * 0.85), 0, 1),
+    };
+  }
+
+  return {
+    direction: overlay.direction,
+    strength01: overlay.strength01,
+    isManualNeutral: false,
   };
 }
 

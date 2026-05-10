@@ -32,5 +32,10 @@ export function raceDataToHorses(data: RaceEvaluationData): EnrichedRaceHorse[] 
     pace_mismatch: e.pace_mismatch,
     l2_sustain_ratio: e.l2_sustain_ratio,
     pastRuns: e.pastRuns,
+    ...(e.position_x != null && Number.isFinite(e.position_x) ? { position_x: e.position_x } : {}),
+    ...(e.abilityIndex != null && Number.isFinite(e.abilityIndex) ? { abilityIndex: e.abilityIndex } : {}),
+    ...(e.suitabilityFlags != null && e.suitabilityFlags.length > 0
+      ? { suitabilityFlags: e.suitabilityFlags }
+      : {}),
   }));
 }

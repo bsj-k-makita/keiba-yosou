@@ -4,7 +4,6 @@ import type { HorseAbility, HorseScoreResult, RaceCondition } from "../../domain
 import { ABILITY_KEYS } from "../../domain/race-evaluation/abilityTypes";
 import { classifyLapStructure, LAP_STRUCTURE } from "../../domain/race-evaluation/lapStructure";
 import { BUY_LABELS } from "../../domain/race-evaluation/lingoConstants";
-import { buildHorseAiShortReview } from "../../domain/race-evaluation/reasonGenerator";
 import { RadarChart } from "./RadarChart";
 import { getFrameColor } from "./frameColor";
 import {
@@ -14,6 +13,9 @@ import {
 } from "./evaluationTags";
 import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
 import { netkeibaHorseResultUrl } from "../../lib/netkeibaUrls";
+import { adjustedScoreToPoints100 } from "./adjustedScorePoints100";
+import { formatPredictedTop3Percent } from "./predictedTop3Display";
+import { RunningStyleStrip } from "./RunningStyleStrip";
 
 type Props = {
   sorted: HorseScoreResult[];
@@ -22,7 +24,6 @@ type Props = {
   condition: RaceCondition;
   viewModel?: RaceEvaluationViewModel;
   onSelectHorse?: (horseId: string) => void;
-  compact?: boolean;
   summaryMode?: boolean;
 };
 
@@ -90,10 +91,13 @@ export function HorseListTable({
   condition,
   viewModel,
   onSelectHorse,
-  compact = false,
   summaryMode = false,
 }: Props) {
   const horseMap = useMemo(() => new Map(horses.map((h) => [h.horseId, h] as const)), [horses]);
+  const maxAdjustedScoreInRace = useMemo(
+    () => sorted.reduce((m, row) => Math.max(m, row.adjustedScore), 0),
+    [sorted],
+  );
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
   const prevTopsRef = useRef<Map<string, number>>(new Map());
 
@@ -129,15 +133,44 @@ export function HorseListTable({
   }, [sorted]);
 
   return (
-    <div className={`horse-list-wrap${compact ? " horse-list-wrap--compact" : ""}`}>
+    <div className="horse-list-wrap">
       <table className="horse-list" aria-label="出走馬一覧">
         <thead>
           <tr>
             <th className="horse-list__th horse-list__th--mark">印</th>
             <th className="horse-list__th horse-list__th--gate">馬番</th>
             {!summaryMode && <th className="horse-list__th horse-list__th--radar">能力</th>}
-            <th className="horse-list__th horse-list__th--name">{summaryMode ? "馬名" : "馬名 / 短評"}</th>
-            <th className="horse-list__th horse-list__th--score">スコア</th>
+            <th className="horse-list__th horse-list__th--name">馬名</th>
+            <th
+              className="horse-list__th horse-list__th--pwin"
+              title="finalEvaluationScore を同一レース内で softmax した単勝確率（表示はパイプラインのみ）。合計 100%。"
+            >
+              予測勝率
+            </th>
+            <th
+              className="horse-list__th horse-list__th--potential"
+              title="枠・コース適性・馬場・展開を除いたレース内ポテンシャル（0〜100）。参考表示。"
+            >
+              ポテンシャル
+            </th>
+            <th
+              className="horse-list__th horse-list__th--suit"
+              title="ポテンシャルは高いが予測勝率が抑えられるとき、適性側の理由。"
+            >
+              適性注意
+            </th>
+            <th
+              className="horse-list__th horse-list__th--score"
+              title="補正後スコアをレース内トップを100点とした比例換算（AI予想・詳細カードと同一）。適性・能力の差が点数の開きになります。"
+            >
+              点数
+            </th>
+            <th
+              className="horse-list__th horse-list__th--top3"
+              title="enrich の参考値（単勝確率由来の変換。点数の補正後スコアとは別計算）。AI予想・オッズ/買い目と同一。"
+            >
+              3着内率
+            </th>
             {!summaryMode && <th className="horse-list__th horse-list__th--grades" title="能力軸ごとの等級">能力等級</th>}
             <th className="horse-list__th horse-list__th--buy">買い</th>
             {!summaryMode && <th className="horse-list__th horse-list__th--role">役割</th>}
@@ -176,21 +209,15 @@ export function HorseListTable({
               (r.lapQualityBonus ?? 0);
             const grades = gradesMap.get(r.horseId);
             const vm = viewModel?.byHorseId.get(horse.horseId);
-            const effectiveEv = vm?.effectiveEv;
             const radarMap = vm?.weightedRadar ?? horseToRadarMap(horse);
+            const score100 = adjustedScoreToPoints100(r.adjustedScore, maxAdjustedScoreInRace);
             const contextual = summarizeContextual(r);
             const lapStatus = inferLapStatus(horse, condition, r);
             const lapProfile = getLapProfileVisual(r.lapProfile);
             const marketAlert = computeMarketAlertLabel(horse, r, horses);
-            const comment = buildHorseAiShortReview(
-              horse,
-              r,
-              condition,
-              horses,
-              grades,
-              marketAlert ?? undefined,
-            );
             const connectionBadges = computeConnectionSpecialBadges(horse, condition);
+            const suitFlags = horse.suitabilityFlags;
+            const suitFirst = suitFlags?.[0];
 
             return (
               <tr
@@ -238,7 +265,7 @@ export function HorseListTable({
                   </td>
                 )}
 
-                {/* 馬名 + 短評 */}
+                {/* 馬名 */}
                 <td className="horse-list__td horse-list__td--name">
                   <div className="horse-list__name-wrap">
                     <div className="horse-list__name-row">
@@ -255,17 +282,57 @@ export function HorseListTable({
                           戦績
                         </a>
                       ) : null}
-                      <span className="horse-list__style">{horse.runningStyle}</span>
                     </div>
-                    {!summaryMode && <p className="horse-list__comment">{comment}</p>}
+                    <RunningStyleStrip runningStyle={horse.runningStyle} position_x={horse.position_x} />
                   </div>
                 </td>
 
-                {/* スコア */}
+                <td className="horse-list__td horse-list__td--pwin">
+                  {vm?.adjustedWinProbability != null && Number.isFinite(vm.adjustedWinProbability) ? (
+                    <span className="horse-list__pwin" title="finalEvaluationScore 由来 softmax（同一レース）">
+                      {(vm.adjustedWinProbability * 100).toFixed(1)}%
+                    </span>
+                  ) : (
+                    <span className="horse-list__role-na">—</span>
+                  )}
+                </td>
+                <td className="horse-list__td horse-list__td--potential">
+                  {horse.abilityIndex != null ? (
+                    <span title="ability_index（適性・枠を除くレース内指数）">{horse.abilityIndex}</span>
+                  ) : (
+                    <span className="horse-list__role-na">—</span>
+                  )}
+                </td>
+                <td className="horse-list__td horse-list__td--suit">
+                  {suitFlags != null && suitFirst != null ? (
+                    <span
+                      className="horse-list__suit-hint"
+                      title={suitFlags.map((f) => f.label).join(" / ")}
+                    >
+                      ⚠ {suitFirst.label}
+                      {suitFlags.length > 1 ? ` ほか${suitFlags.length - 1}` : ""}
+                    </span>
+                  ) : (
+                    <span className="horse-list__role-na">—</span>
+                  )}
+                </td>
+
+                {/* 点数（100点満点・レース内トップ基準） */}
                 <td className="horse-list__td horse-list__td--score">
-                  <span className="horse-list__score">
-                    {summaryMode ? (effectiveEv != null ? effectiveEv.toFixed(2) : "—") : r.adjustedScore.toFixed(1)}
+                  <span
+                    className="horse-list__score"
+                    title={
+                      score100 != null
+                        ? `補正後スコア ${r.adjustedScore.toFixed(1)} → 同一レース内換算`
+                        : undefined
+                    }
+                  >
+                    {score100 != null ? `${score100}点` : "—"}
                   </span>
+                </td>
+
+                <td className="horse-list__td horse-list__td--top3">
+                  <span className="horse-list__top3">{formatPredictedTop3Percent(horse.investment)}</span>
                 </td>
 
                 {!summaryMode && (

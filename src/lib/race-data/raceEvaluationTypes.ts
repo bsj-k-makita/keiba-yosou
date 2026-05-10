@@ -5,6 +5,7 @@ import type {
   PastRunRecord,
   RaceCondition,
   RunningStyle,
+  SuitabilityFlag,
 } from "../../domain/race-evaluation/abilityTypes";
 import type { DisplayGrade } from "../../domain/race-evaluation/abilityGrades";
 import type { FitTendency, PaceFitToken } from "../../domain/race-evaluation/lingoConstants";
@@ -204,6 +205,11 @@ export type RaceEntryEvaluation = {
   bias_mismatch?: boolean;
   pace_mismatch?: boolean;
   l2_sustain_ratio?: number;
+  /** enrich: 隊列位置の横軸スコア（0〜100） */
+  position_x?: number;
+  /** enrich: レース内 0〜100（枠・適性除くポテンシャル） */
+  abilityIndex?: number;
+  suitabilityFlags?: SuitabilityFlag[];
 
   evaluation: EntryEvaluationBlock;
 };

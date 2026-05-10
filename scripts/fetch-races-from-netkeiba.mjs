@@ -1,7 +1,12 @@
 /**
  * netkeiba 出馬表（shutuba）を取得し、既存 app が読む `analysisJson` 互換の JSON を保存する。
  * 取り込み時に各馬の直近5走（pastRuns）も同時に取得して保存する。
- * 起動: node scripts/fetch-races-from-netkeiba.mjs [--date=YYYY-MM-DD] [--skip-past-runs]
+ * 起動:
+ *   node scripts/fetch-races-from-netkeiba.mjs [--date=YYYY-MM-DD] [--skip-past-runs]
+ *   node scripts/fetch-races-from-netkeiba.mjs --from-index [--date=YYYY-MM-DD] [--refetch-past-runs]
+ *     --from-index: index.json の全 raceId を処理（脚質・出馬表の再反映向け）
+ *     既定: 既存レース JSON の pastRuns をマージし netkeiba へ直近5走は取りに行かない（高速）
+ *     --refetch-past-runs: 直近5走も netkeiba から再取得（重い・失敗しやすい）
  * 2026年 対象日「全レース」= 各日 3場 × 12R。
  * index からは対象日の 2025 誤取り込み分も除去してから 2026 行を差し替える。
  */
@@ -14,6 +19,11 @@ import { enrichInvestmentSignalsInRaceData } from "./lib/investmentSignals.mjs";
 import { attachRaceAnalysisOrLeave } from "./lib/raceAnalysis.mjs";
 import { buildDailyBaselineMaster, saveDailyBaseline, DAILY_BASELINE_PATH } from "./lib/dailyBaseline.mjs";
 import { fetchUtf8, fetchSpUtf8 } from "./lib/netkeibaFetch.mjs";
+import { parseRunningStyleFromShutubaHorseRow } from "./lib/parseNetkeibaShutubaKyaku.mjs";
+import {
+  parseShutubaPastHorseRunningStyles,
+  applyShutubaPastRunningStylesToEntries,
+} from "./lib/parseNetkeibaShutubaPast.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -37,6 +47,22 @@ function fetchShutubaHtml(raceId) {
     // fallback below
   }
   return fetchSpUtf8(`https://race.sp.netkeiba.com/race/shutuba.html?race_id=${raceId}`);
+}
+
+/** 5走一覧（馬柱の horse_race_type アイコンで脚質が取れる） */
+function fetchShutubaPastHtml(raceId) {
+  const pcUrl = `https://race.netkeiba.com/race/shutuba_past.html?race_id=${raceId}`;
+  try {
+    const pc = fetchUtf8(pcUrl);
+    if (String(pc ?? "").length > 1000) return pc;
+  } catch {
+    // fallback below
+  }
+  try {
+    return fetchSpUtf8(`https://race.sp.netkeiba.com/race/shutuba_past.html?race_id=${raceId}`);
+  } catch {
+    return "";
+  }
 }
 
 function hashAbilities(horseId) {
@@ -166,7 +192,10 @@ function venueFromKnownPlaceNames(rawVenue, titleText) {
   return t.length ? t : "—";
 }
 
-function parseShutuba(html, { raceId, date }) {
+/**
+ * 出馬表 HTML を解析（投資シグナル・脚質推定は含めない。後段で enrichInvestmentSignalsInRaceData を呼ぶ）
+ */
+function parseShutubaCore(html, { raceId, date }) {
   const $ = load(html);
   const observedAt = new Date().toISOString();
   const trackMeta = parseGroundAndWeather($);
@@ -308,7 +337,7 @@ function parseShutuba(html, { raceId, date }) {
   };
 
   /** race.sp.netkeiba.com は1行5セル（Horse_Info 内に馬・騎手など集約） */
-  const parseSpShutubaRow = ($tr) => {
+  const parseSpShutubaRow = ($tr, cheerio$) => {
     const tds = $tr.children("td");
     if (tds.length >= 7 || tds.length === 0 || !$tr.find("td.Horse_Info").length) return null;
 
@@ -367,6 +396,7 @@ function parseShutuba(html, { raceId, date }) {
 
     const ab = hashAbilities(horseId);
     const market = parseOddsAndPopularity($tr, tds, umaban);
+    const kyakuStyle = parseRunningStyleFromShutubaHorseRow($tr, cheerio$);
     return {
       horseId,
       horseName,
@@ -378,7 +408,8 @@ function parseShutuba(html, { raceId, date }) {
       trainer,
       weight: wVal,
       bodyWeightKg,
-      runningStyle: "好位",
+      runningStyle: kyakuStyle ?? "好位",
+      ...(kyakuStyle != null ? { running_style_source: "netkeiba_shutuba" } : {}),
       abilities: ab,
       ...market,
     };
@@ -394,7 +425,7 @@ function parseShutuba(html, { raceId, date }) {
   $("tr.HorseList").each((_, el) => {
     const $tr = $(el);
     if (useSpShutubaLayout) {
-      const row = parseSpShutubaRow($tr);
+      const row = parseSpShutubaRow($tr, $);
       if (row) entries.push(row);
       return;
     }
@@ -439,6 +470,7 @@ function parseShutuba(html, { raceId, date }) {
 
     const ab = hashAbilities(horseId);
     const market = parseOddsAndPopularity($tr, tds, umaban);
+    const kyakuStyle = parseRunningStyleFromShutubaHorseRow($tr, $);
     entries.push({
       horseId,
       horseName,
@@ -450,7 +482,8 @@ function parseShutuba(html, { raceId, date }) {
       trainer,
       weight: wVal,
       bodyWeightKg,
-      runningStyle: "好位",
+      runningStyle: kyakuStyle ?? "好位",
+      ...(kyakuStyle != null ? { running_style_source: "netkeiba_shutuba" } : {}),
       abilities: ab,
       ...market,
     });
@@ -461,7 +494,7 @@ function parseShutuba(html, { raceId, date }) {
   }
   validateEntries(entries, raceId);
 
-  return enrichInvestmentSignalsInRaceData({
+  return {
     raceId,
     meta: {
       date,
@@ -476,7 +509,44 @@ function parseShutuba(html, { raceId, date }) {
       ...(raceGradeLabel != null ? { raceGrade: raceGradeLabel } : {}),
     },
     entries: entries.sort((a, b) => a.horseNumber - b.horseNumber),
-  });
+  };
+}
+
+function loadPreviousRaceJson(raceId) {
+  try {
+    const p = join(RACES_DIR, `${raceId}.json`);
+    return JSON.parse(readFileSync(p, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+/** @param {unknown[]} entries @param {unknown[]} previousEntries */
+function mergePastRunsFromPrevious(entries, previousEntries) {
+  if (!Array.isArray(previousEntries)) return;
+  const map = new Map(previousEntries.map((e) => [String(e.horseId), e]));
+  for (const e of entries) {
+    const o = map.get(String(e.horseId));
+    if (o && Array.isArray(o.pastRuns) && o.pastRuns.length > 0) {
+      e.pastRuns = o.pastRuns;
+    }
+  }
+}
+
+function makeJobsFromIndex(targetDate = null) {
+  const idx = JSON.parse(readFileSync(INDEX_PATH, "utf8"));
+  if (!Array.isArray(idx)) throw new Error("index.json must be an array");
+  const seen = new Set();
+  const jobs = [];
+  for (const row of idx) {
+    const raceId = row?.raceId != null ? String(row.raceId) : "";
+    const date = row?.date;
+    if (!raceId || !date || seen.has(raceId)) continue;
+    if (targetDate && date !== targetDate) continue;
+    seen.add(raceId);
+    jobs.push({ raceId, date });
+  }
+  return jobs;
 }
 
 async function enrichEntriesWithPastRuns(entries, raceLapCache) {
@@ -555,17 +625,22 @@ function parseOptions() {
   const args = process.argv.slice(2);
   let targetDate = null;
   let skipPastRuns = false;
+  let fromIndex = false;
+  let refetchPastRuns = false;
   for (const arg of args) {
     if (arg.startsWith("--date=")) {
       targetDate = arg.slice("--date=".length).trim();
       continue;
     }
     if (arg === "--skip-past-runs") skipPastRuns = true;
+    if (arg === "--from-index") fromIndex = true;
+    if (arg === "--refetch-past-runs") refetchPastRuns = true;
   }
   if (targetDate && !/^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
     throw new Error(`invalid --date format: ${targetDate}`);
   }
-  return { targetDate, skipPastRuns };
+  const mergePastRunsFromDisk = fromIndex && !refetchPastRuns;
+  return { targetDate, skipPastRuns, fromIndex, refetchPastRuns, mergePastRunsFromDisk };
 }
 
 const venueOrder = (v) => {
@@ -574,8 +649,9 @@ const venueOrder = (v) => {
 };
 
 async function main() {
-  const { targetDate, skipPastRuns } = parseOptions();
-  const jobs = makeJobs(targetDate);
+  const { targetDate, skipPastRuns, fromIndex, mergePastRunsFromDisk, refetchPastRuns } =
+    parseOptions();
+  const jobs = fromIndex ? makeJobsFromIndex(targetDate) : makeJobs(targetDate);
   if (jobs.length === 0) {
     throw new Error(targetDate ? `no jobs for --date=${targetDate}` : "no jobs");
   }
@@ -587,19 +663,44 @@ async function main() {
     process.stderr.write(`fetch ${job.raceId}… `);
     try {
       const html = fetchShutubaHtml(job.raceId);
-      const data = parseShutuba(html, job);
-      if (!skipPastRuns) {
-        const stats = await enrichEntriesWithPastRuns(data.entries, raceLapCache);
-        if (shouldFailByPastRunQuality(data, stats)) {
+      const previousRace = mergePastRunsFromDisk ? loadPreviousRaceJson(job.raceId) : null;
+      const core = parseShutubaCore(html, job);
+      const entries = core.entries;
+
+      try {
+        const pastHtml = fetchShutubaPastHtml(job.raceId);
+        if (String(pastHtml ?? "").length > 500) {
+          const pastStyles = parseShutubaPastHorseRunningStyles(pastHtml);
+          applyShutubaPastRunningStylesToEntries(entries, pastStyles);
+        }
+      } catch {
+        // 5走表が取れなくても出馬表のみで続行
+      }
+      await sleep(150);
+
+      if (mergePastRunsFromDisk && previousRace?.entries && !refetchPastRuns) {
+        mergePastRunsFromPrevious(entries, previousRace.entries);
+      }
+
+      if (!skipPastRuns && (refetchPastRuns || !mergePastRunsFromDisk)) {
+        const stats = await enrichEntriesWithPastRuns(entries, raceLapCache);
+        const dataForQuality = { ...core, entries };
+        if (shouldFailByPastRunQuality(dataForQuality, stats)) {
           throw new Error(
-            `pastRuns quality too low: success=${stats.successCount}/${data.entries.length}`,
+            `pastRuns quality too low: success=${stats.successCount}/${entries.length}`,
           );
         }
       } else {
-        for (const entry of data.entries) {
+        for (const entry of entries) {
           entry.pastRuns = Array.isArray(entry.pastRuns) ? entry.pastRuns : [];
         }
       }
+
+      const data = enrichInvestmentSignalsInRaceData({
+        raceId: core.raceId,
+        meta: core.meta,
+        entries,
+      });
       attachRaceAnalysisOrLeave(data);
       const out = join(RACES_DIR, `${job.raceId}.json`);
       writeFileSync(out, `${JSON.stringify(data, null, 2)}\n`, "utf8");
@@ -630,19 +731,33 @@ async function main() {
   }
 
   const old = JSON.parse(readFileSync(INDEX_PATH, "utf8"));
-  const targetDates = new Set((targetDate ? jobs.filter((j) => j.date === targetDate) : jobs).map((j) => j.date));
-  const replaceDates = new Set();
-  for (const d of targetDates) {
-    replaceDates.add(d);
-    replaceDates.add(d.replace(/^2026/, "2025"));
+  let next;
+  if (fromIndex) {
+    const replacedIds = new Set(metas.map((m) => m.raceId));
+    const without = old.filter((row) => !replacedIds.has(row?.raceId));
+    next = [...without, ...metas].sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      const d = venueOrder(a.venue) - venueOrder(b.venue);
+      if (d !== 0) return d;
+      return a.raceNumber - b.raceNumber;
+    });
+  } else {
+    const targetDates = new Set(
+      (targetDate ? jobs.filter((j) => j.date === targetDate) : jobs).map((j) => j.date),
+    );
+    const replaceDates = new Set();
+    for (const d of targetDates) {
+      replaceDates.add(d);
+      replaceDates.add(d.replace(/^2026/, "2025"));
+    }
+    const without = old.filter((row) => !replaceDates.has(row?.date));
+    next = [...without, ...metas].sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      const d = venueOrder(a.venue) - venueOrder(b.venue);
+      if (d !== 0) return d;
+      return a.raceNumber - b.raceNumber;
+    });
   }
-  const without = old.filter((row) => !replaceDates.has(row?.date));
-  const next = [...without, ...metas].sort((a, b) => {
-    if (a.date !== b.date) return a.date.localeCompare(b.date);
-    const d = venueOrder(a.venue) - venueOrder(b.venue);
-    if (d !== 0) return d;
-    return a.raceNumber - b.raceNumber;
-  });
   writeFileSync(INDEX_PATH, `${JSON.stringify(next, null, 2)}\n`, "utf8");
 
   try {
@@ -651,9 +766,12 @@ async function main() {
     process.stderr.write(`daily_baseline rebuild: ${e?.message || e}\n`);
   }
 
-  process.stdout.write(
-    `done. wrote ${ok} race files, ${err} failed. index: ${metas.length} new rows (${targetDate ? `${targetDate} replaced` : "all configured dates replaced"}).\n`,
-  );
+  const indexNote = fromIndex
+    ? `from-index: ${metas.length} raceIds replaced`
+    : targetDate
+      ? `${targetDate} replaced`
+      : "all configured dates replaced";
+  process.stdout.write(`done. wrote ${ok} race files, ${err} failed. index: ${indexNote}.\n`);
 }
 
 main().catch((e) => {

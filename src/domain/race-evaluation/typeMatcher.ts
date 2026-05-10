@@ -178,8 +178,10 @@ export function findSameTypePeers(
   const peerEntries = scored.slice(0, 2).map((row) => entryFromHorse(row.horse));
 
   const dismissIds = collectDismissIds(horses, results, condition);
+  const peerIdSet = new Set(peerHorseIds);
+  // 「一緒に買いたい」と「消し」が同一頭に付くのは矛盾するため、peer 優先で消し表示から外す
   const dismissEntries = results
-    .filter((r) => dismissIds.has(r.horseId))
+    .filter((r) => dismissIds.has(r.horseId) && !peerIdSet.has(r.horseId))
     .slice(0, 6)
     .map((r) => {
       const h = horses.find((x) => x.horseId === r.horseId)!;

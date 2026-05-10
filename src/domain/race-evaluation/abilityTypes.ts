@@ -50,6 +50,13 @@ export type HorseEvaluationSignals = {
   temperamentRisk?: boolean;
 };
 
+/** enrich / abilityScorer: 適性・枠・展開由来で勝率が伸び悩む理由（JSON の suitability_flags） */
+export type SuitabilityFlag = {
+  code: string;
+  label: string;
+  impactApproxPct?: number;
+};
+
 export type InvestmentValueRank = "S" | "A" | "B" | "C" | "D";
 export type InvestmentConfidenceRank = "S" | "A" | "B" | "C";
 export type InvestmentBetType = "軸" | "相手" | "ヒモ穴" | "見送り";
@@ -60,9 +67,15 @@ export type InvestmentValueChange = "UP" | "DOWN" | "STABLE";
  */
 export type InvestmentCommentInput = {
   predictedProbability: number;
+  /** enrich が保存する単勝予測勝率（0〜1）。オッズ非依存で固定。 */
+  predictedWinRate?: number;
+  /** enrich: predicted_win_rate × 単勝オッズ − ev_margin_dynamic（表示・ランクの単一ソース） */
+  finalExpectedValue?: number;
+  /** @deprecated 旧式（複勝実効オッズ由来）。final_expected_value を優先 */
+  expectedValue?: number;
   actualOdds: number;
   oddsSource?: "actual" | "estimated";
-  /** 実質期待値: (P × O) - margin。 */
+  /** @deprecated 旧 enrich の value_score。final_expected_value を優先 */
   valueScore?: number;
   valueRank: InvestmentValueRank;
   confidenceRank?: InvestmentConfidenceRank;
@@ -116,6 +129,13 @@ export type HorseAbility = {
   pedigree?: HorsePedigree;
   signals?: HorseEvaluationSignals;
   investment?: InvestmentCommentInput;
+  /**
+   * enrich: レース内 0〜100。枠・コース適性・馬場・展開を除いた能力指数（ポテンシャル）。
+   * 予測勝率（predicted_win_rate）とは別。
+   */
+  abilityIndex?: number;
+  /** ポテンシャルは高いが予測勝率が伸びないときの理由フラグ */
+  suitabilityFlags?: SuitabilityFlag[];
   /** 前走が当時のトラックバイアスと逆行していたか（巻き返し補正に使用） */
   was_bias_disadvantaged?: boolean;
   /** 過去L2区間（残り400-200m）の最大パフォーマンスを 0〜1 で正規化（旧JSONの0〜100も読込側で吸収） */
@@ -126,6 +146,8 @@ export type HorseAbility = {
   pace_mismatch?: boolean;
   /** L2からL1にかけての減速耐性（0-1） */
   l2_sustain_ratio?: number;
+  /** 脚質ポジションマップ用（enrich が過去走から算出、0=前方〜100=後方） */
+  position_x?: number;
   /** 直近1走目が先頭。4〜6 本の 200m 通過が揃うと展開分類・再現性推定に使う */
   pastRuns?: PastRunRecord[];
 };
@@ -185,6 +207,8 @@ export type RaceAnalysisSnapshot = {
 
 export type RaceCondition = {
   venue: string;
+  /** 開催日 YYYY-MM-DD（馬場バイアスマスタ照合用。未設定時はマスタ連動をスキップ） */
+  meetingDate?: string;
   courseKey?: string;
   raceName?: string;
   /**

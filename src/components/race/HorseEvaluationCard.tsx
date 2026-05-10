@@ -25,7 +25,10 @@ import { ScoreDiffIndicator } from "./ScoreDiffIndicator";
 import { TypeMatchList } from "./TypeMatchList";
 import { computeConnectionSpecialBadges, computeMarketAlertLabel } from "./evaluationTags";
 import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
+import { FINAL_EXPECTED_RECOMMEND_THRESHOLD } from "../../domain/race-evaluation/investmentEvConstants";
 import { netkeibaHorseResultUrl } from "../../lib/netkeibaUrls";
+import { FinalExpectedRecommendBadge } from "./FinalExpectedRecommendBadge";
+import { runningStyleToStripShortLabel } from "./RunningStyleStrip";
 
 type Props = {
   gate?: number;
@@ -38,6 +41,8 @@ type Props = {
   condition: RaceCondition;
   viewModel?: RaceEvaluationViewModel;
   compact?: boolean;
+  /** 補正後スコアのレース内比例点数（トップ100・オプション） */
+  scorePoints100?: number | null;
 };
 
 function horseToRadarMap(horse: HorseAbility): Record<AbilityKey, number> {
@@ -60,6 +65,7 @@ export function HorseEvaluationCard({
   condition,
   viewModel,
   compact = false,
+  scorePoints100,
 }: Props) {
   const [open, setOpen] = useState(false);
   const id = useId();
@@ -101,15 +107,22 @@ export function HorseEvaluationCard({
   );
   const fitLevel = fitLevelFromScore(fitRaw);
 
-  const weightedRadar = viewModel?.byHorseId.get(horse.horseId)?.weightedRadar;
+  const vmHorse = viewModel?.byHorseId.get(horse.horseId);
+  const weightedRadar = vmHorse?.weightedRadar;
+  const pipelineWinProb = vmHorse?.adjustedWinProbability;
   const hMap = useMemo(() => weightedRadar ?? horseToRadarMap(horse), [horse, weightedRadar]);
   const radarShape = useMemo(() => inferRadarShape(horse), [horse]);
-  const effectiveEv = useMemo(
-    () => viewModel?.byHorseId.get(horse.horseId)?.effectiveEv ?? horse.investment?.valueScore,
-    [horse.horseId, horse.investment?.valueScore, viewModel],
-  );
+  /** JSON final_expected_value（無ければ ViewModel／旧 value_score）。フロントでは再計算しない */
+  const displayEv =
+    horse.investment?.finalExpectedValue ??
+    vmHorse?.effectiveEv ??
+    horse.investment?.valueScore ??
+    null;
+  const effectiveEv = useMemo(() => displayEv, [displayEv]);
   const effectiveEvHot =
-    effectiveEv != null && Number.isFinite(effectiveEv) && effectiveEv > 1.25;
+    displayEv != null &&
+    Number.isFinite(displayEv) &&
+    displayEv > FINAL_EXPECTED_RECOMMEND_THRESHOLD;
   const evBand =
     effectiveEv == null
       ? "muted"
@@ -214,8 +227,11 @@ export function HorseEvaluationCard({
               戦績
             </a>
           ) : null}
-          <span className="horse-card__style-badge" title={UI.RUNNING_STYLE}>
-            {horse.runningStyle}
+          <span
+            className="horse-card__style-badge"
+            title={`${UI.RUNNING_STYLE}（データ: ${horse.runningStyle}）`}
+          >
+            {runningStyleToStripShortLabel(horse.runningStyle, horse.position_x)}
           </span>
           {hokkakeBadge ? (
             <span
@@ -245,6 +261,7 @@ export function HorseEvaluationCard({
               {rankMoveBadge}
             </span>
           ) : null}
+          <FinalExpectedRecommendBadge finalExpectedValue={horse.investment?.finalExpectedValue} />
         </div>
       </header>
 
@@ -265,6 +282,43 @@ export function HorseEvaluationCard({
 
       <section className="horse-card__ability-panel" aria-label="基本能力">
         <h3 className="horse-card__ability-title">基本能力</h3>
+        {scorePoints100 != null ? (
+          <p
+            className="horse-card__scoreline horse-card__scoreline--json-ability"
+            title="補正後スコアをこのレースで最高の馬を100点とした比例換算"
+          >
+            <span className="horse-card__scoreline-lbl">点数</span>
+            <span className="horse-card__scoreline-val">{scorePoints100}</span>
+            <span className="horse-card__scoreline-unit"> / 100</span>
+          </p>
+        ) : null}
+        {pipelineWinProb != null && Number.isFinite(pipelineWinProb) ? (
+          <p
+            className="horse-card__scoreline horse-card__scoreline--pipeline-probs"
+            title="finalEvaluationScore をレース内 softmax した単勝確率"
+          >
+            <span className="horse-card__scoreline-lbl">予測勝率</span>
+            <span className="horse-card__scoreline-val">{(pipelineWinProb * 100).toFixed(1)}%</span>
+            <span className="horse-card__scoreline-unit">（softmax）</span>
+          </p>
+        ) : null}
+        {horse.abilityIndex != null ? (
+          <p
+            className="horse-card__scoreline horse-card__scoreline--pipeline-potential"
+            title="枠・コース適性・馬場・展開を除いたレース内指数（参考）"
+          >
+            <span className="horse-card__scoreline-lbl">ポテンシャル</span>
+            <span className="horse-card__scoreline-val">{horse.abilityIndex}</span>
+            <span className="horse-card__scoreline-unit"> / 100</span>
+          </p>
+        ) : null}
+        {horse.suitabilityFlags != null && horse.suitabilityFlags.length > 0 ? (
+          <ul className="horse-card__suitability-flags" aria-label="適性による勝率抑制の理由">
+            {horse.suitabilityFlags.map((f) => (
+              <li key={`${f.code}-${f.label.slice(0, 24)}`}>{f.label}</li>
+            ))}
+          </ul>
+        ) : null}
         <div className="horse-card__ability-main">
           <div className="horse-card__radar-hero" aria-label="能力バランス">
             <div className="horse-card__radar-svg-wrap">

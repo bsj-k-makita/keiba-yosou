@@ -44,6 +44,8 @@ export type PastRunRecord = {
   passingOrder?: string;
   /** passingOrder の別名（外部JSON揺れ） */
   cornerPassing?: string;
+  /** コーナー通過順を数値配列で保持する場合（先頭から順） */
+  corner_positions?: readonly number[];
   /** 0〜1: 不利度。大外を回す/前が壁など、値が大きいほど不利を受けた。 */
   tripTrouble01?: number;
   /** 0〜1: 展開利・馬場恩恵。値が大きいほど恩恵を受けた。 */

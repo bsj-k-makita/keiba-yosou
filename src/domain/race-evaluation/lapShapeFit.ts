@@ -107,6 +107,13 @@ function computeLapQualityBonus(runs: readonly PastRunRecord[]): number {
  */
 export function computeRunRpcSec(run: PastRunRecord): number | null {
   const s = run.section200mSec;
+  return computeRpcSecFromSections(s);
+}
+
+/**
+ * 当日レース想定ラップ（200m×n）から前後傾差 RPC を算出。`computeRunRpcSec` と同式。
+ */
+export function computeRpcSecFromSections(s: readonly number[] | null | undefined): number | null {
   if (s == null || s.length < 4) return null;
   const n = s.length;
   if (n >= 6) {
@@ -117,6 +124,48 @@ export function computeRunRpcSec(run: PastRunRecord): number | null {
   const front2 = s[0]! + s[1]!;
   const back2 = s[n - 2]! + s[n - 1]!;
   return (front2 - back2) * 1.5;
+}
+
+/**
+ * `section200mSec` が無いとき、ペース設定から当日 RPC の粗い見込みを返す（秒スケール）。
+ */
+export function inferExpectedRpcSecFromPace(condition: RaceCondition): number | null {
+  if (condition.pace === "high" || condition.pace === "many_front_runners") return 0.85;
+  if (condition.pace === "slow" || condition.pace === "no_front_runner") return -0.85;
+  return null;
+}
+
+export function inferTodayExpectedRpcSec(condition: RaceCondition): number | null {
+  const fromSec = computeRpcSecFromSections(condition.section200mSec);
+  if (fromSec != null) return fromSec;
+  return inferExpectedRpcSecFromPace(condition);
+}
+
+function meanPastRpcSec(runs: readonly PastRunRecord[]): number | null {
+  const vals: number[] = [];
+  for (const run of runs.slice(0, 5)) {
+    const v = computeRunRpcSec(run);
+    if (v != null && Number.isFinite(v)) vals.push(v);
+  }
+  if (vals.length === 0) return null;
+  return vals.reduce((a, b) => a + b, 0) / vals.length;
+}
+
+/**
+ * 過去の平均 RPC と当日想定 RPC の乖離をペナルティ（≤0）で返す。展開不向きによる能力減衰。
+ */
+export function computeRpcPaceMismatchPenalty(horse: HorseAbility, condition: RaceCondition): number {
+  const pastAvg = meanPastRpcSec(horse.pastRuns ?? []);
+  const today = inferTodayExpectedRpcSec(condition);
+  if (pastAvg == null || today == null) return 0;
+
+  const diff = Math.abs(pastAvg - today);
+  /** 閾値未満はペナルティなし（同系統の展開） */
+  const threshold = 0.55;
+  if (diff <= threshold) return 0;
+
+  const raw = -((diff - threshold) * 1.25);
+  return round1(clamp(raw, -2.8, 0));
 }
 
 /** 全体ラップの最終 200m での減速幅（l1 - l2, 秒）。 */

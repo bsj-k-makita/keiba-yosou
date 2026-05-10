@@ -16,11 +16,14 @@ import {
 } from "../../domain/race-evaluation";
 import { RaceAdjustmentPanel, loadGlobalProfile } from "./RaceAdjustmentPanel";
 import { HorseEvaluationCard } from "./HorseEvaluationCard";
+import { adjustedScoreToPoints100 } from "./adjustedScorePoints100";
+import { formatPredictedTop3Percent } from "./predictedTop3Display";
 import { RaceEvaluationSummary } from "./RaceEvaluationSummary";
 import { RaceConclusionPanel } from "./RaceConclusionPanel";
 import { RaceNavBar } from "./RaceNavBar";
 import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
 import { HorseListTable } from "./HorseListTable";
+import { RunningStyleRaceSummary } from "./RunningStyleRaceSummary";
 import { RaceResultPanel } from "./RaceResultPanel";
 import { RaceBetPanel } from "./RaceBetPanel";
 import { RaceAdjustProvider } from "./RaceAdjustContext";
@@ -181,7 +184,6 @@ function hokkakePriority(role: string | undefined): number {
 export function RaceDetailView({ race, raceIndex }: Props) {
   const [tab, setTab] = useState<ViewTab>("list");
   const [cardDensity, setCardDensity] = useState<CardDensity>("regular");
-  const [tableCompact, setTableCompact] = useState(false);
   const [tableSummary, setTableSummary] = useState(false);
 
   const horses = useMemo(() => getHorsesFromRaceData(race), [race]);
@@ -203,10 +205,9 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   const [condition, setCondition] = useState<RaceCondition>(initialCondition);
   const userEditedRef = useRef(false);
 
-  useEffect(() => {
-    userEditedRef.current = false;
-    setCondition(initialCondition);
-  }, [initialCondition, race.raceId]);
+  // initialCondition は race JSON の再取得（DEV の定期ポーリング等）で毎回変わりうるが、
+  // ここで同期するとユーザー編集中の条件設定が上書きされる。
+  // レース切替は親の key={race.raceId} で再マウントされ、useState(initialCondition) が再度効く。
 
   useEffect(() => {
     const previousRaceId = findPreviousRaceId(race.raceId, race.raceInfo, raceIndex);
@@ -298,6 +299,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     };
   }, [condition]);
 
+  /** 出馬票一覧：印順を主軸（◎○▲△☆…）、タイブレークは△役割 → 最終順位 */
   const sorted = useMemo(() => {
     if (condition == null) return [];
     const order = new Map(results.map((r, i) => [r.horseId, i] as const));
@@ -318,11 +320,16 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       return order.get(a.horseId)! - order.get(b.horseId)!;
     });
   }, [condition, results]);
-  /** AI予想タブ：pt（補正後スコア）降順 */
+  /** AI予想タブ：補正後スコア降順 */
   const sortedByPtDesc = useMemo(() => {
     if (condition == null) return [];
     return [...results].sort((a, b) => b.adjustedScore - a.adjustedScore);
   }, [condition, results]);
+  /** レース全体の補正後スコア最大（比例点数の分母） */
+  const maxAdjustedScoreInRace = useMemo(
+    () => results.reduce((m, row) => Math.max(m, row.adjustedScore), 0),
+    [results],
+  );
   const topScore = useMemo(
     () => sorted.reduce((max, row) => Math.max(max, row.adjustedScore), 0),
     [sorted],
@@ -492,14 +499,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 <div className="view-density" role="group" aria-label="一覧表示設定">
                   <button
                     type="button"
-                    className={`view-density__btn${tableCompact ? " view-density__btn--active" : ""}`}
-                    onClick={() => setTableCompact((v) => !v)}
-                    aria-pressed={tableCompact}
-                  >
-                    コンパクト表示
-                  </button>
-                  <button
-                    type="button"
                     className={`view-density__btn${tableSummary ? " view-density__btn--active" : ""}`}
                     onClick={() => setTableSummary((v) => !v)}
                     aria-pressed={tableSummary}
@@ -519,13 +518,13 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                   前走加点（不利時）
                 </button>
               </div>
+              <RunningStyleRaceSummary horses={horses} />
               <HorseListTable
                 sorted={sorted}
                 horses={horses}
                 gradesMap={gradesMap}
                 condition={condition}
                 viewModel={pipeline.viewModel}
-                compact={tableCompact}
                 summaryMode={tableSummary}
               />
             </section>
@@ -533,23 +532,42 @@ export function RaceDetailView({ race, raceIndex }: Props) {
 
           {tab === "ai" && (
             <section className="ai-dashboard" aria-label="AI予想ダッシュボード">
-              <h2 className="app__section-title app__section-title--pop">AI能力スコア</h2>
+              <h2 className="app__section-title app__section-title--pop">AI予想（100点満点）</h2>
+              <p className="ai-dashboard__note">
+                条件・適性・能力を反映した<strong>補正後スコア</strong>を、このレースで最高の馬を100点とした比例換算です。力差が大きいほど点数も開きます（例：上位90点・下位30点のような分布になり得ます）。
+              </p>
               <div className="ai-dashboard__chart">
                 {sortedByPtDesc.map((row) => {
                   const horse = horses.find((h) => h.horseId === row.horseId);
                   if (!horse) return null;
-                  const barPercent = topScore > 0 ? Math.max(8, (row.adjustedScore / topScore) * 100) : 0;
+                  const score100 = adjustedScoreToPoints100(row.adjustedScore, maxAdjustedScoreInRace);
+                  const barPercent =
+                    score100 != null
+                      ? Math.max(8, score100)
+                      : topScore > 0
+                        ? Math.max(8, (row.adjustedScore / topScore) * 100)
+                        : 0;
+                  const top3Label = formatPredictedTop3Percent(horse.investment);
                   return (
                     <div key={row.horseId} className="ai-dashboard__row">
                       <p className="ai-dashboard__name">
                         {horse.frameNumber ?? "?"}枠{horse.gate ?? "?"}番 {horse.horseName}
                       </p>
-                      <div className="ai-dashboard__bar-wrap">
+                      <div className="ai-dashboard__metrics">
+                        <div className="ai-dashboard__bar-wrap">
+                          <div
+                            className="ai-dashboard__bar"
+                            style={{ width: `${barPercent}%` }}
+                          >
+                            {score100 != null ? `${score100}点` : "—"}
+                          </div>
+                        </div>
                         <div
-                          className="ai-dashboard__bar"
-                          style={{ width: `${barPercent}%` }}
+                          className="ai-dashboard__top3"
+                          title="enrich の predicted_probability（単勝確率ベースの変換値）。点数（adjustedScore）とは別ルート。"
                         >
-                          {row.adjustedScore.toFixed(1)}pt
+                          <span className="ai-dashboard__top3-lbl">3着内率</span>
+                          <span className="ai-dashboard__top3-val">{top3Label}</span>
                         </div>
                       </div>
                     </div>
@@ -601,6 +619,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                   const horse = horses.find((h) => h.horseId === r.horseId)!;
                   const gate = "gate" in horse ? (horse as typeof horse & { gate?: number }).gate : undefined;
                   const grades = gradesMap.get(r.horseId)!;
+                  const cardScore100 = adjustedScoreToPoints100(r.adjustedScore, maxAdjustedScoreInRace);
                   return (
                     <motion.div
                       key={r.horseId}
@@ -617,6 +636,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                         condition={condition}
                         viewModel={pipeline.viewModel}
                         compact={cardDensity === "compact"}
+                        scorePoints100={cardScore100}
                       />
                     </motion.div>
                   );

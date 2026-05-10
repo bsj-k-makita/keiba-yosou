@@ -128,6 +128,13 @@ export function buildEvaluationData(input: BuildInput): RaceEvaluationData {
         pace_mismatch: h.pace_mismatch,
         l2_sustain_ratio: h.l2_sustain_ratio,
         pastRuns: h.pastRuns,
+        ...(h.position_x != null && Number.isFinite(h.position_x)
+          ? { position_x: h.position_x }
+          : {}),
+        ...(h.abilityIndex != null && Number.isFinite(h.abilityIndex) ? { abilityIndex: h.abilityIndex } : {}),
+        ...(h.suitabilityFlags != null && h.suitabilityFlags.length > 0
+          ? { suitabilityFlags: h.suitabilityFlags }
+          : {}),
       };
     }),
   };
@@ -162,6 +169,9 @@ export function recomputeEvaluationData(data: RaceEvaluationData): RaceEvaluatio
         pace_mismatch: e.pace_mismatch,
         l2_sustain_ratio: e.l2_sustain_ratio,
         pastRuns: e.pastRuns,
+        position_x: e.position_x,
+        ...(e.abilityIndex != null ? { abilityIndex: e.abilityIndex } : {}),
+        ...(e.suitabilityFlags != null ? { suitabilityFlags: e.suitabilityFlags } : {}),
       }) as EnrichedRaceHorse,
   );
   return buildEvaluationData({

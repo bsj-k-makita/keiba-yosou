@@ -40,11 +40,11 @@ import {
 } from "./paceFit";
 import { detectOddsDistortion } from "./oddsDistortion";
 import { computeMaxPerformance, computeVariance, variancePenaltyPoints } from "./maxPerformance";
-import { computeLapShapeFit } from "./lapShapeFit";
+import { computeLapShapeFit, computeRpcPaceMismatchPenalty } from "./lapShapeFit";
 import { computeAdjustedRiskPenalty } from "./lossClassifier";
 import { classifyLapStructure, LAP_STRUCTURE } from "./lapStructure";
 import { computeClassLevelBonus } from "./classLevelScore";
-import { blendAbilityWithPastRuns } from "./performanceAbility";
+import { applyKickL2Emphasis, blendAbilityWithPastRuns } from "./performanceAbility";
 import { computeContextualBonuses } from "./contextualBonuses";
 import { BUY_LABELS } from "./lingoConstants";
 import { ADJUSTMENT_STRENGTH } from "./adjustments";
@@ -335,7 +335,9 @@ export function evaluateRace(
   horses: HorseAbility[],
   condition: RaceCondition,
 ): HorseScoreResult[] {
-  const evalHorses = horses.map((h) => blendAbilityWithPastRuns(h));
+  const evalHorses = horses
+    .map((h) => blendAbilityWithPastRuns(h))
+    .map((h) => applyKickL2Emphasis(h, condition));
   const effectivePace = resolveEffectiveRacePace(condition, evalHorses);
   const evalCondition: RaceCondition = { ...condition, pace: effectivePace };
   const paceSeverity = inferPaceSeverityKind(evalHorses, evalCondition);
@@ -589,10 +591,12 @@ export function evaluateRace(
     const cornerPredBonus = fourthCornerPredictionBonus(
       fourthCornerByHorse.get(h.horseId)?.estimatedRank ?? 99,
     );
+    const rpcPaceMismatchPenalty = computeRpcPaceMismatchPenalty(h, evalCondition);
     const lapShapeScaled =
       (r.lapShapeFitBonus + r.raceAnalysisBonus) * COURSE_SHAPE_FIT_RATIO +
       r.lapSustainBonus +
-      r.lapQualityBonus;
+      r.lapQualityBonus +
+      rpcPaceMismatchPenalty;
     // 既存ラップ枠 +16.8 内に staminaResilienceBonus を合算しクランプ。
     const lapStack = clamp(
       lapShapeScaled + cappedResilienceBonus,

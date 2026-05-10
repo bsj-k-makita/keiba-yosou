@@ -5,6 +5,7 @@ import type {
   RaceCondition,
   RacePeerBaselineSummary,
   RaceStoredLapType,
+  SuitabilityFlag,
 } from "../../domain/race-evaluation/abilityTypes";
 import type { DisplayGrade } from "../../domain/race-evaluation/abilityGrades";
 import { calcHorseScore, getFinalWeights, type HorseAbility, weightsToDemand0to100 } from "../../domain/race-evaluation";
@@ -60,6 +61,26 @@ function parseNumArrayInRange(v: unknown, max: number): readonly number[] | unde
 
 function round1(x: number): number {
   return Math.round(x * 10) / 10;
+}
+
+function parseSuitabilityFlags(raw: unknown): SuitabilityFlag[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out: SuitabilityFlag[] = [];
+  for (const item of raw) {
+    if (item == null || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const label = o.label;
+    const code = o.code;
+    if (typeof label !== "string" || label.trim().length === 0) continue;
+    const flag: SuitabilityFlag = {
+      code: typeof code === "string" && code.length > 0 ? code : "unknown",
+      label: label.trim(),
+    };
+    const pct = n(o.impactApproxPct);
+    if (pct != null) flag.impactApproxPct = pct;
+    out.push(flag);
+  }
+  return out.length > 0 ? out : undefined;
 }
 
 const STORED_LAP_TYPES = new Set<RaceStoredLapType>(["late_accelerated", "early_pressured", "even_pace", "neutral"]);
@@ -145,10 +166,17 @@ function mergeRaceAnalysisFromDoc(doc: Record<string, unknown>): RaceAnalysisSna
 
 /**
  * 保存JSONルート配下の `analysisJson` / `analysis` を畳み込み、変換器が扱う1オブジェクトにまとめる。
+ *
+ * `attachRaceAnalysisOrLeave`（出馬表取得）がルートに付ける `analysis` はレース分析スナップショットのみで、
+ * `entries` を含まない。旧ロジックがこれを丸ごと `analysis` として返すと `unwrap` がその小オブジェクトだけを返し、
+ * 本来の出馬表ルート（`meta` + `entries`）が捨てられて変換に失敗する。
+ * ルートに出走表 `entries` があるときは常にルートをそのまま使う。
  */
 export function unwrapAnalysisPayload(root: unknown): unknown {
   if (root == null || typeof root !== "object") return root;
   const o = root as Record<string, unknown>;
+  if (isRaceEvaluationDataShape(o)) return root;
+  if (Array.isArray(o.entries) && o.entries.length > 0) return root;
   if (o.analysisJson != null) return o.analysisJson;
   if (o.analysis != null) return o.analysis;
   return root;
@@ -230,6 +258,13 @@ function toEvaluationSignals(e: AnalysisHorseEntry): HorseEvaluationSignals | un
 
 function toInvestmentInput(e: AnalysisHorseEntry): InvestmentCommentInput | undefined {
   const predictedProbability = n(e.predicted_probability) ?? n(e.predictedProbability);
+  const predictedWinRate = n(e.predicted_win_rate) ?? n(e.predictedWinRate);
+  const finalExpectedValueRaw =
+    n(e.final_expected_value) ??
+    n(e.finalExpectedValue) ??
+    n(e.value_score) ??
+    n(e.valueScore);
+  const expectedValue = n(e.expected_value) ?? n(e.expectedValue);
   const marketWinOdds = n(e.market_win_odds) ?? n(e.marketWinOdds);
   const marketWinOddsSourceRaw = e.market_win_odds_source ?? e.marketWinOddsSource;
   const actualOdds =
@@ -257,6 +292,9 @@ function toInvestmentInput(e: AnalysisHorseEntry): InvestmentCommentInput | unde
   if (valueChangeRaw == null || !["UP", "DOWN", "STABLE"].includes(valueChangeRaw)) return undefined;
   return {
     predictedProbability,
+    predictedWinRate: predictedWinRate ?? undefined,
+    finalExpectedValue: finalExpectedValueRaw ?? undefined,
+    expectedValue: expectedValue ?? undefined,
     actualOdds,
     oddsSource:
       marketWinOddsSourceRaw === "actual" || marketWinOddsSourceRaw === "estimated"
@@ -317,6 +355,9 @@ function toEnrichedHorse(e: AnalysisHorseEntry): EnrichedRaceHorse {
     l2_sustain_ratio: n(e.l2_sustain_ratio) ?? n(e.l2SustainRatio),
     signals: toEvaluationSignals(e),
     investment: toInvestmentInput(e),
+    position_x: n(e.position_x) ?? n(e.positionX),
+    abilityIndex: n(e.ability_index) ?? n(e.abilityIndex),
+    suitabilityFlags: parseSuitabilityFlags(e.suitability_flags ?? e.suitabilityFlags),
   };
 }
 
@@ -366,6 +407,10 @@ function toCondition(doc: Record<string, unknown>, pack: ReturnType<typeof merge
   const raw = (doc["condition"] ?? null) as Record<string, unknown> | null;
   if (raw != null) {
     return {
+      meetingDate:
+        typeof raw["meetingDate"] === "string" && String(raw["meetingDate"]).length >= 8
+          ? String(raw["meetingDate"])
+          : pack.date,
       venue: typeof raw["venue"] === "string" && raw["venue"] ? raw["venue"] : pack.venue,
       courseKey: typeof raw["courseKey"] === "string" && raw["courseKey"] ? raw["courseKey"] : undefined,
       raceName:
@@ -419,6 +464,7 @@ function toCondition(doc: Record<string, unknown>, pack: ReturnType<typeof merge
     };
   }
   return {
+    meetingDate: pack.date,
     venue: pack.venue,
     courseKey: undefined,
     raceName: pack.raceName,
@@ -577,6 +623,7 @@ function toRaceEntryFromPreserved(
     pace_mismatch: h.pace_mismatch,
     l2_sustain_ratio: h.l2_sustain_ratio,
     pastRuns: h.pastRuns,
+    position_x: h.position_x,
   };
 }
 

@@ -9,8 +9,7 @@ import {
 import { buildBetPlan, type BetMode } from "./betBuilder";
 import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
 import { EvHeatmap } from "./EvHeatmap";
-import { FIXED_SOFTMAX_TEMPERATURE } from "../../lib/pipeline/normalization";
-
+import { formatPredictedTop3Percent } from "./predictedTop3Display";
 type Props = {
   sorted: HorseScoreResult[];
   horses: HorseAbility[];
@@ -39,7 +38,8 @@ const VALUE_RANK_STYLE: Record<string, { bg: string; color: string; label: strin
 
 /** オッズ補正スコア帯に応じた短文ラベル（value_rank より数値を優先）。 */
 function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; color?: string } {
-  const vr = valueRankFromEffectiveEv(inv.valueScore ?? 0);
+  const evPrimary = inv.finalExpectedValue ?? inv.valueScore ?? 0;
+  const vr = valueRankFromEffectiveEv(evPrimary);
   if (vr === "S" || vr === "A") {
     return { text: "【スコア高】", color: "#c0392b" };
   }
@@ -56,12 +56,12 @@ function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; 
  * 補正スコアが高い馬向けバッジ（オッズ×確率ベース）。
  */
 function EvSpecialBadge({ rank, ev }: { rank: string; ev: number }) {
-  if (rank === "S" || ev >= 1.25) {
+  if (rank === "S" || ev >= 1.2) {
     return (
       <>
         <span
           className="ev-badge ev-badge--gekiatu"
-          title="スコア激アツ: 補正スコア 1.25 以上"
+          title="スコア激アツ: 補正スコアまたは JSON の期待値が 1.2 以上"
           style={{
             display: "inline-block",
             padding: "0.1em 0.5em",
@@ -166,12 +166,12 @@ function EvRankBadge({ rank }: { rank: string }) {
   );
 }
 
-function sharpProbability(
-  row: EvRow,
-  viewModel?: RaceEvaluationViewModel,
-): number {
+/**
+ * 単勝勝率 P：`finalEvaluationScore` 由来の ViewModel（同一レース softmax）のみ。
+ */
+function winShareProbabilityForEv(row: EvRow, viewModel?: RaceEvaluationViewModel): number {
   const p = viewModel?.byHorseId.get(row.horseId)?.adjustedWinProbability;
-  if (p != null && Number.isFinite(p) && p > 0) return p;
+  if (p != null && Number.isFinite(p) && p >= 0) return p;
   return row.investment.predictedProbability;
 }
 
@@ -201,8 +201,10 @@ function EvSection({
 
       <h3 className="bet-panel__ev-title">AIオッズ評価（補正スコア）</h3>
       <p className="bet-panel__ev-desc">
-        補正スコア = (補正後の勝率 × オッズ) − マージン。勝率の softmax は常に T={FIXED_SOFTMAX_TEMPERATURE}
-        （尖り固定）で正規化しています。
+        <strong>表示の「3着内率」</strong>は JSON の <strong>predicted_probability</strong> で、単勝確率から変換した参考値です。
+        <strong>点数</strong>（補正後スコアの比例）は別系列のため、高得点でもこの％が低いことがあります。
+        単勝シェア（期待値計算・ランキング）は <strong>finalEvaluationScore</strong> を softmax した確率のみを使用します。
+        <strong>補正スコア</strong>列は enrich が保存した <strong>final_expected_value</strong> です。オッズ歪みブーストは適用しません。
       </p>
 
       <div className="bet-panel__ev-table-wrap">
@@ -213,7 +215,7 @@ function EvSection({
             <th>馬名</th>
             <th>補正スコア</th>
             <th>ランク</th>
-            <th>確率</th>
+            <th>3着内率</th>
             <th>オッズ</th>
             <th>推奨配分</th>
             <th>推奨額</th>
@@ -223,8 +225,12 @@ function EvSection({
         <tbody>
           {rows.map((row) => {
             const inv = row.investment;
-            const probability = sharpProbability(row, viewModel);
-            const ev = Math.round((probability * inv.actualOdds - runtimeMargin) * 100) / 100;
+            const winShareP = winShareProbabilityForEv(row, viewModel);
+            const computedEv = Math.round((winShareP * inv.actualOdds - runtimeMargin) * 100) / 100;
+            const ev =
+              inv.finalExpectedValue != null && Number.isFinite(inv.finalExpectedValue)
+                ? inv.finalExpectedValue
+                : computedEv;
             const adjustedRank = ev >= 1.40 ? "S" : ev >= 1.25 ? "S" : ev >= 1.10 ? "A" : ev >= 1.0 ? "B" : ev >= 0.90 ? "C" : "D";
             const displayRank = adjustedRank;
             const runtimeKelly = viewModel?.byHorseId.get(row.horseId)?.kellyFraction ?? inv.kellyWeight ?? 0;
@@ -249,8 +255,11 @@ function EvSection({
                 <td style={{ textAlign: "center" }}>
                   <EvRankBadge rank={displayRank} />
                 </td>
-                <td style={{ textAlign: "right" }}>
-                  {(probability * 100).toFixed(1)}%
+                <td
+                  style={{ textAlign: "right" }}
+                  title="predicted_probability（単勝確率由来・点数とは別ルート）。AI予想・出馬表と同じ。"
+                >
+                  {formatPredictedTop3Percent(inv)}
                 </td>
                 <td style={{ textAlign: "right" }}>
                   {inv.actualOdds.toFixed(1)}倍
@@ -387,15 +396,16 @@ export function RaceBetPanel({ sorted, horses, condition, viewModel, onCondition
     const runtimeMargin = evRows.length >= 16 ? 0.2 : 0.15;
     const lines = evRows
       .map((row) => {
-        const p = sharpProbability(row, viewModel);
+        const winShareP = winShareProbabilityForEv(row, viewModel);
         const odds = row.investment.actualOdds;
         const kelly = (viewModel?.byHorseId.get(row.horseId)?.kellyFraction ?? row.investment.kellyWeight ?? 0) * kellyFractionValue;
         const amount = Math.floor((budget * kelly) / 100) * 100;
-        const ev = p * odds - runtimeMargin;
+        const ev = winShareP * odds - runtimeMargin;
         if (amount <= 0) return null;
+        const top3pct = (row.investment.predictedProbability * 100).toFixed(1);
         return {
           gate: row.gate,
-          line: `馬番${row.gate}：複勝 ${amount.toLocaleString()}円（スコア ${ev.toFixed(2)} / P ${(p * 100).toFixed(1)}%）`,
+          line: `馬番${row.gate}：複勝 ${amount.toLocaleString()}円（スコア ${ev.toFixed(2)} / 3着内 ${top3pct}%）`,
           amount,
         };
       })
@@ -585,7 +595,11 @@ export function RaceBetPanel({ sorted, horses, condition, viewModel, onCondition
             rows={evRows.map((row) => ({
               horseId: row.horseId,
               horseName: row.horseName,
-              effectiveEv: viewModel?.byHorseId.get(row.horseId)?.effectiveEv ?? row.investment.valueScore ?? null,
+              effectiveEv:
+                row.investment.finalExpectedValue ??
+                viewModel?.byHorseId.get(row.horseId)?.effectiveEv ??
+                row.investment.valueScore ??
+                null,
             }))}
           />
           <EvSection rows={evRows} budget={budget} kellyFraction={kellyFractionValue} viewModel={viewModel} />

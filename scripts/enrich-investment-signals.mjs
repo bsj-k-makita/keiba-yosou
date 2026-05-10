@@ -14,6 +14,7 @@ function parseArgs(argv) {
   for (const a of argv) {
     if (a === "--all") out.all = true;
     else if (a === "--bias-update") out.biasUpdate = true;
+    else if (a === "--recalc-ability") process.env.ENRICH_RECALC_ABILITY = "1";
     else if (!a.startsWith("-")) out.raceIds.push(a.replace(/\.json$/, ""));
   }
   return out;
@@ -57,7 +58,7 @@ async function main() {
       return;
     }
     process.stderr.write(
-      "Usage: node scripts/enrich-investment-signals.mjs [--bias-update] --all | <raceId> [raceId...]\n",
+      "Usage: node scripts/enrich-investment-signals.mjs [--bias-update] [--recalc-ability] --all | <raceId> [raceId...]\n",
     );
     process.exit(1);
   }

@@ -291,12 +291,12 @@ async function switchOddsTableToPopularityOrder(page) {
 }
 
 /**
- * 人気順表示時: 人気・馬番・単勝を1行から取得（馬番順でも td.ninki が無ければ人気は null）。
- * @returns {Promise<{ horseNumber: number, marketWinOdds: number | null, marketPopularity: number | null, excluded?: boolean }[]>}
+ * 人気順表示時: 枠・人気・馬番・単勝を1行から取得（馬番順でも td.ninki が無ければ人気は null）。
+ * @returns {Promise<{ horseNumber: number, frameNumber: number | null, marketWinOdds: number | null, marketPopularity: number | null, excluded?: boolean }[]>}
  */
 async function scrapeTanOddsAndPopularityFromPage(page) {
   return page.evaluate(() => {
-    /** @type {{ horseNumber: number, marketWinOdds: number | null, marketPopularity: number | null, excluded?: boolean }[]} */
+    /** @type {{ horseNumber: number, frameNumber: number | null, marketWinOdds: number | null, marketPopularity: number | null, excluded?: boolean }[]} */
     const out = [];
     const tables = [...document.querySelectorAll("table")];
     const table = tables.find((t) => {
@@ -319,9 +319,33 @@ async function scrapeTanOddsAndPopularityFromPage(page) {
       const horseNumber = parseInt(String(ub.textContent ?? "").replace(/[^\d]/g, ""), 10);
       if (!Number.isFinite(horseNumber) || horseNumber < 1) continue;
 
+      let frameNumber = null;
+      const wakuTd =
+        tr.querySelector("td.wakuban") ??
+        tr.querySelector("td.waku") ??
+        tr.querySelector("td.border_Frame_No") ??
+        null;
+      if (wakuTd) {
+        const wf = parseInt(String(wakuTd.textContent ?? "").replace(/[^\d]/g, ""), 10);
+        if (Number.isFinite(wf) && wf >= 1) frameNumber = wf;
+      } else {
+        const tds = [...tr.querySelectorAll("td")];
+        const ui = tds.findIndex((td) => td.classList.contains("umaban"));
+        if (ui > 0) {
+          const wf = parseInt(String(tds[ui - 1].textContent ?? "").replace(/[^\d]/g, ""), 10);
+          if (Number.isFinite(wf) && wf >= 1 && wf <= 18) frameNumber = wf;
+        }
+      }
+
       const rowText = (tr.textContent ?? "").replace(/\s+/g, "");
       if (/取消|除外/.test(rowText)) {
-        out.push({ horseNumber, marketWinOdds: null, marketPopularity: null, excluded: true });
+        out.push({
+          horseNumber,
+          frameNumber,
+          marketWinOdds: null,
+          marketPopularity: null,
+          excluded: true,
+        });
         continue;
       }
 
@@ -343,6 +367,7 @@ async function scrapeTanOddsAndPopularityFromPage(page) {
 
       out.push({
         horseNumber,
+        frameNumber,
         marketWinOdds: marketWinOdds ?? null,
         marketPopularity,
       });
@@ -408,6 +433,7 @@ export async function fetchJraOfficialWinOddsForRace(ctx, opts = {}) {
       rows.push({
         raceId: ctx.raceId,
         horseNumber: r.horseNumber,
+        frameNumber: r.frameNumber ?? null,
         actualOdds: null,
         marketWinOdds: r.excluded ? null : r.marketWinOdds,
         marketPopularity: r.excluded ? null : r.marketPopularity,
@@ -462,6 +488,7 @@ export async function createJraOfficialOddsSession() {
         rows.push({
           raceId: ctx.raceId,
           horseNumber: r.horseNumber,
+          frameNumber: r.frameNumber ?? null,
           actualOdds: null,
           marketWinOdds: r.excluded ? null : r.marketWinOdds,
           marketPopularity: r.excluded ? null : r.marketPopularity,
@@ -482,6 +509,31 @@ export async function createJraOfficialOddsSession() {
       await browser.close();
     },
   };
+}
+
+/**
+ * JRA 公式から単勝オッズ・枠・人気を馬番キーで返す。全体が失敗したときのみ null。
+ * @param {object} ctx resolveRaceNavigationContext
+ * @param {{ observedAt?: string }} [opts]
+ * @returns {Promise<Record<number, { winOdds: number | null, popularity: number | null, frameNumber: number | null, excluded?: boolean }> | null>}
+ */
+export async function fetchJraOddsAndFramesKeyedOrNull(ctx, opts = {}) {
+  try {
+    const rows = await fetchJraOfficialWinOddsForRace(ctx, opts);
+    /** @type {Record<number, { winOdds: number | null, popularity: number | null, frameNumber: number | null, excluded?: boolean }>} */
+    const keyed = {};
+    for (const r of rows) {
+      keyed[r.horseNumber] = {
+        winOdds: r.marketWinOdds,
+        popularity: r.marketPopularity,
+        frameNumber: r.frameNumber ?? null,
+        excluded: Boolean(r._excluded),
+      };
+    }
+    return keyed;
+  } catch {
+    return null;
+  }
 }
 
 export { randomPoliteMs, sleep };

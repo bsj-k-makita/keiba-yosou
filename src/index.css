@@ -1087,6 +1087,144 @@ samp {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Running style strip（出馬表・馬名セル内）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.running-style-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 6px;
+  max-width: 100%;
+}
+.running-style-strip__title {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2f6c59;
+  padding-top: 8px;
+  letter-spacing: 0.02em;
+}
+.running-style-strip__main {
+  flex: 1;
+  min-width: 0;
+}
+.running-style-strip__bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+.running-style-strip__bar-seg {
+  display: block;
+  height: 100%;
+  opacity: 0.88;
+}
+.running-style-strip__icons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+.running-style-strip__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.running-style-strip__wedge-wrap {
+  color: #94a3b8;
+  line-height: 0;
+}
+.running-style-strip__wedge-wrap--active {
+  transform: scale(1.06);
+}
+.running-style-strip__slot-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  line-height: 1.1;
+}
+.running-style-strip__slot-label--active {
+  font-weight: 800;
+}
+
+/* レース単位・脚質別頭数（出馬表直上） */
+.running-style-race-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px 14px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--c-surface-alt, #f4f6fb);
+  border: 1px solid var(--c-border);
+}
+.running-style-race-summary__label {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-text-muted);
+  padding-top: 4px;
+  letter-spacing: 0.04em;
+}
+.running-style-race-summary__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.running-style-race-summary__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 12px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: var(--c-white, #fff);
+  font-weight: 600;
+  color: var(--c-text);
+}
+.running-style-race-summary__chip--zero {
+  opacity: 0.42;
+}
+.running-style-race-summary__chip--nige {
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(220, 252, 231, 0.55);
+}
+.running-style-race-summary__chip--sen {
+  border-color: rgba(202, 138, 4, 0.45);
+  background: rgba(254, 249, 195, 0.55);
+}
+.running-style-race-summary__chip--sashi {
+  border-color: rgba(22, 163, 74, 0.45);
+  background: rgba(220, 252, 231, 0.65);
+}
+.running-style-race-summary__chip--oi {
+  border-color: rgba(37, 99, 235, 0.45);
+  background: rgba(219, 234, 254, 0.6);
+}
+.running-style-race-summary__name {
+  margin-right: 1px;
+}
+.running-style-race-summary__num {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.running-style-race-summary__unit {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.88;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    Entries Grid
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .app__entries { margin-top: 24px; }
@@ -1413,6 +1551,26 @@ samp {
   line-height: 1;
   color: var(--c-text);
   letter-spacing: 0.196px;
+}
+
+.horse-card__scoreline-unit {
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  color: var(--c-text-3);
+  letter-spacing: -0.06px;
+}
+
+.horse-card__scoreline--pipeline-probs .horse-card__scoreline-val,
+.horse-card__scoreline--pipeline-potential .horse-card__scoreline-val {
+  font-size: 22px;
+}
+
+.horse-card__suitability-flags {
+  margin: 0 0 10px;
+  padding-left: 1.1rem;
+  font-size: var(--font-size-caption, 0.82rem);
+  color: var(--c-text-2);
+  line-height: 1.45;
 }
 
 .horse-card__score-decomp {
@@ -3135,15 +3293,6 @@ samp {
   background: var(--c-white);
 }
 
-.horse-list-wrap--compact .horse-list {
-  font-size: var(--font-size-body);
-}
-
-.horse-list-wrap--compact .horse-list__th,
-.horse-list-wrap--compact .horse-list__td {
-  padding: 8px 10px;
-}
-
 .horse-list {
   width: 100%;
   border-collapse: separate;
@@ -3167,8 +3316,43 @@ samp {
 .horse-list__th--buy,
 .horse-list__th--role,
 .horse-list__th--lap,
-.horse-list__th--radar {
+.horse-list__th--radar,
+.horse-list__th--pwin,
+.horse-list__th--potential,
+.horse-list__th--suit {
   text-align: center;
+}
+
+.horse-list__th--pwin {
+  min-width: 4.25rem;
+}
+
+.horse-list__th--potential {
+  min-width: 4.25rem;
+}
+
+.horse-list__th--suit {
+  min-width: 6rem;
+  max-width: 12rem;
+}
+
+.horse-list__td--suit {
+  max-width: 12rem;
+}
+
+.horse-list__suit-hint {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-caption, 0.82rem);
+  color: var(--c-text-secondary, #92400e);
+}
+
+.horse-list__th--top3 {
+  text-align: right;
+  min-width: 4.5rem;
 }
 
 .horse-list__th--radar {
@@ -3200,6 +3384,12 @@ samp {
 .horse-list__td--lap,
 .horse-list__td--radar {
   text-align: center;
+}
+
+.horse-list__td--top3 {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .horse-list__td--radar {
@@ -3330,15 +3520,6 @@ samp {
   margin-right: 6px;
 }
 
-.horse-list__style {
-  font-size: var(--font-size-body);
-  color: #2f6c59;
-  background: var(--c-mint-soft);
-  border-radius: var(--r-pill);
-  border: 1px solid #b4dfd1;
-  padding: 2px 8px;
-}
-
 .horse-list__score {
   font-weight: 700;
   font-size: 14px;
@@ -3399,7 +3580,7 @@ samp {
 .horse-list__name-wrap {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .horse-list__name-row {
@@ -3407,13 +3588,6 @@ samp {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-}
-
-.horse-list__comment {
-  font-size: var(--font-size-body);
-  color: var(--c-text-sub, #555);
-  margin: 0;
-  line-height: 1.35;
 }
 
 .horse-list__scenario {
@@ -3455,21 +3629,6 @@ samp {
   .horse-list__horse-name {
     margin-right: 4px;
     font-size: var(--font-size-body);
-  }
-
-  .horse-list__style {
-    font-size: var(--font-size-body);
-    padding: 1px 6px;
-  }
-
-  .horse-list__comment {
-    font-size: var(--font-size-body);
-    line-height: 1.35;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
 
   .horse-list__score {
@@ -4260,6 +4419,13 @@ samp {
   background: var(--c-white);
 }
 
+.ai-dashboard__note {
+  margin: -4px 0 14px;
+  font-size: calc(var(--font-size-body) * 0.92);
+  color: var(--c-text-3);
+  line-height: 1.45;
+}
+
 .ai-dashboard__chart {
   display: grid;
   gap: 14px;
@@ -4272,11 +4438,68 @@ samp {
   color: var(--c-text);
 }
 
+.ai-dashboard__metrics {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 14px;
+}
+
 .ai-dashboard__bar-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
   height: 23px;
   border-radius: 11px;
   overflow: hidden;
   background: var(--c-pale);
+}
+
+.ai-dashboard__top3 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  min-width: 5.25rem;
+  padding: 6px 12px;
+  border-radius: 11px;
+  background: var(--c-pale);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.ai-dashboard__top3-lbl {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-text-muted);
+  letter-spacing: 0.04em;
+}
+
+.ai-dashboard__top3-val {
+  margin: 0;
+  font-family: var(--font-pop);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--c-text);
+  line-height: 1.2;
+}
+
+@media (max-width: 640px) {
+  .ai-dashboard__metrics {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ai-dashboard__top3 {
+    min-width: unset;
+    width: 100%;
+    padding: 8px 12px;
+  }
+
+  .ai-dashboard__top3-lbl {
+    font-size: 12px;
+  }
 }
 
 .ai-dashboard__bar {
