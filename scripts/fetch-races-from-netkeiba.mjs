@@ -109,6 +109,10 @@ function makeJobs(targetDate = null) {
       date: "2026-05-10",
       placeCodes: ["040104", "050206", "080306"], // 新潟 / 東京 / 京都
     }),
+    ...makeDayJobs({
+      date: "2026-05-17",
+      placeCodes: ["040106", "050208", "080308"], // 新潟 / 東京 / 京都（1回新潟6日・2回東京8日・3回京都8日）
+    }),
   ];
   if (!targetDate) return out;
   return out.filter((j) => j.date === targetDate);
