@@ -1,6 +1,7 @@
 /**
  * netkeiba 出馬表（shutuba）を取得し、既存 app が読む `analysisJson` 互換の JSON を保存する。
  * 取り込み時に各馬の直近5走（pastRuns）も同時に取得して保存する。
+ * 五能力（abilities）は馬IDハッシュではなく、過去走から `estimateAbilitiesFromPastRuns.mjs` で推定する。
  * 起動:
  *   node scripts/fetch-races-from-netkeiba.mjs [--date=YYYY-MM-DD] [--skip-past-runs]
  *   node scripts/fetch-races-from-netkeiba.mjs --from-index [--date=YYYY-MM-DD] [--refetch-past-runs]
@@ -16,6 +17,7 @@ import { dirname, join } from "path";
 import { load } from "cheerio";
 import { fetchPastRunsForHorse } from "./lib/parseNetkeibaPastRuns.mjs";
 import { enrichInvestmentSignalsInRaceData } from "./lib/investmentSignals.mjs";
+import { applyEstimatedAbilitiesToEntries, neutralPlaceholderAbilities } from "./lib/estimateAbilitiesFromPastRuns.mjs";
 import { attachRaceAnalysisOrLeave } from "./lib/raceAnalysis.mjs";
 import { buildDailyBaselineMaster, saveDailyBaseline, DAILY_BASELINE_PATH } from "./lib/dailyBaseline.mjs";
 import { fetchUtf8, fetchSpUtf8 } from "./lib/netkeibaFetch.mjs";
@@ -63,14 +65,6 @@ function fetchShutubaPastHtml(raceId) {
   } catch {
     return "";
   }
-}
-
-function hashAbilities(horseId) {
-  let h = 0;
-  for (let i = 0; i < horseId.length; i += 1) h = Math.imul(31, h) + horseId.charCodeAt(i);
-  h |= 0;
-  const b = (shift) => 20 + (Math.abs((h + shift * 7919) | 0) % 61);
-  return { speed: b(0), stamina: b(1), kick: b(2), sustain: b(3), power: b(4) };
 }
 
 function makeDayJobs({ date, placeCodes }) {
@@ -398,7 +392,7 @@ function parseShutubaCore(html, { raceId, date }) {
     const weightTdText = $tr.find("td.Weight").text().trim();
     const bodyWeightKg = parseBodyWeight(weightTdText);
 
-    const ab = hashAbilities(horseId);
+    const ab = neutralPlaceholderAbilities();
     const market = parseOddsAndPopularity($tr, tds, umaban);
     const kyakuStyle = parseRunningStyleFromShutubaHorseRow($tr, cheerio$);
     return {
@@ -472,7 +466,7 @@ function parseShutubaCore(html, { raceId, date }) {
     const bodyWeightKg = parseBodyWeight(bodyWeightCellText);
     if (!horseName) return;
 
-    const ab = hashAbilities(horseId);
+    const ab = neutralPlaceholderAbilities();
     const market = parseOddsAndPopularity($tr, tds, umaban);
     const kyakuStyle = parseRunningStyleFromShutubaHorseRow($tr, $);
     entries.push({
@@ -699,6 +693,8 @@ async function main() {
           entry.pastRuns = Array.isArray(entry.pastRuns) ? entry.pastRuns : [];
         }
       }
+
+      applyEstimatedAbilitiesToEntries(entries, core.meta);
 
       const data = enrichInvestmentSignalsInRaceData({
         raceId: core.raceId,

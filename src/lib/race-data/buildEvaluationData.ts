@@ -135,6 +135,7 @@ export function buildEvaluationData(input: BuildInput): RaceEvaluationData {
         ...(h.suitabilityFlags != null && h.suitabilityFlags.length > 0
           ? { suitabilityFlags: h.suitabilityFlags }
           : {}),
+        ...(h.abilitiesPrecomputedFromPastRuns ? { abilities_source: "past_runs_estimated" as const } : {}),
       };
     }),
   };
@@ -172,6 +173,7 @@ export function recomputeEvaluationData(data: RaceEvaluationData): RaceEvaluatio
         position_x: e.position_x,
         ...(e.abilityIndex != null ? { abilityIndex: e.abilityIndex } : {}),
         ...(e.suitabilityFlags != null ? { suitabilityFlags: e.suitabilityFlags } : {}),
+        ...(e.abilities_source === "past_runs_estimated" ? { abilitiesPrecomputedFromPastRuns: true as const } : {}),
       }) as EnrichedRaceHorse,
   );
   return buildEvaluationData({

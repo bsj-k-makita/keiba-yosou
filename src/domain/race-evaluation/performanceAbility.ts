@@ -390,6 +390,7 @@ function deriveAxesFromRuns(
   runningStyle: HorseAbility["runningStyle"],
   condition: RaceCondition | undefined,
 ): DerivedAxes | null {
+  // Node 取り込み: scripts/lib/estimateAbilitiesFromPastRuns.mjs とロジックを揃えること
   if (!runs || runs.length === 0) return null;
   const target = runs.slice(0, 6);
   if (target.length === 0) return null;

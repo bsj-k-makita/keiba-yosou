@@ -126,6 +126,11 @@ export type HorseAbility = {
   kick: number;
   sustain: number;
   power: number;
+  /**
+   * `abilities_source=past_runs_estimated` の JSON から復元したとき true。
+   * evaluateRace 内の過去走ブレンド・L2キレ再合成を省略し、二重補正を防ぐ。
+   */
+  abilitiesPrecomputedFromPastRuns?: boolean;
   pedigree?: HorsePedigree;
   signals?: HorseEvaluationSignals;
   investment?: InvestmentCommentInput;

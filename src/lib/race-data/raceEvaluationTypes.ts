@@ -186,6 +186,10 @@ export type RaceEntryEvaluation = {
     sustain: number;
     power: number;
   };
+  abilities_source?:
+    | "past_runs_estimated"
+    | "neutral_no_past_runs"
+    | "neutral_no_usable_runs";
 
   abilityGrades: {
     speed: PerAxisDisplayGrade;

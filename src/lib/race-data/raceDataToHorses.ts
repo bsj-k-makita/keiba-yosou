@@ -37,5 +37,6 @@ export function raceDataToHorses(data: RaceEvaluationData): EnrichedRaceHorse[] 
     ...(e.suitabilityFlags != null && e.suitabilityFlags.length > 0
       ? { suitabilityFlags: e.suitabilityFlags }
       : {}),
+    ...(e.abilities_source === "past_runs_estimated" ? { abilitiesPrecomputedFromPastRuns: true as const } : {}),
   }));
 }

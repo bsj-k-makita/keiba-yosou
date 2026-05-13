@@ -358,6 +358,7 @@ function toEnrichedHorse(e: AnalysisHorseEntry): EnrichedRaceHorse {
     position_x: n(e.position_x) ?? n(e.positionX),
     abilityIndex: n(e.ability_index) ?? n(e.abilityIndex),
     suitabilityFlags: parseSuitabilityFlags(e.suitability_flags ?? e.suitabilityFlags),
+    ...(e.abilities_source === "past_runs_estimated" ? { abilitiesPrecomputedFromPastRuns: true as const } : {}),
   };
 }
 
@@ -624,6 +625,9 @@ function toRaceEntryFromPreserved(
     l2_sustain_ratio: h.l2_sustain_ratio,
     pastRuns: h.pastRuns,
     position_x: h.position_x,
+    ...(e.abilities_source === "past_runs_estimated" || h.abilitiesPrecomputedFromPastRuns
+      ? { abilities_source: "past_runs_estimated" as const }
+      : {}),
   };
 }
 

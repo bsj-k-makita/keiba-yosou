@@ -342,9 +342,12 @@ export function evaluateRace(
   horses: HorseAbility[],
   condition: RaceCondition,
 ): HorseScoreResult[] {
-  const evalHorses = horses
-    .map((h) => blendAbilityWithPastRuns(h, condition))
-    .map((h) => applyKickL2Emphasis(h, condition));
+  const evalHorses = horses.map((h) => {
+    if (h.abilitiesPrecomputedFromPastRuns) {
+      return { ...h };
+    }
+    return applyKickL2Emphasis(blendAbilityWithPastRuns(h, condition), condition);
+  });
   const effectivePace = resolveEffectiveRacePace(condition, evalHorses);
   const evalCondition: RaceCondition = { ...condition, pace: effectivePace };
   const paceSeverity = inferPaceSeverityKind(evalHorses, evalCondition);

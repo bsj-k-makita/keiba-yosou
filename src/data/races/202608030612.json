@@ -35,11 +35,11 @@
       "pedigree": {},
       "runningStyle": "好位",
       "abilities": {
-        "speed": 21,
-        "stamina": 71,
-        "kick": 60,
-        "sustain": 49,
-        "power": 38
+        "speed": 61.9,
+        "stamina": 43.8,
+        "kick": 60.6,
+        "sustain": 42,
+        "power": 46.2
       },
       "abilityGrades": {
         "speed": "C",
@@ -231,16 +231,16 @@
       "position_x": 49,
       "abilityIndex": 96,
       "running_style_source": "pack_position_x",
-      "predicted_win_rate": 0.0033,
-      "ability_index": 74.1,
+      "predicted_win_rate": 0.0147,
+      "ability_index": 81.9,
       "suitability_flags": [],
-      "final_expected_value": -0.09,
-      "predicted_probability": 0.11,
-      "estimated_actual_odds": 6.69,
+      "final_expected_value": -0.01,
+      "predicted_probability": 0.13,
+      "estimated_actual_odds": 3.64,
       "odds_source": "estimated",
-      "market_popularity": 14,
+      "market_popularity": 8,
       "market_popularity_source": "estimated",
-      "market_win_odds": 17.6,
+      "market_win_odds": 9.58,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -248,13 +248,14 @@
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
-        "長距離実績",
+        "先行力",
         "末脚性能"
       ],
       "risk_factors": [
-        "先行力不足"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021103268",
@@ -268,11 +269,11 @@
       "pedigree": {},
       "runningStyle": "先行",
       "abilities": {
-        "speed": 28,
-        "stamina": 78,
-        "kick": 67,
-        "sustain": 56,
-        "power": 45
+        "speed": 62.1,
+        "stamina": 49.4,
+        "kick": 56.2,
+        "sustain": 46.6,
+        "power": 50.7
       },
       "abilityGrades": {
         "speed": "B",
@@ -473,16 +474,16 @@
       ],
       "position_x": 100,
       "abilityIndex": 87.7,
-      "predicted_win_rate": 0.0007,
-      "ability_index": 66.1,
+      "predicted_win_rate": 0.0008,
+      "ability_index": 69.4,
       "suitability_flags": [],
-      "final_expected_value": -0.14,
+      "final_expected_value": -0.15,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 5.12,
+      "estimated_actual_odds": 1.84,
       "odds_source": "estimated",
-      "market_popularity": 11,
+      "market_popularity": 4,
       "market_popularity_source": "estimated",
-      "market_win_odds": 13.48,
+      "market_win_odds": 4.85,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -490,13 +491,14 @@
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
-        "長距離実績",
+        "先行力",
         "末脚性能"
       ],
       "risk_factors": [
-        "先行力不足"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2019102656",
@@ -510,11 +512,11 @@
       "pedigree": {},
       "runningStyle": "追込",
       "abilities": {
-        "speed": 50,
-        "stamina": 61,
-        "kick": 72,
-        "sustain": 22,
-        "power": 33
+        "speed": 62.7,
+        "stamina": 44.3,
+        "kick": 62,
+        "sustain": 42.4,
+        "power": 46.6
       },
       "abilityGrades": {
         "speed": "A+",
@@ -709,16 +711,16 @@
       ],
       "position_x": 100,
       "abilityIndex": 80.8,
-      "predicted_win_rate": 0.0003,
-      "ability_index": 65.9,
+      "predicted_win_rate": 0.0004,
+      "ability_index": 70.1,
       "suitability_flags": [],
       "final_expected_value": -0.15,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 5.64,
+      "estimated_actual_odds": 2.71,
       "odds_source": "estimated",
-      "market_popularity": 12,
+      "market_popularity": 6,
       "market_popularity_source": "estimated",
-      "market_win_odds": 14.83,
+      "market_win_odds": 7.13,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -726,13 +728,14 @@
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
-        "末脚性能",
-        "長距離実績"
+        "先行力",
+        "末脚性能"
       ],
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2022105177",
@@ -746,11 +749,11 @@
       "pedigree": {},
       "runningStyle": "逃げ",
       "abilities": {
-        "speed": 38,
-        "stamina": 27,
-        "kick": 77,
-        "sustain": 66,
-        "power": 55
+        "speed": 53,
+        "stamina": 56.2,
+        "kick": 49.2,
+        "sustain": 51.7,
+        "power": 54.6
       },
       "abilityGrades": {
         "speed": "A",
@@ -959,16 +962,16 @@
       ],
       "position_x": 100,
       "abilityIndex": 90.1,
-      "predicted_win_rate": 0.0042,
-      "ability_index": 75.3,
+      "predicted_win_rate": 0.0006,
+      "ability_index": 68.2,
       "suitability_flags": [],
-      "final_expected_value": -0.12,
-      "predicted_probability": 0.11,
-      "estimated_actual_odds": 2.71,
+      "final_expected_value": -0.14,
+      "predicted_probability": 0.1,
+      "estimated_actual_odds": 4.62,
       "odds_source": "estimated",
-      "market_popularity": 6,
+      "market_popularity": 10,
       "market_popularity_source": "estimated",
-      "market_win_odds": 7.13,
+      "market_win_odds": 12.15,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -976,13 +979,14 @@
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
-        "末脚性能",
-        "持続力"
+        "長距離実績",
+        "馬場対応力"
       ],
       "risk_factors": [
-        "スタミナ不安"
+        "末脚のキレ負け"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021104514",
@@ -996,11 +1000,11 @@
       "pedigree": {},
       "runningStyle": "追込",
       "abilities": {
-        "speed": 30,
-        "stamina": 80,
-        "kick": 69,
-        "sustain": 58,
-        "power": 47
+        "speed": 58.8,
+        "stamina": 41.8,
+        "kick": 62,
+        "sustain": 40.1,
+        "power": 44
       },
       "abilityGrades": {
         "speed": "B",
@@ -1195,16 +1199,16 @@
       ],
       "position_x": 100,
       "abilityIndex": 100,
-      "predicted_win_rate": 0.0029,
-      "ability_index": 78,
+      "predicted_win_rate": 0.0008,
+      "ability_index": 73.1,
       "suitability_flags": [],
-      "final_expected_value": -0.11,
-      "predicted_probability": 0.11,
-      "estimated_actual_odds": 4.62,
+      "final_expected_value": -0.14,
+      "predicted_probability": 0.1,
+      "estimated_actual_odds": 6.69,
       "odds_source": "estimated",
-      "market_popularity": 10,
+      "market_popularity": 14,
       "market_popularity_source": "estimated",
-      "market_win_odds": 12.15,
+      "market_win_odds": 17.6,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -1212,13 +1216,14 @@
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
-        "長距離実績",
-        "末脚性能"
+        "末脚性能",
+        "先行力"
       ],
       "risk_factors": [
-        "先行力不足"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021103549",
@@ -1232,11 +1237,11 @@
       "pedigree": {},
       "runningStyle": "差し",
       "abilities": {
-        "speed": 44,
-        "stamina": 33,
-        "kick": 22,
-        "sustain": 72,
-        "power": 61
+        "speed": 60.3,
+        "stamina": 42.8,
+        "kick": 57.7,
+        "sustain": 40.9,
+        "power": 45
       },
       "abilityGrades": {
         "speed": "A",
@@ -1428,16 +1433,16 @@
       ],
       "position_x": 85,
       "abilityIndex": 78.4,
-      "predicted_win_rate": 0.0227,
-      "ability_index": 88.2,
+      "predicted_win_rate": 0.0019,
+      "ability_index": 76.8,
       "suitability_flags": [],
-      "final_expected_value": -0.01,
-      "predicted_probability": 0.15,
-      "estimated_actual_odds": 2.27,
+      "final_expected_value": -0.12,
+      "predicted_probability": 0.1,
+      "estimated_actual_odds": 5.64,
       "odds_source": "estimated",
-      "market_popularity": 5,
+      "market_popularity": 12,
       "market_popularity_source": "estimated",
-      "market_win_odds": 5.97,
+      "market_win_odds": 14.83,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -1445,13 +1450,14 @@
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
-        "持続力",
-        "馬場対応力"
+        "先行力",
+        "末脚性能"
       ],
       "risk_factors": [
-        "末脚のキレ負け"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2022100245",
@@ -1465,11 +1471,11 @@
       "pedigree": {},
       "runningStyle": "逃げ",
       "abilities": {
-        "speed": 57,
-        "stamina": 46,
-        "kick": 35,
-        "sustain": 24,
-        "power": 74
+        "speed": 60,
+        "stamina": 42.6,
+        "kick": 54.8,
+        "sustain": 40.8,
+        "power": 44.8
       },
       "abilityGrades": {
         "speed": "A+",
@@ -1658,16 +1664,16 @@
       ],
       "position_x": 12,
       "abilityIndex": 65.2,
-      "predicted_win_rate": 0.0005,
-      "ability_index": 73.1,
+      "predicted_win_rate": 0.0001,
+      "ability_index": 67.6,
       "suitability_flags": [],
       "final_expected_value": -0.15,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 3.64,
+      "estimated_actual_odds": 6.16,
       "odds_source": "estimated",
-      "market_popularity": 8,
+      "market_popularity": 13,
       "market_popularity_source": "estimated",
-      "market_win_odds": 9.58,
+      "market_win_odds": 16.2,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -1675,13 +1681,14 @@
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
-        "馬場対応力",
-        "先行力"
+        "先行力",
+        "末脚性能"
       ],
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021102754",
@@ -1695,11 +1702,11 @@
       "pedigree": {},
       "runningStyle": "先行",
       "abilities": {
-        "speed": 78,
-        "stamina": 67,
-        "kick": 56,
-        "sustain": 45,
-        "power": 34
+        "speed": 69,
+        "stamina": 48.3,
+        "kick": 56.2,
+        "sustain": 46.2,
+        "power": 51
       },
       "abilityGrades": {
         "speed": "S",
@@ -1892,11 +1899,11 @@
       ],
       "position_x": 25,
       "abilityIndex": 86.2,
-      "predicted_win_rate": 0.0648,
-      "ability_index": 88.9,
+      "predicted_win_rate": 0.0032,
+      "ability_index": 75.3,
       "suitability_flags": [],
-      "final_expected_value": 0.03,
-      "predicted_probability": 0.24,
+      "final_expected_value": -0.14,
+      "predicted_probability": 0.11,
       "estimated_actual_odds": 1.1,
       "odds_source": "estimated",
       "market_popularity": 2,
@@ -1905,17 +1912,18 @@
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
-      "confidence_rank": "B",
+      "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
         "先行力",
-        "長距離実績"
+        "末脚性能"
       ],
       "risk_factors": [
-        "馬場適性不足"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021104777",
@@ -1929,11 +1937,11 @@
       "pedigree": {},
       "runningStyle": "逃げ",
       "abilities": {
-        "speed": 67,
-        "stamina": 56,
-        "kick": 45,
-        "sustain": 34,
-        "power": 23
+        "speed": 58.4,
+        "stamina": 46.8,
+        "kick": 57.7,
+        "sustain": 44.3,
+        "power": 48
       },
       "abilityGrades": {
         "speed": "S",
@@ -2133,16 +2141,16 @@
       ],
       "position_x": 90,
       "abilityIndex": 82.1,
-      "predicted_win_rate": 0.0291,
-      "ability_index": 84.9,
+      "predicted_win_rate": 0.0056,
+      "ability_index": 77.7,
       "suitability_flags": [],
-      "final_expected_value": 0.09,
-      "predicted_probability": 0.16,
-      "estimated_actual_odds": 3.17,
+      "final_expected_value": -0.07,
+      "predicted_probability": 0.11,
+      "estimated_actual_odds": 5.12,
       "odds_source": "estimated",
-      "market_popularity": 7,
+      "market_popularity": 11,
       "market_popularity_source": "estimated",
-      "market_win_odds": 8.34,
+      "market_win_odds": 13.48,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -2151,12 +2159,13 @@
       "value_change": "STABLE",
       "key_factors": [
         "先行力",
-        "長距離実績"
+        "末脚性能"
       ],
       "risk_factors": [
-        "馬場適性不足"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2020103189",
@@ -2170,11 +2179,11 @@
       "pedigree": {},
       "runningStyle": "先行",
       "abilities": {
-        "speed": 65,
-        "stamina": 54,
-        "kick": 43,
-        "sustain": 32,
-        "power": 21
+        "speed": 61.8,
+        "stamina": 49.5,
+        "kick": 59.1,
+        "sustain": 46.7,
+        "power": 50.7
       },
       "abilityGrades": {
         "speed": "S",
@@ -2373,16 +2382,16 @@
       ],
       "position_x": 95,
       "abilityIndex": 76.7,
-      "predicted_win_rate": 0.0102,
-      "ability_index": 79.7,
+      "predicted_win_rate": 0.0066,
+      "ability_index": 78.4,
       "suitability_flags": [],
-      "final_expected_value": -0.04,
-      "predicted_probability": 0.12,
-      "estimated_actual_odds": 4.12,
+      "final_expected_value": -0.13,
+      "predicted_probability": 0.11,
+      "estimated_actual_odds": 1.44,
       "odds_source": "estimated",
-      "market_popularity": 9,
+      "market_popularity": 3,
       "market_popularity_source": "estimated",
-      "market_win_odds": 10.85,
+      "market_win_odds": 3.78,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -2391,12 +2400,13 @@
       "value_change": "STABLE",
       "key_factors": [
         "先行力",
-        "長距離実績"
+        "末脚性能"
       ],
       "risk_factors": [
-        "馬場適性不足"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2022101016",
@@ -2410,11 +2420,11 @@
       "pedigree": {},
       "runningStyle": "先行",
       "abilities": {
-        "speed": 79,
-        "stamina": 68,
-        "kick": 57,
-        "sustain": 46,
-        "power": 35
+        "speed": 64.8,
+        "stamina": 45.6,
+        "kick": 56.2,
+        "sustain": 43.7,
+        "power": 48.2
       },
       "abilityGrades": {
         "speed": "S",
@@ -2608,30 +2618,31 @@
       ],
       "position_x": 81,
       "abilityIndex": 91.7,
-      "predicted_win_rate": 0.1884,
-      "ability_index": 94.2,
+      "predicted_win_rate": 0.0034,
+      "ability_index": 75.4,
       "suitability_flags": [],
-      "final_expected_value": 0.21,
-      "predicted_probability": 0.51,
-      "estimated_actual_odds": 1.1,
+      "final_expected_value": -0.13,
+      "predicted_probability": 0.11,
+      "estimated_actual_odds": 2.27,
       "odds_source": "estimated",
-      "market_popularity": 1,
+      "market_popularity": 5,
       "market_popularity_source": "estimated",
-      "market_win_odds": 1.89,
+      "market_win_odds": 5.97,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
-      "confidence_rank": "S",
+      "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
         "先行力",
-        "長距離実績"
+        "末脚性能"
       ],
       "risk_factors": [
-        "馬場適性不足"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021102797",
@@ -2645,11 +2656,11 @@
       "pedigree": {},
       "runningStyle": "先行",
       "abilities": {
-        "speed": 22,
-        "stamina": 72,
-        "kick": 61,
-        "sustain": 50,
-        "power": 39
+        "speed": 62,
+        "stamina": 43.9,
+        "kick": 60.6,
+        "sustain": 42,
+        "power": 46.3
       },
       "abilityGrades": {
         "speed": "B",
@@ -2843,16 +2854,16 @@
       ],
       "position_x": 50,
       "abilityIndex": 92.5,
-      "predicted_win_rate": 0.0017,
-      "ability_index": 70.7,
+      "predicted_win_rate": 0.0058,
+      "ability_index": 77.8,
       "suitability_flags": [],
-      "final_expected_value": -0.12,
-      "predicted_probability": 0.1,
-      "estimated_actual_odds": 6.16,
+      "final_expected_value": -0.1,
+      "predicted_probability": 0.11,
+      "estimated_actual_odds": 3.17,
       "odds_source": "estimated",
-      "market_popularity": 13,
+      "market_popularity": 7,
       "market_popularity_source": "estimated",
-      "market_win_odds": 16.2,
+      "market_win_odds": 8.34,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
@@ -2860,13 +2871,14 @@
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
-        "長距離実績",
+        "先行力",
         "末脚性能"
       ],
       "risk_factors": [
-        "先行力不足"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021100652",
@@ -2880,11 +2892,11 @@
       "pedigree": {},
       "runningStyle": "追込",
       "abilities": {
-        "speed": 45,
-        "stamina": 34,
-        "kick": 23,
-        "sustain": 73,
-        "power": 62
+        "speed": 61.8,
+        "stamina": 43.7,
+        "kick": 60.6,
+        "sustain": 41.8,
+        "power": 46.1
       },
       "abilityGrades": {
         "speed": "A",
@@ -3079,30 +3091,31 @@
       ],
       "position_x": 100,
       "abilityIndex": 83.7,
-      "predicted_win_rate": 0.0644,
-      "ability_index": 93.3,
+      "predicted_win_rate": 0.0058,
+      "ability_index": 81.7,
       "suitability_flags": [],
-      "final_expected_value": 0.16,
-      "predicted_probability": 0.24,
-      "estimated_actual_odds": 1.84,
+      "final_expected_value": -0.09,
+      "predicted_probability": 0.11,
+      "estimated_actual_odds": 4.12,
       "odds_source": "estimated",
-      "market_popularity": 4,
+      "market_popularity": 9,
       "market_popularity_source": "estimated",
-      "market_win_odds": 4.85,
+      "market_win_odds": 10.85,
       "market_win_odds_source": "estimated",
       "value_rank": "D",
       "kelly_weight": 0,
-      "confidence_rank": "B",
+      "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
       "key_factors": [
-        "持続力",
-        "馬場対応力"
+        "先行力",
+        "末脚性能"
       ],
       "risk_factors": [
-        "末脚のキレ負け"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2022105853",
@@ -3116,11 +3129,11 @@
       "pedigree": {},
       "runningStyle": "先行",
       "abilities": {
-        "speed": 50,
-        "stamina": 39,
-        "kick": 28,
-        "sustain": 78,
-        "power": 67
+        "speed": 77.8,
+        "stamina": 63,
+        "kick": 68.2,
+        "sustain": 59.8,
+        "power": 64.6
       },
       "abilityGrades": {
         "speed": "A+",
@@ -3323,30 +3336,31 @@
       ],
       "position_x": 92,
       "abilityIndex": 90.6,
-      "predicted_win_rate": 0.6069,
+      "predicted_win_rate": 0.9504,
       "ability_index": 100,
       "suitability_flags": [],
-      "final_expected_value": 2.14,
+      "final_expected_value": 1.65,
       "predicted_probability": 0.85,
-      "estimated_actual_odds": 1.44,
+      "estimated_actual_odds": 1.1,
       "odds_source": "estimated",
-      "market_popularity": 3,
+      "market_popularity": 1,
       "market_popularity_source": "estimated",
-      "market_win_odds": 3.78,
+      "market_win_odds": 1.89,
       "market_win_odds_source": "estimated",
       "value_rank": "C",
-      "kelly_weight": 0.12,
+      "kelly_weight": 0.22,
       "confidence_rank": "S",
       "bet_type": "軸",
       "value_change": "STABLE",
       "key_factors": [
-        "持続力",
-        "馬場対応力"
+        "先行力",
+        "末脚性能"
       ],
       "risk_factors": [
-        "末脚のキレ負け"
+        "持続力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "abilities_source": "past_runs_estimated"
     }
   ],
   "ev_margin_dynamic": 0.15

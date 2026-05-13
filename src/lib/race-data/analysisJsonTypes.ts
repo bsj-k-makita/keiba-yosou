@@ -109,6 +109,11 @@ export type AnalysisHorseEntry = {
     sustain: number;
     power: number;
   }>;
+  /** 能力値の算出根拠（fetch / reestimate で付与） */
+  abilities_source?:
+    | "past_runs_estimated"
+    | "neutral_no_past_runs"
+    | "neutral_no_usable_runs";
   /** 同出走内等級。無ければ変換時に相対等級化 */
   abilityGrades?: Partial<Record<"speed" | "stamina" | "kick" | "sustain" | "power", string>>;
   evaluation?: {
