@@ -251,20 +251,30 @@ function parseShutubaCore(html, { raceId, date }) {
   const raceGradeLabel = gradeType != null ? netkeibaGradeTypeToRaceGrade(gradeType) : undefined;
 
   const entries = [];
+  const parseIdSuffixUmaban = (id) => {
+    const m = String(id ?? "").match(/_(\d{1,2})$/);
+    if (!m) return undefined;
+    const no = parseInt(m[1], 10);
+    return Number.isFinite(no) && no >= 1 ? no : undefined;
+  };
+  /** 馬番: オッズ等の id が最も確実。従来 td.eq(1) 優先だと列増減で +1 ずれることがある。 */
   const pickHorseNoFromRow = (tr) => {
-    const textNo = parseInt($(tr).children("td").eq(1).text().replace(/[^\d]/g, ""), 10);
-    if (Number.isFinite(textNo) && textNo >= 1) return textNo;
-    const idCandidates = [
-      $(tr).find('span[id^="uno-1_"]').first().attr("id"),
-      $(tr).find('span[id^="odds-1_"]').first().attr("id"),
-      $(tr).find('span[id^="ninki-1_"]').first().attr("id"),
-    ];
-    for (const id of idCandidates) {
-      const m = String(id ?? "").match(/_(\d{1,2})$/);
-      if (!m) continue;
-      const no = parseInt(m[1], 10);
-      if (Number.isFinite(no) && no >= 1) return no;
+    const $tr = $(tr);
+    const fromOdds = parseIdSuffixUmaban($tr.find('span[id^="odds-1_"]').first().attr("id"));
+    if (fromOdds != null) return fromOdds;
+    const fromUno = parseIdSuffixUmaban($tr.find('span[id^="uno-1_"]').first().attr("id"));
+    if (fromUno != null) return fromUno;
+    const $umaTd = $tr
+      .children("td.Umaban, td.Num, td[class*='Umaban'], td[class*='UmaBan'], td.Txt_Umaban")
+      .first();
+    if ($umaTd.length) {
+      const cell = parseInt(String($umaTd.text()).replace(/[^\d]/g, ""), 10);
+      if (Number.isFinite(cell) && cell >= 1) return cell;
     }
+    const textNo = parseInt($tr.children("td").eq(1).text().replace(/[^\d]/g, ""), 10);
+    if (Number.isFinite(textNo) && textNo >= 1) return textNo;
+    const fromNinki = parseIdSuffixUmaban($tr.find('span[id^="ninki-1_"]').first().attr("id"));
+    if (fromNinki != null) return fromNinki;
     return undefined;
   };
   const parseOddsAndPopularity = (tr, cells, horseNo) => {

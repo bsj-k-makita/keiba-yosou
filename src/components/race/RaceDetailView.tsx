@@ -27,7 +27,13 @@ import { RunningStyleRaceSummary } from "./RunningStyleRaceSummary";
 import { RaceResultPanel } from "./RaceResultPanel";
 import { RaceBetPanel } from "./RaceBetPanel";
 import { RaceAdjustProvider } from "./RaceAdjustContext";
-import { getHorsesFromRaceData, getRaceEvaluationById, getRaceResultById, type RaceEvaluationData } from "../../lib/race-data";
+import {
+  getHorsesFromRaceData,
+  getRaceEvaluationById,
+  getRaceResultById,
+  getSortedRaceEntryGateRows,
+  type RaceEvaluationData,
+} from "../../lib/race-data";
 import type { RaceIndexItem } from "../../lib/race-data";
 import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
 import { FIXED_SOFTMAX_TEMPERATURE } from "../../lib/pipeline/normalization";
@@ -191,6 +197,11 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   const [tableSummary, setTableSummary] = useState(false);
 
   const horses = useMemo(() => getHorsesFromRaceData(race), [race]);
+  const entryGateRows = useMemo(() => getSortedRaceEntryGateRows(race), [race]);
+  const pinpointGateRows = useMemo(
+    () => entryGateRows.map((r) => ({ frameNumber: r.frameNumber, horseNumber: r.horseNumber })),
+    [entryGateRows],
+  );
   const inferredSection200mSec = useMemo(
     () => inferRaceSection200mFromEntries(race.raceId, horses),
     [race.raceId, horses],
@@ -416,6 +427,38 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     }));
   }, []);
 
+  const boostedHorseNumbers = condition.favoredHorseNumbers ?? [];
+
+  const handleToggleSubjectiveBoost = useCallback((horseNumber: number) => {
+    userEditedRef.current = true;
+    setAbilityOnlyPreview(false);
+    setCondition((prev) => {
+      const fav = new Set(prev.favoredHorseNumbers ?? []);
+      const dis = new Set(prev.disfavoredHorseNumbers ?? []);
+      if (fav.has(horseNumber)) {
+        fav.delete(horseNumber);
+      } else {
+        fav.add(horseNumber);
+        // 加点優先: 同じ馬番が不利指定に入っていたら外す。
+        dis.delete(horseNumber);
+      }
+      return {
+        ...prev,
+        favoredHorseNumbers: fav.size > 0 ? [...fav].sort((a, b) => a - b) : undefined,
+        disfavoredHorseNumbers: dis.size > 0 ? [...dis].sort((a, b) => a - b) : undefined,
+      };
+    });
+  }, []);
+
+  const handleClearSubjectiveBoosts = useCallback(() => {
+    userEditedRef.current = true;
+    setAbilityOnlyPreview(false);
+    setCondition((prev) => ({
+      ...prev,
+      favoredHorseNumbers: undefined,
+    }));
+  }, []);
+
   const handleResetCondition = useCallback(() => {
     userEditedRef.current = true;
     setAbilityOnlyPreview(false);
@@ -532,6 +575,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 condition={condition}
                 onChange={handleConditionPanelChange}
                 embedded
+                pinpointGateRows={pinpointGateRows}
               />
               <p className="app__meta">{conditionMetaLine}</p>
             </div>
@@ -590,6 +634,38 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 >
                   前走加点（不利時）
                 </button>
+              </div>
+              <div className="quick-adjust" role="group" aria-label="主観加点（本命入替用）">
+                <span className="app__meta">
+                  主観加点（馬番に加点）・並びは出馬表どおり。18頭標準では 1〜2番＝1枠 … 17〜18番＝8枠（枠は JSON
+                  優先、欠損時は馬番から算出）
+                </span>
+                <div className="adj-panel__chips">
+                  {entryGateRows.map((row) => {
+                    const active = boostedHorseNumbers.includes(row.horseNumber);
+                    return (
+                      <button
+                        key={row.horseId}
+                        type="button"
+                        className={`chip ${active ? "chip--active" : ""}`}
+                        onClick={() => handleToggleSubjectiveBoost(row.horseNumber)}
+                        title={`${row.frameNumber}枠${row.horseNumber}番 ${row.horseName} を主観加点`}
+                      >
+                        {row.frameNumber}枠{row.horseNumber}番 {active ? "★" : "☆"}
+                      </button>
+                    );
+                  })}
+                  {boostedHorseNumbers.length > 0 ? (
+                    <button
+                      type="button"
+                      className="chip"
+                      onClick={handleClearSubjectiveBoosts}
+                      title="主観加点を全解除"
+                    >
+                      加点クリア
+                    </button>
+                  ) : null}
+                </div>
               </div>
               <RunningStyleRaceSummary horses={horses} />
               <HorseListTable
@@ -686,6 +762,38 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 >
                   前走加点（不利時）
                 </button>
+              </div>
+              <div className="quick-adjust" role="group" aria-label="主観加点（本命入替用）">
+                <span className="app__meta">
+                  主観加点（馬番に加点）・並びは出馬表どおり。18頭標準では 1〜2番＝1枠 … 17〜18番＝8枠（枠は JSON
+                  優先、欠損時は馬番から算出）
+                </span>
+                <div className="adj-panel__chips">
+                  {entryGateRows.map((row) => {
+                    const active = boostedHorseNumbers.includes(row.horseNumber);
+                    return (
+                      <button
+                        key={row.horseId}
+                        type="button"
+                        className={`chip ${active ? "chip--active" : ""}`}
+                        onClick={() => handleToggleSubjectiveBoost(row.horseNumber)}
+                        title={`${row.frameNumber}枠${row.horseNumber}番 ${row.horseName} を主観加点`}
+                      >
+                        {row.frameNumber}枠{row.horseNumber}番 {active ? "★" : "☆"}
+                      </button>
+                    );
+                  })}
+                  {boostedHorseNumbers.length > 0 ? (
+                    <button
+                      type="button"
+                      className="chip"
+                      onClick={handleClearSubjectiveBoosts}
+                      title="主観加点を全解除"
+                    >
+                      加点クリア
+                    </button>
+                  ) : null}
+                </div>
               </div>
               <div className={`app__grid${cardDensity === "compact" ? " app__grid--compact" : ""}`}>
                 {sorted.map((r) => {

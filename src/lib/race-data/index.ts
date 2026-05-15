@@ -8,6 +8,13 @@ export {
   getRaceResultById,
   fetchRaceResultByApi,
 } from "./raceDataRepository";
-export { raceDataToHorses, type EnrichedRaceHorse } from "./raceDataToHorses";
+export {
+  raceDataToHorses,
+  getSortedRaceEntryGateRows,
+  sanitizeRaceEntriesForUi,
+  inferFrameNumberFromGate,
+  type EnrichedRaceHorse,
+  type RaceEntryGateRow,
+} from "./raceDataToHorses";
 export { buildEvaluationData, recomputeEvaluationData } from "./buildEvaluationData";
 export { convertToRaceEvaluationData, unwrapAnalysisPayload } from "./convertToRaceEvaluationData";

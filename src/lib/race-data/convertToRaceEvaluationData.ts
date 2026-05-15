@@ -31,7 +31,7 @@ import { buildEvaluationData, recomputeEvaluationData } from "./buildEvaluationD
 import { isRaceEvaluationDataShape, assertIsRaceEvaluationData } from "./raceEvaluationGuards";
 import type { RaceEntryEvaluation, RaceEvaluationData, RaceInfo } from "./raceEvaluationTypes";
 import type { AnalysisHorseEntry, AnalysisJsonRoot, AnalysisRaceMeta } from "./analysisJsonTypes";
-import type { EnrichedRaceHorse } from "./raceDataToHorses";
+import { sanitizeRaceEntriesForUi, type EnrichedRaceHorse } from "./raceDataToHorses";
 import { evaluateRace } from "../../domain/race-evaluation/scoreCalculator";
 import type { HorseScoreResult } from "../../domain/race-evaluation/abilityTypes";
 import type { HorseEvaluationSignals } from "../../domain/race-evaluation/abilityTypes";
@@ -61,6 +61,15 @@ function parseNumArrayInRange(v: unknown, max: number): readonly number[] | unde
 
 function round1(x: number): number {
   return Math.round(x * 10) / 10;
+}
+
+function clampInt(v: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, Math.round(v)));
+}
+
+function inferFrameNumberFromHorseNumber(horseNumber: number): number {
+  // 18頭標準: 馬番 n の枠は ceil(n/2)（1〜2→1枠 … 17〜18→8枠）
+  return clampInt(Math.ceil(horseNumber / 2), 1, 8);
 }
 
 function parseSuitabilityFlags(raw: unknown): SuitabilityFlag[] | undefined {
@@ -316,7 +325,8 @@ function toInvestmentInput(e: AnalysisHorseEntry): InvestmentCommentInput | unde
 }
 
 function toEnrichedHorse(e: AnalysisHorseEntry): EnrichedRaceHorse {
-  const um = n(e.umaban) ?? n(e.horseNumber) ?? 1;
+  // `horseNumber` を優先（RaceEvaluationData 側の馬番と揃える。旧 analysis の umaban だけ +1 揺れがある）
+  const um = n(e.horseNumber) ?? n(e.umaban) ?? 1;
   const wk = n(e.waku) ?? n(e.wakuNo) ?? n(e.frameNumber) ?? 1;
   const ab = toAbilities(e);
   const pd = e.pedigree;
@@ -683,10 +693,51 @@ function needsEvaluationV2Migration(d: RaceEvaluationData): boolean {
   });
 }
 
+/**
+ * 既存 JSON の欠損を UI 読み込み時に安全補完する。
+ * `frameNumber` が欠けても表示が崩れないよう `horseNumber` から復元する。
+ */
+function normalizeRaceEvaluationDataForUi(data: RaceEvaluationData): RaceEvaluationData {
+  let touched = false;
+  const mapped = data.entries.map((entry, idx) => {
+    const horseNumberRaw =
+      n((entry as RaceEntryEvaluation & { gate?: unknown }).horseNumber) ??
+      n((entry as RaceEntryEvaluation & { gate?: unknown }).gate) ??
+      idx + 1;
+    const horseNumber = clampInt(horseNumberRaw, 1, 36);
+    const frameNumberRaw =
+      n((entry as RaceEntryEvaluation & { waku?: unknown; wakuNo?: unknown }).frameNumber) ??
+      n((entry as RaceEntryEvaluation & { waku?: unknown; wakuNo?: unknown }).waku) ??
+      n((entry as RaceEntryEvaluation & { waku?: unknown; wakuNo?: unknown }).wakuNo);
+    const frameNumber =
+      frameNumberRaw != null
+        ? clampInt(frameNumberRaw, 1, 8)
+        : inferFrameNumberFromHorseNumber(horseNumber);
+    const normalizedPastRuns = Array.isArray(entry.pastRuns) ? entry.pastRuns : [];
+    const changed =
+      horseNumber !== entry.horseNumber ||
+      frameNumber !== entry.frameNumber ||
+      normalizedPastRuns !== entry.pastRuns;
+    if (!changed) return entry;
+    touched = true;
+    return {
+      ...entry,
+      horseNumber,
+      frameNumber,
+      pastRuns: normalizedPastRuns,
+    };
+  });
+
+  const sanitized = sanitizeRaceEntriesForUi(mapped);
+  if (sanitized !== mapped) touched = true;
+
+  return touched ? { ...data, entries: sanitized } : data;
+}
+
 export function convertToRaceEvaluationData(raw: unknown): RaceEvaluationData {
   const un = unwrapAnalysisPayload(raw);
   if (isRaceEvaluationDataShape(un)) {
-    const v = un as RaceEvaluationData;
+    const v = normalizeRaceEvaluationDataForUi(un as RaceEvaluationData);
     assertIsRaceEvaluationData(v);
     if (needsEvaluationV2Migration(v)) {
       return recomputeEvaluationData(v);

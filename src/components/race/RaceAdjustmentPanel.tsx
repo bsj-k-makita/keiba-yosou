@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { AbilityPriority, RaceCondition } from "../../domain/race-evaluation";
 import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "../../domain/race-evaluation/abilityTypes";
 import {
@@ -15,6 +15,10 @@ type Props = {
   onChange: (next: RaceCondition) => void;
   /** 外側（アコーディオン等）に見出しがある場合は h2「補正パネル」を出さない */
   embedded?: boolean;
+  /**
+   * このレースの枠・馬番（出馬表どおりの枠順→馬番順）。指定時はゲート補正グリッドが頭数分かつ枠表示になる。
+   */
+  pinpointGateRows?: readonly { frameNumber: number; horseNumber: number }[];
 };
 
 const VENUES = SELECTABLE_VENUES as readonly string[];
@@ -93,7 +97,7 @@ function trackCushion01ToJraPenetration(c01: number | undefined): string {
   return v.toFixed(1);
 }
 
-/** 馬番 1〜18: 中立 → 有利 → 不利 → 中立 */
+/** 馬番: 中立 → 有利 → 不利 → 中立 */
 function cycleHorseGate(num: number, condition: RaceCondition): RaceCondition {
   const fav = new Set(condition.favoredHorseNumbers ?? []);
   const dis = new Set(condition.disfavoredHorseNumbers ?? []);
@@ -208,7 +212,15 @@ const ABILITY_PRESETS: AbilityPreset[] = [
   { priority: "power",   label: "パワー/急坂重視",    description: "パワーを1.5倍重視。急坂・重い馬場・タフな消耗戦向き。" },
 ];
 
-export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: Props) {
+export function RaceAdjustmentPanel({
+  condition,
+  onChange,
+  embedded = false,
+  pinpointGateRows,
+}: Props) {
+  const useRacePinpointRows = pinpointGateRows != null && pinpointGateRows.length > 0;
+
+  const fallbackGateNumbers = useMemo(() => Array.from({ length: 18 }, (_, i) => i + 1), []);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [globalProfileOn, setGlobalProfileOn] = useState<boolean>(() => {
     try {
@@ -523,45 +535,96 @@ export function RaceAdjustmentPanel({ condition, onChange, embedded = false }: P
               ))}
             </div>
             <div className="adj-panel__user-bias">
-              <p className="adj-panel__user-bias-label">馬番ゲート補正（1〜18）</p>
+              <p className="adj-panel__user-bias-label">
+                馬番ゲート補正
+                {useRacePinpointRows
+                  ? `（${pinpointGateRows.length}頭・枠順＝出馬表どおり）`
+                  : "（1〜18）"}
+              </p>
               <p className="adj-panel__user-bias-help" style={{ marginTop: "4px", marginBottom: "6px" }}>
-                各番をクリックして「中立 → この馬番を有利（赤）→ 不利（青）→ 中立」と切り替えます。上の「馬場傾向」（内有利・外有利など）によるグラデーションに加算されます。番号に色がついていないとき、内有利／外有利なら端の番号がハイライトされます。
+                各マスは「枠・馬番」表示です（クリック対象は<strong>馬番</strong>）。18頭出走の標準では
+                <strong>1〜2番＝1枠 … 17〜18番＝8枠</strong>です。「中立 → この馬番を有利（赤）→ 不利（青）→
+                中立」と切り替えます。内有利／外有利のハイライトは<strong>枠番</strong>（内＝1〜2枠・外＝7〜8枠目安）です。
               </p>
               <div className="adj-panel__gate-grid" role="group" aria-label="馬番ゲート補正">
-                {Array.from({ length: 18 }, (_, idx) => {
-                  const gate = idx + 1;
-                  const fav = condition.favoredHorseNumbers?.includes(gate) ?? false;
-                  const dis = condition.disfavoredHorseNumbers?.includes(gate) ?? false;
-                  const presetGlowInner =
-                    !fav &&
-                    !dis &&
-                    condition.bias === "inside_favor" &&
-                    gate <= 3;
-                  const presetGlowOuter =
-                    !fav &&
-                    !dis &&
-                    condition.bias === "outside_favor" &&
-                    gate >= 16;
-                  const cls = [
-                    "adj-panel__gate-cell",
-                    fav ? "adj-panel__gate-cell--pick-fav" : "",
-                    dis ? "adj-panel__gate-cell--pick-dis" : "",
-                    presetGlowInner || presetGlowOuter ? "adj-panel__gate-cell--glow" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ");
-                  return (
-                    <button
-                      key={`horse-gate-${gate}`}
-                      type="button"
-                      className={cls}
-                      title="クリックで切替: 中立→有利→不利→中立"
-                      onClick={() => onChange(cycleHorseGate(gate, condition))}
-                    >
-                      {gate}
-                    </button>
-                  );
-                })}
+                {useRacePinpointRows
+                  ? pinpointGateRows.map((row) => {
+                      const gate = row.horseNumber;
+                      const fav = condition.favoredHorseNumbers?.includes(gate) ?? false;
+                      const dis = condition.disfavoredHorseNumbers?.includes(gate) ?? false;
+                      const presetGlowInner =
+                        !fav &&
+                        !dis &&
+                        condition.bias === "inside_favor" &&
+                        row.frameNumber <= 2;
+                      const presetGlowOuter =
+                        !fav &&
+                        !dis &&
+                        condition.bias === "outside_favor" &&
+                        row.frameNumber >= 7;
+                      const cls = [
+                        "adj-panel__gate-cell",
+                        fav ? "adj-panel__gate-cell--pick-fav" : "",
+                        dis ? "adj-panel__gate-cell--pick-dis" : "",
+                        presetGlowInner || presetGlowOuter ? "adj-panel__gate-cell--glow" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ");
+                      return (
+                        <button
+                          key={`horse-gate-${row.frameNumber}-${row.horseNumber}`}
+                          type="button"
+                          className={cls}
+                          title={`クリックで切替（馬番${row.horseNumber}番）: 中立→有利→不利→中立`}
+                          onClick={() => onChange(cycleHorseGate(gate, condition))}
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            lineHeight: 1.1,
+                            gap: "1px",
+                            fontSize: "0.78em",
+                          }}
+                        >
+                          <span style={{ opacity: 0.88 }}>{row.frameNumber}枠</span>
+                          <span style={{ fontWeight: 700, fontSize: "1.05em" }}>{row.horseNumber}</span>
+                        </button>
+                      );
+                    })
+                  : fallbackGateNumbers.map((gate) => {
+                      const fav = condition.favoredHorseNumbers?.includes(gate) ?? false;
+                      const dis = condition.disfavoredHorseNumbers?.includes(gate) ?? false;
+                      const presetGlowInner =
+                        !fav &&
+                        !dis &&
+                        condition.bias === "inside_favor" &&
+                        gate <= 3;
+                      const presetGlowOuter =
+                        !fav &&
+                        !dis &&
+                        condition.bias === "outside_favor" &&
+                        gate >= 16;
+                      const cls = [
+                        "adj-panel__gate-cell",
+                        fav ? "adj-panel__gate-cell--pick-fav" : "",
+                        dis ? "adj-panel__gate-cell--pick-dis" : "",
+                        presetGlowInner || presetGlowOuter ? "adj-panel__gate-cell--glow" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ");
+                      return (
+                        <button
+                          key={`horse-gate-${gate}`}
+                          type="button"
+                          className={cls}
+                          title="クリックで切替: 中立→有利→不利→中立"
+                          onClick={() => onChange(cycleHorseGate(gate, condition))}
+                        >
+                          {gate}
+                        </button>
+                      );
+                    })}
               </div>
               <div className="adj-panel__chips" style={{ marginTop: "4px" }}>
                 <button type="button" className="chip" onClick={() => onChange(clearHorseGatePinpoints(condition))}>
