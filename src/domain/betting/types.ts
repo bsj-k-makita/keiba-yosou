@@ -31,6 +31,10 @@ export type RaceBetResult = {
   totalPayout: number;
   byType: Record<BetTicketType, TicketTypeStats>;
   skippedReason?: string;
+  /** 最終◎が1着だったか */
+  favoriteWinHit?: boolean;
+  /** 最終◎が3着以内だったか */
+  favoriteShowHit?: boolean;
 };
 
 export type BacktestSummary = {
@@ -45,6 +49,14 @@ export type BacktestSummary = {
     { races: number; invested: number; payout: number; rate: number }
   >;
   byClassTier: Record<ClassTier, { races: number; invested: number; payout: number; rate: number }>;
+  /** 最終◎の単勝・3着内（複勝圏）的中率 */
+  favoriteMark: {
+    races: number;
+    winHits: number;
+    showHits: number;
+    winRate: number;
+    showRate: number;
+  };
   generatedAt: string;
 };
 

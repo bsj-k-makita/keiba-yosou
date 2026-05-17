@@ -56,6 +56,37 @@ export default function BacktestDashboardPage() {
             </ul>
           </section>
 
+          {summary.favoriteMark != null && (
+            <section className="card" style={{ marginBottom: "1rem", padding: "1rem" }}>
+              <h2>◎印の的中（診断）</h2>
+              <p style={{ fontSize: "0.9rem", marginBottom: "0.75rem" }}>
+                最終処理後の◎馬が何着に来たか。3連複のボトルネック切り分け用。
+              </p>
+              <ul>
+                <li>集計レース: {summary.favoriteMark.races}</li>
+                <li>
+                  単勝的中（1着）: {summary.favoriteMark.winHits} / {summary.favoriteMark.races}（
+                  <strong>{summary.favoriteMark.winRate}%</strong>）
+                </li>
+                <li>
+                  複勝的中（3着内）: {summary.favoriteMark.showHits} / {summary.favoriteMark.races}（
+                  <strong>{summary.favoriteMark.showRate}%</strong>）
+                </li>
+              </ul>
+              {summary.favoriteMark.showRate >= 30 &&
+                summary.byTicketType.TRIFECTA_FORM.rate < 15 && (
+                  <p style={{ fontSize: "0.85rem", marginTop: "0.5rem", opacity: 0.9 }}>
+                    3着内率は十分だが3連複回収が低い → 2列目選定（同型崩れ）が主因の可能性大。
+                  </p>
+                )}
+              {summary.favoriteMark.showRate < 22 && (
+                <p style={{ fontSize: "0.85rem", marginTop: "0.5rem", opacity: 0.9 }}>
+                  3着内率が低い → 3連複の軸◎自体の見直しが先決。
+                </p>
+              )}
+            </section>
+          )}
+
           <section className="card" style={{ marginBottom: "1rem", padding: "1rem" }}>
             <h2>券種別</h2>
             <table className="horse-list" style={{ width: "100%" }}>

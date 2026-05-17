@@ -12,7 +12,13 @@ import {
 } from "../race-evaluation/resolveEffectiveRaceClass";
 import { resolvePlaceToHorseId } from "../race-evaluation/markHitAnalysis";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
-import { generateTickets, marksFromResults } from "./bettingRules";
+import {
+  computeFavoriteMarkHit,
+  emptyFavoriteMarkAggregate,
+  finalizeFavoriteMarkAggregate,
+  mergeFavoriteMarkHit,
+} from "./favoriteMarkStats";
+import { generateTickets, marksFromResults, resolvePostProcessFavoriteNumber } from "./bettingRules";
 import {
   calculateRacePayout,
   finalizeTicketStats,
@@ -81,9 +87,17 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
 
   const results: HorseScoreResult[] = evaluateRace(input.horses, input.condition);
   const marks = marksFromResults(results, numberById);
-  const tickets = generateTickets(marks);
   const classTier = resolveClassTier(input.condition);
   const classLevel = inferRaceClassBucket(input.condition);
+  const tickets = generateTickets(marks, 100, { classTier });
+  const favoriteNumber = resolvePostProcessFavoriteNumber(marks);
+  const finishOrder = buildFinishOrder(input.places, input.horses, numberById);
+  const favoriteHit = computeFavoriteMarkHit(favoriteNumber, finishOrder);
+  const favoriteFields =
+    favoriteNumber != null
+      ? { favoriteWinHit: favoriteHit.winHit, favoriteShowHit: favoriteHit.showHit }
+      : {};
+
   if (tickets.length === 0) {
     return {
       raceId: input.raceId,
@@ -97,10 +111,10 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
         TRIFECTA_FORM: emptyStats(),
       },
       skippedReason: "no_marks",
+      ...favoriteFields,
     };
   }
 
-  const finishOrder = buildFinishOrder(input.places, input.horses, numberById);
   if (finishOrder.length < 3) {
     return {
       raceId: input.raceId,
@@ -114,6 +128,7 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
         TRIFECTA_FORM: emptyStats(),
       },
       skippedReason: "insufficient_results",
+      ...favoriteFields,
     };
   }
 
@@ -124,7 +139,7 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
     winOddsByNumber: winOddsMap(input.horses),
     officialPayouts: input.payouts,
   });
-  return { ...payout, classTier };
+  return { ...payout, classTier, ...favoriteFields };
 }
 
 function emptyStats(): TicketTypeStats {
@@ -164,8 +179,17 @@ export function aggregateBacktest(rows: RaceBetResult[]): BacktestSummary {
   let totalPayout = 0;
   let matched = 0;
   let skipped = 0;
+  const favoriteMark = emptyFavoriteMarkAggregate();
 
   for (const row of rows) {
+    if (row.favoriteWinHit != null && row.favoriteShowHit != null) {
+      mergeFavoriteMarkHit(
+        favoriteMark,
+        { winHit: row.favoriteWinHit, showHit: row.favoriteShowHit },
+        true,
+      );
+    }
+
     if (row.skippedReason) {
       skipped += 1;
       continue;
@@ -187,6 +211,7 @@ export function aggregateBacktest(rows: RaceBetResult[]): BacktestSummary {
   }
 
   finalizeTicketStats(byTicketType);
+  finalizeFavoriteMarkAggregate(favoriteMark);
   for (const k of Object.keys(byClassLevel) as RaceClassBucket[]) {
     const c = byClassLevel[k];
     c.rate = c.invested > 0 ? Math.round((c.payout / c.invested) * 1000) / 10 : 0;
@@ -206,6 +231,7 @@ export function aggregateBacktest(rows: RaceBetResult[]): BacktestSummary {
     byTicketType,
     byClassLevel,
     byClassTier,
+    favoriteMark,
     generatedAt: new Date().toISOString(),
   };
 }

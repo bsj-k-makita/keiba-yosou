@@ -1,9 +1,9 @@
 {
   "totalRacesMatched": 70,
   "totalRacesSkipped": 2,
-  "totalInvestedSum": 49600,
+  "totalInvestedSum": 49000,
   "totalPayoutSum": 26560,
-  "totalRecoveryRate": 53.5,
+  "totalRecoveryRate": 54.2,
   "byTicketType": {
     "WIN": {
       "invested": 7000,
@@ -24,21 +24,21 @@
       "estimatedPayout": false
     },
     "TRIFECTA_FORM": {
-      "invested": 21600,
+      "invested": 21000,
       "payout": 1560,
-      "rate": 7.2,
+      "rate": 7.4,
       "accuracy": 0.5,
       "hitCount": 1,
-      "betCount": 216,
+      "betCount": 210,
       "estimatedPayout": false
     }
   },
   "byClassLevel": {
     "MAIDEN_NEW": {
       "races": 29,
-      "invested": 20800,
+      "invested": 20600,
       "payout": 13410,
-      "rate": 64.5
+      "rate": 65.1
     },
     "OPEN_GRADE": {
       "races": 10,
@@ -48,9 +48,9 @@
     },
     "OTHER": {
       "races": 31,
-      "invested": 21800,
+      "invested": 21400,
       "payout": 8640,
-      "rate": 39.6
+      "rate": 40.4
     }
   },
   "byClassTier": {
@@ -80,16 +80,23 @@
     },
     "CONDITIONAL_LOWER": {
       "races": 27,
-      "invested": 18800,
+      "invested": 18400,
       "payout": 5460,
-      "rate": 29
+      "rate": 29.7
     },
     "MAIDEN_NEW": {
       "races": 29,
-      "invested": 20800,
+      "invested": 20600,
       "payout": 13410,
-      "rate": 64.5
+      "rate": 65.1
     }
   },
-  "generatedAt": "2026-05-17T14:04:15.108Z"
+  "favoriteMark": {
+    "races": 70,
+    "winHits": 9,
+    "showHits": 25,
+    "winRate": 12.9,
+    "showRate": 35.7
+  },
+  "generatedAt": "2026-05-17T14:09:04.063Z"
 }

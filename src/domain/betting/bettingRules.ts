@@ -1,4 +1,9 @@
 import type { HorseScoreResult } from "../race-evaluation/abilityTypes";
+import {
+  type ClassTier,
+  CLASS_TIER_RANK,
+  isGradedOpenTier,
+} from "../race-evaluation/resolveEffectiveRaceClass";
 import type { BetTicket } from "./types";
 
 export type MarkedHorseRef = {
@@ -6,8 +11,12 @@ export type MarkedHorseRef = {
   mark: string;
   hokkakeRole?: HorseScoreResult["hokkakeRole"];
   longshotReversalTrigger?: boolean;
-  /** evaluateRace 完了後の最終順位（3列目間引き用） */
   finalRank?: number;
+  connectionsBonus?: number;
+};
+
+export type GenerateTicketsOptions = {
+  classTier?: ClassTier;
 };
 
 const HIMOE_ROLES = new Set<HorseScoreResult["hokkakeRole"]>([
@@ -15,6 +24,8 @@ const HIMOE_ROLES = new Set<HorseScoreResult["hokkakeRole"]>([
   "△2物理",
   "△3狙い",
 ]);
+
+const CONNECTIONS_SECOND_ROW_MIN = 2.5;
 
 function sortComb(a: number, b: number): number[] {
   return [a, b].sort((x, y) => x - y);
@@ -28,19 +39,12 @@ function trifectaKey(comb: number[]): string {
   return comb.join("-");
 }
 
-/**
- * 4角◎振替・ポートフォリオ分散後の最終 `mark === '◎'` を軸にする（finalRank 1位は使わない）。
- */
 export function resolvePostProcessFavoriteNumber(
   marks: readonly MarkedHorseRef[],
 ): number | undefined {
-  const fav = marks.find((h) => h.mark === "◎");
-  return fav?.horseNumber;
+  return marks.find((h) => h.mark === "◎")?.horseNumber;
 }
 
-/**
- * 3列目：△1/2/3・☆を優先。ヒモ役未割当の △ は finalRank 5位以内のみ残す。
- */
 export function buildThirdRowNumbers(
   marks: readonly MarkedHorseRef[],
   longshotStar?: number,
@@ -68,14 +72,12 @@ export function buildThirdRowNumbers(
 }
 
 /**
- * 期待値分散型 3連複フォーメ（実戦型◎ × 拡張2列目 × スリム3列目）。
+ * Tier別2列目：未勝利は○▲のみ逆縮小、OP・重賞は拡張＋陣営上位バックアップ。
  */
-export function buildOptimizedTrifectaCombinations(
+export function buildSecondRowNumbers(
   marks: readonly MarkedHorseRef[],
-): number[][] {
-  const omaru = resolvePostProcessFavoriteNumber(marks);
-  if (omaru == null) return [];
-
+  classTier: ClassTier = "CONDITIONAL_LOWER",
+): number[] {
   const taiko = marks.find((h) => h.mark === "○")?.horseNumber;
   const ana = marks.find((h) => h.mark === "▲")?.horseNumber;
   const stabilityTop = marks.find((h) => h.hokkakeRole === "△1安定")?.horseNumber;
@@ -83,23 +85,52 @@ export function buildOptimizedTrifectaCombinations(
     (h) => h.mark === "☆" && h.longshotReversalTrigger === true,
   )?.horseNumber;
 
+  const set = new Set<number>();
+
+  if (classTier === "MAIDEN_NEW") {
+    if (taiko != null) set.add(taiko);
+    if (ana != null) set.add(ana);
+    return [...set];
+  }
+
+  if (taiko != null) set.add(taiko);
+  if (ana != null) set.add(ana);
+
+  if (isGradedOpenTier(classTier)) {
+    if (stabilityTop != null) set.add(stabilityTop);
+    if (longshotStar != null) set.add(longshotStar);
+
+    const backup = marks
+      .filter((h) => h.mark !== "◎" && (h.connectionsBonus ?? 0) >= CONNECTIONS_SECOND_ROW_MIN)
+      .sort((a, b) => (b.connectionsBonus ?? 0) - (a.connectionsBonus ?? 0))[0];
+    if (backup != null) set.add(backup.horseNumber);
+  } else if (CLASS_TIER_RANK[classTier] <= CLASS_TIER_RANK.CONDITIONAL_UPPER) {
+    if (stabilityTop != null) set.add(stabilityTop);
+  }
+
+  return [...set];
+}
+
+export function buildOptimizedTrifectaCombinations(
+  marks: readonly MarkedHorseRef[],
+  options?: GenerateTicketsOptions,
+): number[][] {
+  const classTier = options?.classTier ?? "CONDITIONAL_LOWER";
+  const omaru = resolvePostProcessFavoriteNumber(marks);
+  if (omaru == null) return [];
+
+  const longshotStar = marks.find(
+    (h) => h.mark === "☆" && h.longshotReversalTrigger === true,
+  )?.horseNumber;
+
   const thirdRow = buildThirdRowNumbers(marks, longshotStar);
   if (thirdRow.length === 0) return [];
 
-  const secondRowSet = new Set<number>();
-  if (taiko != null) secondRowSet.add(taiko);
-  if (ana != null) secondRowSet.add(ana);
-  if (stabilityTop != null) secondRowSet.add(stabilityTop);
-  if (longshotStar != null) secondRowSet.add(longshotStar);
-
-  if (secondRowSet.size === 0) {
-    if (taiko != null) secondRowSet.add(taiko);
-    if (ana != null) secondRowSet.add(ana);
-  }
-  if (secondRowSet.size === 0) return [];
+  const secondRow = buildSecondRowNumbers(marks, classTier);
+  if (secondRow.length === 0) return [];
 
   const uniq = new Map<string, number[]>();
-  for (const second of secondRowSet) {
+  for (const second of secondRow) {
     if (second === omaru) continue;
     for (const third of thirdRow) {
       if (third === omaru || third === second) continue;
@@ -111,12 +142,10 @@ export function buildOptimizedTrifectaCombinations(
   return [...uniq.values()];
 }
 
-/**
- * 印付き馬から定型3ルールの購入チケットを生成。
- */
 export function generateTickets(
   marks: readonly MarkedHorseRef[],
   betAmount = 100,
+  options?: GenerateTicketsOptions,
 ): BetTicket[] {
   const omaru = resolvePostProcessFavoriteNumber(marks);
   const taiko = marks.find((h) => h.mark === "○")?.horseNumber;
@@ -140,7 +169,7 @@ export function generateTickets(
     });
   }
 
-  const trifectaCombinations = buildOptimizedTrifectaCombinations(marks);
+  const trifectaCombinations = buildOptimizedTrifectaCombinations(marks, options);
   if (omaru != null && trifectaCombinations.length > 0) {
     tickets.push({
       ticketType: "TRIFECTA_FORM",
@@ -168,6 +197,7 @@ export function marksFromResults(
       hokkakeRole: r.hokkakeRole,
       longshotReversalTrigger: r.longshotReversalTrigger,
       finalRank: r.finalRank,
+      connectionsBonus: r.connectionsBonus,
     });
   }
   return out;
