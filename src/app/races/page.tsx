@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   getHorsesFromRaceData,
   getRaceEvaluationById,
@@ -12,7 +11,12 @@ import {
 import { buildRacePreviewDataFromRace, evaluateRace, type RacePreviewBadgeType } from "../../domain/race-evaluation";
 import { analyzeMarkHits } from "../../domain/race-evaluation/markHitAnalysis";
 import { ensureFrontendDisplayMarks } from "../../lib/race-display/ensureFrontendDisplayMarks";
-import { NetkeibaRaceLinks } from "../../components/race/NetkeibaRaceLinks";
+import { RaceListCard } from "../../components/race/RaceListCard";
+import {
+  mergeListBettingRecoveryStats,
+  type RaceBettingOutcome,
+} from "../../domain/betting/computeRaceBettingOutcome";
+import { computeRaceBettingOutcomeById } from "../../lib/race-data/computeRaceBettingOutcomeById";
 
 function surfaceBadgeClass(surface: string): string {
   return surface === "芝" ? "race-badge race-badge--turf" : "race-badge race-badge--dirt";
@@ -64,6 +68,11 @@ function isFeaturedRow(item: RaceIndexItem): boolean {
   return isFeaturedRaceByName(item.raceName);
 }
 
+function cardToneForFeatured(outcome: RaceBettingOutcome | undefined): boolean {
+  if (outcome?.status === "resolved") return false;
+  return true;
+}
+
 function isFeaturedRaceByName(raceName?: string): boolean {
   if (!raceName) return false;
   if (raceGradeFromName(raceName) != null) return true;
@@ -107,6 +116,14 @@ type ListHitStats = {
   marks: MarkSummary[];
 };
 
+type ListBettingStats = {
+  sampleSize: number;
+  recoveryRate: number;
+  hitRaces: number;
+  totalInvested: number;
+  totalPayout: number;
+};
+
 function previewBadgeTone(type: RacePreviewBadgeType): RaceCardPreview["badgeTone"] {
   if (type === "warning") return "warning";
   if (type === "success") return "success";
@@ -147,6 +164,24 @@ async function computeListHitStats(rows: RaceIndexItem[], limit = 30): Promise<L
   }
 
   return { sampleSize, marks };
+}
+
+async function computeListBettingStats(rows: RaceIndexItem[], limit = 30): Promise<ListBettingStats> {
+  const outcomes: RaceBettingOutcome[] = [];
+  for (const row of rows) {
+    const o = await computeRaceBettingOutcomeById(row.raceId);
+    if (o?.status !== "resolved") continue;
+    outcomes.push(o);
+    if (outcomes.length >= limit) break;
+  }
+  const merged = mergeListBettingRecoveryStats(outcomes);
+  return {
+    sampleSize: merged.sampleSize,
+    recoveryRate: merged.recoveryRate,
+    hitRaces: merged.hitRaces,
+    totalInvested: merged.totalInvested,
+    totalPayout: merged.totalPayout,
+  };
 }
 
 /** ◎〜▲ の試行をまとめた全体複勝圏（3着以内）的中率 */
@@ -200,7 +235,9 @@ export function RacesListPage() {
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [activeVenue, setActiveVenue] = useState<string | null>(null);
   const [previewMap, setPreviewMap] = useState<Record<string, RaceCardPreview>>({});
+  const [outcomeMap, setOutcomeMap] = useState<Record<string, RaceBettingOutcome>>({});
   const [hitStats, setHitStats] = useState<ListHitStats | null>(null);
+  const [bettingStats, setBettingStats] = useState<ListBettingStats | null>(null);
   const [hitStatsLoading, setHitStatsLoading] = useState(true);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkMessage, setBulkMessage] = useState<string | null>(null);
@@ -227,11 +264,14 @@ export function RacesListPage() {
     if (rows == null || rows.length === 0) return;
     let live = true;
     setHitStatsLoading(true);
-    void computeListHitStats(rows, 30).then((stats) => {
-      if (!live) return;
-      setHitStats(stats);
-      setHitStatsLoading(false);
-    });
+    void Promise.all([computeListHitStats(rows, 30), computeListBettingStats(rows, 30)]).then(
+      ([markStats, betStats]) => {
+        if (!live) return;
+        setHitStats(markStats);
+        setBettingStats(betStats);
+        setHitStatsLoading(false);
+      },
+    );
     return () => {
       live = false;
     };
@@ -261,8 +301,14 @@ export function RacesListPage() {
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
       if (cancelled || rows == null) return;
-      const stats = await computeListHitStats(rows, 30);
-      if (!cancelled) setHitStats(stats);
+      const [markStats, betStats] = await Promise.all([
+        computeListHitStats(rows, 30),
+        computeListBettingStats(rows, 30),
+      ]);
+      if (!cancelled) {
+        setHitStats(markStats);
+        setBettingStats(betStats);
+      }
     })();
     return () => {
       cancelled = true;
@@ -299,8 +345,12 @@ export function RacesListPage() {
     );
     if (rows != null && rows.length > 0) {
       setHitStatsLoading(true);
-      const stats = await computeListHitStats(rows, 30);
-      setHitStats(stats);
+      const [markStats, betStats] = await Promise.all([
+        computeListHitStats(rows, 30),
+        computeListBettingStats(rows, 30),
+      ]);
+      setHitStats(markStats);
+      setBettingStats(betStats);
       setHitStatsLoading(false);
     }
     setBulkLoading(false);
@@ -352,6 +402,34 @@ export function RacesListPage() {
       live = false;
     };
   }, [activeRaces, previewMap]);
+
+  useEffect(() => {
+    if (activeRaces.length === 0) return;
+    const missing = activeRaces.map((r) => r.raceId).filter((id) => outcomeMap[id] == null);
+    if (missing.length === 0) return;
+
+    let live = true;
+    void (async () => {
+      const entries = await Promise.all(
+        missing.map(async (raceId): Promise<[string, RaceBettingOutcome] | null> => {
+          try {
+            const o = await computeRaceBettingOutcomeById(raceId);
+            return o != null ? [raceId, o] : null;
+          } catch {
+            return null;
+          }
+        }),
+      );
+      if (!live) return;
+      const next = entries.filter((v): v is [string, RaceBettingOutcome] => v != null);
+      if (next.length === 0) return;
+      setOutcomeMap((prev) => ({ ...prev, ...Object.fromEntries(next) }));
+    })();
+
+    return () => {
+      live = false;
+    };
+  }, [activeRaces, outcomeMap]);
 
   if (err != null) {
     return (
@@ -409,6 +487,16 @@ export function RacesListPage() {
                 <p className="rl-hit-summary__favorite">
                   全体複勝圏（◎〜▲）: <strong>{formatPooledHitRate(hitStats.marks)}</strong>
                 </p>
+                {bettingStats != null && bettingStats.sampleSize > 0 && (
+                  <p className="rl-hit-summary__favorite">
+                    馬券回収率（定型買い目）: <strong>{bettingStats.recoveryRate}%</strong>
+                    <span className="rl-hit-summary__sub" style={{ display: "block", marginTop: "0.25rem" }}>
+                      的中 {bettingStats.hitRaces}/{bettingStats.sampleSize}R · 投資{" "}
+                      {bettingStats.totalInvested.toLocaleString()}円 → 払戻{" "}
+                      {bettingStats.totalPayout.toLocaleString()}円
+                    </span>
+                  </p>
+                )}
                 <p className="rl-hit-summary__sub">※直近{hitStats.sampleSize}レースは全日程・全競馬場混在のグローバル順（結果があるレースから最大30件）</p>
                 <div className="rl-hit-summary__rows" aria-label="印別内訳">
                   {hitStats.marks.map((m) => {
@@ -464,6 +552,21 @@ export function RacesListPage() {
         </div>
       )}
 
+      <div className="backtest-hit-races__legend rl-page__legend" aria-label="カード色の凡例">
+        <span className="backtest-hit-races__legend-item">
+          <span className="backtest-hit-races__legend-swatch backtest-hit-races__legend-swatch--hit" />
+          的中（払戻あり）
+        </span>
+        <span className="backtest-hit-races__legend-item">
+          <span className="backtest-hit-races__legend-swatch backtest-hit-races__legend-swatch--miss" />
+          不的中（2列目全滅含む）
+        </span>
+        <span className="backtest-hit-races__legend-item">
+          <span className="rl-race-list__legend-neutral" />
+          結果未確定
+        </span>
+      </div>
+
       {/* レースカードグリッド */}
       <div className="rl-venues">
         {activeRaces.length === 0 ? (
@@ -472,67 +575,32 @@ export function RacesListPage() {
           </ul>
         ) : (
           <ul className="rl-race-list" aria-label={`${effectiveVenue ?? ""}のレース`}>
-            {activeRaces.map((item) => (
-              <li key={item.raceId}>
-                {(() => {
-                  const dynamicPreview = previewMap[item.raceId];
-                  const fallbackBadge = confidenceBadge(item.raceName);
-                  const badge = dynamicPreview
-                    ? { label: dynamicPreview.badgeLabel, tone: dynamicPreview.badgeTone }
-                    : fallbackBadge;
-                  const gradeBadge =
-                    raceGradeBadgeFromIndex(item.raceGrade) ?? raceGradeFromName(item.raceName);
-                  return (
-                <div
-                  className={`rl-race-card-wrap${isFeaturedRow(item) ? " rl-race-card-wrap--featured" : ""}`}
-                >
-                <Link
-                  to={`/race/${item.raceId}`}
-                  className="rl-race-row"
-                  title={item.raceName ?? item.raceId}
-                >
-                  <div className="rl-race-row__top">
-                    <div className="rl-race-row__left">
-                      {/* R番号バッジ */}
-                      <div className="rl-race-row__r-badge" aria-label={`${item.raceNumber}レース`}>
-                        <span className="rl-race-row__r-label">R</span>
-                        <span className="rl-race-row__r-num">{item.raceNumber}</span>
-                      </div>
-                      <div className="rl-race-row__lead">
-                        {badge ? (
-                          <span className={`rl-race-row__feature rl-race-row__feature--${badge.tone}`}>{badge.label}</span>
-                        ) : null}
-                      </div>
-                    </div>
-                    <span className="rl-race-row__arrow" aria-hidden>›</span>
-                  </div>
+            {activeRaces.map((item) => {
+              const dynamicPreview = previewMap[item.raceId];
+              const fallbackBadge = confidenceBadge(item.raceName);
+              const badge = dynamicPreview
+                ? { label: dynamicPreview.badgeLabel, tone: dynamicPreview.badgeTone }
+                : fallbackBadge;
+              const gradeBadge =
+                raceGradeBadgeFromIndex(item.raceGrade) ?? raceGradeFromName(item.raceName);
+              const outcome = outcomeMap[item.raceId];
 
-                  {/* レース情報 */}
-                  <div className="rl-race-row__info">
-                    <div className="rl-race-row__name-row">
-                      <span className="rl-race-row__name" title={item.raceName}>
-                        {item.raceName ?? `${item.raceNumber}R`}
-                      </span>
-                      {gradeBadge ? (
-                        <span className={`rl-race-grade rl-race-grade--${gradeBadge.variant}`}>{gradeBadge.label}</span>
-                      ) : null}
-                    </div>
-                    {dynamicPreview?.previewText ? (
-                      <p className="rl-race-row__preview">{dynamicPreview.previewText}</p>
-                    ) : null}
-                    <div className="rl-race-row__meta">
-                      <span className={surfaceBadgeClass(item.surface)}>
-                        {raceIcon(item.surface)} {surfaceShort(item.surface)} {item.distance}m
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-                <NetkeibaRaceLinks raceId={item.raceId} variant="cardBar" />
-                </div>
-                  );
-                })()}
-              </li>
-            ))}
+              return (
+                <li key={item.raceId}>
+                  <RaceListCard
+                    item={item}
+                    outcome={outcome}
+                    previewBadge={badge}
+                    gradeBadge={gradeBadge}
+                    previewText={dynamicPreview?.previewText}
+                    featured={isFeaturedRow(item) && cardToneForFeatured(outcome)}
+                    surfaceBadgeClass={surfaceBadgeClass}
+                    surfaceShort={surfaceShort}
+                    raceIcon={raceIcon}
+                  />
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

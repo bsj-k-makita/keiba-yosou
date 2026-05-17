@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import {
   BIAS_ADJUSTMENTS,
   GROUND_ADJUSTMENTS,
@@ -9,23 +8,17 @@ import {
   LAP_STRUCTURE,
   computeAbilityLetterGrades,
   findSameTypePeers,
-  getFinalWeights,
-  weightsToDemand0to100,
   type QuickAdjustmentKey,
   type RaceCondition,
 } from "../../domain/race-evaluation";
 import { RaceAdjustmentPanel, loadGlobalProfile } from "./RaceAdjustmentPanel";
-import { HorseEvaluationCard } from "./HorseEvaluationCard";
-import { adjustedScoreToPoints100 } from "./adjustedScorePoints100";
-import { formatPredictedTop3Percent } from "./predictedTop3Display";
 import { RaceEvaluationSummary } from "./RaceEvaluationSummary";
 import { RaceConclusionPanel } from "./RaceConclusionPanel";
 import { RaceNavBar } from "./RaceNavBar";
 import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
-import { HorseListTable } from "./HorseListTable";
-import { RunningStyleRaceSummary } from "./RunningStyleRaceSummary";
-import { RaceResultPanel } from "./RaceResultPanel";
-import { RaceBetPanel } from "./RaceBetPanel";
+import { RaceHorsesView } from "./RaceHorsesView";
+import { RaceBettingDashboard } from "./RaceBettingDashboard";
+import { RaceResultAnalysis } from "./RaceResultAnalysis";
 import { RaceAdjustProvider } from "./RaceAdjustContext";
 import {
   getHorsesFromRaceData,
@@ -54,8 +47,7 @@ const NEUTRAL_CONDITION: RaceCondition = {
   adjustmentStrength: "middle",
 };
 
-type ViewTab = "list" | "ai" | "cards" | "bets" | "result";
-type CardDensity = "regular" | "compact";
+type ViewTab = "horses" | "bets" | "result";
 
 type Props = {
   race: RaceEvaluationData;
@@ -178,9 +170,7 @@ function loadManualTop3HorseIds(raceId: string): string[] {
 }
 
 export function RaceDetailView({ race, raceIndex }: Props) {
-  const [tab, setTab] = useState<ViewTab>("list");
-  const [cardDensity, setCardDensity] = useState<CardDensity>("regular");
-  const [tableSummary, setTableSummary] = useState(false);
+  const [tab, setTab] = useState<ViewTab>("bets");
 
   const horses = useMemo(() => getHorsesFromRaceData(race), [race]);
   const entryGateRows = useMemo(() => getSortedRaceEntryGateRows(race), [race]);
@@ -280,13 +270,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     [horses, results, evalCondition],
   );
 
-  const finalW = useMemo(
-    () => getFinalWeights(evalCondition ?? NEUTRAL_CONDITION),
-    [evalCondition],
-  );
-
-  const demand0to100 = useMemo(() => weightsToDemand0to100(finalW), [finalW]);
-
   const [conditionOpen, setConditionOpen] = useState(false);
 
   const { conditionOneLine, conditionMetaLine } = useMemo(() => {
@@ -334,18 +317,8 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     if (evalCondition == null) return [];
     return sortResultsForPredictionTable(results, gateOrderHorseIds);
   }, [evalCondition, results, gateOrderHorseIds]);
-  /** AI予想タブ：補正後スコア降順 */
-  const sortedByPtDesc = useMemo(() => {
-    if (evalCondition == null) return [];
-    return [...results].sort((a, b) => b.adjustedScore - a.adjustedScore);
-  }, [evalCondition, results]);
-  /** レース全体の補正後スコア最大（比例点数の分母） */
   const maxAdjustedScoreInRace = useMemo(
     () => results.reduce((m, row) => Math.max(m, row.adjustedScore), 0),
-    [results],
-  );
-  const topScore = useMemo(
-    () => results.reduce((max, row) => Math.max(max, row.adjustedScore), 0),
     [results],
   );
 
@@ -374,21 +347,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     [raceIndex, race.raceId],
   );
 
-  // 結果パネルから条件を適用する
-  const handleApplySuggest = useCallback((bias: string) => {
-    userEditedRef.current = true;
-    setAbilityOnlyPreview(false);
-    setCondition((prev) => ({ ...prev, bias }));
-    setTab("list");
-  }, []);
-
   const handleConditionPanelChange = useCallback((next: RaceCondition) => {
-    userEditedRef.current = true;
-    setAbilityOnlyPreview(false);
-    setCondition(next);
-  }, []);
-
-  const handleBetConditionChange = useCallback((next: RaceCondition) => {
     userEditedRef.current = true;
     setAbilityOnlyPreview(false);
     setCondition(next);
@@ -406,38 +365,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     }));
   }, []);
 
-  const boostedHorseNumbers = condition.favoredHorseNumbers ?? [];
-
-  const handleToggleSubjectiveBoost = useCallback((horseNumber: number) => {
-    userEditedRef.current = true;
-    setAbilityOnlyPreview(false);
-    setCondition((prev) => {
-      const fav = new Set(prev.favoredHorseNumbers ?? []);
-      const dis = new Set(prev.disfavoredHorseNumbers ?? []);
-      if (fav.has(horseNumber)) {
-        fav.delete(horseNumber);
-      } else {
-        fav.add(horseNumber);
-        // 加点優先: 同じ馬番が不利指定に入っていたら外す。
-        dis.delete(horseNumber);
-      }
-      return {
-        ...prev,
-        favoredHorseNumbers: fav.size > 0 ? [...fav].sort((a, b) => a - b) : undefined,
-        disfavoredHorseNumbers: dis.size > 0 ? [...dis].sort((a, b) => a - b) : undefined,
-      };
-    });
-  }, []);
-
-  const handleClearSubjectiveBoosts = useCallback(() => {
-    userEditedRef.current = true;
-    setAbilityOnlyPreview(false);
-    setCondition((prev) => ({
-      ...prev,
-      favoredHorseNumbers: undefined,
-    }));
-  }, []);
-
   const handleResetCondition = useCallback(() => {
     userEditedRef.current = true;
     setAbilityOnlyPreview(false);
@@ -445,11 +372,9 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   }, [race, inferredSection200mSec]);
 
   const TABS: { key: ViewTab; label: string }[] = [
-    { key: "list", label: "出馬表" },
-    { key: "ai", label: "AI予想" },
-    { key: "cards", label: "詳細カード" },
-    { key: "bets", label: "オッズ/買い目" },
-    { key: "result", label: "結果確認" },
+    { key: "horses", label: "出馬表" },
+    { key: "bets", label: "買い目" },
+    { key: "result", label: "結果・回収率" },
   ];
 
   return (
@@ -579,266 +504,61 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       </div>
 
       {/* メイン */}
-      <div className="detail-layout">
+      <div className={`detail-layout${tab === "bets" || tab === "result" ? " detail-layout--wide" : ""}`}>
         <div className="detail-main">
-          {tab !== "result" && (
+          {tab === "horses" && (
             <RaceConclusionPanel results={results} horses={horses} condition={evalCondition} />
           )}
 
-          {/* 一覧タブ */}
-          {tab === "list" && (
-            <section className="app__entries" aria-label="出走馬一覧">
-              <div className="app__entries-head">
-                <h2 className="app__section-title app__section-title--pop">
-                  出馬表 {horses.length > 0 ? `（${horses.length}頭）` : ""}
-                </h2>
-                <p className="app__meta">並び: 印順（◎→○→▲→☆→△）→ 枠・馬番</p>
-                <div className="view-density" role="group" aria-label="一覧表示設定">
-                  <button
-                    type="button"
-                    className={`view-density__btn${tableSummary ? " view-density__btn--active" : ""}`}
-                    onClick={() => setTableSummary((v) => !v)}
-                    aria-pressed={tableSummary}
-                  >
-                    サマリー表示
-                  </button>
-                </div>
-              </div>
-              <div className="quick-adjust" role="group" aria-label="直前補正クイックトグル">
+          {tab === "horses" && (
+            <>
+              <div className="quick-adjust" role="group" aria-label="直前補正">
                 <button
                   type="button"
                   className={`view-density__btn${condition.quickAdjustments?.lastRunReset ? " view-density__btn--active" : ""}`}
                   onClick={() => handleToggleQuickAdjustment("lastRunReset")}
                   aria-pressed={condition.quickAdjustments?.lastRunReset ?? false}
-                  title="前走でバイアス・展開・末脚と着順のギャップなど『不利』があった馬へ、手動で最終スコアを上乗せ（+12）します。データ由来の「バイアス逆行救済」とは別のオプションです。"
                 >
                   前走加点（不利時）
                 </button>
               </div>
-              <div className="quick-adjust" role="group" aria-label="主観加点（本命入替用）">
-                <span className="app__meta">
-                  主観加点（馬番に加点）・並びは出馬表どおり。18頭標準では 1〜2番＝1枠 … 17〜18番＝8枠（枠は JSON
-                  優先、欠損時は馬番から算出）
-                </span>
-                <div className="adj-panel__chips">
-                  {entryGateRows.map((row) => {
-                    const active = boostedHorseNumbers.includes(row.horseNumber);
-                    return (
-                      <button
-                        key={row.horseId}
-                        type="button"
-                        className={`chip ${active ? "chip--active" : ""}`}
-                        onClick={() => handleToggleSubjectiveBoost(row.horseNumber)}
-                        title={`${row.frameNumber}枠${row.horseNumber}番 ${row.horseName} を主観加点`}
-                      >
-                        {row.frameNumber}枠{row.horseNumber}番 {active ? "★" : "☆"}
-                      </button>
-                    );
-                  })}
-                  {boostedHorseNumbers.length > 0 ? (
-                    <button
-                      type="button"
-                      className="chip"
-                      onClick={handleClearSubjectiveBoosts}
-                      title="主観加点を全解除"
-                    >
-                      加点クリア
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-              <RunningStyleRaceSummary horses={horses} />
-              <HorseListTable
+              <RaceHorsesView
                 sorted={sortedForTable}
                 horses={horses}
                 gradesMap={gradesMap}
                 condition={evalCondition}
                 viewModel={pipeline.viewModel}
-                summaryMode={tableSummary}
+                maxAdjustedScoreInRace={maxAdjustedScoreInRace}
               />
-            </section>
+            </>
           )}
 
-          {tab === "ai" && (
-            <section className="ai-dashboard" aria-label="AI予想ダッシュボード">
-              <h2 className="app__section-title app__section-title--pop">AI予想（100点満点）</h2>
-              <p className="ai-dashboard__note">
-                条件・適性・能力を反映した<strong>補正後スコア</strong>を、このレースで最高の馬を100点とした比例換算です。力差が大きいほど点数も開きます（例：上位90点・下位30点のような分布になり得ます）。
-              </p>
-              <div className="ai-dashboard__chart">
-                {sortedByPtDesc.map((row) => {
-                  const horse = horses.find((h) => h.horseId === row.horseId);
-                  if (!horse) return null;
-                  const score100 = adjustedScoreToPoints100(row.adjustedScore, maxAdjustedScoreInRace);
-                  const barPercent =
-                    score100 != null
-                      ? Math.max(8, score100)
-                      : topScore > 0
-                        ? Math.max(8, (row.adjustedScore / topScore) * 100)
-                        : 0;
-                  const top3Label = formatPredictedTop3Percent(horse.investment);
-                  return (
-                    <div key={row.horseId} className="ai-dashboard__row">
-                      <p className="ai-dashboard__name">
-                        {horse.frameNumber ?? "?"}枠{horse.gate ?? "?"}番 {horse.horseName}
-                      </p>
-                      <div className="ai-dashboard__metrics">
-                        <div className="ai-dashboard__bar-wrap">
-                          <div
-                            className="ai-dashboard__bar"
-                            style={{ width: `${barPercent}%` }}
-                          >
-                            {score100 != null ? `${score100}点` : "—"}
-                          </div>
-                        </div>
-                        <div
-                          className="ai-dashboard__top3"
-                          title="enrich の predicted_probability（単勝確率ベースの変換値）。点数（adjustedScore）とは別ルート。"
-                        >
-                          <span className="ai-dashboard__top3-lbl">3着内率</span>
-                          <span className="ai-dashboard__top3-val">{top3Label}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* 詳細カードタブ */}
-          {tab === "cards" && (
-            <section className="app__entries" aria-label="出馬表">
-              <div className="app__entries-head">
-                <h2 className="app__section-title">
-                  出馬表 {horses.length > 0 ? `（${horses.length}頭）` : ""}
-                </h2>
-                <div className="view-density" role="group" aria-label="カード表示密度">
-                  <button
-                    type="button"
-                    className={`view-density__btn${cardDensity === "regular" ? " view-density__btn--active" : ""}`}
-                    onClick={() => setCardDensity("regular")}
-                    aria-pressed={cardDensity === "regular"}
-                  >
-                    通常表示
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-density__btn${cardDensity === "compact" ? " view-density__btn--active" : ""}`}
-                    onClick={() => setCardDensity("compact")}
-                    aria-pressed={cardDensity === "compact"}
-                  >
-                    コンパクト
-                  </button>
-                </div>
-              </div>
-              <div className="quick-adjust" role="group" aria-label="直前補正クイックトグル">
-                <button
-                  type="button"
-                  className={`view-density__btn${condition.quickAdjustments?.lastRunReset ? " view-density__btn--active" : ""}`}
-                  onClick={() => handleToggleQuickAdjustment("lastRunReset")}
-                  aria-pressed={condition.quickAdjustments?.lastRunReset ?? false}
-                  title="前走でバイアス・展開・末脚と着順のギャップなど『不利』があった馬へ、手動で最終スコアを上乗せ（+12）します。データ由来の「バイアス逆行救済」とは別のオプションです。"
-                >
-                  前走加点（不利時）
-                </button>
-              </div>
-              <div className="quick-adjust" role="group" aria-label="主観加点（本命入替用）">
-                <span className="app__meta">
-                  主観加点（馬番に加点）・並びは出馬表どおり。18頭標準では 1〜2番＝1枠 … 17〜18番＝8枠（枠は JSON
-                  優先、欠損時は馬番から算出）
-                </span>
-                <div className="adj-panel__chips">
-                  {entryGateRows.map((row) => {
-                    const active = boostedHorseNumbers.includes(row.horseNumber);
-                    return (
-                      <button
-                        key={row.horseId}
-                        type="button"
-                        className={`chip ${active ? "chip--active" : ""}`}
-                        onClick={() => handleToggleSubjectiveBoost(row.horseNumber)}
-                        title={`${row.frameNumber}枠${row.horseNumber}番 ${row.horseName} を主観加点`}
-                      >
-                        {row.frameNumber}枠{row.horseNumber}番 {active ? "★" : "☆"}
-                      </button>
-                    );
-                  })}
-                  {boostedHorseNumbers.length > 0 ? (
-                    <button
-                      type="button"
-                      className="chip"
-                      onClick={handleClearSubjectiveBoosts}
-                      title="主観加点を全解除"
-                    >
-                      加点クリア
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-              <div className={`app__grid${cardDensity === "compact" ? " app__grid--compact" : ""}`}>
-                {sortedForTable.map((r) => {
-                  const horse = horses.find((h) => h.horseId === r.horseId)!;
-                  const gate = "gate" in horse ? (horse as typeof horse & { gate?: number }).gate : undefined;
-                  const grades = gradesMap.get(r.horseId)!;
-                  const cardScore100 = adjustedScoreToPoints100(r.adjustedScore, maxAdjustedScoreInRace);
-                  return (
-                    <motion.div
-                      key={r.horseId}
-                      layout
-                      transition={{ type: "spring", stiffness: 340, damping: 34, mass: 0.65 }}
-                    >
-                      <HorseEvaluationCard
-                        gate={gate}
-                        horse={horse}
-                        result={r}
-                        grades={grades}
-                        demand0to100={demand0to100}
-                        allHorses={horses}
-                        condition={evalCondition}
-                        viewModel={pipeline.viewModel}
-                        compact={cardDensity === "compact"}
-                        scorePoints100={cardScore100}
-                      />
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* 結果確認タブ */}
           {tab === "bets" && (
-            <RaceBetPanel
-              sorted={sortedForTable}
-              horses={horses}
-              condition={evalCondition}
-              viewModel={pipeline.viewModel}
-              onConditionChange={handleBetConditionChange}
-            />
+            <RaceBettingDashboard results={results} horses={horses} condition={evalCondition} />
           )}
 
-          {/* 結果確認タブ */}
           {tab === "result" && (
-            <RaceResultPanel
+            <RaceResultAnalysis
               raceId={race.raceId}
               results={results}
               horses={horses}
               condition={evalCondition}
-              onApplySuggest={handleApplySuggest}
             />
           )}
 
         </div>
 
-        <aside className="detail-sidebar">
-          <RaceEvaluationSummary
-            raceId={race.raceId}
-            condition={evalCondition}
-            horses={horses}
-            results={results}
-            peers={peers}
-          />
-        </aside>
+        {tab === "horses" && (
+          <aside className="detail-sidebar">
+            <RaceEvaluationSummary
+              raceId={race.raceId}
+              condition={evalCondition}
+              horses={horses}
+              results={results}
+              peers={peers}
+            />
+          </aside>
+        )}
       </div>
     </div>
     </RaceAdjustProvider>

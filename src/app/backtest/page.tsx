@@ -1,42 +1,11 @@
-import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import type { BacktestSummary, RaceDetailLog } from "../../domain/betting/types";
-import { sortRaceDetailsForDisplay } from "../../domain/betting/raceDetailLog";
+import type { BacktestSummary } from "../../domain/betting/types";
+import { BacktestHitRacesSection } from "../../components/backtest/BacktestHitRacesSection";
 import {
   classTierLabelJa,
   type ClassTier,
   CLASS_TIER_RANK,
 } from "../../domain/race-evaluation/resolveEffectiveRaceClass";
-
-function formatPayoutCell(slot: { payout: number; isHit: boolean }): string {
-  if (slot.payout <= 0) return slot.isHit ? "0円" : "—";
-  return `${slot.payout.toLocaleString()}円${slot.isHit ? " 🎯" : ""}`;
-}
-
-function RaceDetailRow({ row }: { row: RaceDetailLog }) {
-  const anyHit = row.totalPayout > 0;
-  const rowStyle: CSSProperties = {
-    background: anyHit ? "rgba(34, 197, 94, 0.08)" : row.isSecondRowDead ? "rgba(251, 191, 36, 0.06)" : undefined,
-  };
-
-  return (
-    <tr style={rowStyle}>
-      <td>
-        <Link to={`/race/${row.raceId}`}>{row.raceId}</Link>
-      </td>
-      <td>
-        {row.raceName}
-        <span style={{ opacity: 0.75, fontSize: "0.85em" }}> ({row.classTierLabel})</span>
-      </td>
-      <td style={{ whiteSpace: "nowrap" }}>{row.finishLabel || "—"}</td>
-      <td>{formatPayoutCell(row.tickets.WIN)}</td>
-      <td>{formatPayoutCell(row.tickets.MAIN_LINE)}</td>
-      <td>{formatPayoutCell(row.tickets.TRIFECTA_FORM)}</td>
-      <td style={{ fontSize: "0.85rem", maxWidth: 220 }}>{row.diagnosisLabel}</td>
-      <td style={{ fontSize: "0.8rem", opacity: 0.85, maxWidth: 160 }}>{row.dominantComment || "—"}</td>
-    </tr>
-  );
-}
 
 const summaryLoaders = import.meta.glob<{ default: BacktestSummary }>(
   "../../data/backtest_summary.json",
@@ -237,33 +206,7 @@ export default function BacktestDashboardPage() {
           )}
 
           {summary.raceDetails != null && summary.raceDetails.length > 0 && (
-            <section className="card" style={{ marginTop: "1rem", padding: "1rem" }}>
-              <h2>的中レース明細ログ</h2>
-              <p style={{ fontSize: "0.9rem", marginBottom: "0.75rem" }}>
-                全{summary.raceDetails.length}レース。緑＝払戻あり、黄＝◎生存かつ2列目全滅。レースIDから詳細へ。
-              </p>
-              <div style={{ overflowX: "auto", maxHeight: "70vh", overflowY: "auto" }}>
-                <table className="horse-list" style={{ width: "100%", fontSize: "0.85rem" }}>
-                  <thead>
-                    <tr>
-                      <th>レースID</th>
-                      <th>レース名</th>
-                      <th>確定着順</th>
-                      <th>単勝</th>
-                      <th>馬連</th>
-                      <th>3連複</th>
-                      <th>AI判定</th>
-                      <th>短評</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortRaceDetailsForDisplay(summary.raceDetails).map((row) => (
-                      <RaceDetailRow key={row.raceId} row={row} />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+            <BacktestHitRacesSection raceDetails={summary.raceDetails} />
           )}
         </>
       )}

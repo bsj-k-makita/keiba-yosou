@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { Fragment, useLayoutEffect, useMemo, useRef, type ReactNode } from "react";
 import type { AbilityGradeRow } from "../../domain/race-evaluation/abilityGrades";
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "../../domain/race-evaluation";
 import { ABILITY_KEYS } from "../../domain/race-evaluation/abilityTypes";
@@ -25,6 +25,11 @@ type Props = {
   viewModel?: RaceEvaluationViewModel;
   onSelectHorse?: (horseId: string) => void;
   summaryMode?: boolean;
+  /** 投資向けスキャン表示（斤量・騎手・脚質中心） */
+  scanMode?: boolean;
+  expandedHorseId?: string | null;
+  onToggleExpand?: (horseId: string) => void;
+  renderExpandedRow?: (result: HorseScoreResult) => ReactNode;
 };
 
 function gradeClass(grade: string): string {
@@ -92,7 +97,12 @@ export function HorseListTable({
   viewModel,
   onSelectHorse,
   summaryMode = false,
+  scanMode = false,
+  expandedHorseId = null,
+  onToggleExpand,
+  renderExpandedRow,
 }: Props) {
+  const compact = scanMode || summaryMode;
   const horseMap = useMemo(() => new Map(horses.map((h) => [h.horseId, h] as const)), [horses]);
   const maxAdjustedScoreInRace = useMemo(
     () => sorted.reduce((m, row) => Math.max(m, row.adjustedScore), 0),
@@ -139,42 +149,55 @@ export function HorseListTable({
           <tr>
             <th className="horse-list__th horse-list__th--mark">印</th>
             <th className="horse-list__th horse-list__th--gate">馬番</th>
-            {!summaryMode && <th className="horse-list__th horse-list__th--radar">能力</th>}
+            {!compact && <th className="horse-list__th horse-list__th--radar">能力</th>}
             <th className="horse-list__th horse-list__th--name">馬名</th>
-            <th
-              className="horse-list__th horse-list__th--pwin"
-              title="finalEvaluationScore を同一レース内で softmax した単勝確率（表示はパイプラインのみ）。合計 100%。"
-            >
-              予測勝率
-            </th>
-            <th
-              className="horse-list__th horse-list__th--potential"
-              title="枠・コース適性・馬場・展開を除いたレース内ポテンシャル（0〜100）。参考表示。"
-            >
-              ポテンシャル
-            </th>
-            <th
-              className="horse-list__th horse-list__th--suit"
-              title="ポテンシャルは高いが予測勝率が抑えられるとき、適性側の理由。"
-            >
-              適性注意
-            </th>
-            <th
-              className="horse-list__th horse-list__th--score"
-              title="補正後スコアをレース内トップを100点とした比例換算（AI予想・詳細カードと同一）。適性・能力の差が点数の開きになります。"
-            >
-              点数
-            </th>
-            <th
-              className="horse-list__th horse-list__th--top3"
-              title="enrich の参考値（単勝確率由来の変換。点数の補正後スコアとは別計算）。AI予想・オッズ/買い目と同一。"
-            >
-              3着内率
-            </th>
-            {!summaryMode && <th className="horse-list__th horse-list__th--grades" title="能力軸ごとの等級">能力等級</th>}
-            <th className="horse-list__th horse-list__th--buy">買い</th>
-            {!summaryMode && <th className="horse-list__th horse-list__th--role">役割</th>}
-            {!summaryMode && (
+            {scanMode && <th className="horse-list__th">斤量</th>}
+            {scanMode && <th className="horse-list__th">騎手</th>}
+            {scanMode && <th className="horse-list__th">脚質</th>}
+            {!scanMode && (
+              <th
+                className="horse-list__th horse-list__th--pwin"
+                title="finalEvaluationScore を同一レース内で softmax した単勝確率（表示はパイプラインのみ）。合計 100%。"
+              >
+                予測勝率
+              </th>
+            )}
+            {!scanMode && (
+              <th
+                className="horse-list__th horse-list__th--potential"
+                title="枠・コース適性・馬場・展開を除いたレース内ポテンシャル（0〜100）。参考表示。"
+              >
+                ポテンシャル
+              </th>
+            )}
+            {!scanMode && (
+              <th
+                className="horse-list__th horse-list__th--suit"
+                title="ポテンシャルは高いが予測勝率が抑えられるとき、適性側の理由。"
+              >
+                適性注意
+              </th>
+            )}
+            {!scanMode && (
+              <th
+                className="horse-list__th horse-list__th--score"
+                title="補正後スコアをレース内トップを100点とした比例換算（AI予想・詳細カードと同一）。適性・能力の差が点数の開きになります。"
+              >
+                点数
+              </th>
+            )}
+            {!scanMode && (
+              <th
+                className="horse-list__th horse-list__th--top3"
+                title="enrich の参考値（単勝確率由来の変換。点数の補正後スコアとは別計算）。AI予想・オッズ/買い目と同一。"
+              >
+                3着内率
+              </th>
+            )}
+            {!compact && <th className="horse-list__th horse-list__th--grades" title="能力軸ごとの等級">能力等級</th>}
+            {!scanMode && <th className="horse-list__th horse-list__th--buy">買い</th>}
+            {!compact && <th className="horse-list__th horse-list__th--role">役割</th>}
+            {!compact && (
               <th
                 className="horse-list__th horse-list__th--lap"
                 title="当日ラップ形状と過去走ラップ形状の一致度。データ不足時は判定不能。"
@@ -182,7 +205,7 @@ export function HorseListTable({
                 ラップ一致度
               </th>
             )}
-            {!summaryMode && (
+            {!compact && (
               <th
                 className="horse-list__th horse-list__th--lap"
                 title="血統・枠順・陣営・傾向・前後傾・不利恩恵の追加補正合計。"
@@ -190,6 +213,7 @@ export function HorseListTable({
                 追加補正
               </th>
             )}
+            {onToggleExpand && <th className="horse-list__th horse-list__th--expand" aria-label="詳細" />}
           </tr>
         </thead>
         <tbody>
@@ -219,19 +243,25 @@ export function HorseListTable({
             const suitFlags = horse.suitabilityFlags;
             const suitFirst = suitFlags?.[0];
 
+            const isExpanded = expandedHorseId === r.horseId;
+            const rowClickable = onToggleExpand != null || onSelectHorse != null;
+
             return (
+              <Fragment key={r.horseId}>
               <tr
-                key={r.horseId}
                 ref={(el) => {
                   if (el) rowRefs.current.set(r.horseId, el);
                   else rowRefs.current.delete(r.horseId);
                 }}
-                className={`horse-list__row${isDismissMasked ? " horse-list__row--dismiss" : ""}`}
+                className={`horse-list__row${isDismissMasked ? " horse-list__row--dismiss" : ""}${isExpanded ? " horse-list__row--expanded" : ""}`}
                 data-buylabel={r.buyLabel}
                 data-has-mark={hasMark ? "1" : undefined}
                 data-ev-hot={vm?.evHot ? "1" : undefined}
-                onClick={() => onSelectHorse?.(r.horseId)}
-                style={{ cursor: onSelectHorse ? "pointer" : undefined }}
+                onClick={() => {
+                  if (onToggleExpand) onToggleExpand(r.horseId);
+                  else onSelectHorse?.(r.horseId);
+                }}
+                style={{ cursor: rowClickable ? "pointer" : undefined }}
               >
                 {/* 印 */}
                 <td className="horse-list__td horse-list__td--mark">
@@ -255,7 +285,7 @@ export function HorseListTable({
                   ) : "—"}
                 </td>
 
-                {!summaryMode && (
+                {!compact && (
                   <td className="horse-list__td horse-list__td--radar">
                     <RadarChart
                       horse={radarMap as Parameters<typeof RadarChart>[0]["horse"]}
@@ -283,10 +313,21 @@ export function HorseListTable({
                         </a>
                       ) : null}
                     </div>
-                    <RunningStyleStrip runningStyle={horse.runningStyle} position_x={horse.position_x} />
+                    {!scanMode && (
+                      <RunningStyleStrip runningStyle={horse.runningStyle} position_x={horse.position_x} />
+                    )}
                   </div>
                 </td>
 
+                {scanMode && (
+                  <td className="horse-list__td">
+                    {horse.bodyWeightKg != null ? `${horse.bodyWeightKg}kg` : "—"}
+                  </td>
+                )}
+                {scanMode && <td className="horse-list__td">{horse.jockey ?? "—"}</td>}
+                {scanMode && <td className="horse-list__td">{horse.runningStyle}</td>}
+
+                {!scanMode && (
                 <td className="horse-list__td horse-list__td--pwin">
                   {vm?.adjustedWinProbability != null && Number.isFinite(vm.adjustedWinProbability) ? (
                     <span className="horse-list__pwin" title="finalEvaluationScore 由来 softmax（同一レース）">
@@ -296,6 +337,8 @@ export function HorseListTable({
                     <span className="horse-list__role-na">—</span>
                   )}
                 </td>
+                )}
+                {!scanMode && (
                 <td className="horse-list__td horse-list__td--potential">
                   {horse.abilityIndex != null ? (
                     <span title="ability_index（適性・枠を除くレース内指数）">{horse.abilityIndex}</span>
@@ -303,6 +346,8 @@ export function HorseListTable({
                     <span className="horse-list__role-na">—</span>
                   )}
                 </td>
+                )}
+                {!scanMode && (
                 <td className="horse-list__td horse-list__td--suit">
                   {suitFlags != null && suitFirst != null ? (
                     <span
@@ -316,8 +361,9 @@ export function HorseListTable({
                     <span className="horse-list__role-na">—</span>
                   )}
                 </td>
+                )}
 
-                {/* 点数（100点満点・レース内トップ基準） */}
+                {!scanMode && (
                 <td className="horse-list__td horse-list__td--score">
                   <span
                     className="horse-list__score"
@@ -330,12 +376,15 @@ export function HorseListTable({
                     {score100 != null ? `${score100}点` : "—"}
                   </span>
                 </td>
+                )}
 
+                {!scanMode && (
                 <td className="horse-list__td horse-list__td--top3">
                   <span className="horse-list__top3">{formatPredictedTop3Percent(horse.investment)}</span>
                 </td>
+                )}
 
-                {!summaryMode && (
+                {!compact && (
                   <td className="horse-list__td horse-list__td--grades">
                     {grades ? (
                       <span className="horse-list__grades">
@@ -349,7 +398,7 @@ export function HorseListTable({
                   </td>
                 )}
 
-                {/* 買いラベル */}
+                {!scanMode && (
                 <td className="horse-list__td horse-list__td--buy">
                   <span className={`horse-list__buy-label${isDismissMasked ? " horse-list__buy-label--dismiss" : ""}`}>
                     {r.buyLabel}
@@ -367,8 +416,9 @@ export function HorseListTable({
                     </span>
                   ) : null}
                 </td>
+                )}
 
-                {!summaryMode && (
+                {!compact && (
                   <td className="horse-list__td horse-list__td--role">
                     {r.roleHint === "頭" && (
                       <span className="horse-card__role-badge horse-card__role-badge--head" title={`stddev ${r.varianceScore.toFixed(1)}`}>頭</span>
@@ -382,7 +432,7 @@ export function HorseListTable({
                   </td>
                 )}
 
-                {!summaryMode && (
+                {!compact && (
                   <td className="horse-list__td horse-list__td--lap">
                     {lapStatus === "none" ? (
                       <span className="horse-list__role-na">判定不能</span>
@@ -403,7 +453,7 @@ export function HorseListTable({
                     )}
                   </td>
                 )}
-                {!summaryMode && (
+                {!compact && (
                   <td className="horse-list__td horse-list__td--lap">
                     {contextual.total !== 0 ? (
                       <span
@@ -417,7 +467,20 @@ export function HorseListTable({
                     )}
                   </td>
                 )}
+                {onToggleExpand && (
+                  <td className="horse-list__td horse-list__td--expand" aria-hidden>
+                    {isExpanded ? "▼" : "▶"}
+                  </td>
+                )}
               </tr>
+              {isExpanded && renderExpandedRow ? (
+                <tr className="horse-list__row horse-list__row--detail">
+                  <td colSpan={20} className="horse-list__detail-cell">
+                    {renderExpandedRow(r)}
+                  </td>
+                </tr>
+              ) : null}
+              </Fragment>
             );
           })}
         </tbody>

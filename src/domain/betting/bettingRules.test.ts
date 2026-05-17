@@ -50,7 +50,7 @@ describe("generateTickets", () => {
       { mark: "◎", horseNumber: 1 },
       { mark: "○", horseNumber: 5 },
       { mark: "▲", horseNumber: 8 },
-      { mark: "△", horseNumber: 3, hokkakeRole: "△2物理" },
+      { mark: "△", horseNumber: 3, hokkakeRole: "△2物理" as const },
       { mark: "△", horseNumber: 7, finalRank: 8 },
       { mark: "☆", horseNumber: 12 },
     ];

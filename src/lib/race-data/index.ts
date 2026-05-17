@@ -19,3 +19,4 @@ export {
 } from "./raceDataToHorses";
 export { buildEvaluationData, recomputeEvaluationData } from "./buildEvaluationData";
 export { convertToRaceEvaluationData, unwrapAnalysisPayload } from "./convertToRaceEvaluationData";
+export { computeRaceBettingOutcomeById } from "./computeRaceBettingOutcomeById";

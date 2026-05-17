@@ -4897,3 +4897,482 @@ img[loading="lazy"] {
     background-position: 58% 18% !important;
   }
 }
+
+/* ── 投資向け3画面 UI ── */
+.detail-layout--wide {
+  display: block;
+}
+
+.detail-layout--wide .detail-main {
+  max-width: 100%;
+}
+
+.betting-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.betting-dashboard__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.betting-dashboard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.betting-dashboard__copy {
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #ccc);
+  background: var(--color-surface, #fff);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.betting-dashboard__total {
+  font-size: 0.95rem;
+}
+
+.bet-card {
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.bet-card--formation {
+  border-color: rgba(37, 99, 235, 0.25);
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.bet-card__title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.bet-card__formation,
+.bet-card__combos {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.bet-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-top: 0.65rem;
+  font-size: 0.88rem;
+}
+
+.bet-card__odds {
+  color: var(--color-accent, #2563eb);
+}
+
+.result-analysis-view__finish-label {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.result-analysis-view__table {
+  margin-top: 1rem;
+}
+
+.result-analysis-view__row--hit {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.result-analysis-view__row--miss {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.result-analysis-view__row--total {
+  font-weight: 600;
+}
+
+.result-analysis-view__rate--plus {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.ai-diagnostic-box {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(251, 191, 36, 0.06);
+}
+
+.ai-diagnostic-box h4 {
+  margin: 0 0 0.5rem;
+}
+
+.ai-diagnostic-box__warn {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.ai-diagnostic-box__ok {
+  color: #15803d;
+}
+
+.result-analysis-view__comments ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+}
+
+.horse-list__row--expanded {
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.horse-list__detail-cell {
+  padding: 0.75rem 1rem 1.25rem;
+  vertical-align: top;
+}
+
+.horse-list__td--expand {
+  width: 2rem;
+  text-align: center;
+  opacity: 0.6;
+  font-size: 0.75rem;
+}
+
+.backtest-hit-races__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.backtest-hit-races__filter {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.backtest-hit-races .rl-date-tabs,
+.backtest-hit-races .rl-venue-tabs {
+  margin-bottom: 0.75rem;
+}
+
+.backtest-hit-races__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.82rem;
+}
+
+.backtest-hit-races__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.backtest-hit-races__legend-swatch {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.backtest-hit-races__legend-swatch--hit {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.backtest-hit-races__legend-swatch--miss {
+  background: #e5e7eb;
+}
+
+/* 的中レースカード（色分け強調） */
+.bt-hit-card {
+  border-radius: var(--radius-cards, 12px);
+  border: 2px solid transparent;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.bt-hit-card__link {
+  display: block;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.bt-hit-card__top {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.55rem;
+}
+
+.bt-hit-card__left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.bt-hit-card__r-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 8px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.bt-hit-card__r-label {
+  font-size: 0.6rem;
+  opacity: 0.85;
+}
+
+.bt-hit-card__r-num {
+  font-size: 1.15rem;
+}
+
+.bt-hit-card__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.bt-hit-card__payout {
+  font-size: 1.05rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.bt-hit-card__arrow {
+  font-size: 1.35rem;
+  opacity: 0.45;
+  flex-shrink: 0;
+}
+
+.bt-hit-card__name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+
+.bt-hit-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.bt-hit-card__tier {
+  font-size: 0.72rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  opacity: 0.9;
+}
+
+.bt-hit-card__finish {
+  margin: 0 0 0.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.bt-hit-card__diagnosis {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  opacity: 0.88;
+}
+
+.bt-hit-card__tickets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.78rem;
+}
+
+.bt-hit-card__ticket {
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  opacity: 0.75;
+}
+
+.bt-hit-card__recovery {
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* ── 的中：鮮やかなグリーン ── */
+.bt-hit-card--hit {
+  border-color: #16a34a;
+  background: linear-gradient(145deg, #ecfdf5 0%, #bbf7d0 45%, #86efac 100%);
+  box-shadow: 0 4px 18px rgba(22, 163, 74, 0.28);
+}
+
+.bt-hit-card--hit::before {
+  content: "";
+  display: block;
+  height: 5px;
+  background: linear-gradient(90deg, #15803d, #22c55e, #4ade80);
+}
+
+.bt-hit-card--hit .bt-hit-card__r-badge {
+  background: #15803d;
+  color: #fff;
+}
+
+.bt-hit-card--hit .bt-hit-card__status--hit {
+  background: #15803d;
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.bt-hit-card--hit .bt-hit-card__payout {
+  color: #14532d;
+}
+
+.bt-hit-card--hit .bt-hit-card__tier {
+  background: rgba(21, 128, 61, 0.15);
+  color: #14532d;
+}
+
+.bt-hit-card--hit .bt-hit-card__ticket--on {
+  background: #15803d;
+  color: #fff;
+  opacity: 1;
+  font-weight: 700;
+}
+
+.bt-hit-card--hit .bt-hit-card__recovery--plus {
+  background: #dc2626;
+  color: #fff;
+}
+
+.bt-hit-card--hit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35);
+}
+
+/* ── 不的中・2列目全滅：グレーアウト ── */
+.bt-hit-card--miss {
+  border-color: #d1d5db;
+  background: linear-gradient(145deg, #f9fafb 0%, #f3f4f6 100%);
+  opacity: 0.92;
+}
+
+.bt-hit-card--miss::before {
+  content: "";
+  display: block;
+  height: 3px;
+  background: #9ca3af;
+}
+
+.bt-hit-card--miss .bt-hit-card__r-badge {
+  background: #9ca3af;
+  color: #fff;
+}
+
+.bt-hit-card--miss .bt-hit-card__status--miss {
+  background: #6b7280;
+  color: #fff;
+}
+
+.bt-hit-card--miss .bt-hit-card__name,
+.bt-hit-card--miss .bt-hit-card__finish {
+  color: #6b7280;
+}
+
+.bt-hit-card--miss .bt-hit-card__tier {
+  background: rgba(107, 114, 128, 0.12);
+  color: #6b7280;
+}
+
+.bt-hit-card .bt-hit-card__recovery--plus {
+  background: #dc2626;
+  color: #fff;
+}
+
+.backtest-hit-races .rl-race-list {
+  gap: 0.65rem;
+}
+
+.rl-page__legend {
+  margin: 0 1rem 0.75rem;
+}
+
+.rl-race-list__recovery {
+  margin-left: 0.5rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.rl-race-list__recovery--plus {
+  background: #dc2626;
+  color: #fff;
+}
+
+.rl-race-list__recovery--pending {
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.rl-race-list__legend-neutral {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+}
+
+.rl-race-list .bt-hit-card {
+  margin-bottom: 0;
+}
+
+.rl-race-list li > .bt-hit-card,
+.rl-race-list li > .rl-race-card-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+:root[data-theme="dark"] .bt-hit-card--hit {
+  background: linear-gradient(145deg, #052e16 0%, #14532d 50%, #166534 100%);
+  border-color: #4ade80;
+}
+
+:root[data-theme="dark"] .bt-hit-card--hit .bt-hit-card__payout {
+  color: #bbf7d0;
+}
+
+:root[data-theme="dark"] .bt-hit-card--miss {
+  background: linear-gradient(145deg, #1f2937 0%, #374151 100%);
+  border-color: #4b5563;
+}
+
