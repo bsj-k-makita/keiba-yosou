@@ -6,7 +6,15 @@ export type MarkedHorseRef = {
   mark: string;
   hokkakeRole?: HorseScoreResult["hokkakeRole"];
   longshotReversalTrigger?: boolean;
+  /** evaluateRace 完了後の最終順位（3列目間引き用） */
+  finalRank?: number;
 };
+
+const HIMOE_ROLES = new Set<HorseScoreResult["hokkakeRole"]>([
+  "△1安定",
+  "△2物理",
+  "△3狙い",
+]);
 
 function sortComb(a: number, b: number): number[] {
   return [a, b].sort((x, y) => x - y);
@@ -21,29 +29,62 @@ function trifectaKey(comb: number[]): string {
 }
 
 /**
- * 期待値分散型 3連複フォーメ（◎ × 拡張2列目 × △☆ヒモ）。
- * 2列目: ○▲ + △1安定 + 爆穴トリガー☆（2列目昇格）
+ * 4角◎振替・ポートフォリオ分散後の最終 `mark === '◎'` を軸にする（finalRank 1位は使わない）。
+ */
+export function resolvePostProcessFavoriteNumber(
+  marks: readonly MarkedHorseRef[],
+): number | undefined {
+  const fav = marks.find((h) => h.mark === "◎");
+  return fav?.horseNumber;
+}
+
+/**
+ * 3列目：△1/2/3・☆を優先。ヒモ役未割当の △ は finalRank 5位以内のみ残す。
+ */
+export function buildThirdRowNumbers(
+  marks: readonly MarkedHorseRef[],
+  longshotStar?: number,
+): number[] {
+  const nums = new Set<number>();
+
+  for (const h of marks) {
+    if (h.mark === "☆") {
+      if (longshotStar != null && h.horseNumber === longshotStar) continue;
+      nums.add(h.horseNumber);
+      continue;
+    }
+    if (h.mark !== "△") continue;
+
+    if (h.hokkakeRole != null && HIMOE_ROLES.has(h.hokkakeRole)) {
+      nums.add(h.horseNumber);
+      continue;
+    }
+
+    const fr = h.finalRank ?? 99;
+    if (fr <= 5) nums.add(h.horseNumber);
+  }
+
+  return [...nums];
+}
+
+/**
+ * 期待値分散型 3連複フォーメ（実戦型◎ × 拡張2列目 × スリム3列目）。
  */
 export function buildOptimizedTrifectaCombinations(
   marks: readonly MarkedHorseRef[],
 ): number[][] {
-  const byMark = (m: string) => marks.find((h) => h.mark === m)?.horseNumber;
-  const omaru = byMark("◎");
+  const omaru = resolvePostProcessFavoriteNumber(marks);
   if (omaru == null) return [];
 
-  const taiko = byMark("○");
-  const ana = byMark("▲");
+  const taiko = marks.find((h) => h.mark === "○")?.horseNumber;
+  const ana = marks.find((h) => h.mark === "▲")?.horseNumber;
   const stabilityTop = marks.find((h) => h.hokkakeRole === "△1安定")?.horseNumber;
   const longshotStar = marks.find(
     (h) => h.mark === "☆" && h.longshotReversalTrigger === true,
   )?.horseNumber;
 
-  const himoArray = marks
-    .filter((h) => h.mark === "△" || h.mark === "☆")
-    .map((h) => h.horseNumber)
-    .filter((n) => Number.isFinite(n));
-
-  if (himoArray.length === 0) return [];
+  const thirdRow = buildThirdRowNumbers(marks, longshotStar);
+  if (thirdRow.length === 0) return [];
 
   const secondRowSet = new Set<number>();
   if (taiko != null) secondRowSet.add(taiko);
@@ -60,7 +101,7 @@ export function buildOptimizedTrifectaCombinations(
   const uniq = new Map<string, number[]>();
   for (const second of secondRowSet) {
     if (second === omaru) continue;
-    for (const third of himoArray) {
+    for (const third of thirdRow) {
       if (third === omaru || third === second) continue;
       const comb = sortTrifecta(omaru, second, third);
       uniq.set(trifectaKey(comb), comb);
@@ -77,10 +118,9 @@ export function generateTickets(
   marks: readonly MarkedHorseRef[],
   betAmount = 100,
 ): BetTicket[] {
-  const byMark = (m: string) => marks.find((h) => h.mark === m)?.horseNumber;
-  const omaru = byMark("◎");
-  const taiko = byMark("○");
-  const ana = byMark("▲");
+  const omaru = resolvePostProcessFavoriteNumber(marks);
+  const taiko = marks.find((h) => h.mark === "○")?.horseNumber;
+  const ana = marks.find((h) => h.mark === "▲")?.horseNumber;
 
   const tickets: BetTicket[] = [];
 
@@ -127,6 +167,7 @@ export function marksFromResults(
       mark,
       hokkakeRole: r.hokkakeRole,
       longshotReversalTrigger: r.longshotReversalTrigger,
+      finalRank: r.finalRank,
     });
   }
   return out;
