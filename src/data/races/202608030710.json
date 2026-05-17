@@ -2702,5 +2702,41 @@
       "ev_margin_applied": 0.15
     }
   ],
-  "ev_margin_dynamic": 0.15
+  "ev_margin_dynamic": 0.15,
+  "analysis": {
+    "bias": {
+      "innerOuter": -0.6,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 36.4,
+    "meanMarginFieldSec": 0.23,
+    "lapStructure": "中間",
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-16T11:47:00.582Z"
+  },
+  "condition": {
+    "venue": "京都",
+    "raceName": "上賀茂S",
+    "surface": "ダート",
+    "distance": 1900,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -0.6,
+        "frontCloser": 0,
+        "innerShare": 0.33,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 36.4,
+      "meanMarginFieldSec": 0.23,
+      "lapStructureLabel": "中間",
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-16T11:47:00.582Z"
+    }
+  }
 }

@@ -2721,5 +2721,41 @@
       "ev_margin_applied": 0.15
     }
   ],
-  "ev_margin_dynamic": 0.15
+  "ev_margin_dynamic": 0.15,
+  "analysis": {
+    "bias": {
+      "innerOuter": -0.6,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 34.3,
+    "meanMarginFieldSec": 0.19,
+    "lapStructure": "中間",
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-16T11:46:46.537Z"
+  },
+  "condition": {
+    "venue": "新潟",
+    "raceName": "新潟大賞典",
+    "surface": "芝",
+    "distance": 2000,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -0.6,
+        "frontCloser": 0,
+        "innerShare": 0.33,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 34.3,
+      "meanMarginFieldSec": 0.19,
+      "lapStructureLabel": "中間",
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-16T11:46:46.537Z"
+    }
+  }
 }

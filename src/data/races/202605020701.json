@@ -2069,5 +2069,41 @@
       "ev_margin_applied": 0.2
     }
   ],
-  "ev_margin_dynamic": 0.2
+  "ev_margin_dynamic": 0.2,
+  "analysis": {
+    "bias": {
+      "innerOuter": 2,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 38.15,
+    "meanMarginFieldSec": 0.95,
+    "lapStructure": "中間",
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-16T11:46:47.740Z"
+  },
+  "condition": {
+    "venue": "東京",
+    "raceName": "3歳未勝利",
+    "surface": "ダート",
+    "distance": 1400,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": 2,
+        "frontCloser": 0,
+        "innerShare": 0.67,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 38.15,
+      "meanMarginFieldSec": 0.95,
+      "lapStructureLabel": "中間",
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-16T11:46:47.740Z"
+    }
+  }
 }

@@ -2643,5 +2643,41 @@
       "ev_margin_applied": 0.2
     }
   ],
-  "ev_margin_dynamic": 0.2
+  "ev_margin_dynamic": 0.2,
+  "analysis": {
+    "bias": {
+      "innerOuter": 2,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 33,
+    "meanMarginFieldSec": 0.2,
+    "lapStructure": "中間",
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-16T11:47:01.030Z"
+  },
+  "condition": {
+    "venue": "京都",
+    "raceName": "鞍馬S",
+    "surface": "芝",
+    "distance": 1200,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": 2,
+        "frontCloser": 0,
+        "innerShare": 0.67,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 33,
+      "meanMarginFieldSec": 0.2,
+      "lapStructureLabel": "中間",
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-16T11:47:01.030Z"
+    }
+  }
 }

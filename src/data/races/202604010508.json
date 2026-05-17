@@ -1526,5 +1526,41 @@
       "ev_margin_applied": 0.15
     }
   ],
-  "ev_margin_dynamic": 0.15
+  "ev_margin_dynamic": 0.15,
+  "analysis": {
+    "bias": {
+      "innerOuter": -2,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 38.9,
+    "meanMarginFieldSec": 1.04,
+    "lapStructure": "中間",
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-16T11:46:45.107Z"
+  },
+  "condition": {
+    "venue": "新潟",
+    "raceName": "4歳以上1勝クラス",
+    "surface": "ダート",
+    "distance": 1800,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -2,
+        "frontCloser": 0,
+        "innerShare": 0,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 38.9,
+      "meanMarginFieldSec": 1.04,
+      "lapStructureLabel": "中間",
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-16T11:46:45.107Z"
+    }
+  }
 }

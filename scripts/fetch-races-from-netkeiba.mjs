@@ -257,6 +257,50 @@ function parseShutubaCore(html, { raceId, date }) {
     const no = parseInt(m[1], 10);
     return Number.isFinite(no) && no >= 1 ? no : undefined;
   };
+  /** 枠番: Waku クラス優先。eq(0) が馬番と同値のときは誤読とみなし JRA 規則で復元。 */
+  const pickFrameFromRow = ($tr, umaban) => {
+    const $wakuTd = $tr
+      .children("td.Waku, td[class*='Waku'], td[class*='waku'], td.Txt_Waku, td[class*='枠']")
+      .first();
+    if ($wakuTd.length) {
+      const cls = String($wakuTd.attr("class") ?? "");
+      const fromCls = cls.match(/Waku(\d)/i);
+      if (fromCls) {
+        const n = parseInt(fromCls[1], 10);
+        if (n >= 1 && n <= 8) return n;
+      }
+      const t = parseInt(String($wakuTd.text()).replace(/[^\d]/g, ""), 10);
+      if (Number.isFinite(t) && t >= 1 && t <= 8 && t !== umaban) return t;
+    }
+    const $first = $tr.children("td").first();
+    const cls0 = String($first.attr("class") ?? "");
+    const fromCls0 = cls0.match(/Waku(\d)/i);
+    if (fromCls0) {
+      const n = parseInt(fromCls0[1], 10);
+      if (n >= 1 && n <= 8) return n;
+    }
+    const eq0 = parseInt(String($first.text()).trim().replace(/[^\d]/g, ""), 10);
+    if (Number.isFinite(eq0) && eq0 >= 1 && eq0 <= 8 && eq0 !== umaban) return eq0;
+    return Math.max(1, Math.min(8, Math.ceil(umaban / 2)));
+  };
+
+  const normalizeFrameNumbers = (rows) => {
+    const n = rows.length;
+    for (const e of rows) {
+      const um = Number(e.horseNumber);
+      let wk = Number(e.frameNumber);
+      if (!Number.isFinite(um) || um < 1) continue;
+      if (!Number.isFinite(wk) || wk < 1 || wk > 8) {
+        e.frameNumber = Math.max(1, Math.min(8, Math.ceil(um / 2)));
+        continue;
+      }
+      // 枠列を馬番列と誤読した典型: 2番→枠2（正しくは1枠）
+      if (wk === um && !(n <= 8 && um <= 8)) {
+        e.frameNumber = Math.max(1, Math.min(8, Math.ceil(um / 2)));
+      }
+    }
+  };
+
   /** 馬番: オッズ等の id が最も確実。従来 td.eq(1) 優先だと列増減で +1 ずれることがある。 */
   const pickHorseNoFromRow = (tr) => {
     const $tr = $(tr);
@@ -358,12 +402,7 @@ function parseShutubaCore(html, { raceId, date }) {
     const umaban = umabanMatch ? parseInt(umabanMatch[1], 10) : undefined;
     if (!Number.isFinite(umaban) || umaban < 1) return null;
 
-    const wakuTd = tds.first();
-    const wakuCls = wakuTd.attr("class") ?? "";
-    const wakuFromCls = wakuCls.match(/Waku(\d)/);
-    const rawWaku = wakuFromCls
-      ? parseInt(wakuFromCls[1], 10)
-      : parseInt(wakuTd.text().trim().replace(/[^\d]/g, ""), 10);
+    const rawWaku = pickFrameFromRow($tr, umaban);
     const wakuValid = Number.isFinite(rawWaku) && rawWaku >= 1 && rawWaku <= 8;
 
     const modalA = $tr.find('a[href*="horse_id="]').first();
@@ -443,10 +482,10 @@ function parseShutubaCore(html, { raceId, date }) {
     }
     const tds = $tr.children("td");
     if (tds.length < 7) return;
-    const rawWaku = parseInt(tds.eq(0).text().trim().replace(/[^\d]/g, ""), 10);
     const umaban = pickHorseNoFromRow($tr);
     // 正しい馬番が取れない行は採用しない（行順推定は誤紐付けを招くため禁止）
     if (!Number.isFinite(umaban) || umaban < 1) return;
+    const rawWaku = pickFrameFromRow($tr, umaban);
     const wakuValid = Number.isFinite(rawWaku) && rawWaku >= 1 && rawWaku <= 8;
     const a = tds.eq(3).find('a[href*="/horse/"]').first();
     const href = a.attr("href");
@@ -504,6 +543,7 @@ function parseShutubaCore(html, { raceId, date }) {
   if (entries.length === 0) {
     throw new Error("出走馬の行を1件も解釈できません");
   }
+  normalizeFrameNumbers(entries);
   validateEntries(entries, raceId);
 
   return {
@@ -716,6 +756,10 @@ async function main() {
         entries,
       });
       attachRaceAnalysisOrLeave(data);
+      if (mergePastRunsFromDisk && previousRace?.condition != null) {
+        data.condition = previousRace.condition;
+        if (previousRace.analysis != null) data.analysis = previousRace.analysis;
+      }
       const out = join(RACES_DIR, `${job.raceId}.json`);
       writeFileSync(out, `${JSON.stringify(data, null, 2)}\n`, "utf8");
       const idxRow = {

@@ -22,6 +22,8 @@
     "update-bias-master": "node scripts/enrich-investment-signals.mjs --bias-update",
     "backfill-index-grade": "node scripts/backfill-index-race-grade.mjs",
     "build-daily-baseline": "node scripts/build-daily-baseline.mjs",
+    "apply-prev-day-conditions": "node scripts/apply-prev-day-conditions.mjs",
+    "apply-tokyo-meeting-bias-brief": "node scripts/apply-tokyo-meeting-bias-brief.mjs --target=2026-05-17",
     "reestimate-abilities": "node scripts/reestimate-abilities-from-past-runs.mjs"
   },
   "dependencies": {
