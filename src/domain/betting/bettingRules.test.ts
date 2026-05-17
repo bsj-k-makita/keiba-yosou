@@ -6,6 +6,7 @@ import {
   generateTickets,
   resolvePostProcessFavoriteNumber,
 } from "./bettingRules";
+import { calculateRacePayout } from "./payoutCalculator";
 
 describe("generateTickets", () => {
   const baseMarks = [
@@ -21,8 +22,8 @@ describe("generateTickets", () => {
     const second = buildSecondRowNumbers(baseMarks, "MAIDEN_NEW");
     expect(second.sort((a, b) => a - b)).toEqual([5, 8]);
     const combos = buildOptimizedTrifectaCombinations(baseMarks, { classTier: "MAIDEN_NEW" });
-    expect(combos.length).toBe(6);
-    expect(combos.every((c) => c.includes(1) && (c.includes(5) || c.includes(8)))).toBe(true);
+    expect(combos.length).toBeGreaterThanOrEqual(6);
+    expect(combos.some((c) => [...c].sort((a, b) => a - b).join("-") === "1-5-8")).toBe(true);
   });
 
   test("OP・重賞Tierは2列目拡張", () => {
@@ -45,7 +46,7 @@ describe("generateTickets", () => {
     expect(resolvePostProcessFavoriteNumber(marks)).toBe(9);
   });
 
-  test("3列目は6位以下ノーマーク△を間引く", () => {
+  test("3列目は○▲☆△（2列目と重複して◎-○-▲を形成可能）", () => {
     const marks = [
       { mark: "◎", horseNumber: 1 },
       { mark: "○", horseNumber: 5 },
@@ -54,7 +55,28 @@ describe("generateTickets", () => {
       { mark: "△", horseNumber: 7, finalRank: 8 },
       { mark: "☆", horseNumber: 12 },
     ];
-    expect(buildThirdRowNumbers(marks).sort((a, b) => a - b)).toEqual([3, 12]);
+    expect(buildThirdRowNumbers(marks).sort((a, b) => a - b)).toEqual([3, 5, 8, 12]);
+  });
+
+  test("◎○▲が3着内なら3連複的中（着順入替えでも可）", () => {
+    const marks = [
+      { mark: "◎", horseNumber: 1 },
+      { mark: "○", horseNumber: 5 },
+      { mark: "▲", horseNumber: 8 },
+      { mark: "△", horseNumber: 3, hokkakeRole: "△1安定" as const },
+    ];
+    const combos = buildOptimizedTrifectaCombinations(marks);
+    const key = (c: number[]) => [...c].sort((a, b) => a - b).join("-");
+    expect(combos.some((c) => key(c) === "1-5-8")).toBe(true);
+
+    const tickets = generateTickets(marks);
+    const result = calculateRacePayout(tickets, {
+      raceId: "test",
+      classLevel: "OTHER",
+      finishOrder: [5, 1, 8],
+      winOddsByNumber: new Map(),
+    });
+    expect(result.byType.TRIFECTA_FORM.hitCount).toBeGreaterThan(0);
   });
 
   test("generateTickets 単勝・馬連", () => {

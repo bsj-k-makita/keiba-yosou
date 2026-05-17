@@ -45,6 +45,10 @@ export function resolvePostProcessFavoriteNumber(
   return marks.find((h) => h.mark === "◎")?.horseNumber;
 }
 
+/**
+ * 3列目: ○▲☆△（2列目と重複可。各列から1頭ずつ異なる馬番で3連複を形成）
+ * 例: 2列目=○▲ / 3列目=○▲☆△ → ◎-○-▲ の組み合わせが買い目に含まれる
+ */
 export function buildThirdRowNumbers(
   marks: readonly MarkedHorseRef[],
   longshotStar?: number,
@@ -52,6 +56,10 @@ export function buildThirdRowNumbers(
   const nums = new Set<number>();
 
   for (const h of marks) {
+    if (h.mark === "○" || h.mark === "▲") {
+      nums.add(h.horseNumber);
+      continue;
+    }
     if (h.mark === "☆") {
       if (longshotStar != null && h.horseNumber === longshotStar) continue;
       nums.add(h.horseNumber);

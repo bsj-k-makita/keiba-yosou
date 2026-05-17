@@ -6,6 +6,7 @@
 
 import { load } from "cheerio";
 import iconv from "iconv-lite";
+import { parseNetkeibaPayouts } from "../scripts/lib/parseNetkeibaPayouts.mjs";
 
 const NETKEIBA_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
@@ -95,7 +96,8 @@ function parseResultHtml(html, raceId) {
     throw new Error("着順行を1件も解析できません");
   }
 
-  return { raceId, fetchedAt: new Date().toISOString(), places };
+  const payouts = parseNetkeibaPayouts(html);
+  return { raceId, fetchedAt: new Date().toISOString(), places, payouts };
 }
 
 export default async function handler(req, res) {

@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "../../domain/race-evaluation";
 import { resolvePlaceToHorseId } from "../../domain/race-evaluation/markHitAnalysis";
 import { buildRaceBettingContext } from "../../domain/betting/buildRaceBettingContext";
-import { calculateRacePayout } from "../../domain/betting/payoutCalculator";
-import { buildAiMarksMap, formatFinishWithMarks } from "../../domain/betting/raceDetailLog";
+import { calculateRacePayout, lookupOfficialDividend } from "../../domain/betting/payoutCalculator";
+import type { RaceOfficialPayoutRow } from "../../lib/race-data/raceEvaluationTypes";
 import { analyzeSecondRowStatus } from "../../domain/betting/secondRowAnalysis";
 import type { BetTicketType } from "../../domain/betting/types";
 import { ensureRaceResultFetched } from "../../lib/race-data";
@@ -45,6 +45,19 @@ function ticketTypeName(t: BetTicketType): string {
   if (t === "WIN") return "単勝◎";
   if (t === "MAIN_LINE") return "馬連◎○▲";
   return "3連複フォーメ";
+}
+
+function formatOfficialPayoutRow(row: RaceOfficialPayoutRow): string {
+  return `${row.numbers.join("-")} … ${row.dividend.toLocaleString()}円`;
+}
+
+function horseNumberForPlace(
+  place: { horseId?: string; horseNumber?: number },
+  horseNumberById: Map<string, number>,
+): number | undefined {
+  if (place.horseNumber != null) return place.horseNumber;
+  if (place.horseId) return horseNumberById.get(place.horseId);
+  return undefined;
 }
 
 function buildFinishOrder(
@@ -106,12 +119,19 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
         .map((place) => {
           const horseId = manualPlaces[String(place) as "1" | "2" | "3" | "4"];
           if (!horseId) return null;
-          return { place, horseId };
+          const horse = horses.find((h) => h.horseId === horseId);
+          return {
+            place,
+            horseId,
+            horseName: horse?.horseName ?? "",
+            time: "",
+            margin: null,
+          };
         })
-        .filter((p): p is { place: number; horseId: string } => p != null);
+        .filter((p): p is NonNullable<typeof p> => p != null);
     }
     return [];
-  }, [autoResult, manualSubmitted, manualPlaces]);
+  }, [autoResult, manualSubmitted, manualPlaces, horses]);
 
   const finishOrder = useMemo(() => {
     if (!ctx || activePlaces.length < 3) return [];
@@ -129,11 +149,9 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
     });
   }, [ctx, finishOrder, raceId, autoResult?.payouts]);
 
-  const aiMarks = useMemo(() => (ctx ? buildAiMarksMap(ctx.marks) : {}), [ctx]);
-
-  const finishLabel = useMemo(
-    () => (finishOrder.length > 0 ? formatFinishWithMarks(finishOrder, aiMarks) : ""),
-    [finishOrder, aiMarks],
+  const sortedPlaces = useMemo(
+    () => [...activePlaces].sort((a, b) => a.place - b.place),
+    [activePlaces],
   );
 
   const secondStatus = useMemo(() => {
@@ -141,20 +159,7 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
     return analyzeSecondRowStatus(ctx.marks, ctx.classTier, finishOrder, ctx.favoriteNumber);
   }, [ctx, finishOrder]);
 
-  const markedComments = useMemo(() => {
-    return results
-      .filter((r) => (r.mark ?? "").length > 0 && r.predictionShortComment?.trim())
-      .slice(0, 8)
-      .map((r) => {
-        const num = ctx?.horseNumberById.get(r.horseId);
-        const horse = horses.find((h) => h.horseId === r.horseId);
-        return {
-          key: r.horseId,
-          label: `${num != null ? `${num}番` : ""}${horse?.horseName ?? r.horseName}（${r.mark}）`,
-          comment: r.predictionShortComment!.trim(),
-        };
-      });
-  }, [results, horses, ctx]);
+  const officialPayouts = autoResult?.payouts;
 
   const horseOptions = useMemo(() => {
     return results.map((r) => {
@@ -241,9 +246,56 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
       {isResolved && (
         <>
           <div className="result-analysis-view__finish">
-            <h3>確定着順（印付き）</h3>
-            <p className="result-analysis-view__finish-label">{finishLabel}</p>
+            <h3>確定着順</h3>
+            <ol className="result-panel__place-list">
+              {sortedPlaces.map((p) => {
+                const num =
+                  ctx != null ? horseNumberForPlace(p, ctx.horseNumberById) : undefined;
+                const name =
+                  p.horseName ||
+                  (p.horseId
+                    ? horses.find((h) => h.horseId === p.horseId)?.horseName
+                    : undefined) ||
+                  "—";
+                return (
+                  <li key={p.place} className="result-panel__place-item">
+                    <span className="result-panel__place-num">{p.place}着</span>
+                    <span className="result-panel__place-name">
+                      {num != null ? `${num}番 ` : ""}
+                      {name}
+                    </span>
+                    {"time" in p && p.time ? (
+                      <span className="result-panel__place-time">{p.time}</span>
+                    ) : null}
+                    {"margin" in p && p.margin != null && p.place > 1 ? (
+                      <span className="result-panel__place-margin">{p.margin.toFixed(2)}秒差</span>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ol>
           </div>
+
+          {officialPayouts &&
+            (officialPayouts.REN.length > 0 || officialPayouts.TRI.length > 0) && (
+              <div className="result-analysis-view__official-payouts">
+                <h3>公式払戻（100円あたり）</h3>
+                <ul className="result-analysis-view__official-payouts-list">
+                  {officialPayouts.REN.map((row, i) => (
+                    <li key={`ren-${i}`}>
+                      <span className="result-analysis-view__official-kind">馬連</span>
+                      {formatOfficialPayoutRow(row)}
+                    </li>
+                  ))}
+                  {officialPayouts.TRI.map((row, i) => (
+                    <li key={`tri-${i}`}>
+                      <span className="result-analysis-view__official-kind">3連複</span>
+                      {formatOfficialPayoutRow(row)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
           {payoutRow && (
             <table className="horse-list result-analysis-view__table">
@@ -260,12 +312,40 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
                 {(["WIN", "MAIN_LINE", "TRIFECTA_FORM"] as const).map((type) => {
                   const d = payoutRow.byType[type];
                   const hit = d.hitCount > 0;
+                  const ticket = ctx?.tickets.find((t) => t.ticketType === type);
+                  const hitComb = hit && ticket
+                    ? ticket.combinations.find((comb) => {
+                        if (type === "WIN") return finishOrder[0] === comb[0];
+                        if (type === "MAIN_LINE") {
+                          const top2 = new Set(finishOrder.slice(0, 2));
+                          return top2.has(comb[0]!) && top2.has(comb[1]!);
+                        }
+                        const top3 = new Set(finishOrder.slice(0, 3));
+                        return top3.has(comb[0]!) && top3.has(comb[1]!) && top3.has(comb[2]!);
+                      })
+                    : undefined;
+                  const officialDiv =
+                    hitComb != null
+                      ? lookupOfficialDividend(officialPayouts, type, hitComb)
+                      : null;
                   return (
                     <tr
                       key={type}
                       className={hit ? "result-analysis-view__row--hit" : "result-analysis-view__row--miss"}
                     >
-                      <td>{ticketTypeName(type)}</td>
+                      <td>
+                        {ticketTypeName(type)}
+                        {hitComb != null && (
+                          <span className="result-analysis-view__hit-comb">
+                            {" "}
+                            {hitComb.join("-")}
+                            {officialDiv != null ? `（${officialDiv.toLocaleString()}円）` : ""}
+                          </span>
+                        )}
+                        {d.estimatedPayout && type !== "WIN" && (
+                          <span className="result-analysis-view__payout-warn"> 払戻未取得</span>
+                        )}
+                      </td>
                       <td>{d.invested.toLocaleString()}円</td>
                       <td>{d.payout.toLocaleString()}円</td>
                       <td className={d.rate >= 100 ? "result-analysis-view__rate--plus" : ""}>
@@ -316,18 +396,6 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
             </div>
           )}
 
-          {markedComments.length > 0 && (
-            <div className="result-analysis-view__comments">
-              <h3>AI短評（印付き馬）</h3>
-              <ul>
-                {markedComments.map((c) => (
-                  <li key={c.key}>
-                    <strong>{c.label}</strong> — {c.comment}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </>
       )}
     </section>

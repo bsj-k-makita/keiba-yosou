@@ -4978,10 +4978,47 @@ img[loading="lazy"] {
   color: var(--color-accent, #2563eb);
 }
 
-.result-analysis-view__finish-label {
-  font-size: 1.05rem;
+.result-analysis-view__finish {
+  margin-top: 1rem;
+}
+
+.result-analysis-view__official-payouts {
+  margin-top: 1rem;
+}
+
+.result-analysis-view__official-payouts h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.result-analysis-view__official-payouts-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.92rem;
+}
+
+.result-analysis-view__official-payouts-list li + li {
+  margin-top: 0.35rem;
+}
+
+.result-analysis-view__official-kind {
+  display: inline-block;
+  min-width: 3.2rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  color: var(--color-muted, #64748b);
+}
+
+.result-analysis-view__hit-comb {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  color: var(--color-muted, #64748b);
+}
+
+.result-analysis-view__payout-warn {
+  font-size: 0.78rem;
+  color: #b45309;
 }
 
 .result-analysis-view__table {
