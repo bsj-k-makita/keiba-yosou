@@ -1,4 +1,5 @@
 import type { BetTicket, BetTicketType, RaceBetResult, RacePayoutInput, TicketTypeStats } from "./types";
+import type { RaceOfficialPayoutRow, RaceOfficialPayouts } from "../../lib/race-data/raceEvaluationTypes";
 
 function emptyTypeStats(estimated: boolean): TicketTypeStats {
   return {
@@ -32,49 +33,52 @@ function isTrifectaHit(comb: number[], finishOrder: number[]): boolean {
   return top3.has(comb[0]!) && top3.has(comb[1]!) && top3.has(comb[2]!);
 }
 
+function poolForTicket(
+  payouts: RaceOfficialPayouts | undefined,
+  ticketType: BetTicketType,
+): RaceOfficialPayoutRow[] | null {
+  if (!payouts) return null;
+  if (ticketType === "WIN") return payouts.WIN;
+  if (ticketType === "MAIN_LINE") return payouts.REN;
+  if (ticketType === "TRIFECTA_FORM") return payouts.TRI;
+  return null;
+}
+
+/** 確定配当（100円あたり）を馬番組み合わせから検索 */
+export function lookupOfficialDividend(
+  payouts: RaceOfficialPayouts | undefined,
+  ticketType: BetTicketType,
+  comb: number[],
+): number | null {
+  const pool = poolForTicket(payouts, ticketType);
+  if (!pool || pool.length === 0) return null;
+  const key = combKey(comb);
+  for (const row of pool) {
+    if (combKey(row.numbers) === key) return row.dividend;
+  }
+  return null;
+}
+
 function estimateWinPayout(horseNo: number, winOddsByNumber: Map<number, number>, betAmount: number): number {
   const odds = winOddsByNumber.get(horseNo);
   if (odds == null || !Number.isFinite(odds) || odds <= 0) return 0;
   return (betAmount / 100) * odds * 100;
 }
 
-function estimateComboPayout(
-  comb: number[],
-  winOddsByNumber: Map<number, number>,
-  betAmount: number,
-  kind: "MAIN_LINE" | "TRIFECTA_FORM",
-): number {
-  const odds = comb.map((n) => winOddsByNumber.get(n)).filter((o): o is number => o != null && o > 0);
-  if (odds.length !== comb.length) return 0;
-  const product = odds.reduce((p, o) => p * o, 1);
-  const mult = kind === "MAIN_LINE" ? 1.8 : 4.5;
-  return (betAmount / 100) * Math.sqrt(product) * 100 * mult;
-}
-
-function lookupOfficialPayout(
-  input: RacePayoutInput,
-  ticketType: BetTicketType,
-  comb: number[],
-): number | null {
-  const list = input.dividends?.[ticketType];
-  if (!list) return null;
-  const key = combKey(comb);
-  for (const row of list) {
-    for (const c of row.combinations) {
-      if (combKey(c) === key) return row.payoutPer100;
-    }
-  }
-  return null;
+function usesOfficialPayouts(payouts: RaceOfficialPayouts | undefined, ticketType: BetTicketType): boolean {
+  const pool = poolForTicket(payouts, ticketType);
+  return pool != null && pool.length > 0;
 }
 
 export function calculateRacePayout(
   tickets: BetTicket[],
   input: RacePayoutInput,
 ): RaceBetResult {
+  const official = input.officialPayouts;
   const byType: RaceBetResult["byType"] = {
-    WIN: emptyTypeStats(false),
-    MAIN_LINE: emptyTypeStats(true),
-    TRIFECTA_FORM: emptyTypeStats(true),
+    WIN: emptyTypeStats(!usesOfficialPayouts(official, "WIN")),
+    MAIN_LINE: emptyTypeStats(!usesOfficialPayouts(official, "MAIN_LINE")),
+    TRIFECTA_FORM: emptyTypeStats(!usesOfficialPayouts(official, "TRIFECTA_FORM")),
   };
 
   let raceInvested = 0;
@@ -96,21 +100,14 @@ export function calculateRacePayout(
       if (!hit) continue;
 
       bucket.hitCount += 1;
-      let payoutPer100 = lookupOfficialPayout(input, ticket.ticketType, comb);
+      const officialDividend = lookupOfficialDividend(official, ticket.ticketType, comb);
       let payout = 0;
-      if (payoutPer100 != null) {
-        payout = (ticket.betAmount / 100) * payoutPer100;
+      if (officialDividend != null) {
+        payout = (ticket.betAmount / 100) * officialDividend;
         bucket.estimatedPayout = false;
       } else if (ticket.ticketType === "WIN") {
         payout = estimateWinPayout(comb[0]!, input.winOddsByNumber, ticket.betAmount);
-        bucket.estimatedPayout = false;
-      } else {
-        payout = estimateComboPayout(
-          comb,
-          input.winOddsByNumber,
-          ticket.betAmount,
-          ticket.ticketType,
-        );
+        bucket.estimatedPayout = bucket.estimatedPayout && payout <= 0;
       }
       bucket.payout += payout;
       racePayout += payout;

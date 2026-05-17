@@ -5,17 +5,20 @@
  *   node scripts/fetch-race-results.mjs --date=2026-04-26
  *   node scripts/fetch-race-results.mjs --raceId=202603010601
  *   node scripts/fetch-race-results.mjs --date=2026-04-26 --venue=東京
+ *   node scripts/fetch-race-results.mjs --backfill-from-results
  *
  * 出力 JSON スキーマ:
- *   { raceId, fetchedAt, places: [{ place, horseId, horseName, time, margin }] }
+ *   { raceId, fetchedAt, places: [...], payouts?: { WIN, SHOW, REN, WREN, TRI } }
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { load } from "cheerio";
 import { fetchUtf8, sleep } from "./lib/netkeibaFetch.mjs";
 import { parseChakusaToSeconds } from "./lib/parseNetkeibaPastRuns.mjs";
+import { parseRaceResultNetkeiba } from "./lib/parseRaceResultNetkeiba.mjs";
+import { parseNetkeibaPayouts } from "./lib/parseNetkeibaPayouts.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -89,11 +92,18 @@ async function fetchResult(raceId) {
   const url = `https://race.netkeiba.com/race/result.html?race_id=${raceId}`;
   process.stderr.write(`  fetch result ${raceId}… `);
   const html = fetchUtf8(url);
-  const places = parseResultPage(html, raceId);
+  let places;
+  try {
+    ({ places } = parseRaceResultNetkeiba(html, raceId));
+  } catch {
+    places = parseResultPage(html, raceId);
+  }
+  const payouts = parseNetkeibaPayouts(html);
   const out = {
     raceId,
     fetchedAt: new Date().toISOString(),
     places,
+    payouts,
   };
   const path = join(RESULTS_DIR, `${raceId}.json`);
   writeFileSync(path, `${JSON.stringify(out, null, 2)}\n`, "utf8");
@@ -108,22 +118,28 @@ function parseOptions() {
   let targetDate = null;
   let targetRaceId = null;
   let targetVenue = null;
+  let backfillFromResults = false;
 
   for (const arg of args) {
     if (arg.startsWith("--date=")) targetDate = arg.slice(7).trim();
     if (arg.startsWith("--raceId=")) targetRaceId = arg.slice(9).trim();
     if (arg.startsWith("--venue=")) targetVenue = arg.slice(8).trim();
+    if (arg === "--backfill-from-results") backfillFromResults = true;
   }
 
-  return { targetDate, targetRaceId, targetVenue };
+  return { targetDate, targetRaceId, targetVenue, backfillFromResults };
 }
 
 async function main() {
-  const { targetDate, targetRaceId, targetVenue } = parseOptions();
+  const { targetDate, targetRaceId, targetVenue, backfillFromResults } = parseOptions();
 
   let raceIds = [];
 
-  if (targetRaceId) {
+  if (backfillFromResults) {
+    raceIds = readdirSync(RESULTS_DIR)
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => f.replace(/\.json$/, ""));
+  } else if (targetRaceId) {
     raceIds = [targetRaceId];
   } else if (targetDate) {
     const index = JSON.parse(readFileSync(INDEX_PATH, "utf8"));

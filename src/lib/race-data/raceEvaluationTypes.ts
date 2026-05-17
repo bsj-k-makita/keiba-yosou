@@ -147,10 +147,28 @@ export type RaceResultPlace = {
   margin: number | null;
 };
 
+/** netkeiba 確定払戻（100円あたりの配当金） */
+export type RaceOfficialPayoutRow = {
+  numbers: number[];
+  dividend: number;
+};
+
+export type RaceOfficialPayouts = {
+  WIN: RaceOfficialPayoutRow[];
+  SHOW: RaceOfficialPayoutRow[];
+  /** 馬連 */
+  REN: RaceOfficialPayoutRow[];
+  /** ワイド */
+  WREN: RaceOfficialPayoutRow[];
+  /** 3連複 */
+  TRI: RaceOfficialPayoutRow[];
+};
+
 export type RaceResultData = {
   raceId: string;
   fetchedAt: string;
   places: RaceResultPlace[];
+  payouts?: RaceOfficialPayouts;
 };
 
 export type RaceEntryEvaluation = {

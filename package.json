@@ -17,6 +17,7 @@
     "reset-market-odds": "node scripts/reset-market-odds.mjs",
     "apply-external-odds": "node scripts/apply-external-odds.mjs",
     "fetch-results": "node scripts/fetch-race-results.mjs",
+    "fetch-results:payouts": "node scripts/fetch-race-results.mjs --backfill-from-results",
     "apply-trip-context": "node scripts/apply-trip-context.mjs",
     "enrich-investment-signals": "node scripts/enrich-investment-signals.mjs --all",
     "update-bias-master": "node scripts/enrich-investment-signals.mjs --bias-update",

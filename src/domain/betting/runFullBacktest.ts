@@ -43,7 +43,10 @@ export function collectBacktestRows(): ReturnType<typeof runBacktestOnRace>[] {
     if (!raceKey) continue;
 
     const raw = raceJsonLoaders[raceKey]!.default;
-    const resultRaw = resultMod.default as { places?: BacktestRaceInput["places"] };
+    const resultRaw = resultMod.default as {
+      places?: BacktestRaceInput["places"];
+      payouts?: BacktestRaceInput["payouts"];
+    };
     const data = convertToRaceEvaluationData(raw);
     const horses = getHorsesFromRaceData(data);
     const info = data.raceInfo;
@@ -62,6 +65,7 @@ export function collectBacktestRows(): ReturnType<typeof runBacktestOnRace>[] {
       condition: data.condition ?? defaultCondition(info),
       horses,
       places: resultRaw.places ?? [],
+      payouts: resultRaw.payouts,
     };
 
     const row = runBacktestOnRace(input);

@@ -10,6 +10,7 @@ import {
   finalizeTicketStats,
   mergeTicketStats,
 } from "./payoutCalculator";
+import type { RaceOfficialPayouts } from "../../lib/race-data/raceEvaluationTypes";
 import type { BacktestSummary, BetTicketType, RaceBetResult, TicketTypeStats } from "./types";
 
 export type BacktestRaceInput = {
@@ -26,6 +27,7 @@ export type BacktestRaceInput = {
   condition: RaceCondition;
   horses: HorseAbility[];
   places: { place: number; horseId?: string; horseName?: string; horseNumber?: number }[];
+  payouts?: RaceOfficialPayouts;
 };
 
 function horseNumberMap(horses: readonly HorseAbility[]): Map<string, number> {
@@ -108,6 +110,7 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
     classLevel: inferRaceClassBucket(input.condition),
     finishOrder,
     winOddsByNumber: winOddsMap(input.horses),
+    officialPayouts: input.payouts,
   });
 }
 

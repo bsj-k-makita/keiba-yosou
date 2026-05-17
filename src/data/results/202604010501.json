@@ -1,111 +1,213 @@
 {
   "raceId": "202604010501",
-  "fetchedAt": "2026-05-16T11:45:22.019Z",
+  "fetchedAt": "2026-05-17T13:49:25.334Z",
   "places": [
     {
       "place": 1,
+      "waku": 3,
       "horseId": "2023102761",
       "horseName": "ハイロード",
-      "time": "1:54.3",
-      "margin": 0
+      "final3fSec": 39.4,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 4,
       "horseId": "2023102967",
       "horseName": "クリムゾンリーフ",
-      "time": "1:54.4",
-      "margin": 1
+      "final3fSec": 39,
+      "cornerPassing": null,
+      "marginToWinnerSec": 1
     },
     {
       "place": 3,
+      "waku": 5,
       "horseId": "2023106397",
       "horseName": "ストロングボーイ",
-      "time": "1:54.5",
-      "margin": 0.165
+      "final3fSec": 38.4,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.165
     },
     {
       "place": 4,
+      "waku": 2,
       "horseId": "2023103332",
       "horseName": "ウェイヴムーン",
-      "time": "1:54.9",
-      "margin": 2
+      "final3fSec": 39.7,
+      "cornerPassing": null,
+      "marginToWinnerSec": 2
     },
     {
       "place": 5,
+      "waku": 1,
       "horseId": "2023100578",
       "horseName": "ロジキセキ",
-      "time": "1:54.9",
-      "margin": 0.12
+      "final3fSec": 39.1,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 6,
+      "waku": 7,
       "horseId": "2023105139",
       "horseName": "ティブロン",
-      "time": "1:56.0",
-      "margin": 7
+      "final3fSec": 40.2,
+      "cornerPassing": null,
+      "marginToWinnerSec": 7
     },
     {
       "place": 7,
+      "waku": 7,
       "horseId": "2023105467",
       "horseName": "ショーンバローズ",
-      "time": "1:57.7",
-      "margin": 2.2
+      "final3fSec": 42.2,
+      "cornerPassing": null,
+      "marginToWinnerSec": 2.2
     },
     {
       "place": 8,
+      "waku": 2,
       "horseId": "2023104572",
       "horseName": "アルファシーナ",
-      "time": "1:58.1",
-      "margin": 0.55
+      "final3fSec": 41,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.55
     },
     {
       "place": 9,
+      "waku": 3,
       "horseId": "2023104111",
       "horseName": "クレセントゼファー",
-      "time": "1:58.2",
-      "margin": 0.11
+      "final3fSec": 41.8,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 10,
+      "waku": 4,
       "horseId": "2023103144",
       "horseName": "ユイアンゴロー",
-      "time": "1:58.3",
-      "margin": 0.165
+      "final3fSec": 41.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.165
     },
     {
       "place": 11,
+      "waku": 6,
       "horseId": "2023104378",
       "horseName": "カモンレイル",
-      "time": "1:58.4",
-      "margin": 0.11
+      "final3fSec": 41.7,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 12,
+      "waku": 5,
       "horseId": "2023102964",
       "horseName": "タイガーゲイト",
-      "time": "1:59.6",
-      "margin": 7
+      "final3fSec": 42.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": 7
     },
     {
       "place": 13,
+      "waku": 8,
       "horseId": "2023105916",
       "horseName": "オオアバレ",
-      "time": "1:59.7",
-      "margin": 0.12
+      "final3fSec": 44.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 14,
+      "waku": 6,
       "horseId": "2023103527",
       "horseName": "カリドーラ",
-      "time": "2:00.4",
-      "margin": 4
+      "final3fSec": 43.8,
+      "cornerPassing": null,
+      "marginToWinnerSec": 4
     },
     {
       "place": 15,
+      "waku": 8,
       "horseId": "2023100181",
       "horseName": "ダノンクラウディア",
-      "time": "2:09.5",
-      "margin": null
+      "final3fSec": 52.5,
+      "cornerPassing": null,
+      "marginToWinnerSec": null
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          4
+        ],
+        "dividend": 1170
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          4
+        ],
+        "dividend": 210
+      },
+      {
+        "numbers": [
+          7
+        ],
+        "dividend": 130
+      },
+      {
+        "numbers": [
+          8
+        ],
+        "dividend": 120
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          4,
+          7
+        ],
+        "dividend": 1540
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          4,
+          7
+        ],
+        "dividend": 560
+      },
+      {
+        "numbers": [
+          4,
+          8
+        ],
+        "dividend": 480
+      },
+      {
+        "numbers": [
+          7,
+          8
+        ],
+        "dividend": 210
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          4,
+          7,
+          8
+        ],
+        "dividend": 1040
+      }
+    ]
+  }
 }

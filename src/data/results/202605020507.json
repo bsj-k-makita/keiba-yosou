@@ -1,104 +1,204 @@
 {
   "raceId": "202605020507",
-  "fetchedAt": "2026-05-09T10:22:09.753Z",
+  "fetchedAt": "2026-05-17T13:49:36.953Z",
   "places": [
     {
       "place": 1,
+      "waku": 6,
       "horseId": "2022105197",
       "horseName": "マウントバーノン",
-      "time": "2:12.4",
-      "margin": 0
+      "final3fSec": 37.7,
+      "cornerPassing": "8-9-7-6",
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 8,
       "horseId": "2022104419",
       "horseName": "ローズマイスター",
-      "time": "2:12.5",
-      "margin": 0.11
+      "final3fSec": 37.5,
+      "cornerPassing": "12-12-11-8",
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 3,
+      "waku": 7,
       "horseId": "2021100884",
       "horseName": "タケルゴールド",
-      "time": "2:12.9",
-      "margin": 0.55
+      "final3fSec": 37.7,
+      "cornerPassing": "11-10-11-11",
+      "marginToWinnerSec": 0.55
     },
     {
       "place": 4,
+      "waku": 5,
       "horseId": "2022101450",
       "horseName": "ブルージャイアント",
-      "time": "2:13.2",
-      "margin": 2
+      "final3fSec": 39.1,
+      "cornerPassing": "4-2-2-2",
+      "marginToWinnerSec": 2
     },
     {
       "place": 5,
+      "waku": 4,
       "horseId": "2022102991",
       "horseName": "カイトヴィント",
-      "time": "2:13.2",
-      "margin": 0.06
+      "final3fSec": 39.1,
+      "cornerPassing": "2-2-2-1",
+      "marginToWinnerSec": 0.06
     },
     {
       "place": 6,
+      "waku": 1,
       "horseId": "2019103219",
       "horseName": "ブレイクザアイス",
-      "time": "2:13.4",
-      "margin": 0.275
+      "final3fSec": 38.5,
+      "cornerPassing": "8-8-8-8",
+      "marginToWinnerSec": 0.275
     },
     {
       "place": 7,
+      "waku": 5,
       "horseId": "2022105940",
       "horseName": "メイショウコウベ",
-      "time": "2:13.8",
-      "margin": 0.55
+      "final3fSec": 39.4,
+      "cornerPassing": "5-5-4-4",
+      "marginToWinnerSec": 0.55
     },
     {
       "place": 8,
+      "waku": 7,
       "horseId": "2022105337",
       "horseName": "カサビセンス",
-      "time": "2:13.9",
-      "margin": 0.11
+      "final3fSec": 38.9,
+      "cornerPassing": "8-10-8-8",
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 9,
+      "waku": 6,
       "horseId": "2021101201",
       "horseName": "ロードインフェルノ",
-      "time": "2:14.4",
-      "margin": 3
+      "final3fSec": 38.9,
+      "cornerPassing": "13-13-13-12",
+      "marginToWinnerSec": 3
     },
     {
       "place": 10,
+      "waku": 8,
       "horseId": "2022106174",
       "horseName": "ブラックタロー",
-      "time": "2:15.0",
-      "margin": 0.77
+      "final3fSec": 40.6,
+      "cornerPassing": "7-7-4-4",
+      "marginToWinnerSec": 0.77
     },
     {
       "place": 11,
+      "waku": 3,
       "horseId": "2022105506",
       "horseName": "シドニーホバート",
-      "time": "2:15.5",
-      "margin": 0.77
+      "final3fSec": 41.2,
+      "cornerPassing": "1-1-1-3",
+      "marginToWinnerSec": 0.77
     },
     {
       "place": 12,
+      "waku": 3,
       "horseId": "2022106199",
       "horseName": "タマモトリノ",
-      "time": "2:15.8",
-      "margin": 0.33
+      "final3fSec": 41.2,
+      "cornerPassing": "2-4-4-6",
+      "marginToWinnerSec": 0.33
     },
     {
       "place": 13,
+      "waku": 4,
       "horseId": "2022106628",
       "horseName": "ヴォルクメア",
-      "time": "2:16.2",
-      "margin": 0.55
+      "final3fSec": 40.8,
+      "cornerPassing": "13-13-13-12",
+      "marginToWinnerSec": 0.55
     },
     {
       "place": 14,
+      "waku": 2,
       "horseId": "2022104181",
       "horseName": "ミルキープリンセス",
-      "time": "2:16.6",
-      "margin": 0.55
+      "final3fSec": 41.2,
+      "cornerPassing": "5-5-8-12",
+      "marginToWinnerSec": 0.55
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          10
+        ],
+        "dividend": 2790
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          10
+        ],
+        "dividend": 650
+      },
+      {
+        "numbers": [
+          14
+        ],
+        "dividend": 190
+      },
+      {
+        "numbers": [
+          11
+        ],
+        "dividend": 780
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          10,
+          14
+        ],
+        "dividend": 4570
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          10,
+          14
+        ],
+        "dividend": 1430
+      },
+      {
+        "numbers": [
+          10,
+          11
+        ],
+        "dividend": 7370
+      },
+      {
+        "numbers": [
+          11,
+          14
+        ],
+        "dividend": 1560
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          10,
+          11,
+          14
+        ],
+        "dividend": 27010
+      }
+    ]
+  }
 }

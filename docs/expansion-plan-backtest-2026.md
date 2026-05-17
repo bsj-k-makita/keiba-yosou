@@ -1,6 +1,6 @@
 # 競馬予想AI機能拡張計画書：重賞・OP攻略および馬券回収率バックテストの実装
 
-設計図・実装トラッキング用。詳細はリポジトリ内の以下モジュールを参照。
+設計図・実装トラッキング用。
 
 | 領域 | パス |
 |------|------|
@@ -10,26 +10,31 @@
 | 短評生成 | `src/domain/race-evaluation/predictionComment.ts` |
 | 馬券ルール | `src/domain/betting/bettingRules.ts` |
 | 払戻計算 | `src/domain/betting/payoutCalculator.ts` |
-| バックテスト | `src/domain/betting/runBacktest.ts` |
-| CLI | `scripts/run-betting-backtest.mjs` |
+| バックテスト | `src/domain/betting/runBacktest.ts` / `runFullBacktest.ts` |
+| 確定払戻パース | `scripts/lib/parseNetkeibaPayouts.mjs` |
+| 結果取得 | `scripts/fetch-race-results.mjs` |
 | ダッシュボード | `src/app/backtest/page.tsx` |
 
-## 処理フロー（実装版）
+## コマンド
 
-```
-evaluateRace 前: longshotReversalIntrinsicBoost（前走補正）
-  ↓
-第1層 intrinsic + classTriggerMultipliers
-  ↓
-raceAdjustedInput → 相対化 → 文脈・ラップ → finalEvaluationScore
-  ↓
-assignMarks → distributeMarkPortfolio → 4角◎振替 → …
-  ↓
-generatePredictionShortComment
-  ↓
-（別パイプライン）generateTickets → calculateRacePayout → 集計
+```bash
+npm run fetch-results:payouts   # 既存 results/*.json を確定払戻付きで再取得
+npm run backtest:bets           # 回収率サマリ生成 → src/data/backtest_summary.json
 ```
 
-## 払戻データについて
+## フェーズ2（進行中）
 
-現行 `src/data/results/*.json` は着順のみ。馬連・3連複は **単勝オッズからの推定払戻** を使用（`payoutCalculator.ts` の `estimated` フラグ）。公式払戻が取れるようになったら `dividends` を差し替え可能。
+1. **確定払戻** — 完了。`results/*.json` に `payouts: { WIN, SHOW, REN, WREN, TRI }` を格納。
+2. **クラス判定厳密化** — 未着手（`raceGrade` / `classTier`）
+3. **3連複フォーメ改造** — 未着手（2頭軸・☆2列目昇格）
+
+## 確定払戻ベース初回（70レース）
+
+| 券種 | 回収率 | 的中率 |
+|------|--------|--------|
+| 単勝◎ | 55.6% | 14.3% |
+| 馬連◎○▲ | 70.6% | 3.3% |
+| 3連複フォーメ | 4.9% | 0.5% |
+| 合計 | 25.2% | — |
+
+推定払戻時代の馬連26%は過小評価、3連複20.8%は過大評価だった。真のボトルネックは3連複の組み合わせ設計。

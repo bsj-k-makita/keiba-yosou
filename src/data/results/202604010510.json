@@ -1,69 +1,159 @@
 {
   "raceId": "202604010510",
-  "fetchedAt": "2026-05-16T11:45:28.053Z",
+  "fetchedAt": "2026-05-17T13:49:31.256Z",
   "places": [
     {
       "place": 1,
+      "waku": 1,
       "horseId": "2021110012",
       "horseName": "アークドール",
-      "time": "1:54.3",
-      "margin": 0
+      "final3fSec": 36.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 8,
       "horseId": "2022102905",
       "horseName": "ディアウス",
-      "time": "1:54.3",
-      "margin": null
+      "final3fSec": 37.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": null
     },
     {
       "place": 3,
+      "waku": 2,
       "horseId": "2022102965",
       "horseName": "ブレトワルダ",
-      "time": "1:54.4",
-      "margin": 0.165
+      "final3fSec": 37.5,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.165
     },
     {
       "place": 4,
+      "waku": 3,
       "horseId": "2022105486",
       "horseName": "テルアスワッド",
-      "time": "1:54.4",
-      "margin": 0.12
+      "final3fSec": 37.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 5,
+      "waku": 7,
       "horseId": "2020100640",
       "horseName": "プラニスフェリオ",
-      "time": "1:54.5",
-      "margin": 0.12
+      "final3fSec": 37.3,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 6,
+      "waku": 6,
       "horseId": "2022105495",
       "horseName": "マーゴットゲイン",
-      "time": "1:54.5",
-      "margin": 0.06
+      "final3fSec": 37.3,
+      "cornerPassing": "8-7-9",
+      "marginToWinnerSec": 0.06
     },
     {
       "place": 7,
+      "waku": 8,
       "horseId": "2021104321",
       "horseName": "カレンワッツアップ",
-      "time": "1:54.6",
-      "margin": 0.12
+      "final3fSec": 37.7,
+      "cornerPassing": "5-4-4",
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 8,
+      "waku": 4,
       "horseId": "2021101106",
       "horseName": "スマートスピア",
-      "time": "1:54.6",
-      "margin": 0.12
+      "final3fSec": 37.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 9,
+      "waku": 5,
       "horseId": "2022104854",
       "horseName": "ソニックステップ",
-      "time": "1:55.6",
-      "margin": 6
+      "final3fSec": 38.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 6
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          1
+        ],
+        "dividend": 510
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          1
+        ],
+        "dividend": 440
+      },
+      {
+        "numbers": [
+          8
+        ],
+        "dividend": 570
+      },
+      {
+        "numbers": [
+          2
+        ],
+        "dividend": 2240
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          1,
+          8
+        ],
+        "dividend": 2220
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          1,
+          8
+        ],
+        "dividend": 710
+      },
+      {
+        "numbers": [
+          1,
+          2
+        ],
+        "dividend": 2160
+      },
+      {
+        "numbers": [
+          2,
+          8
+        ],
+        "dividend": 2910
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          1,
+          2,
+          8
+        ],
+        "dividend": 18840
+      }
+    ]
+  }
 }

@@ -1,83 +1,177 @@
 {
   "raceId": "202608030702",
-  "fetchedAt": "2026-05-16T11:45:37.629Z",
+  "fetchedAt": "2026-05-17T13:49:58.652Z",
   "places": [
     {
       "place": 1,
+      "waku": 1,
       "horseId": "2023103315",
       "horseName": "ゴールドコット",
-      "time": "1:53.4",
-      "margin": 0
+      "final3fSec": 37.1,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 7,
       "horseId": "2023103441",
       "horseName": "レッドフロイデ",
-      "time": "1:53.5",
-      "margin": 1
+      "final3fSec": 37.2,
+      "cornerPassing": null,
+      "marginToWinnerSec": 1
     },
     {
       "place": 3,
+      "waku": 6,
       "horseId": "2023101607",
       "horseName": "ダイメイクマモト",
-      "time": "1:54.0",
-      "margin": 3
+      "final3fSec": 37.4,
+      "cornerPassing": null,
+      "marginToWinnerSec": 3
     },
     {
       "place": 4,
+      "waku": 7,
       "horseId": "2023104172",
       "horseName": "リリーサンダー",
-      "time": "1:54.3",
-      "margin": 2
+      "final3fSec": 38.1,
+      "cornerPassing": null,
+      "marginToWinnerSec": 2
     },
     {
       "place": 5,
+      "waku": 3,
       "horseId": "2023100945",
       "horseName": "サンライズナスカ",
-      "time": "1:54.7",
-      "margin": 2
+      "final3fSec": 38.1,
+      "cornerPassing": null,
+      "marginToWinnerSec": 2
     },
     {
       "place": 6,
+      "waku": 5,
       "horseId": "2023104747",
       "horseName": "チアフルラン",
-      "time": "1:54.7",
-      "margin": 0.06
+      "final3fSec": 37.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.06
     },
     {
       "place": 7,
+      "waku": 4,
       "horseId": "2023101742",
       "horseName": "ホワイトラバーズ",
-      "time": "1:54.7",
-      "margin": 0.06
+      "final3fSec": 37.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.06
     },
     {
       "place": 8,
+      "waku": 8,
       "horseId": "2023104499",
       "horseName": "ビナハイバン",
-      "time": "1:54.9",
-      "margin": 1
+      "final3fSec": 38,
+      "cornerPassing": null,
+      "marginToWinnerSec": 1
     },
     {
       "place": 9,
+      "waku": 2,
       "horseId": "2023104403",
       "horseName": "ハギノギフテッド",
-      "time": "1:55.4",
-      "margin": 3
+      "final3fSec": 38.8,
+      "cornerPassing": null,
+      "marginToWinnerSec": 3
     },
     {
       "place": 10,
+      "waku": 6,
       "horseId": "2023102369",
       "horseName": "フロムザムーン",
-      "time": "1:55.6",
-      "margin": 0.33
+      "final3fSec": 38.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.33
     },
     {
       "place": 11,
+      "waku": 8,
       "horseId": "2023106724",
       "horseName": "サンロンブル",
-      "time": "1:56.8",
-      "margin": 7
+      "final3fSec": 40.3,
+      "cornerPassing": null,
+      "marginToWinnerSec": 7
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          1
+        ],
+        "dividend": 2570
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          1
+        ],
+        "dividend": 280
+      },
+      {
+        "numbers": [
+          9
+        ],
+        "dividend": 110
+      },
+      {
+        "numbers": [
+          6
+        ],
+        "dividend": 140
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          1,
+          9
+        ],
+        "dividend": 1480
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          1,
+          9
+        ],
+        "dividend": 480
+      },
+      {
+        "numbers": [
+          1,
+          6
+        ],
+        "dividend": 1020
+      },
+      {
+        "numbers": [
+          6,
+          9
+        ],
+        "dividend": 170
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          1,
+          6,
+          9
+        ],
+        "dividend": 1560
+      }
+    ]
+  }
 }

@@ -1,69 +1,159 @@
 {
   "raceId": "202605020709",
-  "fetchedAt": "2026-05-16T11:45:34.675Z",
+  "fetchedAt": "2026-05-17T13:49:47.253Z",
   "places": [
     {
       "place": 1,
+      "waku": 7,
       "horseId": "2022101227",
       "horseName": "ヴォンフレ",
-      "time": "1:46.0",
-      "margin": 0
+      "final3fSec": 33.1,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 3,
       "horseId": "2022105038",
       "horseName": "シャンソンドール",
-      "time": "1:46.1",
-      "margin": 1
+      "final3fSec": 33.3,
+      "cornerPassing": null,
+      "marginToWinnerSec": 1
     },
     {
       "place": 3,
+      "waku": 5,
       "horseId": "2022105317",
       "horseName": "ミーントゥビー",
-      "time": "1:46.4",
-      "margin": 0.33
+      "final3fSec": 32.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.33
     },
     {
       "place": 4,
+      "waku": 8,
       "horseId": "2021102597",
       "horseName": "ラビットアイ",
-      "time": "1:46.4",
-      "margin": 0.12
+      "final3fSec": 33.3,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 5,
+      "waku": 1,
       "horseId": "2022104784",
       "horseName": "ルクスジニア",
-      "time": "1:46.4",
-      "margin": 0.06
+      "final3fSec": 33.3,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.06
     },
     {
       "place": 6,
+      "waku": 6,
       "horseId": "2022104748",
       "horseName": "ウィルサヴァイブ",
-      "time": "1:46.4",
-      "margin": null
+      "final3fSec": 33.1,
+      "cornerPassing": null,
+      "marginToWinnerSec": null
     },
     {
       "place": 7,
+      "waku": 2,
       "horseId": "2022102295",
       "horseName": "マドモアゼルアスク",
-      "time": "1:46.6",
-      "margin": 0.275
+      "final3fSec": 33.3,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.275
     },
     {
       "place": 8,
+      "waku": 4,
       "horseId": "2021106826",
       "horseName": "レッセパッセ",
-      "time": "1:46.7",
-      "margin": 0.12
+      "final3fSec": 33.3,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 9,
+      "waku": 8,
       "horseId": "2021105863",
       "horseName": "ルージュスエルテ",
-      "time": "1:47.9",
-      "margin": 7
+      "final3fSec": 34.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 7
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          7
+        ],
+        "dividend": 8560
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          7
+        ],
+        "dividend": 930
+      },
+      {
+        "numbers": [
+          3
+        ],
+        "dividend": 110
+      },
+      {
+        "numbers": [
+          5
+        ],
+        "dividend": 150
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          3,
+          7
+        ],
+        "dividend": 5240
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          3,
+          7
+        ],
+        "dividend": 1340
+      },
+      {
+        "numbers": [
+          5,
+          7
+        ],
+        "dividend": 3870
+      },
+      {
+        "numbers": [
+          3,
+          5
+        ],
+        "dividend": 240
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          3,
+          5,
+          7
+        ],
+        "dividend": 6740
+      }
+    ]
+  }
 }

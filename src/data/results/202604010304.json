@@ -1,83 +1,177 @@
 {
   "raceId": "202604010304",
-  "fetchedAt": "2026-05-09T10:21:59.833Z",
+  "fetchedAt": "2026-05-17T13:49:19.457Z",
   "places": [
     {
       "place": 1,
+      "waku": 8,
       "horseId": "2018105213",
       "horseName": "ルドヴィクス",
-      "time": "3:10.9",
-      "margin": 0
+      "final3fSec": 13.2,
+      "cornerPassing": "2-2-2-2",
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 6,
       "horseId": "2020110020",
       "horseName": "コレクテイニア",
-      "time": "3:11.4",
-      "margin": 3
+      "final3fSec": 13.2,
+      "cornerPassing": "11-9-7-6",
+      "marginToWinnerSec": 3
     },
     {
       "place": 3,
+      "waku": 2,
       "horseId": "2019100718",
       "horseName": "スコラーリ",
-      "time": "3:11.6",
-      "margin": 0.275
+      "final3fSec": 13.3,
+      "cornerPassing": "8-7-4-4",
+      "marginToWinnerSec": 0.275
     },
     {
       "place": 4,
+      "waku": 6,
       "horseId": "2022102821",
       "horseName": "ロードリベラシオン",
-      "time": "3:11.7",
-      "margin": 0.11
+      "final3fSec": 13.3,
+      "cornerPassing": "1-1-1-1",
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 5,
+      "waku": 8,
       "horseId": "2020103276",
       "horseName": "バルサムノート",
-      "time": "3:11.8",
-      "margin": 0.11
+      "final3fSec": 13.3,
+      "cornerPassing": "4-3-3-3",
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 6,
+      "waku": 7,
       "horseId": "2021104943",
       "horseName": "ジーティーオウジャ",
-      "time": "3:11.9",
-      "margin": 0.11
+      "final3fSec": 13.3,
+      "cornerPassing": "9-9-7-5",
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 7,
+      "waku": 7,
       "horseId": "2020101268",
       "horseName": "モズバンディット",
-      "time": "3:12.8",
-      "margin": 5
+      "final3fSec": 13.3,
+      "cornerPassing": "6-6-9-9",
+      "marginToWinnerSec": 5
     },
     {
       "place": 8,
+      "waku": 4,
       "horseId": "2021104112",
       "horseName": "ローンウルフ",
-      "time": "3:14.1",
-      "margin": 8
+      "final3fSec": 13.4,
+      "cornerPassing": "3-3-6-8",
+      "marginToWinnerSec": 8
     },
     {
       "place": 9,
+      "waku": 5,
       "horseId": "2019100135",
       "horseName": "タイセイジャスパー",
-      "time": "3:16.0",
-      "margin": null
+      "final3fSec": 13.6,
+      "cornerPassing": "5-5-4-6",
+      "marginToWinnerSec": null
     },
     {
       "place": 10,
+      "waku": 1,
       "horseId": "2021104280",
       "horseName": "テクネチウム",
-      "time": "3:17.2",
-      "margin": 7
+      "final3fSec": 13.6,
+      "cornerPassing": "6-7-10-11",
+      "marginToWinnerSec": 7
     },
     {
       "place": 11,
+      "waku": 3,
       "horseId": "2017105439",
       "horseName": "キングサーガ",
-      "time": "3:18.7",
-      "margin": 9
+      "final3fSec": 13.8,
+      "cornerPassing": "9-9-11-10",
+      "marginToWinnerSec": 9
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          11
+        ],
+        "dividend": 930
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          11
+        ],
+        "dividend": 240
+      },
+      {
+        "numbers": [
+          7
+        ],
+        "dividend": 120
+      },
+      {
+        "numbers": [
+          2
+        ],
+        "dividend": 150
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          7,
+          11
+        ],
+        "dividend": 1310
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          7,
+          11
+        ],
+        "dividend": 490
+      },
+      {
+        "numbers": [
+          2,
+          11
+        ],
+        "dividend": 500
+      },
+      {
+        "numbers": [
+          2,
+          7
+        ],
+        "dividend": 280
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          2,
+          7,
+          11
+        ],
+        "dividend": 1330
+      }
+    ]
+  }
 }

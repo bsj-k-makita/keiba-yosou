@@ -1,90 +1,186 @@
 {
   "raceId": "202605020710",
-  "fetchedAt": "2026-05-16T11:45:35.365Z",
+  "fetchedAt": "2026-05-17T13:49:47.849Z",
   "places": [
     {
       "place": 1,
+      "waku": 6,
       "horseId": "2022100905",
       "horseName": "メリディアンスター",
-      "time": "1:23.9",
-      "margin": 0
+      "final3fSec": 35,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 5,
       "horseId": "2022110130",
       "horseName": "ベラジオワールド",
-      "time": "1:24.0",
-      "margin": 1
+      "final3fSec": 35.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": 1
     },
     {
       "place": 3,
+      "waku": 8,
       "horseId": "2022110152",
       "horseName": "レーティッシュ",
-      "time": "1:24.1",
-      "margin": 0.11
+      "final3fSec": 35.4,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 4,
+      "waku": 8,
       "horseId": "2022100702",
       "horseName": "ポッドベル",
-      "time": "1:24.2",
-      "margin": 0.11
+      "final3fSec": 35.2,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 5,
+      "waku": 2,
       "horseId": "2022101863",
       "horseName": "ドントゥザムーン",
-      "time": "1:24.5",
-      "margin": 0.33
+      "final3fSec": 36.3,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.33
     },
     {
       "place": 6,
+      "waku": 5,
       "horseId": "2022106328",
       "horseName": "モリノアミーゴ",
-      "time": "1:25.0",
-      "margin": 3
+      "final3fSec": 35.8,
+      "cornerPassing": null,
+      "marginToWinnerSec": 3
     },
     {
       "place": 7,
+      "waku": 6,
       "horseId": "2022106011",
       "horseName": "ホウオウゴールド",
-      "time": "1:25.1",
-      "margin": 0.165
+      "final3fSec": 36,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.165
     },
     {
       "place": 8,
+      "waku": 7,
       "horseId": "2020103007",
       "horseName": "エンファサイズ",
-      "time": "1:25.2",
-      "margin": 0.11
+      "final3fSec": 36.5,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 9,
+      "waku": 3,
       "horseId": "2020105813",
       "horseName": "マーゴットレーヴ",
-      "time": "1:25.4",
-      "margin": 1
+      "final3fSec": 36,
+      "cornerPassing": null,
+      "marginToWinnerSec": 1
     },
     {
       "place": 10,
+      "waku": 7,
       "horseId": "2021101660",
       "horseName": "アンクエンチャブル",
-      "time": "1:26.0",
-      "margin": 0.77
+      "final3fSec": 37.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.77
     },
     {
       "place": 11,
+      "waku": 1,
       "horseId": "2022101572",
       "horseName": "プライベートアイズ",
-      "time": "1:26.2",
-      "margin": 0.33
+      "final3fSec": 37.2,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.33
     },
     {
       "place": 12,
+      "waku": 4,
       "horseId": "2021103161",
       "horseName": "トーレ",
-      "time": "1:26.2",
-      "margin": 0.06
+      "final3fSec": 37.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.06
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          8
+        ],
+        "dividend": 290
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          8
+        ],
+        "dividend": 140
+      },
+      {
+        "numbers": [
+          6
+        ],
+        "dividend": 140
+      },
+      {
+        "numbers": [
+          12
+        ],
+        "dividend": 130
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          6,
+          8
+        ],
+        "dividend": 1050
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          6,
+          8
+        ],
+        "dividend": 400
+      },
+      {
+        "numbers": [
+          8,
+          12
+        ],
+        "dividend": 290
+      },
+      {
+        "numbers": [
+          6,
+          12
+        ],
+        "dividend": 290
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          6,
+          8,
+          12
+        ],
+        "dividend": 1090
+      }
+    ]
+  }
 }

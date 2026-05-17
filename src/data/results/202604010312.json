@@ -1,90 +1,186 @@
 {
   "raceId": "202604010312",
-  "fetchedAt": "2026-05-09T10:22:04.922Z",
+  "fetchedAt": "2026-05-17T13:49:24.781Z",
   "places": [
     {
       "place": 1,
+      "waku": 8,
       "horseId": "2022106924",
       "horseName": "ハイクオリティ",
-      "time": "1:54.8",
-      "margin": 0
+      "final3fSec": 40.9,
+      "cornerPassing": "1-1-1-1",
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 6,
       "horseId": "2022104723",
       "horseName": "カレンラップスター",
-      "time": "1:55.2",
-      "margin": 0.55
+      "final3fSec": 40.1,
+      "cornerPassing": "9-8-7-6",
+      "marginToWinnerSec": 0.55
     },
     {
       "place": 3,
+      "waku": 3,
       "horseId": "2021103150",
       "horseName": "タルタロス",
-      "time": "1:55.4",
-      "margin": 0.165
+      "final3fSec": 40,
+      "cornerPassing": "12-12-9-9",
+      "marginToWinnerSec": 0.165
     },
     {
       "place": 4,
+      "waku": 1,
       "horseId": "2021102294",
       "horseName": "チュウワダイオウ",
-      "time": "1:55.9",
-      "margin": 3
+      "final3fSec": 41.6,
+      "cornerPassing": "5-4-3-3",
+      "marginToWinnerSec": 3
     },
     {
       "place": 5,
+      "waku": 2,
       "horseId": "2022105903",
       "horseName": "トーアケルキラ",
-      "time": "1:56.0",
-      "margin": 0.11
+      "final3fSec": 41.5,
+      "cornerPassing": "5-6-5-4",
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 6,
+      "waku": 4,
       "horseId": "2022106312",
       "horseName": "キュードス",
-      "time": "1:56.2",
-      "margin": 0.275
+      "final3fSec": 42,
+      "cornerPassing": "3-3-2-2",
+      "marginToWinnerSec": 0.275
     },
     {
       "place": 7,
+      "waku": 7,
       "horseId": "2022101814",
       "horseName": "ナムラジミー",
-      "time": "1:56.6",
-      "margin": 2
+      "final3fSec": 41.6,
+      "cornerPassing": "8-8-7-8",
+      "marginToWinnerSec": 2
     },
     {
       "place": 8,
+      "waku": 7,
       "horseId": "2019100689",
       "horseName": "リリーアロー",
-      "time": "1:56.6",
-      "margin": 0.06
+      "final3fSec": 40.6,
+      "cornerPassing": "10-10-11-10",
+      "marginToWinnerSec": 0.06
     },
     {
       "place": 9,
+      "waku": 6,
       "horseId": "2022102486",
       "horseName": "キタノブレイク",
-      "time": "1:57.3",
-      "margin": 4
+      "final3fSec": 41.6,
+      "cornerPassing": "7-7-10-10",
+      "marginToWinnerSec": 4
     },
     {
       "place": 10,
+      "waku": 5,
       "horseId": "2019106972",
       "horseName": "ロストボール",
-      "time": "1:57.6",
-      "margin": 2
+      "final3fSec": 41,
+      "cornerPassing": "11-11-12-12",
+      "marginToWinnerSec": 2
     },
     {
       "place": 11,
+      "waku": 8,
       "horseId": "2021105993",
       "horseName": "マテンロウミラクル",
-      "time": "1:58.2",
-      "margin": 0.77
+      "final3fSec": 43.7,
+      "cornerPassing": "4-4-5-6",
+      "marginToWinnerSec": 0.77
     },
     {
       "place": 12,
+      "waku": 5,
       "horseId": "2022101578",
       "horseName": "ブラックジジ",
-      "time": "1:58.2",
-      "margin": null
+      "final3fSec": 43.8,
+      "cornerPassing": "2-2-3-4",
+      "marginToWinnerSec": null
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          11
+        ],
+        "dividend": 170
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          11
+        ],
+        "dividend": 110
+      },
+      {
+        "numbers": [
+          8
+        ],
+        "dividend": 160
+      },
+      {
+        "numbers": [
+          3
+        ],
+        "dividend": 250
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          8,
+          11
+        ],
+        "dividend": 600
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          8,
+          11
+        ],
+        "dividend": 280
+      },
+      {
+        "numbers": [
+          3,
+          11
+        ],
+        "dividend": 490
+      },
+      {
+        "numbers": [
+          3,
+          8
+        ],
+        "dividend": 1140
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          3,
+          8,
+          11
+        ],
+        "dividend": 2100
+      }
+    ]
+  }
 }

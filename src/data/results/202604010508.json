@@ -1,69 +1,159 @@
 {
   "raceId": "202604010508",
-  "fetchedAt": "2026-05-16T11:45:26.628Z",
+  "fetchedAt": "2026-05-17T13:49:30.110Z",
   "places": [
     {
       "place": 1,
+      "waku": 8,
       "horseId": "2020104748",
       "horseName": "ファルコンミノル",
-      "time": "1:53.7",
-      "margin": 0
+      "final3fSec": 38.1,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 7,
       "horseId": "2022107342",
       "horseName": "ザラタン",
-      "time": "1:54.1",
-      "margin": 0.55
+      "final3fSec": 38.2,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.55
     },
     {
       "place": 3,
+      "waku": 5,
       "horseId": "2022103242",
       "horseName": "ダノンヴェステル",
-      "time": "1:54.6",
-      "margin": 3
+      "final3fSec": 39.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": 3
     },
     {
       "place": 4,
+      "waku": 6,
       "horseId": "2022105241",
       "horseName": "ソナタン",
-      "time": "1:55.4",
-      "margin": 5
+      "final3fSec": 40.2,
+      "cornerPassing": null,
+      "marginToWinnerSec": 5
     },
     {
       "place": 5,
+      "waku": 3,
       "horseId": "2021107012",
       "horseName": "キングプロフィット",
-      "time": "1:55.5",
-      "margin": 0.11
+      "final3fSec": 38.5,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.11
     },
     {
       "place": 6,
+      "waku": 2,
       "horseId": "2021103010",
       "horseName": "オウケンベリー",
-      "time": "1:55.5",
-      "margin": 0.12
+      "final3fSec": 39.3,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 7,
+      "waku": 1,
       "horseId": "2022102529",
       "horseName": "ボーヌロマネ",
-      "time": "1:55.6",
-      "margin": 0.12
+      "final3fSec": 38,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     },
     {
       "place": 8,
+      "waku": 8,
       "horseId": "2021104362",
       "horseName": "イーサンハンター",
-      "time": "1:55.9",
-      "margin": 0.385
+      "final3fSec": 40.2,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.385
     },
     {
       "place": 9,
+      "waku": 4,
       "horseId": "2021101591",
       "horseName": "ファーマシャイン",
-      "time": "1:55.9",
-      "margin": 0.12
+      "final3fSec": 38.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.12
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          9
+        ],
+        "dividend": 230
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          9
+        ],
+        "dividend": 110
+      },
+      {
+        "numbers": [
+          7
+        ],
+        "dividend": 150
+      },
+      {
+        "numbers": [
+          5
+        ],
+        "dividend": 110
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          7,
+          9
+        ],
+        "dividend": 1520
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          7,
+          9
+        ],
+        "dividend": 270
+      },
+      {
+        "numbers": [
+          5,
+          9
+        ],
+        "dividend": 120
+      },
+      {
+        "numbers": [
+          5,
+          7
+        ],
+        "dividend": 290
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          5,
+          7,
+          9
+        ],
+        "dividend": 540
+      }
+    ]
+  }
 }

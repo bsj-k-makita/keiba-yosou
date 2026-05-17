@@ -22,12 +22,13 @@ export default function BacktestDashboardPage() {
       </p>
       <h1>馬券回収率バックテスト</h1>
       <p className="app__lead">
-        定型ルール（単勝◎ / 馬連◎○▲ / 3連複◎-○▲-△☆）の一括検証結果。馬連・3連複は単勝オッズからの推定払戻です。
+        定型ルール（単勝◎ / 馬連◎○▲ / 3連複◎-○▲-△☆）の一括検証結果。馬連・3連複は netkeiba 確定払戻（未取得時は払戻0）。
       </p>
 
       {summary == null && (
         <p style={{ color: "var(--color-danger, #c44)" }}>
-          backtest_summary.json がありません。ターミナルで{" "}
+          backtest_summary.json がありません。{" "}
+          <code>npm run fetch-results:payouts</code> のあと{" "}
           <code>npm run backtest:bets</code> を実行してください。
         </p>
       )}
@@ -75,7 +76,7 @@ export default function BacktestDashboardPage() {
                       <td>{row.payout.toLocaleString()}</td>
                       <td>{row.rate}%</td>
                       <td>{row.accuracy}%</td>
-                      <td>{row.estimatedPayout ? "推定払戻" : "単勝実オッズ"}</td>
+                      <td>{row.estimatedPayout ? "払戻データなし" : "確定払戻"}</td>
                     </tr>
                   );
                 })}

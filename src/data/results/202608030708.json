@@ -1,48 +1,126 @@
 {
   "raceId": "202608030708",
-  "fetchedAt": "2026-05-16T11:45:41.969Z",
+  "fetchedAt": "2026-05-17T13:50:02.249Z",
   "places": [
     {
       "place": 1,
+      "waku": 5,
       "horseId": "2019105654",
       "horseName": "シホノスペランツァ",
-      "time": "4:33.6",
-      "margin": 0
+      "final3fSec": 13.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0
     },
     {
       "place": 2,
+      "waku": 6,
       "horseId": "2021102482",
       "horseName": "ゴールデンスロープ",
-      "time": "4:34.1",
-      "margin": 3
+      "final3fSec": 13.9,
+      "cornerPassing": null,
+      "marginToWinnerSec": 3
     },
     {
       "place": 3,
+      "waku": 3,
       "horseId": "2018105731",
       "horseName": "メイショウアツイタ",
-      "time": "4:34.8",
-      "margin": 4
+      "final3fSec": 14,
+      "cornerPassing": null,
+      "marginToWinnerSec": 4
     },
     {
       "place": 4,
+      "waku": 4,
       "horseId": "2018103677",
       "horseName": "ネビーイーム",
-      "time": "4:35.0",
-      "margin": 0.275
+      "final3fSec": 14,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.275
     },
     {
       "place": 5,
+      "waku": 2,
       "horseId": "2019105578",
       "horseName": "ヴラディア",
-      "time": "4:35.5",
-      "margin": 0.77
+      "final3fSec": 14,
+      "cornerPassing": null,
+      "marginToWinnerSec": 0.77
     },
     {
       "place": 6,
+      "waku": 1,
       "horseId": "2021105654",
       "horseName": "ダノンロッキー",
-      "time": "4:46.3",
-      "margin": null
+      "final3fSec": 14.6,
+      "cornerPassing": null,
+      "marginToWinnerSec": null
     }
-  ]
+  ],
+  "payouts": {
+    "WIN": [
+      {
+        "numbers": [
+          5
+        ],
+        "dividend": 370
+      }
+    ],
+    "SHOW": [
+      {
+        "numbers": [
+          5
+        ],
+        "dividend": 180
+      },
+      {
+        "numbers": [
+          6
+        ],
+        "dividend": 470
+      }
+    ],
+    "REN": [
+      {
+        "numbers": [
+          5,
+          6
+        ],
+        "dividend": 1630
+      }
+    ],
+    "WREN": [
+      {
+        "numbers": [
+          5,
+          6
+        ],
+        "dividend": 580
+      },
+      {
+        "numbers": [
+          3,
+          5
+        ],
+        "dividend": 430
+      },
+      {
+        "numbers": [
+          3,
+          6
+        ],
+        "dividend": 670
+      }
+    ],
+    "TRI": [
+      {
+        "numbers": [
+          3,
+          5,
+          6
+        ],
+        "dividend": 2090
+      }
+    ]
+  }
 }

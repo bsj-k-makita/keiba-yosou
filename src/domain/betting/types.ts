@@ -1,4 +1,7 @@
 import type { RaceClassBucket } from "../race-evaluation/raceClassLevel";
+import type { RaceOfficialPayouts } from "../../lib/race-data/raceEvaluationTypes";
+
+export type { RaceOfficialPayouts };
 
 export type BetTicketType = "WIN" | "MAIN_LINE" | "TRIFECTA_FORM";
 
@@ -47,13 +50,8 @@ export type RacePayoutInput = {
   classLevel: RaceClassBucket;
   /** 1着〜の馬番（ゲート番号） */
   finishOrder: number[];
-  /** 馬番 → 単勝オッズ（100円あたり払戻の元） */
+  /** 馬番 → 単勝オッズ（公式払戻が無い単勝のみフォールバック） */
   winOddsByNumber: Map<number, number>;
-  /** 公式払戻があれば優先 */
-  dividends?: Partial<
-    Record<
-      BetTicketType,
-      { combinations: number[][]; payoutPer100: number }[]
-    >
-  >;
+  /** netkeiba 確定払戻（あれば馬連・3連複の推定を廃止） */
+  officialPayouts?: RaceOfficialPayouts;
 };
