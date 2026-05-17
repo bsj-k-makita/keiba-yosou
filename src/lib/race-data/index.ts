@@ -7,6 +7,7 @@ export {
   getRaceIndex,
   getRaceResultById,
   fetchRaceResultByApi,
+  ensureRaceResultFetched,
 } from "./raceDataRepository";
 export {
   raceDataToHorses,

@@ -12,6 +12,7 @@ import {
   applyCornerLeadFavoritePromotion,
   applyStabilityRescueMarks,
 } from "./markAssigner";
+import { hasRequiredTopMarks } from "./markHitAnalysis";
 import { generateScoreReason } from "./reasonGenerator";
 import {
   baseAbilityCore,
@@ -721,6 +722,11 @@ export function evaluateRace(
     if (r.mark === "△" && r.buyLabel === BUY_LABELS.DISMISS) {
       r.buyLabel = BUY_LABELS.GROUP;
     }
+  }
+
+  // 条件変更・構造消しの直後に ◎○▲ が欠けるケースの最終ガード
+  if (!hasRequiredTopMarks(results, dismissIds) && results.length >= 3) {
+    assignCompleteMarks(results, dismissIds);
   }
 
   for (const r of results) {

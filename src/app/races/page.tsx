@@ -2,15 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   getHorsesFromRaceData,
-  fetchRaceResultByApi,
   getRaceEvaluationById,
   getRaceIndex,
+  ensureRaceResultFetched,
   getRaceResultById,
-  type RaceResultPlace,
   type RaceIndexItem,
   type RaceGradeLabel,
 } from "../../lib/race-data";
 import { buildRacePreviewDataFromRace, evaluateRace, type RacePreviewBadgeType } from "../../domain/race-evaluation";
+import { analyzeMarkHits } from "../../domain/race-evaluation/markHitAnalysis";
+import { ensureFrontendDisplayMarks } from "../../lib/race-display/ensureFrontendDisplayMarks";
 import { NetkeibaRaceLinks } from "../../components/race/NetkeibaRaceLinks";
 
 function surfaceBadgeClass(surface: string): string {
@@ -126,20 +127,19 @@ async function computeListHitStats(rows: RaceIndexItem[], limit = 30): Promise<L
     const evalData = await getRaceEvaluationById(row.raceId);
     if (evalData == null) continue;
     const horses = getHorsesFromRaceData(evalData);
-    const scored = evaluateRace(horses, evalData.condition);
-    const top3 = new Set(
-      result.places
-        .filter((p: RaceResultPlace) => p.place >= 1 && p.place <= 3)
-        .map((p: RaceResultPlace) => p.horseId)
-        .filter((id: string) => id.length > 0),
+    const scored = ensureFrontendDisplayMarks(
+      evaluateRace(horses, evalData.condition),
+      horses,
+      evalData.condition,
     );
-    if (top3.size === 0) continue;
+    const { winners, rows } = analyzeMarkHits(result.places, scored, horses);
+    if (winners.size === 0) continue;
 
     for (const m of marks) {
-      const picked = scored.find((s) => s.mark === m.mark);
-      if (!picked) continue;
+      const row = rows.find((r) => r.mark === m.mark);
+      if (!row) continue;
       m.total += 1;
-      if (top3.has(picked.horseId)) m.hit += 1;
+      if (row.hit) m.hit += 1;
     }
 
     sampleSize += 1;
@@ -250,6 +250,25 @@ export function RacesListPage() {
     return rows.filter((r) => r.date === activeDate);
   }, [rows, activeDate]);
 
+  /** 選択開催日のレース結果をバックグラウンドで自動取得 */
+  useEffect(() => {
+    if (racesOnActiveDate.length === 0) return;
+    let cancelled = false;
+    void (async () => {
+      for (const r of racesOnActiveDate) {
+        if (cancelled) return;
+        await ensureRaceResultFetched(r.raceId);
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+      if (cancelled || rows == null) return;
+      const stats = await computeListHitStats(rows, 30);
+      if (!cancelled) setHitStats(stats);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeDate, racesOnActiveDate, rows]);
+
   const venues = useMemo(() => venueGroups.map((g) => g.venue), [venueGroups]);
   const effectiveVenue = activeVenue != null && venues.includes(activeVenue)
     ? activeVenue
@@ -268,7 +287,7 @@ export function RacesListPage() {
     setBulkMessage(null);
     const settled = await Promise.allSettled(
       racesOnActiveDate.map(async (r) => {
-        const data = await fetchRaceResultByApi(r.raceId);
+        const data = await ensureRaceResultFetched(r.raceId);
         return data != null;
       }),
     );
@@ -302,7 +321,11 @@ export function RacesListPage() {
             const race = await getRaceEvaluationById(raceId);
             if (race == null) return null;
             const horses = getHorsesFromRaceData(race);
-            const results = evaluateRace(horses, race.condition);
+            const results = ensureFrontendDisplayMarks(
+              evaluateRace(horses, race.condition),
+              horses,
+              race.condition,
+            );
             const preview = buildRacePreviewDataFromRace(horses, results);
             if (!preview.hasGapSignals) return null;
             return [

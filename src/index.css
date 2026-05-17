@@ -3856,7 +3856,19 @@ samp {
 .result-panel__mark-label {
   font-size: var(--font-size-body);
   color: var(--c-text-muted);
+  width: 3em;
+  flex-shrink: 0;
+}
+
+.result-panel__mark-horse {
   flex: 1;
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  color: var(--c-text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .result-panel__mark-result {

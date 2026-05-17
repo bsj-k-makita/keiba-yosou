@@ -14,6 +14,7 @@ export * from "./finalScoring";
 export * from "./weightResolver";
 export * from "./reasonGenerator";
 export * from "./markAssigner";
+export * from "./markHitAnalysis";
 export * from "./typeMatcher";
 export * from "./raceTargeting";
 export * from "./abilityGrades";

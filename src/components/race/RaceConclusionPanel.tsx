@@ -25,27 +25,10 @@ function conclusionShortTitle(condition: RaceCondition): string {
   return RACE_TYPE_SHORT.BALANCED;
 }
 
-function pickConclusionTop3(results: HorseScoreResult[]): [HorseScoreResult | undefined, HorseScoreResult | undefined, HorseScoreResult | undefined] {
-  const sorted = [...results].sort((a, b) => {
-    const ra = a.finalRank ?? a.adjustedRank ?? 99;
-    const rb = b.finalRank ?? b.adjustedRank ?? 99;
-    if (ra !== rb) return ra - rb;
-    return b.finalEvaluationScore - a.finalEvaluationScore;
-  });
-  const used = new Set<string>();
-  const pick = (mark: "◎" | "○" | "▲"): HorseScoreResult | undefined => {
-    const byMark = sorted.find((r) => r.mark === mark && !used.has(r.horseId));
-    if (byMark) {
-      used.add(byMark.horseId);
-      return byMark;
-    }
-    const fallback = sorted.find((r) => !used.has(r.horseId));
-    if (fallback) {
-      used.add(fallback.horseId);
-      return fallback;
-    }
-    return undefined;
-  };
+function pickConclusionTop3(
+  results: HorseScoreResult[],
+): [HorseScoreResult | undefined, HorseScoreResult | undefined, HorseScoreResult | undefined] {
+  const pick = (mark: "◎" | "○" | "▲") => results.find((r) => r.mark === mark);
   return [pick("◎"), pick("○"), pick("▲")];
 }
 

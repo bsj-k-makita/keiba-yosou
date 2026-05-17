@@ -130,6 +130,17 @@ export async function getRaceResultById(
 /**
  * API 経由で結果を即時取得し、メモリ・localStorage に保存する。
  */
+/**
+ * キャッシュ（JSON / localStorage）があれば返し、なければ API で自動取得する。
+ */
+export async function ensureRaceResultFetched(raceId: string): Promise<RaceResultData | null> {
+  const cached = await getRaceResultById(raceId);
+  if (cached != null && cached.places.length >= 3) {
+    return cached;
+  }
+  return fetchRaceResultByApi(raceId);
+}
+
 export async function fetchRaceResultByApi(raceId: string): Promise<RaceResultData | null> {
   if (!/^\d{12}$/.test(raceId)) return null;
   const inFlight = resultFetchInFlight.get(raceId);

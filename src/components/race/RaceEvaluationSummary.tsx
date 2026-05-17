@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { evaluateRace, type HorseAbility, type HorseScoreResult, type RaceCondition } from "../../domain/race-evaluation";
+import { analyzeMarkHits } from "../../domain/race-evaluation/markHitAnalysis";
+import { ensureFrontendDisplayMarks } from "../../lib/race-display/ensureFrontendDisplayMarks";
 import { getDismissContextLine } from "../../domain/race-evaluation/reasonGenerator";
 import { describeTargetingPlaceholder } from "../../domain/race-evaluation/raceTargeting";
 import type { SameTypePeerResult } from "../../domain/race-evaluation/typeMatcher";
@@ -67,20 +69,19 @@ async function computeHitStats(limit: number, currentRaceId: string): Promise<Hi
     const evalData = await getRaceEvaluationById(row.raceId);
     if (evalData == null) continue;
     const horses = getHorsesFromRaceData(evalData);
-    const scored = evaluateRace(horses, evalData.condition);
-    const top3 = new Set(
-      result.places
-        .filter((p) => p.place >= 1 && p.place <= 3)
-        .map((p) => p.horseId)
-        .filter((id) => id.length > 0),
+    const scored = ensureFrontendDisplayMarks(
+      evaluateRace(horses, evalData.condition),
+      horses,
+      evalData.condition,
     );
-    if (top3.size === 0) continue;
+    const { winners, rows } = analyzeMarkHits(result.places, scored, horses);
+    if (winners.size === 0) continue;
 
     for (const rate of markRates) {
-      const picked = scored.find((s) => s.mark === rate.mark);
-      if (!picked) continue;
+      const row = rows.find((r) => r.mark === rate.mark);
+      if (!row) continue;
       rate.total += 1;
-      if (top3.has(picked.horseId)) {
+      if (row.hit) {
         rate.hit += 1;
       }
     }

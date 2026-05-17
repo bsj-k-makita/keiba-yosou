@@ -30,12 +30,14 @@ import { RaceAdjustProvider } from "./RaceAdjustContext";
 import {
   getHorsesFromRaceData,
   getRaceEvaluationById,
+  ensureRaceResultFetched,
   getRaceResultById,
   getSortedRaceEntryGateRows,
   type RaceEvaluationData,
 } from "../../lib/race-data";
 import type { RaceIndexItem } from "../../lib/race-data";
 import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
+import { sortResultsForPredictionTable } from "../../domain/race-evaluation/markHitAnalysis";
 import { FIXED_SOFTMAX_TEMPERATURE } from "../../lib/pipeline/normalization";
 import {
   buildAbilityOnlyEvaluationCondition,
@@ -175,22 +177,6 @@ function loadManualTop3HorseIds(raceId: string): string[] {
   }
 }
 
-function markPriority(mark: string | undefined): number {
-  if (mark === "◎") return 0;
-  if (mark === "○") return 1;
-  if (mark === "▲") return 2;
-  if (mark === "☆") return 3;
-  if (mark === "△") return 4;
-  return 5;
-}
-
-function hokkakePriority(role: string | undefined): number {
-  if (role === "△1安定") return 0;
-  if (role === "△2物理") return 1;
-  if (role === "△3狙い") return 2;
-  return 3;
-}
-
 export function RaceDetailView({ race, raceIndex }: Props) {
   const [tab, setTab] = useState<ViewTab>("list");
   const [cardDensity, setCardDensity] = useState<CardDensity>("regular");
@@ -270,6 +256,11 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     saveCarryOverCondition(race.raceInfo, condition);
   }, [condition, race.raceInfo]);
 
+  /** レース表示時に結果を自動取得（結果タブを開かなくてもキャッシュされる） */
+  useEffect(() => {
+    void ensureRaceResultFetched(race.raceId);
+  }, [race.raceId]);
+
   const pipeline = useMemo(
     () =>
       horses.length && evalCondition
@@ -334,27 +325,15 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     };
   }, [evalCondition, abilityOnlyPreview]);
 
-  /** 出馬票一覧：印順を主軸（◎○▲△☆…）、タイブレークは△役割 → 最終順位 */
-  const sorted = useMemo(() => {
+  const gateOrderHorseIds = useMemo(
+    () => entryGateRows.map((r) => r.horseId),
+    [entryGateRows],
+  );
+  /** 出馬表・カード：印順（◎→○→▲→☆→△）→ 同印内は順位 → 枠馬番 */
+  const sortedForTable = useMemo(() => {
     if (evalCondition == null) return [];
-    const order = new Map(results.map((r, i) => [r.horseId, i] as const));
-    return [...results].sort((a, b) => {
-      const ma = markPriority(a.mark);
-      const mb = markPriority(b.mark);
-      if (ma !== mb) return ma - mb;
-
-      // △同士は役割ラベルの順（安定→物理→展開→その他）で並べる。
-      if (a.mark === "△" && b.mark === "△") {
-        const ha = hokkakePriority(a.hokkakeRole);
-        const hb = hokkakePriority(b.hokkakeRole);
-        if (ha !== hb) return ha - hb;
-      }
-
-      const da = (a.finalRank ?? a.adjustedRank ?? 99) - (b.finalRank ?? b.adjustedRank ?? 99);
-      if (da !== 0) return da;
-      return order.get(a.horseId)! - order.get(b.horseId)!;
-    });
-  }, [evalCondition, results]);
+    return sortResultsForPredictionTable(results, gateOrderHorseIds);
+  }, [evalCondition, results, gateOrderHorseIds]);
   /** AI予想タブ：補正後スコア降順 */
   const sortedByPtDesc = useMemo(() => {
     if (evalCondition == null) return [];
@@ -366,8 +345,8 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     [results],
   );
   const topScore = useMemo(
-    () => sorted.reduce((max, row) => Math.max(max, row.adjustedScore), 0),
-    [sorted],
+    () => results.reduce((max, row) => Math.max(max, row.adjustedScore), 0),
+    [results],
   );
 
   const { raceInfo } = race;
@@ -613,6 +592,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 <h2 className="app__section-title app__section-title--pop">
                   出馬表 {horses.length > 0 ? `（${horses.length}頭）` : ""}
                 </h2>
+                <p className="app__meta">並び: 印順（◎→○→▲→☆→△）→ 枠・馬番</p>
                 <div className="view-density" role="group" aria-label="一覧表示設定">
                   <button
                     type="button"
@@ -669,7 +649,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
               </div>
               <RunningStyleRaceSummary horses={horses} />
               <HorseListTable
-                sorted={sorted}
+                sorted={sortedForTable}
                 horses={horses}
                 gradesMap={gradesMap}
                 condition={evalCondition}
@@ -796,7 +776,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 </div>
               </div>
               <div className={`app__grid${cardDensity === "compact" ? " app__grid--compact" : ""}`}>
-                {sorted.map((r) => {
+                {sortedForTable.map((r) => {
                   const horse = horses.find((h) => h.horseId === r.horseId)!;
                   const gate = "gate" in horse ? (horse as typeof horse & { gate?: number }).gate : undefined;
                   const grades = gradesMap.get(r.horseId)!;
@@ -829,7 +809,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
           {/* 結果確認タブ */}
           {tab === "bets" && (
             <RaceBetPanel
-              sorted={sorted}
+              sorted={sortedForTable}
               horses={horses}
               condition={evalCondition}
               viewModel={pipeline.viewModel}
@@ -841,9 +821,9 @@ export function RaceDetailView({ race, raceIndex }: Props) {
           {tab === "result" && (
             <RaceResultPanel
               raceId={race.raceId}
-              sorted={sorted}
+              results={results}
               horses={horses}
-              condition={condition}
+              condition={evalCondition}
               onApplySuggest={handleApplySuggest}
             />
           )}

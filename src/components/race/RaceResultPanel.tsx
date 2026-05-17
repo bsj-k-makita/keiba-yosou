@@ -1,12 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import type { HorseAbility, HorseScoreResult } from "../../domain/race-evaluation";
 import type { RaceCondition } from "../../domain/race-evaluation/abilityTypes";
+import {
+  analyzeMarkHits,
+  manualPlaceMapToPlaces,
+  resolvePlaceToHorseId,
+  type MarkHitRow,
+  type TopPredictionMark,
+} from "../../domain/race-evaluation/markHitAnalysis";
 import { BIAS_ADJUSTMENTS, PACE_ADJUSTMENTS } from "../../domain/race-evaluation/adjustments";
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
-import { fetchRaceResultByApi, getRaceResultById } from "../../lib/race-data";
+import { ensureRaceResultFetched } from "../../lib/race-data";
 import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
-
-// ===== localStorage helpers (手動入力の保存) =====
 
 type ManualPlaces = Partial<Record<"1" | "2" | "3" | "4", string>>;
 
@@ -31,60 +36,31 @@ function saveManualResult(raceId: string, places: ManualPlaces) {
   }
 }
 
-// ===== 共通: "places" 正規化 =====
-// horseId をキーにした着順 Map（1〜4着の horseId を返す）
-
-type PlaceMap = Partial<Record<"1" | "2" | "3" | "4", string>>;
-
-/** RaceResultData → PlaceMap（1〜4着分のみ） */
-function resultDataToPlaceMap(data: RaceResultData): PlaceMap {
-  const map: PlaceMap = {};
-  for (const p of data.places) {
-    if (p.place >= 1 && p.place <= 4) {
-      const key = String(p.place) as "1" | "2" | "3" | "4";
-      if (p.horseId) map[key] = p.horseId;
-    }
+function clearManualResult(raceId: string) {
+  try {
+    localStorage.removeItem(storageKey(raceId));
+  } catch {
+    // ignore
   }
-  return map;
 }
 
-// ===== 的中判定 =====
-
-type HitSummary = {
-  favorite: boolean | null;
-  rival: boolean | null;
-  triangle: boolean | null;
-  topHorse: string | null;
-  secondHorse: string | null;
-  thirdHorse: string | null;
+const MARK_LABELS: Record<TopPredictionMark, string> = {
+  "◎": "本命",
+  "○": "対抗",
+  "▲": "単穴",
 };
 
-function analyzeHits(
-  places: PlaceMap,
-  sorted: HorseScoreResult[],
-  horses: HorseAbility[],
-): HitSummary {
-  const horseById = new Map(horses.map((h) => [h.horseId, h]));
-  const winners = new Set([places["1"], places["2"], places["3"]].filter(Boolean) as string[]);
-
-  const favoriteId = sorted.find((r) => r.mark === "◎")?.horseId ?? null;
-  const rivalId = sorted.find((r) => r.mark === "○")?.horseId ?? null;
-  const triangleId = sorted.find((r) => r.mark === "▲")?.horseId ?? null;
-
-  const nameOf = (id: string | undefined) =>
-    id ? (horseById.get(id)?.horseName ?? id) : null;
-
-  return {
-    favorite: favoriteId != null ? winners.has(favoriteId) : null,
-    rival: rivalId != null ? winners.has(rivalId) : null,
-    triangle: triangleId != null ? winners.has(triangleId) : null,
-    topHorse: nameOf(places["1"]),
-    secondHorse: nameOf(places["2"]),
-    thirdHorse: nameOf(places["3"]),
-  };
+function formatPickLabel(row: MarkHitRow): string {
+  const gate = row.gate != null ? `${row.gate}番 ` : "";
+  return `${gate}${row.horseName}`;
 }
 
-// ===== 条件フィードバック =====
+function gateOf(h: HorseAbility): number | undefined {
+  if ("gate" in h && typeof (h as { gate?: number }).gate === "number") {
+    return (h as { gate?: number }).gate;
+  }
+  return undefined;
+}
 
 type ConditionHint = {
   title: string;
@@ -93,13 +69,12 @@ type ConditionHint = {
 };
 
 function buildConditionHint(
-  places: PlaceMap,
+  top3HorseIds: string[],
   horses: HorseAbility[],
   condition: RaceCondition,
 ): ConditionHint {
   const horseById = new Map(horses.map((h) => [h.horseId, h]));
-  const top3Ids = [places["1"], places["2"], places["3"]].filter(Boolean) as string[];
-  const top3 = top3Ids.map((id) => horseById.get(id)).filter(Boolean) as HorseAbility[];
+  const top3 = top3HorseIds.map((id) => horseById.get(id)).filter(Boolean) as HorseAbility[];
 
   if (top3.length === 0) {
     return { title: "データ不足", detail: "1〜3着を入力すると分析できます。", suggest: null };
@@ -136,24 +111,19 @@ function buildConditionHint(
   };
 }
 
-// ===== Props =====
-
 type Props = {
   raceId: string;
-  sorted: HorseScoreResult[];
+  /** 出馬表と同じ evaluateRace 結果（印はここから読む） */
+  results: HorseScoreResult[];
   horses: HorseAbility[];
   condition: RaceCondition;
   onApplySuggest?: (bias: string) => void;
 };
 
-// ===== Component =====
-
-export function RaceResultPanel({ raceId, sorted, horses, condition, onApplySuggest }: Props) {
-  // 自動取得した結果データ
+export function RaceResultPanel({ raceId, results, horses, condition, onApplySuggest }: Props) {
   const [autoResult, setAutoResult] = useState<RaceResultData | null>(null);
   const [autoLoading, setAutoLoading] = useState(true);
 
-  // 手動入力フォームの状態
   const [manualPlaces, setManualPlaces] = useState<ManualPlaces>(
     () => loadManualResult(raceId) ?? {},
   );
@@ -161,53 +131,75 @@ export function RaceResultPanel({ raceId, sorted, horses, condition, onApplySugg
     () => loadManualResult(raceId) != null,
   );
 
-  // 自動ロード（Vercel API 経由）
   useEffect(() => {
     setAutoLoading(true);
     void (async () => {
-      const live = await fetchRaceResultByApi(raceId);
-      if (live != null) {
-        setAutoResult(live);
-        setAutoLoading(false);
-        return;
+      const data = await ensureRaceResultFetched(raceId);
+      if (data != null) {
+        setAutoResult(data);
+        if (loadManualResult(raceId) != null) {
+          clearManualResult(raceId);
+          setManualPlaces({});
+          setManualSubmitted(false);
+        }
+      } else {
+        setAutoResult(null);
       }
-      const cached = await getRaceResultById(raceId);
-      setAutoResult(cached);
       setAutoLoading(false);
     })();
   }, [raceId]);
 
-  // 表示に使う places（自動 > 手動）
-  const activePlaces = useMemo<PlaceMap>(() => {
-    if (autoResult) return resultDataToPlaceMap(autoResult);
-    if (manualSubmitted) return manualPlaces;
-    return {};
+  const activePlaces = useMemo(() => {
+    if (autoResult) return autoResult.places;
+    if (manualSubmitted) return manualPlaceMapToPlaces(manualPlaces);
+    return [];
   }, [autoResult, manualSubmitted, manualPlaces]);
 
-  const isResolved = autoResult != null || manualSubmitted;
+  const isResolved = activePlaces.length >= 3;
 
-  const hits = useMemo(
-    () => (isResolved ? analyzeHits(activePlaces, sorted, horses) : null),
-    [isResolved, activePlaces, sorted, horses],
+  const hitAnalysis = useMemo(
+    () => (isResolved ? analyzeMarkHits(activePlaces, results, horses) : null),
+    [isResolved, activePlaces, results, horses],
   );
+
+  const top3HorseIds = useMemo(() => {
+    if (!hitAnalysis) return [];
+    return [...hitAnalysis.winners];
+  }, [hitAnalysis]);
 
   const conditionHint = useMemo(
-    () => (isResolved ? buildConditionHint(activePlaces, horses, condition) : null),
-    [isResolved, activePlaces, horses, condition],
+    () => (hitAnalysis ? buildConditionHint(top3HorseIds, horses, condition) : null),
+    [hitAnalysis, top3HorseIds, horses, condition],
   );
 
-  // 手動入力 handlers
   const horseOptions = useMemo(() => {
     const horseById = new Map(horses.map((h) => [h.horseId, h]));
-    return sorted.map((r) => {
+    return results.map((r) => {
       const h = horseById.get(r.horseId);
-      const gate = h && "gate" in h ? (h as HorseAbility & { gate?: number }).gate : undefined;
+      const gate = h ? gateOf(h) : undefined;
+      const markSuffix = r.mark ? ` [${r.mark}]` : "";
       return {
         horseId: r.horseId,
-        label: `${gate != null ? `${gate}番` : ""}${h?.horseName ?? r.horseName}`,
+        label: `${gate != null ? `${gate}番` : ""}${h?.horseName ?? r.horseName}${markSuffix}`,
       };
     });
-  }, [sorted, horses]);
+  }, [results, horses]);
+
+  const podiumLabels = useMemo(() => {
+    const horseById = new Map(horses.map((h) => [h.horseId, h]));
+    return [1, 2, 3].map((place) => {
+      const row = activePlaces.find((p) => p.place === place);
+      if (!row) return { pos: `${place}着`, name: "—" as const };
+      const id = resolvePlaceToHorseId(row, horses);
+      const h = id ? horseById.get(id) : undefined;
+      const gate = h ? gateOf(h) : undefined;
+      const name = h?.horseName ?? row.horseName ?? "—";
+      return {
+        pos: `${place}着`,
+        name: gate != null ? `${gate}番 ${name}` : name,
+      };
+    });
+  }, [activePlaces, horses]);
 
   function handleSubmit() {
     saveManualResult(raceId, manualPlaces);
@@ -217,7 +209,7 @@ export function RaceResultPanel({ raceId, sorted, horses, condition, onApplySugg
   function handleReset() {
     setManualPlaces({});
     setManualSubmitted(false);
-    try { localStorage.removeItem(storageKey(raceId)); } catch { /* ignore */ }
+    clearManualResult(raceId);
   }
 
   const POSITIONS: Array<{ key: "1" | "2" | "3" | "4"; label: string }> = [
@@ -231,8 +223,10 @@ export function RaceResultPanel({ raceId, sorted, horses, condition, onApplySugg
     <div className="result-panel">
       <h2 className="app__section-title">結果確認・予想フィードバック</h2>
       <NetkeibaRaceLinks raceId={raceId} />
+      <p className="result-panel__lead result-panel__lead--note">
+        的中判定は<strong>出馬表タブと同じ印</strong>（現在の条件設定で再計算した ◎・○・▲）と、確定着順の突合です。
+      </p>
 
-      {/* 自動取得済みバナー */}
       {autoResult ? (
         <div className="result-panel__auto-badge">
           自動取得済み
@@ -243,7 +237,6 @@ export function RaceResultPanel({ raceId, sorted, horses, condition, onApplySugg
       ) : autoLoading ? (
         <p className="result-panel__lead">結果データを確認中…</p>
       ) : (
-        /* 手動入力フォーム（自動データなし時のみ） */
         <div className="result-panel__form">
           <p className="result-panel__lead">
             結果データが未取得です。着順を手動で入力するか、
@@ -294,7 +287,6 @@ export function RaceResultPanel({ raceId, sorted, horses, condition, onApplySugg
         </div>
       )}
 
-      {/* 着順一覧（自動取得時） */}
       {autoResult && (
         <div className="result-panel__auto-places">
           <h3 className="result-panel__analysis-h">確定着順</h3>
@@ -313,43 +305,31 @@ export function RaceResultPanel({ raceId, sorted, horses, condition, onApplySugg
         </div>
       )}
 
-      {/* 的中分析 */}
-      {isResolved && hits && (
+      {isResolved && hitAnalysis && (
         <div className="result-panel__analysis">
           <h3 className="result-panel__analysis-h">的中チェック</h3>
 
-          {!autoResult && (
-            <div className="result-panel__podium">
-              {[
-                { pos: "1着", name: hits.topHorse },
-                { pos: "2着", name: hits.secondHorse },
-                { pos: "3着", name: hits.thirdHorse },
-              ].map(({ pos, name }) => (
-                <div key={pos} className="result-panel__podium-item">
-                  <span className="result-panel__podium-pos">{pos}</span>
-                  <span className="result-panel__podium-name">{name ?? "—"}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="result-panel__podium">
+            {podiumLabels.map(({ pos, name }) => (
+              <div key={pos} className="result-panel__podium-item">
+                <span className="result-panel__podium-pos">{pos}</span>
+                <span className="result-panel__podium-name">{name}</span>
+              </div>
+            ))}
+          </div>
 
           <div className="result-panel__marks">
-            {([
-              { mark: "◎" as const, hit: hits.favorite, label: "本命" },
-              { mark: "○" as const, hit: hits.rival, label: "対抗" },
-              { mark: "▲" as const, hit: hits.triangle, label: "単穴" },
-            ] as const).map(({ mark, hit, label }) =>
-              hit !== null ? (
-                <div
-                  key={mark}
-                  className={`result-panel__mark-row${hit ? " result-panel__mark-row--hit" : " result-panel__mark-row--miss"}`}
-                >
-                  <span className="result-panel__mark">{mark}</span>
-                  <span className="result-panel__mark-label">{label}</span>
-                  <span className="result-panel__mark-result">{hit ? "的中 ✓" : "外れ ✗"}</span>
-                </div>
-              ) : null,
-            )}
+            {hitAnalysis.rows.map((row) => (
+              <div
+                key={row.mark}
+                className={`result-panel__mark-row${row.hit ? " result-panel__mark-row--hit" : " result-panel__mark-row--miss"}`}
+              >
+                <span className="result-panel__mark">{row.mark}</span>
+                <span className="result-panel__mark-label">{MARK_LABELS[row.mark]}</span>
+                <span className="result-panel__mark-horse">{formatPickLabel(row)}</span>
+                <span className="result-panel__mark-result">{row.hit ? "的中 ✓" : "外れ ✗"}</span>
+              </div>
+            ))}
           </div>
 
           {conditionHint && (

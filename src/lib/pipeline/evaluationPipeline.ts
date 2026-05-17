@@ -1,4 +1,5 @@
 import { evaluateRace, type HorseAbility, type RaceCondition } from "../../domain/race-evaluation";
+import { ensureFrontendDisplayMarks } from "../race-display/ensureFrontendDisplayMarks";
 import {
   buildRaceEvaluationViewModel,
   type RaceEvaluationViewModel,
@@ -15,7 +16,8 @@ export function runRaceEvaluationPipeline(
   horses: readonly HorseAbility[],
   condition: RaceCondition,
 ): EvaluationPipelineResult {
-  const results = evaluateRace([...horses], condition);
+  const raw = evaluateRace([...horses], condition);
+  const results = ensureFrontendDisplayMarks(raw, horses, condition);
   const temperature = effectiveSoftmaxTemperature(
     condition.softmaxTemperature,
     condition.adjustmentStrength,
