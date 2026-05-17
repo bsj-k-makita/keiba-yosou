@@ -1,7 +1,15 @@
 import type { HorseAbility, RaceCondition, HorseScoreResult } from "../race-evaluation/abilityTypes";
 import type { RaceGradeLabel } from "../../lib/race-data/raceEvaluationTypes";
 import { evaluateRace } from "../race-evaluation/scoreCalculator";
-import { inferRaceClassBucket, type RaceClassBucket } from "../race-evaluation/raceClassLevel";
+import {
+  inferRaceClassBucket,
+  resolveClassTier,
+  type RaceClassBucket,
+} from "../race-evaluation/raceClassLevel";
+import {
+  type ClassTier,
+  CLASS_TIER_RANK,
+} from "../race-evaluation/resolveEffectiveRaceClass";
 import { resolvePlaceToHorseId } from "../race-evaluation/markHitAnalysis";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
 import { generateTickets, marksFromResults } from "./bettingRules";
@@ -74,10 +82,13 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
   const results: HorseScoreResult[] = evaluateRace(input.horses, input.condition);
   const marks = marksFromResults(results, numberById);
   const tickets = generateTickets(marks);
+  const classTier = resolveClassTier(input.condition);
+  const classLevel = inferRaceClassBucket(input.condition);
   if (tickets.length === 0) {
     return {
       raceId: input.raceId,
-      classLevel: inferRaceClassBucket(input.condition),
+      classLevel,
+      classTier,
       totalInvested: 0,
       totalPayout: 0,
       byType: {
@@ -93,7 +104,8 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
   if (finishOrder.length < 3) {
     return {
       raceId: input.raceId,
-      classLevel: inferRaceClassBucket(input.condition),
+      classLevel,
+      classTier,
       totalInvested: 0,
       totalPayout: 0,
       byType: {
@@ -105,13 +117,14 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
     };
   }
 
-  return calculateRacePayout(tickets, {
+  const payout = calculateRacePayout(tickets, {
     raceId: input.raceId,
-    classLevel: inferRaceClassBucket(input.condition),
+    classLevel,
     finishOrder,
     winOddsByNumber: winOddsMap(input.horses),
     officialPayouts: input.payouts,
   });
+  return { ...payout, classTier };
 }
 
 function emptyStats(): TicketTypeStats {
@@ -140,6 +153,12 @@ export function aggregateBacktest(rows: RaceBetResult[]): BacktestSummary {
     OPEN_GRADE: { races: 0, invested: 0, payout: 0, rate: 0 },
     OTHER: { races: 0, invested: 0, payout: 0, rate: 0 },
   };
+  const tierKeys = (Object.keys(CLASS_TIER_RANK) as ClassTier[]).sort(
+    (a, b) => CLASS_TIER_RANK[a] - CLASS_TIER_RANK[b],
+  );
+  const byClassTier = Object.fromEntries(
+    tierKeys.map((t) => [t, { races: 0, invested: 0, payout: 0, rate: 0 }]),
+  ) as Record<ClassTier, { races: number; invested: number; payout: number; rate: number }>;
 
   let totalInvested = 0;
   let totalPayout = 0;
@@ -159,11 +178,21 @@ export function aggregateBacktest(rows: RaceBetResult[]): BacktestSummary {
     cl.races += 1;
     cl.invested += row.totalInvested;
     cl.payout += row.totalPayout;
+    if (row.classTier != null) {
+      const ct = byClassTier[row.classTier];
+      ct.races += 1;
+      ct.invested += row.totalInvested;
+      ct.payout += row.totalPayout;
+    }
   }
 
   finalizeTicketStats(byTicketType);
   for (const k of Object.keys(byClassLevel) as RaceClassBucket[]) {
     const c = byClassLevel[k];
+    c.rate = c.invested > 0 ? Math.round((c.payout / c.invested) * 1000) / 10 : 0;
+  }
+  for (const t of tierKeys) {
+    const c = byClassTier[t];
     c.rate = c.invested > 0 ? Math.round((c.payout / c.invested) * 1000) / 10 : 0;
   }
 
@@ -176,6 +205,7 @@ export function aggregateBacktest(rows: RaceBetResult[]): BacktestSummary {
       totalInvested > 0 ? Math.round((totalPayout / totalInvested) * 1000) / 10 : 0,
     byTicketType,
     byClassLevel,
+    byClassTier,
     generatedAt: new Date().toISOString(),
   };
 }

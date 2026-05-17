@@ -1,8 +1,14 @@
 import type { HorseAbility, RaceCondition } from "./abilityTypes";
 import { computeLapShapeFit } from "./lapShapeFit";
-import { isOpenOrGradedRace } from "./raceClassLevel";
+import { resolveClassTier } from "./raceClassLevel";
+import {
+  hasOpenClassStepCredibility,
+  isGradedOpenTier,
+} from "./resolveEffectiveRaceClass";
 
 const LAP_SHAPE_WEAK_THRESHOLD = 1.5;
+const NO_STEP_CREDIBILITY_MULT = 0.85;
+const STEP_CREDIBILITY_MULT = 1.06;
 
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
@@ -21,9 +27,17 @@ export function applyClassTriggerToIntrinsic(
   condition: RaceCondition,
   effectivePace: string,
 ): number {
-  if (!isOpenOrGradedRace(condition)) return intrinsic;
+  const tier = resolveClassTier(condition);
+  if (!isGradedOpenTier(tier)) return intrinsic;
 
   let score = intrinsic;
+
+  if (hasOpenClassStepCredibility(horse, tier)) {
+    score *= STEP_CREDIBILITY_MULT;
+  } else {
+    score *= NO_STEP_CREDIBILITY_MULT;
+  }
+
   const dist = condition.distance ?? 0;
   const turf = condition.surface !== "ダート";
 

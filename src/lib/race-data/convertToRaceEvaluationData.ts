@@ -435,6 +435,8 @@ function toCondition(doc: Record<string, unknown>, pack: ReturnType<typeof merge
         typeof raw["raceName"] === "string" && raw["raceName"]
           ? raw["raceName"]
           : pack.raceName,
+      ...(pack.raceGrade != null ? { raceGrade: pack.raceGrade } : {}),
+      ...(pack.netkeibaGradeType != null ? { netkeibaGradeType: pack.netkeibaGradeType } : {}),
       surface:
         raw["surface"] === "ダート" || raw["surface"] === "芝"
           ? raw["surface"]
@@ -486,6 +488,8 @@ function toCondition(doc: Record<string, unknown>, pack: ReturnType<typeof merge
     venue: pack.venue,
     courseKey: undefined,
     raceName: pack.raceName,
+    ...(pack.raceGrade != null ? { raceGrade: pack.raceGrade } : {}),
+    ...(pack.netkeibaGradeType != null ? { netkeibaGradeType: pack.netkeibaGradeType } : {}),
     surface: inferSurface(pack.surface),
     distance: pack.distance,
     ground: mapGroundLabelToKey(pack.groundLabel),

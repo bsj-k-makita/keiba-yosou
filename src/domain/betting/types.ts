@@ -1,4 +1,5 @@
 import type { RaceClassBucket } from "../race-evaluation/raceClassLevel";
+import type { ClassTier } from "../race-evaluation/resolveEffectiveRaceClass";
 import type { RaceOfficialPayouts } from "../../lib/race-data/raceEvaluationTypes";
 
 export type { RaceOfficialPayouts };
@@ -25,6 +26,7 @@ export type TicketTypeStats = {
 export type RaceBetResult = {
   raceId: string;
   classLevel: RaceClassBucket;
+  classTier?: ClassTier;
   totalInvested: number;
   totalPayout: number;
   byType: Record<BetTicketType, TicketTypeStats>;
@@ -42,6 +44,7 @@ export type BacktestSummary = {
     RaceClassBucket,
     { races: number; invested: number; payout: number; rate: number }
   >;
+  byClassTier: Record<ClassTier, { races: number; invested: number; payout: number; rate: number }>;
   generatedAt: string;
 };
 

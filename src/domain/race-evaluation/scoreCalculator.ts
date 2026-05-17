@@ -57,6 +57,8 @@ import { computeContextualBonuses, getPinpointGateBonus } from "./contextualBonu
 import { buildPedigreeFieldMap } from "./pedigreeCluster";
 import { getSireStatsMaster } from "./sireStatsLookup";
 import { applyClassTriggerToIntrinsic } from "./classTriggerMultipliers";
+import { resolveClassTier } from "./raceClassLevel";
+import { isMaidenNewTier } from "./resolveEffectiveRaceClass";
 import { longshotReversalIntrinsicBoost } from "./longshotReversal";
 import { distributeMarkPortfolio } from "./markPortfolio";
 import { applyPredictionShortComments } from "./predictionComment";
@@ -568,9 +570,15 @@ export function evaluateRace(
     if (lapFocusBonus > 0.1) {
       adjustmentBadges.push("ラップ適合");
     }
-    if (evalCondition.quickAdjustments?.lastRunReset && hasBiasDisadvantage(h)) {
-      lastRunResetBonus = LAST_RUN_RESET_BONUS;
-      adjustmentBadges.push("前走不利解消");
+    const maidenTier = isMaidenNewTier(resolveClassTier(evalCondition));
+    if (
+      (evalCondition.quickAdjustments?.lastRunReset || maidenTier) &&
+      hasBiasDisadvantage(h)
+    ) {
+      lastRunResetBonus = Math.max(lastRunResetBonus, LAST_RUN_RESET_BONUS);
+      if (!adjustmentBadges.includes("前走不利解消")) {
+        adjustmentBadges.push("前走不利解消");
+      }
     }
     if (biasDisadvantageRecoveryBonus > 0.1) {
       adjustmentBadges.push("バイアス逆行救済");

@@ -1,5 +1,10 @@
 import { Link } from "react-router-dom";
 import type { BacktestSummary } from "../../domain/betting/types";
+import {
+  classTierLabelJa,
+  type ClassTier,
+  CLASS_TIER_RANK,
+} from "../../domain/race-evaluation/resolveEffectiveRaceClass";
 
 const summaryLoaders = import.meta.glob<{ default: BacktestSummary }>(
   "../../data/backtest_summary.json",
@@ -118,6 +123,40 @@ export default function BacktestDashboardPage() {
               </tbody>
             </table>
           </section>
+
+          {summary.byClassTier != null && (
+            <section className="card" style={{ marginTop: "1rem", padding: "1rem" }}>
+              <h2>クラス階層（Tier）</h2>
+              <table className="horse-list" style={{ width: "100%" }}>
+                <thead>
+                  <tr>
+                    <th>Tier</th>
+                    <th>レース数</th>
+                    <th>投資</th>
+                    <th>払戻</th>
+                    <th>回収率</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(Object.keys(CLASS_TIER_RANK) as ClassTier[])
+                    .sort((a, b) => CLASS_TIER_RANK[a] - CLASS_TIER_RANK[b])
+                    .map((tier) => {
+                      const row = summary.byClassTier[tier];
+                      if (row.races === 0) return null;
+                      return (
+                        <tr key={tier}>
+                          <td>{classTierLabelJa(tier)}</td>
+                          <td>{row.races}</td>
+                          <td>{row.invested.toLocaleString()}</td>
+                          <td>{row.payout.toLocaleString()}</td>
+                          <td>{row.rate}%</td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </section>
+          )}
         </>
       )}
     </div>

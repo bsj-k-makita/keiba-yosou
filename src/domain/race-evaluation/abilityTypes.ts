@@ -220,6 +220,10 @@ export type RaceCondition = {
   meetingDate?: string;
   courseKey?: string;
   raceName?: string;
+  /** netkeiba グレード（G1/G2/G3/L/S）。クラス階層判定の最優先ソース */
+  raceGrade?: "G1" | "G2" | "G3" | "L" | "S";
+  /** netkeiba Icon_GradeType（1=GI 等） */
+  netkeibaGradeType?: number;
   /**
    * ON の能力軸は最終ウェイト計算で 3 倍したあと再正規化（重点項目）。
    */

@@ -1,35 +1,35 @@
 {
   "totalRacesMatched": 70,
   "totalRacesSkipped": 2,
-  "totalInvestedSum": 85400,
-  "totalPayoutSum": 21510,
-  "totalRecoveryRate": 25.2,
+  "totalInvestedSum": 85200,
+  "totalPayoutSum": 27790,
+  "totalRecoveryRate": 32.6,
   "byTicketType": {
     "WIN": {
       "invested": 7000,
-      "payout": 3890,
-      "rate": 55.6,
-      "accuracy": 14.3,
-      "hitCount": 10,
+      "payout": 3630,
+      "rate": 51.9,
+      "accuracy": 12.9,
+      "hitCount": 9,
       "betCount": 70,
       "estimatedPayout": false
     },
     "MAIN_LINE": {
       "invested": 21000,
-      "payout": 14830,
-      "rate": 70.6,
-      "accuracy": 3.3,
-      "hitCount": 7,
+      "payout": 21370,
+      "rate": 101.8,
+      "accuracy": 3.8,
+      "hitCount": 8,
       "betCount": 210,
       "estimatedPayout": false
     },
     "TRIFECTA_FORM": {
-      "invested": 57400,
+      "invested": 57200,
       "payout": 2790,
       "rate": 4.9,
       "accuracy": 0.5,
       "hitCount": 3,
-      "betCount": 574,
+      "betCount": 572,
       "estimatedPayout": false
     }
   },
@@ -37,21 +37,59 @@
     "MAIDEN_NEW": {
       "races": 29,
       "invested": 36400,
-      "payout": 7130,
-      "rate": 19.6
+      "payout": 13410,
+      "rate": 36.8
     },
     "OPEN_GRADE": {
+      "races": 10,
+      "invested": 12600,
+      "payout": 4510,
+      "rate": 35.8
+    },
+    "OTHER": {
+      "races": 31,
+      "invested": 36200,
+      "payout": 9870,
+      "rate": 27.3
+    }
+  },
+  "byClassTier": {
+    "G1_CLASS": {
       "races": 0,
       "invested": 0,
       "payout": 0,
       "rate": 0
     },
-    "OTHER": {
-      "races": 41,
-      "invested": 49000,
-      "payout": 14380,
-      "rate": 29.3
+    "G2_G3_CLASS": {
+      "races": 3,
+      "invested": 3600,
+      "payout": 0,
+      "rate": 0
+    },
+    "OPEN_LISTED": {
+      "races": 7,
+      "invested": 9000,
+      "payout": 4510,
+      "rate": 50.1
+    },
+    "CONDITIONAL_UPPER": {
+      "races": 4,
+      "invested": 4800,
+      "payout": 3360,
+      "rate": 70
+    },
+    "CONDITIONAL_LOWER": {
+      "races": 27,
+      "invested": 31400,
+      "payout": 6510,
+      "rate": 20.7
+    },
+    "MAIDEN_NEW": {
+      "races": 29,
+      "invested": 36400,
+      "payout": 13410,
+      "rate": 36.8
     }
   },
-  "generatedAt": "2026-05-17T13:50:16.757Z"
+  "generatedAt": "2026-05-17T13:56:18.809Z"
 }
