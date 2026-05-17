@@ -19,13 +19,15 @@ import {
   mergeFavoriteMarkHit,
 } from "./favoriteMarkStats";
 import { generateTickets, marksFromResults, resolvePostProcessFavoriteNumber } from "./bettingRules";
+import { buildRaceDetailLog, finalizeRaceDetailLog } from "./raceDetailLog";
+import { aggregateSecondRowDead } from "./secondRowAnalysis";
 import {
   calculateRacePayout,
   finalizeTicketStats,
   mergeTicketStats,
 } from "./payoutCalculator";
 import type { RaceOfficialPayouts } from "../../lib/race-data/raceEvaluationTypes";
-import type { BacktestSummary, BetTicketType, RaceBetResult, TicketTypeStats } from "./types";
+import type { BacktestSummary, BetTicketType, RaceBetResult, RaceDetailLog, TicketTypeStats } from "./types";
 
 export type BacktestRaceInput = {
   raceId: string;
@@ -42,6 +44,11 @@ export type BacktestRaceInput = {
   horses: HorseAbility[];
   places: { place: number; horseId?: string; horseName?: string; horseNumber?: number }[];
   payouts?: RaceOfficialPayouts;
+};
+
+export type BacktestRaceOutput = {
+  result: RaceBetResult;
+  detail: RaceDetailLog;
 };
 
 function horseNumberMap(horses: readonly HorseAbility[]): Map<string, number> {
@@ -81,7 +88,33 @@ function buildFinishOrder(
   return out;
 }
 
-export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | null {
+function makeDetail(
+  input: BacktestRaceInput,
+  results: HorseScoreResult[],
+  marks: ReturnType<typeof marksFromResults>,
+  classTier: ClassTier,
+  finishOrder: number[],
+  row: RaceBetResult,
+  favoriteNumber?: number,
+): RaceDetailLog {
+  return finalizeRaceDetailLog(
+    buildRaceDetailLog({
+      raceId: input.raceId,
+      raceName: input.condition.raceName ?? input.meta.raceName ?? input.raceId,
+      classTier,
+      venue: input.meta.venue,
+      raceNumber: input.meta.raceNumber,
+      date: input.meta.date,
+      marks,
+      results,
+      finishOrder,
+      row,
+      favoriteNumber,
+    }),
+  );
+}
+
+export function runBacktestOnRace(input: BacktestRaceInput): BacktestRaceOutput | null {
   const numberById = horseNumberMap(input.horses);
   if (numberById.size === 0) return null;
 
@@ -99,7 +132,7 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
       : {};
 
   if (tickets.length === 0) {
-    return {
+    const result: RaceBetResult = {
       raceId: input.raceId,
       classLevel,
       classTier,
@@ -113,10 +146,11 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
       skippedReason: "no_marks",
       ...favoriteFields,
     };
+    return { result, detail: makeDetail(input, results, marks, classTier, finishOrder, result, favoriteNumber) };
   }
 
   if (finishOrder.length < 3) {
-    return {
+    const result: RaceBetResult = {
       raceId: input.raceId,
       classLevel,
       classTier,
@@ -130,6 +164,7 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
       skippedReason: "insufficient_results",
       ...favoriteFields,
     };
+    return { result, detail: makeDetail(input, results, marks, classTier, finishOrder, result, favoriteNumber) };
   }
 
   const payout = calculateRacePayout(tickets, {
@@ -139,7 +174,8 @@ export function runBacktestOnRace(input: BacktestRaceInput): RaceBetResult | nul
     winOddsByNumber: winOddsMap(input.horses),
     officialPayouts: input.payouts,
   });
-  return { ...payout, classTier, ...favoriteFields };
+  const result: RaceBetResult = { ...payout, classTier, ...favoriteFields };
+  return { result, detail: makeDetail(input, results, marks, classTier, finishOrder, result, favoriteNumber) };
 }
 
 function emptyStats(): TicketTypeStats {
@@ -154,7 +190,12 @@ function emptyStats(): TicketTypeStats {
   };
 }
 
-export function aggregateBacktest(rows: RaceBetResult[]): BacktestSummary {
+export function aggregateBacktest(
+  outputs: BacktestRaceOutput[],
+): BacktestSummary {
+  const rows = outputs.map((o) => o.result);
+  const raceDetails = outputs.map((o) => o.detail);
+
   const byTicketType: Record<BetTicketType, TicketTypeStats> = {
     WIN: emptyStats(),
     MAIN_LINE: emptyStats(),
@@ -212,6 +253,8 @@ export function aggregateBacktest(rows: RaceBetResult[]): BacktestSummary {
 
   finalizeTicketStats(byTicketType);
   finalizeFavoriteMarkAggregate(favoriteMark);
+  const secondRowDead = aggregateSecondRowDead(raceDetails);
+
   for (const k of Object.keys(byClassLevel) as RaceClassBucket[]) {
     const c = byClassLevel[k];
     c.rate = c.invested > 0 ? Math.round((c.payout / c.invested) * 1000) / 10 : 0;
@@ -232,6 +275,8 @@ export function aggregateBacktest(rows: RaceBetResult[]): BacktestSummary {
     byClassLevel,
     byClassTier,
     favoriteMark,
+    secondRowDead,
+    raceDetails,
     generatedAt: new Date().toISOString(),
   };
 }

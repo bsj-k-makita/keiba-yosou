@@ -2,7 +2,7 @@ import { convertToRaceEvaluationData } from "../../lib/race-data/convertToRaceEv
 import { getHorsesFromRaceData } from "../../lib/race-data/raceDataRepository";
 import type { RaceCondition } from "../race-evaluation/abilityTypes";
 import type { RaceInfo } from "../../lib/race-data/raceEvaluationTypes";
-import { runBacktestOnRace, aggregateBacktest, type BacktestRaceInput } from "./runBacktest";
+import { runBacktestOnRace, aggregateBacktest, type BacktestRaceInput, type BacktestRaceOutput } from "./runBacktest";
 import type { BacktestSummary } from "./types";
 
 const raceJsonLoaders = import.meta.glob<{ default: unknown }>("../../data/races/*.json", {
@@ -35,8 +35,8 @@ function raceIdFromGlobKey(key: string): string {
 }
 
 /** 結果JSONとレースJSONが揃う分だけバックテスト行を集計 */
-export function collectBacktestRows(): ReturnType<typeof runBacktestOnRace>[] {
-  const rows: NonNullable<ReturnType<typeof runBacktestOnRace>>[] = [];
+export function collectBacktestOutputs(): BacktestRaceOutput[] {
+  const outputs: BacktestRaceOutput[] = [];
 
   for (const [resultKey, resultMod] of Object.entries(resultJsonLoaders)) {
     const raceId = raceIdFromGlobKey(resultKey);
@@ -75,13 +75,13 @@ export function collectBacktestRows(): ReturnType<typeof runBacktestOnRace>[] {
       payouts: resultRaw.payouts,
     };
 
-    const row = runBacktestOnRace(input);
-    if (row) rows.push(row);
+    const out = runBacktestOnRace(input);
+    if (out) outputs.push(out);
   }
 
-  return rows;
+  return outputs;
 }
 
 export function runFullBettingBacktest(): BacktestSummary {
-  return aggregateBacktest(collectBacktestRows().filter((r): r is NonNullable<typeof r> => r != null));
+  return aggregateBacktest(collectBacktestOutputs());
 }

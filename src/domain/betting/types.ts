@@ -37,6 +37,35 @@ export type RaceBetResult = {
   favoriteShowHit?: boolean;
 };
 
+export type RaceDetailTicketSlot = {
+  invested: number;
+  payout: number;
+  isHit: boolean;
+};
+
+export type RaceDetailLog = {
+  raceId: string;
+  raceName: string;
+  classTier: ClassTier;
+  classTierLabel: string;
+  venue: string;
+  raceNumber: number;
+  date: string;
+  /** 1〜3着の馬番 */
+  actualResults: number[];
+  /** 例: 12(◎)→7(○)→3(△) */
+  finishLabel: string;
+  aiMarks: Record<string, string>;
+  tickets: Record<BetTicketType, RaceDetailTicketSlot>;
+  totalInvested: number;
+  totalPayout: number;
+  dominantComment: string;
+  isAnchorHit: boolean;
+  isSecondRowDead: boolean;
+  diagnosisLabel: string;
+  skippedReason?: string;
+};
+
 export type BacktestSummary = {
   totalRacesMatched: number;
   totalRacesSkipped: number;
@@ -57,6 +86,12 @@ export type BacktestSummary = {
     winRate: number;
     showRate: number;
   };
+  secondRowDead: {
+    anchorSurvivedRaces: number;
+    secondRowDeadCount: number;
+    secondRowDeadRate: number;
+  };
+  raceDetails: RaceDetailLog[];
   generatedAt: string;
 };
 
