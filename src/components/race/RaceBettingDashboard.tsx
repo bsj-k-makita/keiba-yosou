@@ -18,6 +18,7 @@ type Props = {
 function ticketLabel(type: BetTicket["ticketType"]): string {
   if (type === "WIN") return "単勝◎";
   if (type === "MAIN_LINE") return "馬連◎○▲（3点BOX）";
+  if (type === "WIDE") return "ワイド◎-印";
   return "3連複フォーメーション";
 }
 

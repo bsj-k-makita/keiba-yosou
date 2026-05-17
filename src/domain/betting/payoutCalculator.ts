@@ -27,6 +27,12 @@ function isMainLineHit(comb: number[], finishOrder: number[]): boolean {
   return top2.has(comb[0]!) && top2.has(comb[1]!);
 }
 
+function isWideHit(comb: number[], finishOrder: number[]): boolean {
+  if (finishOrder.length < 3) return false;
+  const top3 = new Set(finishOrder.slice(0, 3));
+  return top3.has(comb[0]!) && top3.has(comb[1]!);
+}
+
 function isTrifectaHit(comb: number[], finishOrder: number[]): boolean {
   if (finishOrder.length < 3) return false;
   const top3 = new Set(finishOrder.slice(0, 3));
@@ -40,6 +46,7 @@ function poolForTicket(
   if (!payouts) return null;
   if (ticketType === "WIN") return payouts.WIN;
   if (ticketType === "MAIN_LINE") return payouts.REN;
+  if (ticketType === "WIDE") return payouts.WREN;
   if (ticketType === "TRIFECTA_FORM") return payouts.TRI;
   return null;
 }
@@ -78,6 +85,7 @@ export function calculateRacePayout(
   const byType: RaceBetResult["byType"] = {
     WIN: emptyTypeStats(!usesOfficialPayouts(official, "WIN")),
     MAIN_LINE: emptyTypeStats(!usesOfficialPayouts(official, "MAIN_LINE")),
+    WIDE: emptyTypeStats(!usesOfficialPayouts(official, "WIDE")),
     TRIFECTA_FORM: emptyTypeStats(!usesOfficialPayouts(official, "TRIFECTA_FORM")),
   };
 
@@ -95,6 +103,7 @@ export function calculateRacePayout(
       let hit = false;
       if (ticket.ticketType === "WIN") hit = isWinHit(comb, input.finishOrder);
       else if (ticket.ticketType === "MAIN_LINE") hit = isMainLineHit(comb, input.finishOrder);
+      else if (ticket.ticketType === "WIDE") hit = isWideHit(comb, input.finishOrder);
       else hit = isTrifectaHit(comb, input.finishOrder);
 
       if (!hit) continue;

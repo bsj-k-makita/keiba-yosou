@@ -4,7 +4,10 @@ import type { RaceOfficialPayouts } from "../../lib/race-data/raceEvaluationType
 
 export type { RaceOfficialPayouts };
 
-export type BetTicketType = "WIN" | "MAIN_LINE" | "TRIFECTA_FORM";
+export type BetTicketType = "WIN" | "MAIN_LINE" | "WIDE" | "TRIFECTA_FORM";
+
+/** UI・集計で共通利用する券種順 */
+export const BET_TICKET_TYPES: BetTicketType[] = ["WIN", "MAIN_LINE", "WIDE", "TRIFECTA_FORM"];
 
 export type BetTicket = {
   ticketType: BetTicketType;

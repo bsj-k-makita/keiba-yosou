@@ -5,7 +5,7 @@ import { buildRaceBettingContext } from "../../domain/betting/buildRaceBettingCo
 import { calculateRacePayout, lookupOfficialDividend } from "../../domain/betting/payoutCalculator";
 import type { RaceOfficialPayoutRow } from "../../lib/race-data/raceEvaluationTypes";
 import { analyzeSecondRowStatus } from "../../domain/betting/secondRowAnalysis";
-import type { BetTicketType } from "../../domain/betting/types";
+import { BET_TICKET_TYPES, type BetTicketType } from "../../domain/betting/types";
 import { ensureRaceResultFetched } from "../../lib/race-data";
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
 import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
@@ -44,6 +44,7 @@ function clearManualResult(raceId: string) {
 function ticketTypeName(t: BetTicketType): string {
   if (t === "WIN") return "単勝◎";
   if (t === "MAIN_LINE") return "馬連◎○▲";
+  if (t === "WIDE") return "ワイド◎-印";
   return "3連複フォーメ";
 }
 
@@ -277,13 +278,21 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
           </div>
 
           {officialPayouts &&
-            (officialPayouts.REN.length > 0 || officialPayouts.TRI.length > 0) && (
+            (officialPayouts.REN.length > 0 ||
+              officialPayouts.WREN.length > 0 ||
+              officialPayouts.TRI.length > 0) && (
               <div className="result-analysis-view__official-payouts">
                 <h3>公式払戻（100円あたり）</h3>
                 <ul className="result-analysis-view__official-payouts-list">
                   {officialPayouts.REN.map((row, i) => (
                     <li key={`ren-${i}`}>
                       <span className="result-analysis-view__official-kind">馬連</span>
+                      {formatOfficialPayoutRow(row)}
+                    </li>
+                  ))}
+                  {officialPayouts.WREN.map((row, i) => (
+                    <li key={`wren-${i}`}>
+                      <span className="result-analysis-view__official-kind">ワイド</span>
                       {formatOfficialPayoutRow(row)}
                     </li>
                   ))}
@@ -309,7 +318,7 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
                 </tr>
               </thead>
               <tbody>
-                {(["WIN", "MAIN_LINE", "TRIFECTA_FORM"] as const).map((type) => {
+                {BET_TICKET_TYPES.map((type) => {
                   const d = payoutRow.byType[type];
                   const hit = d.hitCount > 0;
                   const ticket = ctx?.tickets.find((t) => t.ticketType === type);
@@ -319,6 +328,10 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
                         if (type === "MAIN_LINE") {
                           const top2 = new Set(finishOrder.slice(0, 2));
                           return top2.has(comb[0]!) && top2.has(comb[1]!);
+                        }
+                        if (type === "WIDE") {
+                          const top3 = new Set(finishOrder.slice(0, 3));
+                          return top3.has(comb[0]!) && top3.has(comb[1]!);
                         }
                         const top3 = new Set(finishOrder.slice(0, 3));
                         return top3.has(comb[0]!) && top3.has(comb[1]!) && top3.has(comb[2]!);

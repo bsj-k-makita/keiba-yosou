@@ -102,6 +102,11 @@ export function buildTicketsCopyText(ctx: RaceBettingContext): string {
       lines.push(`【馬連】${combos} 各${t.betAmount}円（${t.combinations.length}点）`);
       continue;
     }
+    if (t.ticketType === "WIDE") {
+      const combos = t.combinations.map((c) => c.join("-")).join(", ");
+      lines.push(`【ワイド】${combos} 各${t.betAmount}円（${t.combinations.length}点）`);
+      continue;
+    }
     const preview = t.combinations
       .slice(0, 8)
       .map((c) => c.join("-"))

@@ -150,6 +150,23 @@ export function buildOptimizedTrifectaCombinations(
   return [...uniq.values()];
 }
 
+const WIDE_PARTNER_MARKS = new Set(["○", "▲", "☆", "△"]);
+
+/** ワイド: ◎と各印（○▲☆△）の2頭組。3着以内に両方入れば的中 */
+export function buildWideCombinations(
+  marks: readonly MarkedHorseRef[],
+  omaru: number,
+): number[][] {
+  const uniq = new Map<string, number[]>();
+  for (const h of marks) {
+    if (h.horseNumber === omaru) continue;
+    if (!WIDE_PARTNER_MARKS.has(h.mark)) continue;
+    const comb = sortComb(omaru, h.horseNumber);
+    uniq.set(comb.join("-"), comb);
+  }
+  return [...uniq.values()];
+}
+
 export function generateTickets(
   marks: readonly MarkedHorseRef[],
   betAmount = 100,
@@ -175,6 +192,13 @@ export function generateTickets(
       ],
       betAmount,
     });
+  }
+
+  if (omaru != null) {
+    const wideCombinations = buildWideCombinations(marks, omaru);
+    if (wideCombinations.length > 0) {
+      tickets.push({ ticketType: "WIDE", combinations: wideCombinations, betAmount });
+    }
   }
 
   const trifectaCombinations = buildOptimizedTrifectaCombinations(marks, options);

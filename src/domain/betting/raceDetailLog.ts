@@ -82,6 +82,7 @@ export function buildRaceDetailLog(params: {
     tickets: {
       WIN: ticketSlot(row, "WIN"),
       MAIN_LINE: ticketSlot(row, "MAIN_LINE"),
+      WIDE: ticketSlot(row, "WIDE"),
       TRIFECTA_FORM: ticketSlot(row, "TRIFECTA_FORM"),
     },
     totalInvested: row.totalInvested,

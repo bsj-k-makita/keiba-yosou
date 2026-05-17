@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { BacktestSummary } from "../../domain/betting/types";
+import { BET_TICKET_TYPES, type BacktestSummary } from "../../domain/betting/types";
 import { BacktestHitRacesSection } from "../../components/backtest/BacktestHitRacesSection";
 import {
   classTierLabelJa,
@@ -28,7 +28,7 @@ export default function BacktestDashboardPage() {
       </p>
       <h1>馬券回収率バックテスト</h1>
       <p className="app__lead">
-        定型ルール（単勝◎ / 馬連◎○▲ / 3連複◎-○▲-△☆）の一括検証結果。馬連・3連複は netkeiba 確定払戻（未取得時は払戻0）。
+        定型ルール（単勝◎ / 馬連◎○▲ / ワイド◎-印 / 3連複◎-○▲-△☆）の一括検証結果。馬連・ワイド・3連複は netkeiba 確定払戻（未取得時は払戻0）。
       </p>
 
       {summary == null && (
@@ -117,10 +117,16 @@ export default function BacktestDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {(["WIN", "MAIN_LINE", "TRIFECTA_FORM"] as const).map((t) => {
+                {BET_TICKET_TYPES.map((t) => {
                   const row = summary.byTicketType[t];
                   const label =
-                    t === "WIN" ? "単勝◎" : t === "MAIN_LINE" ? "馬連◎○▲" : "3連複フォーメ";
+                    t === "WIN"
+                      ? "単勝◎"
+                      : t === "MAIN_LINE"
+                        ? "馬連◎○▲"
+                        : t === "WIDE"
+                          ? "ワイド◎-印"
+                          : "3連複フォーメ";
                   return (
                     <tr key={t}>
                       <td>{label}</td>

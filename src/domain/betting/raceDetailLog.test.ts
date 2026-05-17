@@ -21,6 +21,7 @@ function baseDetail(overrides: Partial<RaceDetailLog> = {}): RaceDetailLog {
     tickets: {
       WIN: { invested: 100, payout: 0, isHit: false },
       MAIN_LINE: { invested: 300, payout: 0, isHit: false },
+      WIDE: { invested: 500, payout: 0, isHit: false },
       TRIFECTA_FORM: { invested: 300, payout: 0, isHit: false },
     },
     totalInvested: 700,

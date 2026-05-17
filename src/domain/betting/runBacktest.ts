@@ -141,6 +141,7 @@ export function runBacktestOnRace(input: BacktestRaceInput): BacktestRaceOutput 
       byType: {
         WIN: emptyStats(),
         MAIN_LINE: emptyStats(),
+        WIDE: emptyStats(),
         TRIFECTA_FORM: emptyStats(),
       },
       skippedReason: "no_marks",
@@ -159,6 +160,7 @@ export function runBacktestOnRace(input: BacktestRaceInput): BacktestRaceOutput 
       byType: {
         WIN: emptyStats(),
         MAIN_LINE: emptyStats(),
+        WIDE: emptyStats(),
         TRIFECTA_FORM: emptyStats(),
       },
       skippedReason: "insufficient_results",
@@ -199,6 +201,7 @@ export function aggregateBacktest(
   const byTicketType: Record<BetTicketType, TicketTypeStats> = {
     WIN: emptyStats(),
     MAIN_LINE: emptyStats(),
+    WIDE: emptyStats(),
     TRIFECTA_FORM: emptyStats(),
   };
   const byClassLevel: Record<

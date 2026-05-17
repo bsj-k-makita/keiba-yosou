@@ -103,6 +103,13 @@ function HitRaceCard({ row }: { row: RaceDetailLog }) {
               </span>
               <span
                 className={
+                  row.tickets.WIDE.isHit ? "bt-hit-card__ticket bt-hit-card__ticket--on" : "bt-hit-card__ticket"
+                }
+              >
+                ワイド {formatPayoutShort(row.tickets.WIDE)}
+              </span>
+              <span
+                className={
                   row.tickets.TRIFECTA_FORM.isHit
                     ? "bt-hit-card__ticket bt-hit-card__ticket--on"
                     : "bt-hit-card__ticket"

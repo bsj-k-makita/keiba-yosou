@@ -3,6 +3,7 @@ import {
   buildOptimizedTrifectaCombinations,
   buildSecondRowNumbers,
   buildThirdRowNumbers,
+  buildWideCombinations,
   generateTickets,
   resolvePostProcessFavoriteNumber,
 } from "./bettingRules";
@@ -83,5 +84,35 @@ describe("generateTickets", () => {
     const tickets = generateTickets(baseMarks);
     expect(tickets.find((t) => t.ticketType === "WIN")?.combinations).toEqual([[1]]);
     expect(tickets.find((t) => t.ticketType === "MAIN_LINE")?.combinations.length).toBe(3);
+  });
+
+  test("ワイドは◎と各印（○▲☆△）の組み合わせ", () => {
+    const wide = buildWideCombinations(baseMarks, 1);
+    const keys = wide.map((c) => c.join("-")).sort();
+    expect(keys).toEqual(["1-12", "1-3", "1-5", "1-7", "1-8"]);
+  });
+
+  test("ワイドは3着内に両方入れば的中", () => {
+    const tickets = generateTickets(baseMarks);
+    const official = {
+      WIN: [],
+      SHOW: [],
+      REN: [],
+      WREN: [
+        { numbers: [1, 5], dividend: 250 },
+        { numbers: [1, 8], dividend: 350 },
+      ],
+      TRI: [],
+    };
+    const result = calculateRacePayout(tickets, {
+      raceId: "test",
+      classLevel: "OTHER",
+      finishOrder: [5, 1, 8],
+      winOddsByNumber: new Map(),
+      officialPayouts: official,
+    });
+    expect(result.byType.WIDE.hitCount).toBe(2);
+    expect(result.byType.WIDE.payout).toBe(600);
+    expect(result.byType.WIDE.estimatedPayout).toBe(false);
   });
 });

@@ -130,9 +130,9 @@ export async function getRaceResultById(
 /**
  * API 経由で結果を即時取得し、メモリ・localStorage に保存する。
  */
-function hasQuinellaAndTrifectaPayouts(data: RaceResultData): boolean {
+function hasQuinellaWideAndTrifectaPayouts(data: RaceResultData): boolean {
   const p = data.payouts;
-  return (p?.REN?.length ?? 0) > 0 && (p?.TRI?.length ?? 0) > 0;
+  return (p?.REN?.length ?? 0) > 0 && (p?.WREN?.length ?? 0) > 0 && (p?.TRI?.length ?? 0) > 0;
 }
 
 /**
@@ -141,7 +141,7 @@ function hasQuinellaAndTrifectaPayouts(data: RaceResultData): boolean {
  */
 export async function ensureRaceResultFetched(raceId: string): Promise<RaceResultData | null> {
   const cached = await getRaceResultById(raceId);
-  if (cached != null && cached.places.length >= 3 && hasQuinellaAndTrifectaPayouts(cached)) {
+  if (cached != null && cached.places.length >= 3 && hasQuinellaWideAndTrifectaPayouts(cached)) {
     return cached;
   }
   const fromApi = await fetchRaceResultByApi(raceId);
