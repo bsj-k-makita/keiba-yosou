@@ -395,7 +395,8 @@ export function evaluateRace(
     // 第1層: 展開不問のエンジン素点バイアス
     const enginePeak = round1(enginePeakAdjustment(h));
     let intrinsicRaw = round1(bCore + repro - risk + enginePeak);
-    intrinsicRaw += longshotReversalIntrinsicBoost(h, evalCondition);
+    const longshotBoost = longshotReversalIntrinsicBoost(h, evalCondition);
+    intrinsicRaw += longshotBoost;
     intrinsicRaw = applyClassTriggerToIntrinsic(h, intrinsicRaw, evalCondition, effectivePace);
     const intrinsic = compressIntrinsicTailScore(intrinsicRaw);
 
@@ -475,6 +476,7 @@ export function evaluateRace(
       lastRunResetBonus: 0,
       lapFocusBonus: 0,
       adjustmentBadges: [],
+      longshotReversalTrigger: longshotBoost > 0,
       lapShapeFitBonus: round1(lapShapeFitBonus),
       raceAnalysisBonus: round1(raceAnalysisBonus),
       lapSustainBonus: round1(lapFit.sustainBonus),

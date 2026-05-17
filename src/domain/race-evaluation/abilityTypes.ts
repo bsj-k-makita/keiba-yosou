@@ -397,6 +397,8 @@ export type HorseScoreResult = {
   paceSeverityKind?: "high" | "slow" | "neutral";
   /** △ヒモ穴の個性ラベル（メインの `mark` と併用） */
   hokkakeRole?: "△1安定" | "△2物理" | "△3狙い";
+  /** 爆穴ハント（50倍以上・反転トリガー）が intrinsic に効いた */
+  longshotReversalTrigger?: boolean;
   buyLabel: BuyLabel;
   reason: string;
   strongAbilities: AbilityKey[];
