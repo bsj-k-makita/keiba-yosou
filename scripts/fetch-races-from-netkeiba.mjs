@@ -111,6 +111,18 @@ function makeJobs(targetDate = null) {
       date: "2026-05-17",
       placeCodes: ["040106", "050208", "080308"], // 新潟 / 東京 / 京都（1回新潟6日・2回東京8日・3回京都8日）
     }),
+    ...makeDayJobs({
+      date: "2026-05-23",
+      placeCodes: ["040107", "050209", "080309"], // 新潟 / 東京 / 京都（1回新潟7日・2回東京9日・3回京都9日）
+    }),
+    ...makeDayJobs({
+      date: "2026-05-24",
+      placeCodes: ["040108", "050210", "080310"], // 新潟 / 東京 / 京都（1回新潟8日・2回東京10日・3回京都10日）
+    }),
+    ...makeDayJobs({
+      date: "2026-05-31",
+      placeCodes: ["040109", "050212", "080311"], // 新潟 / 東京 / 京都（ダービー週・東京11R=日本ダービー）
+    }),
   ];
   if (!targetDate) return out;
   return out.filter((j) => j.date === targetDate);
