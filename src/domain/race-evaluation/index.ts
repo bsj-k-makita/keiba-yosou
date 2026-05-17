@@ -28,6 +28,8 @@ export * from "./pastRunTypes";
 export * from "./pastRunDerivedSignals";
 export * from "./resolveEvaluationSignals";
 export * from "./contextualBonuses";
+export * from "./pedigreeCluster";
+export * from "./sireStatsLookup";
 export * from "./racePreview";
 export * from "./courseTraitResolver";
 export * from "./structuralPhysicalBonuses";

@@ -255,11 +255,15 @@ function toAbilities(e: AnalysisHorseEntry): { speed: number; stamina: number; k
 
 function toEvaluationSignals(e: AnalysisHorseEntry): HorseEvaluationSignals | undefined {
   const base = e.evaluationSignals;
+  const marketWinOdds = n(e.market_win_odds) ?? n(e.marketWinOdds);
   const temperamentConcern01 = n(e.temperamentConcern01);
   const temperamentRisk = typeof e.temperamentRisk === "boolean" ? e.temperamentRisk : undefined;
-  if (base == null && temperamentConcern01 == null && temperamentRisk == null) return undefined;
+  if (base == null && marketWinOdds == null && temperamentConcern01 == null && temperamentRisk == null) {
+    return undefined;
+  }
   return {
     ...base,
+    winOdds: base?.winOdds ?? marketWinOdds,
     temperamentConcern01: base?.temperamentConcern01 ?? temperamentConcern01,
     temperamentRisk: base?.temperamentRisk ?? temperamentRisk,
   };
@@ -345,8 +349,11 @@ function toEnrichedHorse(e: AnalysisHorseEntry): EnrichedRaceHorse {
     sustain: ab.sustain,
     power: ab.power,
     pedigree: {
+      sireId: pd?.sireId,
       sireName: pd?.sireName ?? e.sireName ?? e.sire,
+      damSireId: pd?.damSireId,
       damSireName: pd?.damSireName ?? e.damSireName ?? e.damsire,
+      sireLineName: pd?.sireLineName,
       courseFit01: n(pd?.courseFit01),
       distanceFit01: n(pd?.distanceFit01),
       flatTrackFit01: n(pd?.flatTrackFit01),

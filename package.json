@@ -22,9 +22,11 @@
     "update-bias-master": "node scripts/enrich-investment-signals.mjs --bias-update",
     "backfill-index-grade": "node scripts/backfill-index-race-grade.mjs",
     "build-daily-baseline": "node scripts/build-daily-baseline.mjs",
+    "build-sire-stats": "node scripts/build-sire-stats.mjs",
     "apply-prev-day-conditions": "node scripts/apply-prev-day-conditions.mjs",
     "apply-tokyo-meeting-bias-brief": "node scripts/apply-tokyo-meeting-bias-brief.mjs --target=2026-05-17",
-    "reestimate-abilities": "node scripts/reestimate-abilities-from-past-runs.mjs"
+    "reestimate-abilities": "node scripts/reestimate-abilities-from-past-runs.mjs",
+    "backtest:bets": "vitest run src/domain/betting/runFullBacktest.test.ts"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",
@@ -35,6 +37,7 @@
     "react-router-dom": "^6.30.3"
   },
   "devDependencies": {
+    "@types/node": "^25.8.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",

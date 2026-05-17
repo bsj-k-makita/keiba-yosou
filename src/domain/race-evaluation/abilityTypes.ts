@@ -88,8 +88,12 @@ export type InvestmentCommentInput = {
 };
 
 export type HorsePedigree = {
+  sireId?: string;
   sireName?: string;
+  damSireId?: string;
   damSireName?: string;
+  /** 父系統名（例: Roberto系） */
+  sireLineName?: string;
   /** 0〜1: 血統によるコース適性（中立 0.5） */
   courseFit01?: number;
   /** 0〜1: 血統による距離適性（中立 0.5） */
@@ -381,6 +385,8 @@ export type HorseScoreResult = {
   adjustmentBadges: string[];
   finalRank?: number;
   mark?: "◎" | "○" | "▲" | "△" | "☆" | "";
+  /** スコア内訳の主因から生成した1行短評 */
+  predictionShortComment?: string;
   /** 複勝安定度インデックス（0〜100 目安）。救済ヒモ選出に利用 */
   stabilityScore?: number;
   /** 自動推計したペース激化度（表示・ヒモ△3狙いに利用） */

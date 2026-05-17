@@ -154,8 +154,8 @@ export function HorseEvaluationCard({
     [allHorses, horse, result],
   );
   const connectionBadges = useMemo(
-    () => computeConnectionSpecialBadges(horse, condition),
-    [horse, condition],
+    () => computeConnectionSpecialBadges(horse, condition, allHorses),
+    [allHorses, horse, condition],
   );
   const courseTraitBadge = useMemo(() => {
     const bonus = result.courseTraitBonus ?? 0;

@@ -89,8 +89,11 @@ export type AnalysisHorseEntry = {
   damSireName?: string;
   damsire?: string;
   pedigree?: {
+    sireId?: string;
     sireName?: string;
+    damSireId?: string;
     damSireName?: string;
+    sireLineName?: string;
     courseFit01?: number;
     distanceFit01?: number;
     flatTrackFit01?: number;

@@ -1,5 +1,6 @@
 import { load } from "cheerio";
 import { fetchUtf8, sleep } from "./netkeibaFetch.mjs";
+import { fetchPedigreeForHorse } from "./parseNetkeibaPedigree.mjs";
 
 /**
  * 着差テキストを「勝ち馬からの遅れ（秒）」に近い値へ。
@@ -218,26 +219,6 @@ function parseHorseProfile($) {
     $(".db_head_name.fc").text().replace(/\s+/g, " ").trim() ||
     undefined;
 
-  const sire =
-    $('a[href*="/horse/sire/"]').first().text().replace(/\s+/g, " ").trim() ||
-    $(".blood_table")
-      .find("a")
-      .first()
-      .text()
-      .replace(/\s+/g, " ")
-      .trim() ||
-    undefined;
-
-  const damSire =
-    $('a[href*="/horse/sire/"]').eq(1).text().replace(/\s+/g, " ").trim() ||
-    $(".blood_table")
-      .find("a")
-      .eq(2)
-      .text()
-      .replace(/\s+/g, " ")
-      .trim() ||
-    undefined;
-
   const bodyWeightMatch = text.match(/馬体重[^0-9]*([0-9]{3})/);
   const bodyWeightKg = bodyWeightMatch ? parseInt(bodyWeightMatch[1], 10) : undefined;
 
@@ -245,12 +226,22 @@ function parseHorseProfile($) {
     sex: normalizeSex(sexAge?.[1]),
     age: sexAge?.[2] ? parseInt(sexAge[2], 10) : undefined,
     trainer: trainer && trainer !== "厩舎" ? trainer : undefined,
-    pedigree: {
-      sireName: sire || undefined,
-      damSireName: damSire || undefined,
-    },
+    pedigree: {},
     bodyWeightKg: Number.isFinite(bodyWeightKg) ? bodyWeightKg : undefined,
   };
+}
+
+function mergePedigreeProfile(profile, pedigreeFromPed) {
+  if (!pedigreeFromPed?.sireName) return profile;
+  profile.pedigree = {
+    ...(profile.pedigree ?? {}),
+    ...(pedigreeFromPed.sireId ? { sireId: pedigreeFromPed.sireId } : {}),
+    sireName: pedigreeFromPed.sireName,
+    ...(pedigreeFromPed.damSireId ? { damSireId: pedigreeFromPed.damSireId } : {}),
+    ...(pedigreeFromPed.damSireName ? { damSireName: pedigreeFromPed.damSireName } : {}),
+    ...(pedigreeFromPed.sireLineName ? { sireLineName: pedigreeFromPed.sireLineName } : {}),
+  };
+  return profile;
 }
 
 /**
@@ -362,6 +353,14 @@ export async function fetchPastRunsForHorse(horseId, opts = {}) {
       const lap = raceLapCache.get(raceId);
       if (lap && lap.length) run.section200mSec = lap;
     }
+  }
+
+  try {
+    await sleep(Math.min(sleepMs, 250));
+    const pedigreeFromPed = fetchPedigreeForHorse(horseId);
+    mergePedigreeProfile(horseProfile, pedigreeFromPed);
+  } catch {
+    // 血統ページ未取得でも過去走は返す
   }
 
   return { pastRuns, raceIdsFetched, horseProfile };

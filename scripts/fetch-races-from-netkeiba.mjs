@@ -637,10 +637,14 @@ async function enrichEntriesWithPastRuns(entries, raceLapCache) {
         entry.trainer = entry.trainer ?? horseProfile?.trainer;
         entry.bodyWeightKg = entry.bodyWeightKg ?? horseProfile?.bodyWeightKg;
         if (horseProfile?.pedigree) {
+          const pd = horseProfile.pedigree;
           entry.pedigree = {
             ...(entry.pedigree ?? {}),
-            ...(horseProfile.pedigree.sireName ? { sireName: horseProfile.pedigree.sireName } : {}),
-            ...(horseProfile.pedigree.damSireName ? { damSireName: horseProfile.pedigree.damSireName } : {}),
+            ...(pd.sireId ? { sireId: pd.sireId } : {}),
+            ...(pd.sireName ? { sireName: pd.sireName } : {}),
+            ...(pd.damSireId ? { damSireId: pd.damSireId } : {}),
+            ...(pd.damSireName ? { damSireName: pd.damSireName } : {}),
+            ...(pd.sireLineName ? { sireLineName: pd.sireLineName } : {}),
           };
         }
         process.stderr.write(`${entry.pastRuns.length} runs\n`);

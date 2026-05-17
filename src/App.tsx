@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import { RacesListPage } from "./app/races/page";
 import { RaceDetailPage } from "./app/race/[raceId]/page";
+import BacktestDashboardPage from "./app/backtest/page";
 
 type ThemeMode = "light" | "dark";
 
@@ -38,6 +39,9 @@ function AppNav({
         <span className="app-nav__logo-text">競馬AI分析</span>
       </Link>
       <div className="app-nav__right">
+        <Link to="/backtest" className="app-nav__link" style={{ marginRight: "0.75rem" }}>
+          回収率BT
+        </Link>
         <button
           type="button"
           className="app-nav__theme-btn"
@@ -105,6 +109,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/races" replace />} />
         <Route path="/races" element={<RacesListPage />} />
         <Route path="/race/:raceId" element={<RaceDetailPage />} />
+        <Route path="/backtest" element={<BacktestDashboardPage />} />
       </Routes>
     </AppShell>
   );

@@ -215,7 +215,7 @@ export function HorseListTable({
             const lapStatus = inferLapStatus(horse, condition, r);
             const lapProfile = getLapProfileVisual(r.lapProfile);
             const marketAlert = computeMarketAlertLabel(horse, r, horses);
-            const connectionBadges = computeConnectionSpecialBadges(horse, condition);
+            const connectionBadges = computeConnectionSpecialBadges(horse, condition, horses);
             const suitFlags = horse.suitabilityFlags;
             const suitFirst = suitFlags?.[0];
 

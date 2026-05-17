@@ -54,6 +54,12 @@ import {
   computeCourseProfileMatchBonus,
 } from "./performanceAbility";
 import { computeContextualBonuses, getPinpointGateBonus } from "./contextualBonuses";
+import { buildPedigreeFieldMap } from "./pedigreeCluster";
+import { getSireStatsMaster } from "./sireStatsLookup";
+import { applyClassTriggerToIntrinsic } from "./classTriggerMultipliers";
+import { longshotReversalIntrinsicBoost } from "./longshotReversal";
+import { distributeMarkPortfolio } from "./markPortfolio";
+import { applyPredictionShortComments } from "./predictionComment";
 import { BUY_LABELS } from "./lingoConstants";
 import { ADJUSTMENT_STRENGTH } from "./adjustments";
 import { computeCourseTraitHits } from "./courseTraitResolver";
@@ -386,7 +392,10 @@ export function evaluateRace(
 
     // 第1層: 展開不問のエンジン素点バイアス
     const enginePeak = round1(enginePeakAdjustment(h));
-    const intrinsic = compressIntrinsicTailScore(round1(bCore + repro - risk + enginePeak));
+    let intrinsicRaw = round1(bCore + repro - risk + enginePeak);
+    intrinsicRaw += longshotReversalIntrinsicBoost(h, evalCondition);
+    intrinsicRaw = applyClassTriggerToIntrinsic(h, intrinsicRaw, evalCondition, effectivePace);
+    const intrinsic = compressIntrinsicTailScore(intrinsicRaw);
 
     // MAX性能
     const maxPerf = computeMaxPerformance(h.pastRuns);
@@ -498,6 +507,7 @@ export function evaluateRace(
     results.map((r) => ({ horseId: r.horseId, raceAdjustedInput: r.raceAdjustedInput })),
     relativeMode,
   );
+  const pedigreeField = buildPedigreeFieldMap(evalHorses, evalCondition, getSireStatsMaster());
   for (const h of evalHorses) {
     const r = results.find((x) => x.horseId === h.horseId);
     if (!r) continue;
@@ -514,6 +524,7 @@ export function evaluateRace(
       evalCondition,
       evalHorses.length,
       styleSignalFactor,
+      pedigreeField,
     );
     /** ピンポイント枠は raceAdjustedInput に直打ち済み。ここでは二重計上しない。 */
     const pinGate = getPinpointGateBonus(h, evalCondition);
@@ -728,6 +739,10 @@ export function evaluateRace(
   if (!hasRequiredTopMarks(results, dismissIds) && results.length >= 3) {
     assignCompleteMarks(results, dismissIds);
   }
+
+  distributeMarkPortfolio(results, evalHorses);
+
+  applyPredictionShortComments(results);
 
   for (const r of results) {
     const h = horseById.get(r.horseId);

@@ -1,4 +1,9 @@
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "../../domain/race-evaluation";
+import {
+  buildPedigreeFieldMap,
+  formatPedigreeClusterBadge,
+} from "../../domain/race-evaluation/pedigreeCluster";
+import { getSireStatsMaster } from "../../domain/race-evaluation/sireStatsLookup";
 
 type OddsStanding = {
   rank: number;
@@ -57,10 +62,16 @@ export function getLapProfileVisual(profile: HorseScoreResult["lapProfile"]): { 
 export function computeConnectionSpecialBadges(
   horse: HorseAbility,
   condition: RaceCondition,
+  fieldHorses?: readonly HorseAbility[],
 ): string[] {
   const s = horse.signals;
-  if (s == null) return [];
   const badges: string[] = [];
+  if (fieldHorses != null && fieldHorses.length >= 2) {
+    const pedMap = buildPedigreeFieldMap(fieldHorses, condition, getSireStatsMaster());
+    const pedBadge = formatPedigreeClusterBadge(pedMap.get(horse.horseId));
+    if (pedBadge) badges.push(pedBadge);
+  }
+  if (s == null) return badges.slice(0, 2);
   if ((s.jockeyCourseWinRate01 ?? 0) >= 0.3) {
     badges.push(`🎯騎手コース勝率${Math.round((s.jockeyCourseWinRate01 ?? 0) * 100)}%`);
   }
@@ -75,5 +86,5 @@ export function computeConnectionSpecialBadges(
   if (s.temperamentRisk === true || temperamentConcern >= 0.6) {
     badges.push("💢折り合い注意");
   }
-  return badges.slice(0, 2);
+  return badges.slice(0, 3);
 }

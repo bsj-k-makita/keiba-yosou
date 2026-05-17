@@ -1,6 +1,7 @@
 import type { HorseAbility, RaceCondition } from "./abilityTypes";
 import { lookupBiasMasterTrackBias } from "./biasMasterLookup";
 import type { PastRunRecord } from "./pastRunTypes";
+import { getPedigreeClusterBonus, type PedigreeFieldMap } from "./pedigreeCluster";
 
 type ContextualBonusBreakdown = {
   pedigreeBonus: number;
@@ -67,32 +68,41 @@ function inferSlopePedigreeByName(horse: HorseAbility, topology: "flat" | "uphil
   return bonus;
 }
 
-function computePedigreeBonus(horse: HorseAbility, condition: RaceCondition): number {
+function computePedigreeBonus(
+  horse: HorseAbility,
+  condition: RaceCondition,
+  pedigreeField?: PedigreeFieldMap,
+): number {
   const p = horse.pedigree;
-  if (p == null) return 0;
+  if (p == null && !pedigreeField?.has(horse.horseId)) return 0;
 
   const distance = condition.distance ?? 0;
-  let bonus =
-    centered01(p.courseFit01) * 1.8 +
-    centered01(p.distanceFit01) * 2.2;
+  let bonus = 0;
+  if (p != null) {
+    bonus =
+      centered01(p.courseFit01) * 1.8 +
+      centered01(p.distanceFit01) * 2.2;
 
-  if (horse.sex === "牡" && distance >= 2200) {
-    bonus += centered01(p.maleStayerFit01) * 1.2;
-  }
-  if (horse.sex === "牝" && distance > 0 && distance <= 2000) {
-    bonus += centered01(p.femaleMiddleFit01) * 1.2;
+    if (horse.sex === "牡" && distance >= 2200) {
+      bonus += centered01(p.maleStayerFit01) * 1.2;
+    }
+    if (horse.sex === "牝" && distance > 0 && distance <= 2000) {
+      bonus += centered01(p.femaleMiddleFit01) * 1.2;
+    }
+
+    const topology = inferCourseTopology(condition);
+    if (topology === "flat") {
+      bonus += centered01(p.flatTrackFit01) * 1.2;
+    } else if (topology === "uphill") {
+      bonus += centered01(p.uphillTrackFit01) * 1.4;
+    } else {
+      bonus += centered01(p.downhillToFlatFit01) * 1.4;
+    }
+    bonus += inferSlopePedigreeByName(horse, topology);
+    bonus += inferSireBiasByName(horse, condition);
   }
 
-  const topology = inferCourseTopology(condition);
-  if (topology === "flat") {
-    bonus += centered01(p.flatTrackFit01) * 1.2;
-  } else if (topology === "uphill") {
-    bonus += centered01(p.uphillTrackFit01) * 1.4;
-  } else {
-    bonus += centered01(p.downhillToFlatFit01) * 1.4;
-  }
-  bonus += inferSlopePedigreeByName(horse, topology);
-  bonus += inferSireBiasByName(horse, condition);
+  bonus += getPedigreeClusterBonus(horse.horseId, pedigreeField);
   return round1(clamp(bonus, -4, 4));
 }
 
@@ -434,8 +444,9 @@ export function computeContextualBonuses(
   condition: RaceCondition,
   fieldSize: number,
   styleSignalFactor: number = 1,
+  pedigreeField?: PedigreeFieldMap,
 ): ContextualBonusBreakdown {
-  const pedigreeBonus = computePedigreeBonus(horse, condition);
+  const pedigreeBonus = computePedigreeBonus(horse, condition, pedigreeField);
   const gateBiasBonus = computeGateBiasBonus(horse, condition, fieldSize);
   const gateStyleSynergyBonus = computeGateStyleSynergyBonus(
     horse,

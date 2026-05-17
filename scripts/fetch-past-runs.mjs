@@ -11,12 +11,14 @@
  * オプション:
  *   --all      src/data/races/*.json をすべて処理
  *   --force    既に pastRuns がある行も上書き
+ *   --pedigree-only  血統ページのみ取得（過去走は触らない）
  *   --sleep=N  リクエスト間隔（ms。既定 400）
  */
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { fetchPastRunsForHorse } from "./lib/parseNetkeibaPastRuns.mjs";
+import { fetchPedigreeForHorse } from "./lib/parseNetkeibaPedigree.mjs";
 import { sleep } from "./lib/netkeibaFetch.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -24,14 +26,28 @@ const ROOT = join(__dirname, "..");
 const RACES_DIR = join(ROOT, "src/data/races");
 
 function parseArgs(argv) {
-  const out = { all: false, force: false, sleepMs: 400, raceIds: [] };
+  const out = { all: false, force: false, pedigreeOnly: false, sleepMs: 400, raceIds: [] };
   for (const a of argv) {
     if (a === "--all") out.all = true;
     else if (a === "--force") out.force = true;
+    else if (a === "--pedigree-only") out.pedigreeOnly = true;
     else if (a.startsWith("--sleep=")) out.sleepMs = Math.max(100, parseInt(a.slice(8), 10) || 400);
     else if (!a.startsWith("-")) out.raceIds.push(a);
   }
   return out;
+}
+
+function applyPedigreeToEntry(entry, pd) {
+  if (!pd?.sireName) return false;
+  entry.pedigree = {
+    ...(entry.pedigree ?? {}),
+    ...(pd.sireId ? { sireId: pd.sireId } : {}),
+    sireName: pd.sireName,
+    ...(pd.damSireId ? { damSireId: pd.damSireId } : {}),
+    ...(pd.damSireName ? { damSireName: pd.damSireName } : {}),
+    ...(pd.sireLineName ? { sireLineName: pd.sireLineName } : {}),
+  };
+  return true;
 }
 
 function listRaceJsons() {
@@ -41,7 +57,7 @@ function listRaceJsons() {
     .map((f) => join(RACES_DIR, f));
 }
 
-async function processRaceFile(filePath, { force, sleepMs, raceLapCache }) {
+async function processRaceFile(filePath, { force, pedigreeOnly, sleepMs, raceLapCache }) {
   const raw = readFileSync(filePath, "utf8");
   const data = JSON.parse(raw);
   if (!data.entries || !Array.isArray(data.entries)) {
@@ -52,6 +68,19 @@ async function processRaceFile(filePath, { force, sleepMs, raceLapCache }) {
   for (const entry of data.entries) {
     const hid = entry.horseId;
     if (!hid) continue;
+    if (pedigreeOnly) {
+      if (!force && entry.pedigree?.sireName) continue;
+      process.stderr.write(`  ped ${hid} ${entry.horseName ?? ""}… `);
+      const pd = fetchPedigreeForHorse(String(hid));
+      if (applyPedigreeToEntry(entry, pd)) {
+        n += 1;
+        process.stderr.write(`${pd.sireName}\n`);
+      } else {
+        process.stderr.write("skip\n");
+      }
+      await sleep(sleepMs);
+      continue;
+    }
     if (!force && entry.pastRuns && entry.pastRuns.length > 0) continue;
 
     process.stderr.write(`  horse ${hid} ${entry.horseName ?? ""}… `);
@@ -62,11 +91,7 @@ async function processRaceFile(filePath, { force, sleepMs, raceLapCache }) {
     entry.trainer = entry.trainer ?? horseProfile?.trainer;
     entry.bodyWeightKg = entry.bodyWeightKg ?? horseProfile?.bodyWeightKg;
     if (horseProfile?.pedigree) {
-      entry.pedigree = {
-        ...(entry.pedigree ?? {}),
-        ...(horseProfile.pedigree.sireName ? { sireName: horseProfile.pedigree.sireName } : {}),
-        ...(horseProfile.pedigree.damSireName ? { damSireName: horseProfile.pedigree.damSireName } : {}),
-      };
+      applyPedigreeToEntry(entry, horseProfile.pedigree);
     }
     n += 1;
     process.stderr.write(`${pastRuns.length} runs\n`);
@@ -97,7 +122,7 @@ async function main() {
     }
   } else {
     process.stderr.write(
-      "Usage: node scripts/fetch-past-runs.mjs <raceId> [raceId...] | --all [--force] [--sleep=400]\n",
+      "Usage: node scripts/fetch-past-runs.mjs <raceId> [raceId...] | --all [--force] [--pedigree-only] [--sleep=400]\n",
     );
     process.exit(1);
   }
@@ -105,10 +130,16 @@ async function main() {
   let total = 0;
   for (const fp of files) {
     process.stderr.write(`${fp} …\n`);
-    const n = await processRaceFile(fp, { force: args.force, sleepMs, raceLapCache });
+    const n = await processRaceFile(fp, {
+      force: args.force,
+      pedigreeOnly: args.pedigreeOnly,
+      sleepMs,
+      raceLapCache,
+    });
     total += n;
   }
-  process.stdout.write(`done. updated pastRuns for ${total} horses (${files.length} files).\n`);
+  const label = args.pedigreeOnly ? "pedigree" : "pastRuns";
+  process.stdout.write(`done. updated ${label} for ${total} horses (${files.length} files).\n`);
 }
 
 main().catch((e) => {
