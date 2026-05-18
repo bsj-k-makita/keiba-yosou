@@ -5,9 +5,10 @@ LightGBMを用いた勝率予測モデルの学習・評価・推論。
 ハイパーパラメータチューニング（Optuna）付き。
 """
 
+from __future__ import annotations
+
 import logging
 import pickle
-from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -17,13 +18,23 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedGroupKFold
 
 from config import (
-    LGBM_PARAMS, CV_FOLDS, RANDOM_SEED, TEST_YEARS, MODEL_DIR
+    LGBM_PARAMS,
+    CV_FOLDS,
+    RANDOM_SEED,
+    MODEL_DIR,
+    resolve_test_mask,
+    ENABLE_EV_SAMPLE_WEIGHT,
+    EV_WEIGHT_CENTER,
+    EV_WEIGHT_TAU,
 )
 
 logger = logging.getLogger(__name__)
 
+_EPS = 1e-9
+
 # ============================================================
 # 使用特徴量（学習・推論共通）
+# speed_index は当該レース finish_time 由来のため恒久的除外
 # ============================================================
 FEATURE_COLS = [
     # 基本情報
@@ -48,10 +59,103 @@ FEATURE_COLS = [
     # 騎手・調教師
     "jockey_win_rate", "jockey_top3_rate", "jockey_venue_win_rate",
     "trainer_win_rate", "trainer_top3_rate",
-    # スピード指数
-    "speed_index", "last_final3f", "avg_final3f",
+    # 脚質・上がり（speed_index はリークのため除外）
+    "last_final3f", "avg_final3f",
     "avg_first_corner",
 ]
+
+
+def calculate_ev_weight(
+    ev: np.ndarray,
+    center: float = EV_WEIGHT_CENTER,
+    tau: float = EV_WEIGHT_TAU,
+) -> np.ndarray:
+    """
+    理論期待値からシグモイド学習重みを算出する。
+
+    weight = 1.0 + sigmoid((ev - center) / tau)  → 範囲 [1.0, 2.0]
+    """
+    ev = np.asarray(ev, dtype=float)
+    sig = 1.0 / (1.0 + np.exp(-(ev - center) / tau))
+    return 1.0 + sig
+
+
+def _normalize_oof_per_race(oof_pred: pd.Series, race_id: pd.Series) -> pd.Series:
+    """OOF予測確率を race_id 単位で合計1に正規化（ゼロ除算ガード付き）。"""
+    frame = pd.DataFrame({"oof_pred": oof_pred, "race_id": race_id})
+
+    def _norm_group(s: pd.Series) -> pd.Series:
+        total = float(s.sum())
+        if total < _EPS:
+            return pd.Series(1.0 / len(s), index=s.index)
+        return s / max(total, _EPS)
+
+    return frame.groupby("race_id", sort=False)["oof_pred"].transform(_norm_group)
+
+
+def _normalize_raw_weights_per_race(
+    raw_weight: np.ndarray,
+    race_id: pd.Series,
+) -> np.ndarray:
+    """raw_weight を race_id 単位で合計1に正規化。"""
+    series = pd.Series(raw_weight, index=race_id.index)
+
+    def _norm_group(s: pd.Series) -> pd.Series:
+        total = float(s.sum())
+        if total < _EPS:
+            return pd.Series(1.0 / len(s), index=s.index)
+        return s / max(total, _EPS)
+
+    return series.groupby(race_id, sort=False).transform(_norm_group).to_numpy()
+
+
+def compute_train_sample_weights(
+    df_train: pd.DataFrame,
+    oof_preds: np.ndarray,
+    *,
+    center: float = EV_WEIGHT_CENTER,
+    tau: float = EV_WEIGHT_TAU,
+) -> np.ndarray:
+    """
+    OOF予測と odds から学習用サンプル重みを算出する。
+
+    1. race_id 単位で oof_pred を正規化
+    2. 理論EV = oof_pred_norm * odds
+    3. シグモイド重み（不正オッズは raw_weight=1.0）
+    4. race_id 単位で weight 合計=1
+    """
+    if len(df_train) != len(oof_preds):
+        raise ValueError(
+            f"df_train と oof_preds の長さが一致しません: {len(df_train)} vs {len(oof_preds)}"
+        )
+
+    race_id = df_train["race_id"].reset_index(drop=True)
+    odds = pd.to_numeric(df_train["odds"], errors="coerce").reset_index(drop=True)
+    oof_series = pd.Series(oof_preds, index=race_id.index)
+
+    oof_norm = _normalize_oof_per_race(oof_series, race_id)
+    ev = oof_norm * odds
+
+    valid_odds = odds.notna() & (odds > 0)
+    raw_weight = np.ones(len(df_train), dtype=float)
+    if valid_odds.any():
+        raw_weight[valid_odds.to_numpy()] = calculate_ev_weight(
+            ev[valid_odds].to_numpy(), center=center, tau=tau
+        )
+
+    weights = _normalize_raw_weights_per_race(raw_weight, race_id)
+
+    n_ev_gt_1 = int((ev[valid_odds] > 1.0).sum()) if valid_odds.any() else 0
+    logger.info(
+        "EV sample weights: min=%.4f max=%.4f mean=%.4f | EV>1 rows=%d/%d (%.1f%%)",
+        weights.min(),
+        weights.max(),
+        weights.mean(),
+        n_ev_gt_1,
+        len(df_train),
+        100.0 * n_ev_gt_1 / max(len(df_train), 1),
+    )
+    return weights
 
 
 class Model:
@@ -69,6 +173,8 @@ class Model:
         self.booster: Optional[lgb.Booster] = None
         self.feature_importances_: Optional[pd.DataFrame] = None
         self.cv_scores_: list[float] = []
+        self.oof_auc_pass1_: Optional[float] = None
+        self.ev_weight_meta_: dict = {}
 
     # ----------------------------------------------------------
     # 学習
@@ -82,10 +188,8 @@ class Model:
         """
         データを学習・評価（TimeSeriesSplit的なGroupKFold）する。
 
-        Args:
-            df: 特徴量付きDataFrame（race_date, race_id 列を含む）
-            target_col: 目的変数列名
-            feature_cols: 使用特徴量（Noneで FEATURE_COLS を使用）
+        ENABLE_EV_SAMPLE_WEIGHT=True のとき:
+          Pass1: 重みなしOOF → EV重み算出 → Pass2: 重み付きCV → 重み付き最終学習
         """
         feature_cols = feature_cols or self._available_features(df)
         logger.info("学習開始: %d rows, %d features", len(df), len(feature_cols))
@@ -93,51 +197,160 @@ class Model:
         X = df[feature_cols].copy()
         y = df[target_col].copy()
 
-        # カテゴリ変数の型確保
         for col in X.columns:
             if X[col].dtype.name == "category":
-                pass  # そのまま
+                pass
             elif X[col].dtype == object:
                 X[col] = X[col].astype("category")
 
-        # ============================================================
-        # 時系列考慮の交差検証
-        # race_id を group として年度単位でフォールド分割
-        # ============================================================
         df_sorted = df.sort_values("race_date").reset_index(drop=True)
         X_sorted = X.loc[df_sorted.index]
         y_sorted = y.loc[df_sorted.index]
         groups = df_sorted["race_id"]
 
-        # テストデータ（最新年度）を分離
-        test_mask = df_sorted["race_date"].dt.year.isin(TEST_YEARS)
+        test_mask, test_label = resolve_test_mask(df_sorted)
         X_train_all = X_sorted[~test_mask]
         y_train_all = y_sorted[~test_mask]
         X_test = X_sorted[test_mask]
         y_test = y_sorted[test_mask]
         groups_train = groups[~test_mask]
+        df_train = df_sorted.loc[~test_mask].reset_index(drop=True)
 
         logger.info(
-            "train: %d rows, test: %d rows (years=%s)",
-            len(X_train_all), len(X_test), TEST_YEARS
+            "train: %d rows, test: %d rows (test_set=%s, ev_weights=%s)",
+            len(X_train_all),
+            len(X_test),
+            test_label,
+            ENABLE_EV_SAMPLE_WEIGHT,
         )
 
-        # GroupKFold でCV
-        gkf = StratifiedGroupKFold(n_splits=CV_FOLDS, shuffle=True, random_state=RANDOM_SEED)
-        self.cv_scores_ = []
-        oof_preds = np.zeros(len(X_train_all))
+        gkf = StratifiedGroupKFold(
+            n_splits=CV_FOLDS, shuffle=True, random_state=RANDOM_SEED
+        )
+        fold_splits = list(gkf.split(X_train_all, y_train_all, groups=groups_train))
 
-        for fold, (tr_idx, val_idx) in enumerate(
-            gkf.split(X_train_all, y_train_all, groups=groups_train)
-        ):
-            X_tr, X_val = X_train_all.iloc[tr_idx], X_train_all.iloc[val_idx]
-            y_tr, y_val = y_train_all.iloc[tr_idx], y_train_all.iloc[val_idx]
+        use_ev_weights = ENABLE_EV_SAMPLE_WEIGHT
+        train_weight: np.ndarray | None = None
+
+        if use_ev_weights:
+            oof_preds = self._run_group_cv(
+                X_train_all,
+                y_train_all,
+                fold_splits,
+                sample_weight=None,
+                pass_label="Pass1 (OOF)",
+            )
+            self.oof_auc_pass1_ = roc_auc_score(y_train_all, oof_preds)
+            logger.info("Pass1 OOF AUC: %.4f", self.oof_auc_pass1_)
+
+            train_weight = compute_train_sample_weights(
+                df_train,
+                oof_preds,
+                center=EV_WEIGHT_CENTER,
+                tau=EV_WEIGHT_TAU,
+            )
+            self.ev_weight_meta_ = {
+                "enable_ev_sample_weight": True,
+                "center": EV_WEIGHT_CENTER,
+                "tau": EV_WEIGHT_TAU,
+            }
+
+            self.cv_scores_ = self._run_group_cv(
+                X_train_all,
+                y_train_all,
+                fold_splits,
+                sample_weight=train_weight,
+                pass_label="Pass2 (weighted CV)",
+                return_scores=True,
+            )
+            logger.info(
+                "Pass2 mean fold AUC: %.4f (Pass1 OOF AUC: %.4f)",
+                float(np.mean(self.cv_scores_)),
+                self.oof_auc_pass1_ or float("nan"),
+            )
+        else:
+            self.oof_auc_pass1_ = None
+            self.ev_weight_meta_ = {"enable_ev_sample_weight": False}
+            oof_preds = self._run_group_cv(
+                X_train_all,
+                y_train_all,
+                fold_splits,
+                sample_weight=None,
+                pass_label="CV",
+            )
+            self.cv_scores_ = [
+                roc_auc_score(y_train_all.iloc[val_idx], oof_preds[val_idx])
+                for _, val_idx in fold_splits
+            ]
+            logger.info(
+                "OOF AUC: %.4f (mean fold AUC: %.4f)",
+                roc_auc_score(y_train_all, oof_preds),
+                float(np.mean(self.cv_scores_)),
+            )
+
+        params = {**self.params}
+        n_estimators = params.pop("n_estimators", 1000)
+        params.pop("early_stopping_rounds", None)
+
+        final_weight = train_weight if use_ev_weights else None
+        train_set = lgb.Dataset(
+            X_train_all,
+            label=y_train_all,
+            weight=final_weight,
+        )
+        self.booster = lgb.train(
+            params,
+            train_set,
+            num_boost_round=int(n_estimators * 1.1),
+        )
+
+        self.feature_importances_ = pd.DataFrame({
+            "feature": feature_cols,
+            "importance": self.booster.feature_importance(importance_type="gain"),
+        }).sort_values("importance", ascending=False).reset_index(drop=True)
+
+        if len(X_test) > 0:
+            test_preds = self.booster.predict(X_test)
+            test_auc = roc_auc_score(y_test, test_preds)
+            logger.info("Test AUC (test_set=%s): %.4f", test_label, test_auc)
+
+        self.feature_cols_ = feature_cols
+        return self
+
+    def _run_group_cv(
+        self,
+        X_train_all: pd.DataFrame,
+        y_train_all: pd.Series,
+        fold_splits: list,
+        *,
+        sample_weight: np.ndarray | None,
+        pass_label: str,
+        return_scores: bool = False,
+    ) -> list[float] | np.ndarray:
+        """
+        GroupKFold CV を1パス実行する。
+
+        return_scores=True のとき各FoldのAUCリストを返す。
+        それ以外は OOF 予測配列を返す。
+        """
+        oof_preds = np.zeros(len(X_train_all))
+        scores: list[float] = []
+
+        for fold, (tr_idx, val_idx) in enumerate(fold_splits):
+            X_tr = X_train_all.iloc[tr_idx]
+            X_val = X_train_all.iloc[val_idx]
+            y_tr = y_train_all.iloc[tr_idx]
+            y_val = y_train_all.iloc[val_idx]
+
+            w_tr = None
+            if sample_weight is not None:
+                w_tr = sample_weight[tr_idx]
 
             params = {**self.params}
             n_estimators = params.pop("n_estimators", 1000)
             early_stopping_rounds = params.pop("early_stopping_rounds", 50)
 
-            train_set = lgb.Dataset(X_tr, label=y_tr)
+            train_set = lgb.Dataset(X_tr, label=y_tr, weight=w_tr)
             val_set = lgb.Dataset(X_val, label=y_val, reference=train_set)
 
             booster = lgb.train(
@@ -152,42 +365,18 @@ class Model:
             )
 
             val_preds = booster.predict(X_val)
-            oof_preds[val_idx] = val_preds
-            fold_auc = roc_auc_score(y_val, val_preds)
-            self.cv_scores_.append(fold_auc)
-            logger.info("Fold %d AUC: %.4f", fold + 1, fold_auc)
+            if return_scores:
+                fold_auc = roc_auc_score(y_val, val_preds)
+                scores.append(fold_auc)
+                logger.info("%s Fold %d AUC: %.4f", pass_label, fold + 1, fold_auc)
+            else:
+                oof_preds[val_idx] = val_preds
+                fold_auc = roc_auc_score(y_val, val_preds)
+                logger.info("%s Fold %d AUC: %.4f", pass_label, fold + 1, fold_auc)
 
-        oof_auc = roc_auc_score(y_train_all, oof_preds)
-        logger.info("OOF AUC: %.4f (mean fold AUC: %.4f)", oof_auc, np.mean(self.cv_scores_))
-
-        # ============================================================
-        # 全学習データで最終モデルを作成
-        # ============================================================
-        params = {**self.params}
-        n_estimators = params.pop("n_estimators", 1000)
-        params.pop("early_stopping_rounds", None)
-
-        train_set = lgb.Dataset(X_train_all, label=y_train_all)
-        self.booster = lgb.train(
-            params,
-            train_set,
-            num_boost_round=int(n_estimators * 1.1),  # 早期停止なしで少し多めに
-        )
-
-        # 特徴量重要度
-        self.feature_importances_ = pd.DataFrame({
-            "feature": feature_cols,
-            "importance": self.booster.feature_importance(importance_type="gain"),
-        }).sort_values("importance", ascending=False).reset_index(drop=True)
-
-        # テストデータで評価
-        if len(X_test) > 0:
-            test_preds = self.booster.predict(X_test)
-            test_auc = roc_auc_score(y_test, test_preds)
-            logger.info("Test AUC (years=%s): %.4f", TEST_YEARS, test_auc)
-
-        self.feature_cols_ = feature_cols
-        return self
+        if return_scores:
+            return scores
+        return oof_preds
 
     # ----------------------------------------------------------
     # ハイパーパラメータチューニング（Optuna）
@@ -200,6 +389,7 @@ class Model:
     ) -> dict:
         """
         Optunaでハイパーパラメータを最適化する。
+        EVサンプル重みは常に無効（探索のブレ防止）。
 
         Returns:
             最適パラメータの辞書
@@ -215,7 +405,6 @@ class Model:
         X = df[feature_cols].copy()
         y = df[target_col].copy()
 
-        # カテゴリ変換
         for col in X.columns:
             if X[col].dtype == object:
                 X[col] = X[col].astype("category")
@@ -223,7 +412,7 @@ class Model:
         df_sorted = df.sort_values("race_date").reset_index(drop=True)
         X = X.loc[df_sorted.index]
         y = y.loc[df_sorted.index]
-        test_mask = df_sorted["race_date"].dt.year.isin(TEST_YEARS)
+        test_mask, _ = resolve_test_mask(df_sorted)
         X_tr = X[~test_mask]
         y_tr = y[~test_mask]
         groups_tr = df_sorted[~test_mask]["race_id"]
@@ -304,15 +493,11 @@ class Model:
         df = df.copy()
         df["pred_prob"] = self.predict_proba(df)
 
-        # レース内確率の正規化（合計が1になるよう）
         total = df["pred_prob"].sum()
         if total > 0:
             df["pred_prob_normalized"] = df["pred_prob"] / total
         else:
             df["pred_prob_normalized"] = 1 / len(df)
-
-        # 期待値は BettingEvaluator.decide_bets() で算出するためここでは計算しない
-        # （単純な P×O ではなく、マージン控除・ケリー基準を統合した計算が必要なため）
 
         return df.sort_values("pred_prob", ascending=False).reset_index(drop=True)
 

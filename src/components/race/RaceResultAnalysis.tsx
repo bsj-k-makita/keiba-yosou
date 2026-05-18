@@ -5,10 +5,17 @@ import { buildRaceBettingContext } from "../../domain/betting/buildRaceBettingCo
 import { calculateRacePayout, lookupOfficialDividend } from "../../domain/betting/payoutCalculator";
 import type { RaceOfficialPayoutRow } from "../../lib/race-data/raceEvaluationTypes";
 import { analyzeSecondRowStatus } from "../../domain/betting/secondRowAnalysis";
+import { computeFormationHits } from "../../domain/betting/markFormationHits";
+import {
+  formationHitForType,
+  isTicketDisplayHit,
+  ticketResultText,
+} from "../../domain/betting/ticketOutcomeDisplay";
 import { BET_TICKET_TYPES, type BetTicketType } from "../../domain/betting/types";
 import { ensureRaceResultFetched } from "../../lib/race-data";
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
 import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
+import { FinishPlaceLabel } from "./FinishPlaceLabel";
 
 type ManualPlaces = Partial<Record<"1" | "2" | "3" | "4", string>>;
 
@@ -82,9 +89,18 @@ type Props = {
   results: HorseScoreResult[];
   horses: HorseAbility[];
   condition: RaceCondition;
+  adjustedProbabilities?: ReadonlyMap<string, number>;
+  isSkippableRace?: boolean;
 };
 
-export function RaceResultAnalysis({ raceId, results, horses, condition }: Props) {
+export function RaceResultAnalysis({
+  raceId,
+  results,
+  horses,
+  condition,
+  adjustedProbabilities,
+  isSkippableRace,
+}: Props) {
   const [autoResult, setAutoResult] = useState<RaceResultData | null>(null);
   const [autoLoading, setAutoLoading] = useState(true);
   const [manualPlaces, setManualPlaces] = useState<ManualPlaces>(() => loadManualResult(raceId) ?? {});
@@ -108,9 +124,21 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
     })();
   }, [raceId]);
 
+  const markByHorseId = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const r of results) {
+      if (r.mark) m.set(r.horseId, r.mark);
+    }
+    return m;
+  }, [results]);
+
   const ctx = useMemo(
-    () => buildRaceBettingContext(results, horses, condition),
-    [results, horses, condition],
+    () =>
+      buildRaceBettingContext(results, horses, condition, 100, {
+        adjustedProbabilities,
+        isSkippableRace,
+      }),
+    [results, horses, condition, adjustedProbabilities, isSkippableRace],
   );
 
   const activePlaces = useMemo(() => {
@@ -160,6 +188,11 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
     return analyzeSecondRowStatus(ctx.marks, ctx.classTier, finishOrder, ctx.favoriteNumber);
   }, [ctx, finishOrder]);
 
+  const formationHits = useMemo(() => {
+    if (!ctx || finishOrder.length < 3) return null;
+    return computeFormationHits(ctx.marks, finishOrder, ctx.classTier);
+  }, [ctx, finishOrder]);
+
   const officialPayouts = autoResult?.payouts;
 
   const horseOptions = useMemo(() => {
@@ -180,7 +213,7 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
       <h2 className="app__section-title app__section-title--pop">確定結果・回収率</h2>
       <NetkeibaRaceLinks raceId={raceId} />
       <p className="app__meta">
-        画面2の定型買い目と確定着順・公式払戻を突合。KPIは券種別回収率です。
+        定型フォーメ（◎単勝・◎○馬連等）の投資・払戻を全レースで集計。見送りはEV推奨なしの目安です。
       </p>
 
       {autoResult ? (
@@ -252,19 +285,21 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
               {sortedPlaces.map((p) => {
                 const num =
                   ctx != null ? horseNumberForPlace(p, ctx.horseNumberById) : undefined;
+                const hid = resolvePlaceToHorseId(p, horses);
                 const name =
                   p.horseName ||
-                  (p.horseId
-                    ? horses.find((h) => h.horseId === p.horseId)?.horseName
-                    : undefined) ||
+                  (hid ? horses.find((h) => h.horseId === hid)?.horseName : undefined) ||
                   "—";
+                const mark = hid ? markByHorseId.get(hid) : undefined;
                 return (
                   <li key={p.place} className="result-panel__place-item">
                     <span className="result-panel__place-num">{p.place}着</span>
-                    <span className="result-panel__place-name">
-                      {num != null ? `${num}番 ` : ""}
-                      {name}
-                    </span>
+                    <FinishPlaceLabel
+                      className="result-panel__place-name"
+                      horseNumber={num}
+                      horseName={name}
+                      mark={mark}
+                    />
                     {"time" in p && p.time ? (
                       <span className="result-panel__place-time">{p.time}</span>
                     ) : null}
@@ -320,9 +355,15 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
               <tbody>
                 {BET_TICKET_TYPES.map((type) => {
                   const d = payoutRow.byType[type];
-                  const hit = d.hitCount > 0;
+                  const purchasedHit = d.hitCount > 0;
+                  const formationHit =
+                    formationHits != null ? formationHitForType(formationHits, type) : false;
+                  const displayHit = isTicketDisplayHit({
+                    isHit: purchasedHit,
+                    formationHit,
+                  });
                   const ticket = ctx?.tickets.find((t) => t.ticketType === type);
-                  const hitComb = hit && ticket
+                  const hitComb = purchasedHit && ticket
                     ? ticket.combinations.find((comb) => {
                         if (type === "WIN") return finishOrder[0] === comb[0];
                         if (type === "MAIN_LINE") {
@@ -344,7 +385,13 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
                   return (
                     <tr
                       key={type}
-                      className={hit ? "result-analysis-view__row--hit" : "result-analysis-view__row--miss"}
+                      className={
+                        displayHit
+                          ? purchasedHit
+                            ? "result-analysis-view__row--hit"
+                            : "result-analysis-view__row--formation"
+                          : "result-analysis-view__row--miss"
+                      }
                     >
                       <td>
                         {ticketTypeName(type)}
@@ -364,7 +411,9 @@ export function RaceResultAnalysis({ raceId, results, horses, condition }: Props
                       <td className={d.rate >= 100 ? "result-analysis-view__rate--plus" : ""}>
                         {d.rate}%
                       </td>
-                      <td>{hit ? "🎯 的中" : "✕ 不的中"}</td>
+                      <td>
+                        {ticketResultText({ isHit: purchasedHit, formationHit }, d.payout)}
+                      </td>
                     </tr>
                   );
                 })}

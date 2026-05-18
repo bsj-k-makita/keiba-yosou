@@ -3,6 +3,8 @@
 DBから生データを読み込み、学習用DataFrameに整形する
 """
 
+from __future__ import annotations
+
 import re
 import logging
 import sqlite3
@@ -190,9 +192,9 @@ class DataProcessor:
             if col not in df.columns:
                 continue
             df[col] = df[col].fillna("不明").astype(str)
-            # 未知ラベルを "不明" にマップ
             known = set(le.classes_)
-            df[col] = df[col].map(lambda x: x if x in known else "不明")
+            fallback = "不明" if "不明" in known else str(le.classes_[0])
+            df[col] = df[col].map(lambda x: x if x in known else fallback)
             df[col] = le.transform(df[col])
         return df
 

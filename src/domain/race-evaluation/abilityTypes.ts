@@ -145,6 +145,12 @@ export type HorseAbility = {
   abilityIndex?: number;
   /** ポテンシャルは高いが予測勝率が伸びないときの理由フラグ */
   suitabilityFlags?: SuitabilityFlag[];
+  /**
+   * Phase1 Python ML バックフィル（scripts/backfill-ai-predictions.py）。
+   * TS の predicted_win_rate / final_expected_value は上書きしない。
+   */
+  aiPredictedWinRate?: number;
+  aiEffectiveEv?: number;
   /** 前走が当時のトラックバイアスと逆行していたか（巻き返し補正に使用） */
   was_bias_disadvantaged?: boolean;
   /** 過去L2区間（残り400-200m）の最大パフォーマンスを 0〜1 で正規化（旧JSONの0〜100も読込側で吸収） */

@@ -5,6 +5,9 @@
     # データ収集（全年・全場）
     python main.py collect
 
+    # Phase0 疎通用（TS既存の結果JSON分のみ・約108レース）
+    python main.py collect-quick --with-horses
+
     # データ収集（年・場を指定）
     python main.py collect --years 2023 2024 --venues 5 6
 
@@ -24,6 +27,8 @@
     python main.py predict --race-id 202405050511
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sqlite3
@@ -33,13 +38,27 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from config import DB_PATH, MODEL_DIR, LOG_FILE, LOG_LEVEL
+from config import (
+    DB_PATH,
+    MODEL_DIR,
+    LOG_FILE,
+    LOG_LEVEL,
+    ENABLE_EV_SAMPLE_WEIGHT,
+    EV_WEIGHT_CENTER,
+    EV_WEIGHT_TAU,
+)
 from scraper import Scraper
 from data_processor import DataProcessor
 from feature_engineer import FeatureEngineer
 from model import Model
 from simulator import Simulator
 from betting_evaluator import BettingEvaluator
+from artifacts import export_training_artifacts
+from baseline_metrics import (
+    build_baseline_report,
+    print_baseline_summary,
+    write_baseline_report,
+)
 
 # ============================================================
 # ロガー設定
@@ -71,6 +90,58 @@ def cmd_collect(args: argparse.Namespace) -> None:
         )
 
 
+def _repo_result_race_ids() -> list[str]:
+    """src/data/results/*.json と整合する race_id 一覧（TS バックテスト済み分）。"""
+    results_dir = Path(__file__).resolve().parent.parent / "src" / "data" / "results"
+    if not results_dir.is_dir():
+        return []
+    return sorted(p.stem for p in results_dir.glob("*.json") if p.stem.isdigit())
+
+
+def _golden_race_ids() -> list[str]:
+    import json
+
+    path = Path(__file__).resolve().parent / "golden_races.json"
+    if not path.is_file():
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return [r["race_id"] for r in data.get("races", [])]
+
+
+def cmd_collect_quick(args: argparse.Namespace) -> None:
+    """
+    クイック・インジェスト: TS 既存結果JSON + ゴールデンレースのみ netkeiba から取得。
+    全期間 collect の代替（Phase 0 パイプライン疎通・108レース規模）。
+    """
+    ids: set[str] = set(_repo_result_race_ids())
+    ids.update(_golden_race_ids())
+    if args.extra_years:
+        with Scraper() as scraper:
+            for year in args.extra_years:
+                ids.update(scraper.get_race_id_list(years=[year], jra_only=True))
+    if args.race_id:
+        ids.update(args.race_id)
+
+    race_list = sorted(ids)
+    logger.info(
+        "collect-quick: %d race_ids (repo_results=%d, golden=%d)",
+        len(race_list),
+        len(_repo_result_race_ids()),
+        len(_golden_race_ids()),
+    )
+    if not race_list:
+        logger.error("収集対象 race_id がありません")
+        return
+
+    with Scraper() as scraper:
+        ok, total = scraper.collect_race_ids(
+            race_list,
+            skip_horse=not args.with_horses,
+            skip_pedigree=not args.with_pedigree,
+        )
+    logger.info("collect-quick 完了: %d/%d", ok, total)
+
+
 def cmd_train(args: argparse.Namespace) -> None:
     """特徴量生成 & モデル学習コマンド"""
     # ---------- 前処理 ----------
@@ -88,7 +159,11 @@ def cmd_train(args: argparse.Namespace) -> None:
     feature_df = processor.encode_categoricals_as_category(feature_df)
 
     # ---------- 目的変数 ----------
-    feature_df["target_win"] = FeatureEngineer.make_target(feature_df, target="win")
+    target_mode = getattr(args, "target", "win")
+    if target_mode == "win_mod":
+        feature_df["target_win"] = FeatureEngineer.make_target(feature_df, target="win_mod")
+    else:
+        feature_df["target_win"] = FeatureEngineer.make_target(feature_df, target="win")
     feature_df["target_top3"] = FeatureEngineer.make_target(feature_df, target="top3")
 
     logger.info("最終データセット: %d rows, %d cols", len(feature_df), feature_df.shape[1])
@@ -104,55 +179,84 @@ def cmd_train(args: argparse.Namespace) -> None:
     model.fit(feature_df, target_col="target_win")
     model.print_feature_importance(top_n=30)
 
-    # ---------- モデル保存 ----------
-    model.save()
+    # ---------- アーティファクト一括エクスポート（Phase 0-1 / Feature Bridge 用）----------
+    bundle_path = export_training_artifacts(
+        model,
+        processor,
+        fe,
+        feature_df,
+        target_col="target_win",
+        extra_meta={
+            "target_mode": target_mode,
+            "enable_ev_sample_weight": ENABLE_EV_SAMPLE_WEIGHT,
+            "ev_weight_center": EV_WEIGHT_CENTER,
+            "ev_weight_tau": EV_WEIGHT_TAU,
+        },
+    )
+    logger.info("Model bundle manifest: %s", bundle_path)
 
-    # ---------- processor も保存（推論時に再利用）----------
+
+def _load_target_mode() -> str:
+    bundle_path = MODEL_DIR / "model_bundle.json"
+    if not bundle_path.is_file():
+        return "win"
+    import json
+
+    try:
+        bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+        return (
+            bundle.get("extra_meta", {}).get("target_mode")
+            or bundle.get("target_mode")
+            or "win"
+        )
+    except Exception:
+        return "win"
+
+
+def _prepare_test_feature_df():
+    """simulate / optimize 共通のテスト DataFrame 構築。"""
     import pickle
-    proc_path = str(MODEL_DIR / "processor.pkl")
-    with open(proc_path, "wb") as f:
-        pickle.dump(processor, f)
-    logger.info("DataProcessor saved: %s", proc_path)
 
-    fe_path = str(MODEL_DIR / "feature_engineer.pkl")
-    with open(fe_path, "wb") as f:
-        pickle.dump(fe, f)
-    logger.info("FeatureEngineer saved: %s", fe_path)
+    model = Model.load()
+    processor = DataProcessor()
+    master_df = processor.build_master_df()
+
+    with open(MODEL_DIR / "processor.pkl", "rb") as f:
+        processor = pickle.load(f)
+    with open(MODEL_DIR / "feature_engineer.pkl", "rb") as f:
+        fe = pickle.load(f)
+
+    feature_df = fe.transform(master_df)
+    feature_df = processor.apply_label_encoders(feature_df)
+    feature_df = processor.encode_categoricals_as_category(feature_df)
+
+    target_mode = _load_target_mode()
+    if target_mode == "win_mod":
+        feature_df["target_win"] = FeatureEngineer.make_target(feature_df, target="win_mod")
+    else:
+        feature_df["target_win"] = FeatureEngineer.make_target(feature_df, target="win")
+
+    from config import resolve_test_mask
+
+    test_mask, test_label = resolve_test_mask(feature_df)
+    test_df = feature_df[test_mask].copy()
+    test_df.attrs["test_label"] = test_label
+    test_df["pred_prob"] = model.predict_proba(test_df)
+    return model, test_df, target_mode
 
 
 def cmd_simulate(args: argparse.Namespace) -> None:
     """バックテスト（シミュレーション）コマンド"""
     import pickle
 
-    # モデル読み込み
-    model = Model.load()
-
-    # データ読み込み
-    processor = DataProcessor()
-    master_df = processor.build_master_df()
-    horse_results = processor.clean_horse_results(processor.load_horse_results())
-
-    # 特徴量生成
-    proc_path = str(MODEL_DIR / "processor.pkl")
-    with open(proc_path, "rb") as f:
-        processor = pickle.load(f)
-
-    fe_path = str(MODEL_DIR / "feature_engineer.pkl")
-    with open(fe_path, "rb") as f:
-        fe = pickle.load(f)
-
-    feature_df = fe.transform(master_df)
-    feature_df = processor.apply_label_encoders(feature_df)
-    feature_df = processor.encode_categoricals_as_category(feature_df)
-    feature_df["target_win"] = FeatureEngineer.make_target(feature_df, target="win")
-
-    # テストデータのみ使用
-    from config import TEST_YEARS
-    test_df = feature_df[feature_df["race_date"].dt.year.isin(TEST_YEARS)].copy()
-    logger.info("シミュレーション対象: %d rows (years=%s)", len(test_df), TEST_YEARS)
-
-    # 予測
-    test_df["pred_prob"] = model.predict_proba(test_df)
+    model, test_df, target_mode = _prepare_test_feature_df()
+    test_label = test_df.attrs.get("test_label", "unknown")
+    logger.info(
+        "シミュレーション対象: %d rows (test_set=%s, target_mode=%s)",
+        len(test_df),
+        test_label,
+        target_mode,
+    )
 
     # キャリブレーション
     # 【重要】学習データのみでキャリブレーションを学習（データリーク防止）
@@ -176,10 +280,32 @@ def cmd_simulate(args: argparse.Namespace) -> None:
     with sqlite3.connect(str(DB_PATH)) as conn:
         payout_df = pd.read_sql("SELECT * FROM payouts", conn)
 
-    # シミュレーション実行
-    report = sim.run(test_df, payout_df, ticket_type="win")
+    # EV スイープ（単勝）— 検収チェックリスト用
+    opt = sim.optimize_threshold(
+        test_df,
+        payout_df,
+        ticket_type="win",
+        ev_range=(1.0, 3.5),
+        n_steps=40,
+    )
+    sim.plot_roi_by_threshold(
+        opt["grid_results"],
+        save_path=str(MODEL_DIR / "roi_by_threshold.png"),
+    )
 
-    # グラフ出力
+    baseline = build_baseline_report(
+        target_mode=target_mode,
+        y_true=test_df["target_win"].values,
+        y_prob=test_df["pred_prob"].values,
+        ev_grid_win=opt["grid_results"],
+        bundle_path=MODEL_DIR / "model_bundle.json",
+        test_years=test_label,
+    )
+    write_baseline_report(baseline)
+    print_baseline_summary(baseline)
+
+    # 固定閾値でのシミュレーション（参考）
+    report = sim.run(test_df, payout_df, ticket_type="win")
     sim.plot_cumulative_profit(report, save_path=str(MODEL_DIR / "cumulative_profit.png"))
 
     # ----------------------------------------------------------
@@ -196,31 +322,8 @@ def cmd_simulate(args: argparse.Namespace) -> None:
 
 
 def cmd_optimize(args: argparse.Namespace) -> None:
-    """EV閾値最適化コマンド"""
-    import pickle
-
-    model = Model.load()
-
-    processor = DataProcessor()
-    master_df = processor.build_master_df()
-    horse_results = processor.clean_horse_results(processor.load_horse_results())
-
-    proc_path = str(MODEL_DIR / "processor.pkl")
-    with open(proc_path, "rb") as f:
-        processor = pickle.load(f)
-
-    fe_path = str(MODEL_DIR / "feature_engineer.pkl")
-    with open(fe_path, "rb") as f:
-        fe = pickle.load(f)
-
-    feature_df = fe.transform(master_df)
-    feature_df = processor.apply_label_encoders(feature_df)
-    feature_df = processor.encode_categoricals_as_category(feature_df)
-    feature_df["target_win"] = FeatureEngineer.make_target(feature_df, target="win")
-
-    from config import TEST_YEARS
-    test_df = feature_df[feature_df["race_date"].dt.year.isin(TEST_YEARS)].copy()
-    test_df["pred_prob"] = model.predict_proba(test_df)
+    """EV閾値最適化コマンド（simulate と同じ baseline_report を更新）"""
+    _, test_df, target_mode = _prepare_test_feature_df()
 
     with sqlite3.connect(str(DB_PATH)) as conn:
         payout_df = pd.read_sql("SELECT * FROM payouts", conn)
@@ -232,8 +335,11 @@ def cmd_optimize(args: argparse.Namespace) -> None:
     )
 
     result = sim.optimize_threshold(
-        test_df, payout_df, ticket_type="win",
-        ev_range=(1.0, 2.5), n_steps=30,
+        test_df,
+        payout_df,
+        ticket_type="win",
+        ev_range=(1.0, 3.5),
+        n_steps=40,
     )
 
     sim.plot_roi_by_threshold(
@@ -241,9 +347,24 @@ def cmd_optimize(args: argparse.Namespace) -> None:
         save_path=str(MODEL_DIR / "roi_by_threshold.png"),
     )
 
-    print(f"\n最適EV閾値: {result['best_ev_threshold']:.2f}")
-    print(f"最大回収率: {result['best_roi']:.1f}%")
-    print("\nconfig.py の MIN_EV_THRESHOLD をこの値に更新してください。")
+    test_label = test_df.attrs.get("test_label", "unknown")
+    baseline = build_baseline_report(
+        target_mode=target_mode,
+        y_true=test_df["target_win"].values,
+        y_prob=test_df["pred_prob"].values,
+        ev_grid_win=result["grid_results"],
+        bundle_path=MODEL_DIR / "model_bundle.json",
+        test_years=test_label,
+    )
+    write_baseline_report(baseline)
+    print_baseline_summary(baseline)
+
+    print(f"\n最適EV(ROI): {result['best_ev_threshold']:.2f} → ROI {result['best_roi']:.1f}%")
+    print(
+        f"最適EV(Sharpe): {result['best_sharpe_threshold']:.2f} "
+        f"→ sharp {result['best_sharpe']:.3f}"
+    )
+    print("\nPhase3 では best_by_sharp_ratio を第一候補にしてください。")
 
 
 def cmd_predict(args: argparse.Namespace) -> None:
@@ -388,6 +509,33 @@ def main() -> None:
         help="血統の収集をスキップ",
     )
 
+    p_quick = subparsers.add_parser(
+        "collect-quick",
+        help="TS結果JSON+ゴールデンレースのみ収集（Phase0疎通用・約108レース）",
+    )
+    p_quick.add_argument(
+        "--race-id",
+        action="append",
+        dest="race_id",
+        help="追加で収集する race_id（複数可）",
+    )
+    p_quick.add_argument(
+        "--extra-years",
+        type=int,
+        nargs="+",
+        help="追加でJRA全年レースIDを日付巡回取得（例: 2024 2025）。重い",
+    )
+    p_quick.add_argument(
+        "--with-horses",
+        action="store_true",
+        help="出走馬の過去成績も収集（推奨・train前にON）",
+    )
+    p_quick.add_argument(
+        "--with-pedigree",
+        action="store_true",
+        help="血統も収集（デフォルトはスキップ）",
+    )
+
     # train
     p_train = subparsers.add_parser("train", help="モデル学習")
     p_train.add_argument(
@@ -396,12 +544,24 @@ def main() -> None:
     p_train.add_argument(
         "--n-trials", type=int, default=50, help="Optunaのトライアル数（デフォルト: 50）"
     )
+    p_train.add_argument(
+        "--target",
+        choices=["win", "win_mod"],
+        default="win",
+        help="目的変数: win=1着のみ, win_mod=実質同着も正例",
+    )
 
     # simulate
     subparsers.add_parser("simulate", help="バックテスト（シミュレーション）")
 
     # optimize
     subparsers.add_parser("optimize", help="EV閾値の最適化")
+
+    # golden-test
+    subparsers.add_parser(
+        "golden-test",
+        help="Phase1: ゴールデンレース不変性テスト（DB vs feature_bridge）",
+    )
 
     # predict
     p_predict = subparsers.add_parser("predict", help="レース予測（推論）")
@@ -411,12 +571,18 @@ def main() -> None:
 
     if args.command == "collect":
         cmd_collect(args)
+    elif args.command == "collect-quick":
+        cmd_collect_quick(args)
     elif args.command == "train":
         cmd_train(args)
     elif args.command == "simulate":
         cmd_simulate(args)
     elif args.command == "optimize":
         cmd_optimize(args)
+    elif args.command == "golden-test":
+        from golden_invariance import main as golden_main
+
+        raise SystemExit(golden_main())
     elif args.command == "predict":
         cmd_predict(args)
     else:

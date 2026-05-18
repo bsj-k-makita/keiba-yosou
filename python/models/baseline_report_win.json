@@ -1,0 +1,459 @@
+{
+  "target_mode": "win",
+  "test_years": "holdout_last_21_races",
+  "classification": {
+    "n_samples": 33,
+    "positive_rate": 0.6363636363636364,
+    "prob_floor": 0.01,
+    "mean_pred_prob": 0.633419234766969,
+    "std_pred_prob": 0.4667808476193863,
+    "auc": 1.0,
+    "logloss": 0.014729762355399773
+  },
+  "classification_all_probs": {
+    "n_samples": 265,
+    "positive_rate": 0.07924528301886792,
+    "prob_floor": 0.0,
+    "mean_pred_prob": 0.07922608729402664,
+    "std_pred_prob": 0.26612169879421604,
+    "auc": 1.0,
+    "logloss": 0.002182504127130309
+  },
+  "prob_floor_note": "本番EVは prob>=0.01 を推奨（TS bettingRules と同期）",
+  "ev_sweep": {
+    "ticket_type": "win",
+    "ev_range_note": "馬連(REN)は Python Simulator 未対応。TS側バックテストで別途検証。",
+    "grid": [
+      {
+        "ev_threshold": 1.0,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.064102564102564,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.1282051282051282,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.1923076923076923,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.2564102564102564,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.3205128205128205,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.3846153846153846,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.4487179487179487,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.5128205128205128,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.5769230769230769,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.641025641025641,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.705128205128205,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.7692307692307692,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.8333333333333333,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.8974358974358974,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 1.9615384615384615,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.0256410256410255,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.0897435897435894,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.1538461538461537,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.217948717948718,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.282051282051282,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.346153846153846,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.41025641025641,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.4743589743589745,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.5384615384615383,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.602564102564102,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.6666666666666665,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.730769230769231,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.7948717948717947,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.8589743589743586,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.923076923076923,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 2.9871794871794872,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 3.051282051282051,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 3.115384615384615,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 3.1794871794871793,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 3.2435897435897436,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 3.3076923076923075,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 3.3717948717948714,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 3.4358974358974357,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      },
+      {
+        "ev_threshold": 3.5,
+        "n_bets": 0,
+        "n_hits": 0,
+        "hit_rate": 0.0,
+        "roi": 0.0,
+        "profit": 0,
+        "std_return": 0.0,
+        "sharp_ratio": 0.0
+      }
+    ],
+    "best_by_roi": {
+      "ev_threshold": 1.0,
+      "n_bets": 0.0,
+      "n_hits": 0.0,
+      "hit_rate": 0.0,
+      "roi": 0.0,
+      "profit": 0.0,
+      "std_return": 0.0,
+      "sharp_ratio": 0.0
+    },
+    "best_by_sharp_ratio": {
+      "ev_threshold": 1.0,
+      "n_bets": 0.0,
+      "n_hits": 0.0,
+      "hit_rate": 0.0,
+      "roi": 0.0,
+      "profit": 0.0,
+      "std_return": 0.0,
+      "sharp_ratio": 0.0
+    }
+  },
+  "review_checklist": {
+    "1_sharpe_vs_roi": "best_by_sharp_ratio を Phase3 EV閾値の第一候補とする",
+    "2_logloss": "win_mod の方が logloss が低下するか target_mode 比較で確認",
+    "3_ticket_asymmetry": "単勝1.4-1.8 / 馬連2.6-3.0 は TS optimize または今後 REN 追加後に記録"
+  },
+  "model_bundle": {
+    "created_at": "2026-05-18T08:33:34+00:00",
+    "train_rows": 1459,
+    "target_mode": "win"
+  }
+}

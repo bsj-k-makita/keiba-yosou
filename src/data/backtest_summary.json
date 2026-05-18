@@ -1,116 +1,116 @@
 {
-  "totalRacesMatched": 70,
-  "totalRacesSkipped": 2,
-  "totalInvestedSum": 98600,
-  "totalPayoutSum": 50260,
-  "totalRecoveryRate": 51,
+  "totalRacesMatched": 108,
+  "totalRacesSkipped": 0,
+  "totalInvestedSum": 119600,
+  "totalPayoutSum": 71420,
+  "totalRecoveryRate": 59.7,
   "byTicketType": {
     "WIN": {
-      "invested": 7000,
-      "payout": 3630,
-      "rate": 51.9,
-      "accuracy": 12.9,
-      "hitCount": 9,
-      "betCount": 70,
+      "invested": 10800,
+      "payout": 9120,
+      "rate": 84.4,
+      "accuracy": 16.7,
+      "hitCount": 18,
+      "betCount": 108,
       "estimatedPayout": false
     },
     "MAIN_LINE": {
-      "invested": 21000,
-      "payout": 21370,
-      "rate": 101.8,
-      "accuracy": 3.8,
-      "hitCount": 8,
-      "betCount": 210,
+      "invested": 10800,
+      "payout": 13420,
+      "rate": 124.3,
+      "accuracy": 6.5,
+      "hitCount": 7,
+      "betCount": 108,
       "estimatedPayout": false
     },
     "WIDE": {
-      "invested": 42600,
-      "payout": 23700,
-      "rate": 55.6,
-      "accuracy": 7.5,
-      "hitCount": 32,
-      "betCount": 426,
+      "invested": 43200,
+      "payout": 31490,
+      "rate": 72.9,
+      "accuracy": 10.2,
+      "hitCount": 44,
+      "betCount": 432,
       "estimatedPayout": false
     },
     "TRIFECTA_FORM": {
-      "invested": 28000,
-      "payout": 1560,
-      "rate": 5.6,
-      "accuracy": 0.4,
-      "hitCount": 1,
-      "betCount": 280,
+      "invested": 54800,
+      "payout": 17390,
+      "rate": 31.7,
+      "accuracy": 1.6,
+      "hitCount": 9,
+      "betCount": 548,
       "estimatedPayout": false
     }
   },
   "byClassLevel": {
     "MAIDEN_NEW": {
-      "races": 29,
-      "invested": 41700,
-      "payout": 26800,
-      "rate": 64.3
+      "races": 46,
+      "invested": 50600,
+      "payout": 39410,
+      "rate": 77.9
     },
     "OPEN_GRADE": {
-      "races": 10,
-      "invested": 14300,
-      "payout": 8420,
-      "rate": 58.9
+      "races": 15,
+      "invested": 17200,
+      "payout": 11410,
+      "rate": 66.3
     },
     "OTHER": {
-      "races": 31,
-      "invested": 42600,
-      "payout": 15040,
-      "rate": 35.3
+      "races": 47,
+      "invested": 51800,
+      "payout": 20600,
+      "rate": 39.8
     }
   },
   "byClassTier": {
     "G1_CLASS": {
-      "races": 0,
-      "invested": 0,
+      "races": 1,
+      "invested": 1200,
       "payout": 0,
       "rate": 0
     },
     "G2_G3_CLASS": {
       "races": 3,
-      "invested": 4000,
+      "invested": 3500,
       "payout": 0,
       "rate": 0
     },
     "OPEN_LISTED": {
-      "races": 7,
-      "invested": 10300,
-      "payout": 8420,
-      "rate": 81.7
+      "races": 11,
+      "invested": 12500,
+      "payout": 11410,
+      "rate": 91.3
     },
     "CONDITIONAL_UPPER": {
-      "races": 4,
-      "invested": 5800,
-      "payout": 5080,
-      "rate": 87.6
+      "races": 6,
+      "invested": 6700,
+      "payout": 2150,
+      "rate": 32.1
     },
     "CONDITIONAL_LOWER": {
-      "races": 27,
-      "invested": 36800,
-      "payout": 9960,
-      "rate": 27.1
+      "races": 41,
+      "invested": 45100,
+      "payout": 18450,
+      "rate": 40.9
     },
     "MAIDEN_NEW": {
-      "races": 29,
-      "invested": 41700,
-      "payout": 26800,
-      "rate": 64.3
+      "races": 46,
+      "invested": 50600,
+      "payout": 39410,
+      "rate": 77.9
     }
   },
   "favoriteMark": {
-    "races": 70,
-    "winHits": 9,
-    "showHits": 25,
-    "winRate": 12.9,
-    "showRate": 35.7
+    "races": 108,
+    "winHits": 18,
+    "showHits": 39,
+    "winRate": 16.7,
+    "showRate": 36.1
   },
   "secondRowDead": {
-    "anchorSurvivedRaces": 25,
-    "secondRowDeadCount": 12,
-    "secondRowDeadRate": 48
+    "anchorSurvivedRaces": 39,
+    "secondRowDeadCount": 16,
+    "secondRowDeadRate": 41
   },
   "raceDetails": [
     {
@@ -126,39 +126,41 @@
         7,
         13
       ],
-      "finishLabel": "2(△)→7(─)→13(─)",
+      "finishLabel": "2番 ブラックバラード(☆)→7番 コスモアミマネラ(─)→13番 マグナレガリア(─)",
       "aiMarks": {
-        "1": "▲",
-        "2": "△",
+        "2": "☆",
         "3": "○",
-        "6": "☆",
-        "9": "△",
-        "10": "△",
+        "4": "▲",
+        "6": "△",
         "11": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1500,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -178,45 +180,46 @@
         2,
         8
       ],
-      "finishLabel": "3(○)→2(▲)→8(☆)",
+      "finishLabel": "3番 ベストブラザーズ(○)→2番 セブンワンダーズ(▲)→8番 ロードステラート(─)",
       "aiMarks": {
-        "1": "△",
         "2": "▲",
         "3": "○",
-        "5": "△",
+        "5": "☆",
         "6": "◎",
-        "8": "☆",
-        "9": "△",
-        "10": "△"
+        "9": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 1090,
-          "isHit": true
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
-      "totalPayout": 1090,
+      "totalInvested": 1100,
+      "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
       "isSecondRowDead": false,
-      "diagnosisLabel": "【馬連のみ】3連複は不的中"
+      "diagnosisLabel": "【軸トビ】"
     },
     {
       "raceId": "202604010303",
@@ -231,40 +234,41 @@
         14,
         13
       ],
-      "finishLabel": "15(◎)→14(─)→13(☆)",
+      "finishLabel": "15番 フレンズプラス(◎)→14番 キタノプレミアム(─)→13番 プラチナムディスク(△)",
       "aiMarks": {
-        "1": "△",
-        "3": "△",
         "8": "○",
         "9": "▲",
-        "10": "△",
-        "12": "△",
-        "13": "☆",
+        "12": "☆",
+        "13": "△",
         "15": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 340,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 710,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 1050,
       "dominantComment": "想定される特有の持続力ラップへの適合度が極めて高い。",
       "isAnchorHit": true,
@@ -284,44 +288,46 @@
         7,
         2
       ],
-      "finishLabel": "11(△)→7(─)→2(◎)",
+      "finishLabel": "11番 ルドヴィクス(─)→7番 コレクテイニア(△)→2番 スコラーリ(◎)",
       "aiMarks": {
         "2": "◎",
-        "3": "△",
         "4": "☆",
-        "5": "△",
         "6": "▲",
-        "10": "○",
-        "11": "△"
+        "7": "△",
+        "10": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
-          "payout": 500,
-          "isHit": true
+          "invested": 400,
+          "payout": 280,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 600,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
-      "totalPayout": 500,
+      "totalInvested": 1200,
+      "totalPayout": 280,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
-      "isSecondRowDead": true,
-      "diagnosisLabel": "【2列目全滅】3着にヒモ決着"
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【部分的中】"
     },
     {
       "raceId": "202604010305",
@@ -336,39 +342,41 @@
         7,
         16
       ],
-      "finishLabel": "10(─)→7(─)→16(△)",
+      "finishLabel": "10番 ソードスレイプニル(─)→7番 ハルヒメ(▲)→16番 マイネルユーゲント(☆)",
       "aiMarks": {
-        "2": "▲",
-        "3": "△",
-        "4": "△",
+        "2": "△",
         "5": "○",
-        "8": "△",
+        "7": "▲",
         "12": "◎",
-        "16": "△"
+        "16": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -388,40 +396,41 @@
         9,
         5
       ],
-      "finishLabel": "15(☆)→9(△)→5(─)",
+      "finishLabel": "15番 タイキアロハ(─)→9番 ウインマニフィーク(─)→5番 フローレンスフーガ(─)",
       "aiMarks": {
-        "3": "△",
+        "3": "☆",
         "4": "◎",
-        "6": "△",
-        "9": "△",
         "12": "△",
         "13": "○",
-        "14": "▲",
-        "15": "☆"
+        "14": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -441,39 +450,41 @@
         3,
         7
       ],
-      "finishLabel": "12(△)→3(─)→7(─)",
+      "finishLabel": "12番 ピコテンダー(─)→3番 サンライズジュピタ(─)→7番 ゼットスパンキー(─)",
       "aiMarks": {
         "2": "◎",
-        "4": "△",
-        "9": "☆",
+        "4": "☆",
+        "9": "△",
         "10": "○",
-        "12": "△",
-        "13": "△",
-        "14": "▲"
+        "11": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1500,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -493,43 +504,46 @@
         4,
         2
       ],
-      "finishLabel": "3(◎)→4(○)→2(─)",
+      "finishLabel": "3番 ヴァズレーヌ(◎)→4番 オブシディアーナ(△)→2番 ブーケドグレイス(─)",
       "aiMarks": {
-        "1": "△",
         "3": "◎",
-        "4": "○",
-        "6": "△",
-        "8": "▲",
-        "9": "☆"
+        "4": "△",
+        "5": "○",
+        "6": "☆",
+        "10": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 570,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 4560,
-          "isHit": true
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
+          "invested": 400,
           "payout": 1690,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1200,
-      "totalPayout": 6820,
+      "totalInvested": 1100,
+      "totalPayout": 2260,
       "dominantComment": "想定される特有の持続力ラップへの適合度が極めて高い。",
       "isAnchorHit": true,
-      "isSecondRowDead": false,
-      "diagnosisLabel": "【馬連のみ】3連複は不的中"
+      "isSecondRowDead": true,
+      "diagnosisLabel": "【単勝的中】"
     },
     {
       "raceId": "202604010309",
@@ -544,39 +558,41 @@
         12,
         8
       ],
-      "finishLabel": "11(△)→12(─)→8(─)",
+      "finishLabel": "11番 トップアタック(─)→12番 デンプシー(─)→8番 マナボニート(▲)",
       "aiMarks": {
-        "1": "△",
         "5": "○",
-        "9": "☆",
+        "8": "▲",
+        "9": "△",
         "10": "◎",
-        "11": "△",
-        "13": "▲",
-        "14": "△"
+        "13": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -596,40 +612,41 @@
         8,
         7
       ],
-      "finishLabel": "3(△)→8(─)→7(─)",
+      "finishLabel": "3番 スピンザブラッド(☆)→8番 ゴーゴータカシ(─)→7番 サトノラポール(─)",
       "aiMarks": {
         "1": "▲",
-        "2": "☆",
-        "3": "△",
+        "2": "△",
+        "3": "☆",
         "4": "○",
-        "5": "◎",
-        "6": "△",
-        "11": "△",
-        "12": "△"
+        "5": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -649,39 +666,41 @@
         12,
         15
       ],
-      "finishLabel": "16(─)→12(△)→15(─)",
+      "finishLabel": "16番 シュラフ(─)→12番 ロードトレイル(─)→15番 カウスリップ(─)",
       "aiMarks": {
-        "3": "☆",
-        "5": "△",
-        "7": "△",
+        "1": "▲",
+        "3": "△",
+        "5": "☆",
         "8": "○",
-        "12": "△",
-        "13": "◎",
-        "14": "▲"
+        "13": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 600,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1200,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -701,40 +720,41 @@
         8,
         3
       ],
-      "finishLabel": "11(─)→8(△)→3(▲)",
+      "finishLabel": "11番 ハイクオリティ(─)→8番 カレンラップスター(☆)→3番 タルタロス(▲)",
       "aiMarks": {
         "1": "◎",
         "2": "○",
         "3": "▲",
-        "4": "△",
-        "5": "△",
-        "7": "☆",
-        "8": "△",
-        "12": "△"
+        "7": "△",
+        "8": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -754,39 +774,41 @@
         7,
         8
       ],
-      "finishLabel": "4(○)→7(◎)→8(─)",
+      "finishLabel": "4番 ハイロード(○)→7番 クリムゾンリーフ(◎)→8番 ストロングボーイ(─)",
       "aiMarks": {
-        "3": "△",
+        "3": "☆",
         "4": "○",
-        "6": "☆",
+        "6": "△",
         "7": "◎",
-        "10": "△",
-        "11": "▲",
-        "12": "△"
+        "11": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 1540,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 560,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 2100,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
@@ -806,38 +828,41 @@
         12,
         3
       ],
-      "finishLabel": "14(─)→12(─)→3(☆)",
+      "finishLabel": "14番 シュヴァルツシルト(○)→12番 ナムラロダン(▲)→3番 フィールマイプラン(─)",
       "aiMarks": {
-        "2": "○",
-        "3": "☆",
+        "2": "☆",
         "6": "△",
-        "8": "▲",
-        "9": "△",
-        "13": "◎"
+        "12": "▲",
+        "13": "◎",
+        "14": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1400,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -857,38 +882,41 @@
         9,
         11
       ],
-      "finishLabel": "14(○)→9(─)→11(─)",
+      "finishLabel": "14番 ミラキュラスアース(─)→9番 バンオンタイム(▲)→11番 ドラリズム(─)",
       "aiMarks": {
+        "2": "☆",
         "3": "△",
         "4": "◎",
-        "8": "△",
-        "12": "▲",
-        "14": "○",
-        "16": "△"
+        "5": "○",
+        "9": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1200,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -908,39 +936,42 @@
         8,
         10
       ],
-      "finishLabel": "11(◎)→8(△)→10(△)",
+      "finishLabel": "11番 ボールドタワー(◎)→8番 テリコス(☆)→10番 ワンダーブリッツ(─)",
       "aiMarks": {
-        "3": "▲",
-        "5": "○",
-        "8": "△",
-        "9": "△",
-        "10": "△",
+        "4": "▲",
+        "5": "△",
+        "7": "○",
+        "8": "☆",
         "11": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 310,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
-          "payout": 890,
-          "isHit": true
+          "invested": 400,
+          "payout": 720,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1200,
-      "totalPayout": 1200,
+      "totalInvested": 1100,
+      "totalPayout": 1030,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": true,
@@ -959,40 +990,41 @@
         9,
         11
       ],
-      "finishLabel": "1(△)→9(▲)→11(△)",
+      "finishLabel": "1番 アナザーフェイス(─)→9番 トリニタリオ(▲)→11番 コーディアリー(☆)",
       "aiMarks": {
-        "1": "△",
         "3": "◎",
-        "4": "☆",
         "9": "▲",
         "10": "△",
-        "11": "△",
-        "14": "○",
-        "15": "△"
+        "11": "☆",
+        "14": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1012,39 +1044,41 @@
         16,
         15
       ],
-      "finishLabel": "1(☆)→16(─)→15(△)",
+      "finishLabel": "1番 アカウフリューゲル(─)→16番 リュウセイコウテイ(─)→15番 ミルトメロディー(☆)",
       "aiMarks": {
-        "1": "☆",
         "2": "○",
-        "7": "△",
-        "8": "▲",
         "10": "△",
+        "11": "▲",
         "13": "◎",
-        "15": "△"
+        "15": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1500,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1064,39 +1098,41 @@
         12,
         13
       ],
-      "finishLabel": "9(─)→12(─)→13(─)",
+      "finishLabel": "9番 シャンハイナイト(─)→12番 オースミライト(─)→13番 アルバニー(─)",
       "aiMarks": {
+        "1": "▲",
         "2": "◎",
-        "3": "△",
-        "4": "△",
+        "3": "☆",
         "6": "○",
-        "7": "▲",
-        "10": "☆",
-        "11": "△"
+        "10": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1500,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1116,38 +1152,41 @@
         7,
         5
       ],
-      "finishLabel": "9(△)→7(─)→5(☆)",
+      "finishLabel": "9番 ファルコンミノル(─)→7番 ザラタン(─)→5番 ダノンヴェステル(△)",
       "aiMarks": {
-        "1": "○",
-        "2": "▲",
-        "3": "△",
-        "5": "☆",
+        "1": "▲",
+        "2": "☆",
+        "5": "△",
         "6": "◎",
-        "9": "△"
+        "8": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1200,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1167,44 +1206,46 @@
         6,
         14
       ],
-      "finishLabel": "12(▲)→6(△)→14(◎)",
+      "finishLabel": "12番 ルールーリマ(─)→6番 シェーンシュティア(─)→14番 キアラメンテ(◎)",
       "aiMarks": {
-        "4": "☆",
-        "5": "△",
-        "6": "△",
+        "4": "△",
         "8": "○",
-        "12": "▲",
+        "10": "▲",
         "14": "◎",
-        "16": "△"
+        "16": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
-          "payout": 980,
-          "isHit": true
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1500,
-      "totalPayout": 980,
+      "totalInvested": 1100,
+      "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
-      "isSecondRowDead": false,
-      "diagnosisLabel": "【部分的中】"
+      "isSecondRowDead": true,
+      "diagnosisLabel": "【2列目全滅】3着にヒモ決着"
     },
     {
       "raceId": "202604010510",
@@ -1219,40 +1260,41 @@
         8,
         2
       ],
-      "finishLabel": "1(○)→8(─)→2(▲)",
+      "finishLabel": "1番 アークドール(○)→8番 ディアウス(─)→2番 ブレトワルダ(▲)",
       "aiMarks": {
         "1": "○",
         "2": "▲",
-        "3": "△",
         "4": "◎",
-        "5": "△",
-        "6": "☆",
-        "7": "△",
-        "9": "△"
+        "5": "☆",
+        "6": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1272,14 +1314,11 @@
         11,
         9
       ],
-      "finishLabel": "3(▲)→11(─)→9(─)",
+      "finishLabel": "3番 グランディア(▲)→11番 バレエマスター(─)→9番 フクノブルーレイク(─)",
       "aiMarks": {
-        "1": "△",
         "3": "▲",
         "4": "○",
-        "5": "△",
-        "8": "☆",
-        "10": "△",
+        "5": "☆",
         "12": "◎",
         "15": "△"
       },
@@ -1287,25 +1326,29 @@
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 600,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1700,
+      "totalInvested": 1200,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1325,45 +1368,706 @@
         11,
         13
       ],
-      "finishLabel": "10(△)→11(△)→13(△)",
+      "finishLabel": "10番 サンタアニタ(─)→11番 ワンコールアウェイ(─)→13番 シュードタキライト(△)",
       "aiMarks": {
         "1": "○",
-        "3": "☆",
+        "2": "☆",
         "5": "▲",
         "6": "◎",
-        "10": "△",
-        "11": "△",
-        "13": "△",
-        "16": "△"
+        "13": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
       "isSecondRowDead": false,
       "diagnosisLabel": "【軸トビ】"
+    },
+    {
+      "raceId": "202604010601",
+      "raceName": "4歳以上障害未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "新潟",
+      "raceNumber": 1,
+      "date": "2026-05-17",
+      "actualResults": [
+        6,
+        11,
+        3
+      ],
+      "finishLabel": "6番 ライツフォル(─)→11番 トーアマリシテン(─)→3番 ゲレル(─)",
+      "aiMarks": {
+        "1": "☆",
+        "2": "○",
+        "5": "△",
+        "7": "◎",
+        "8": "▲"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010602",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "新潟",
+      "raceNumber": 2,
+      "date": "2026-05-17",
+      "actualResults": [
+        6,
+        7,
+        1
+      ],
+      "finishLabel": "6番 エタンセル(◎)→7番 アデルフィー(☆)→1番 ナウオアネヴァー(○)",
+      "aiMarks": {
+        "1": "○",
+        "2": "△",
+        "3": "▲",
+        "6": "◎",
+        "7": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 190,
+          "isHit": true,
+          "formationHit": true
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 260,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 250,
+          "isHit": true,
+          "formationHit": true
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 700,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印3連複的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010603",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "新潟",
+      "raceNumber": 3,
+      "date": "2026-05-17",
+      "actualResults": [
+        10,
+        6,
+        12
+      ],
+      "finishLabel": "10番 マジンタクシー(○)→6番 マリリンバローズ(▲)→12番 エコロセレナ(◎)",
+      "aiMarks": {
+        "2": "△",
+        "6": "▲",
+        "10": "○",
+        "12": "◎",
+        "15": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 620,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 970,
+          "isHit": true,
+          "formationHit": true
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 1590,
+      "dominantComment": "現在のイン有利バイアスに内枠が合致。鞍上強化も含め勝負気配高。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印3連複的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010604",
+      "raceName": "4歳以上障害未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "新潟",
+      "raceNumber": 4,
+      "date": "2026-05-17",
+      "actualResults": [
+        8,
+        12,
+        7
+      ],
+      "finishLabel": "8番 ヴェールランス(─)→12番 アルヴィア(─)→7番 ガストン(▲)",
+      "aiMarks": {
+        "6": "○",
+        "7": "▲",
+        "9": "△",
+        "10": "☆",
+        "11": "◎"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010605",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "新潟",
+      "raceNumber": 5,
+      "date": "2026-05-17",
+      "actualResults": [
+        13,
+        4,
+        10
+      ],
+      "finishLabel": "13番 レゼルフォート(△)→4番 ラップトップ(▲)→10番 コスモアミュレット(─)",
+      "aiMarks": {
+        "1": "○",
+        "4": "▲",
+        "8": "◎",
+        "9": "☆",
+        "13": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010606",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "新潟",
+      "raceNumber": 6,
+      "date": "2026-05-17",
+      "actualResults": [
+        3,
+        5,
+        4
+      ],
+      "finishLabel": "3番 オーケーリアン(▲)→5番 サイモンセレーノ(△)→4番 ブエノスオプティマ(○)",
+      "aiMarks": {
+        "1": "☆",
+        "2": "◎",
+        "3": "▲",
+        "4": "○",
+        "5": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "現在のイン有利バイアスに内枠が合致。鞍上強化も含め勝負気配高。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010607",
+      "raceName": "4歳以上1勝クラス",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "新潟",
+      "raceNumber": 7,
+      "date": "2026-05-17",
+      "actualResults": [
+        8,
+        4,
+        12
+      ],
+      "finishLabel": "8番 ベネスピラ(○)→4番 コスモアチーブ(▲)→12番 ダノンアトラス(─)",
+      "aiMarks": {
+        "1": "△",
+        "4": "▲",
+        "8": "○",
+        "9": "◎",
+        "11": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010608",
+      "raceName": "4歳以上1勝クラス",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "新潟",
+      "raceNumber": 8,
+      "date": "2026-05-17",
+      "actualResults": [
+        10,
+        8,
+        2
+      ],
+      "finishLabel": "10番 ゴルデールスカー(─)→8番 アバレリュウ(─)→2番 ココデイック(○)",
+      "aiMarks": {
+        "1": "☆",
+        "2": "○",
+        "3": "▲",
+        "4": "◎",
+        "7": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "現在のイン有利バイアスに内枠が合致。鞍上強化も含め勝負気配高。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010609",
+      "raceName": "飛竜特別",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "新潟",
+      "raceNumber": 9,
+      "date": "2026-05-17",
+      "actualResults": [
+        7,
+        8,
+        13
+      ],
+      "finishLabel": "7番 ラヴェンデル(─)→8番 ブラックティンカー(○)→13番 グランプレジール(─)",
+      "aiMarks": {
+        "2": "△",
+        "4": "◎",
+        "8": "○",
+        "11": "☆",
+        "12": "▲"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010610",
+      "raceName": "信濃川特別",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "新潟",
+      "raceNumber": 10,
+      "date": "2026-05-17",
+      "actualResults": [
+        14,
+        4,
+        1
+      ],
+      "finishLabel": "14番 マリアイリダータ(▲)→4番 ホウオウシンデレラ(─)→1番 コンフォルツァ(○)",
+      "aiMarks": {
+        "1": "○",
+        "10": "☆",
+        "11": "△",
+        "14": "▲",
+        "15": "◎"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010611",
+      "raceName": "弥彦S",
+      "classTier": "OPEN_LISTED",
+      "classTierLabel": "OP・リステッド",
+      "venue": "新潟",
+      "raceNumber": 11,
+      "date": "2026-05-17",
+      "actualResults": [
+        6,
+        15,
+        13
+      ],
+      "finishLabel": "6番 エストゥペンダ(◎)→15番 ガジュノリ(─)→13番 タイキラフター(─)",
+      "aiMarks": {
+        "3": "○",
+        "6": "◎",
+        "9": "△",
+        "11": "☆",
+        "16": "▲"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 210,
+          "isHit": true,
+          "formationHit": true
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 600,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1200,
+      "totalPayout": 210,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": true,
+      "isSecondRowDead": true,
+      "diagnosisLabel": "【印単勝的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202604010612",
+      "raceName": "4歳以上1勝クラス",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "新潟",
+      "raceNumber": 12,
+      "date": "2026-05-17",
+      "actualResults": [
+        10,
+        9,
+        7
+      ],
+      "finishLabel": "10番 スーパーバイザー(◎)→9番 ティピティーナ(○)→7番 エルムラント(▲)",
+      "aiMarks": {
+        "6": "☆",
+        "7": "▲",
+        "8": "△",
+        "9": "○",
+        "10": "◎"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 480,
+          "isHit": true,
+          "formationHit": true
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 2730,
+          "isHit": true,
+          "formationHit": true
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 1490,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 4770,
+          "isHit": true,
+          "formationHit": true
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 9470,
+      "dominantComment": "現在のイン有利バイアスに内枠が合致。鞍上強化も含め勝負気配高。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印3連複的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
     },
     {
       "raceId": "202605020501",
@@ -1378,43 +2082,46 @@
         16,
         8
       ],
-      "finishLabel": "14(─)→16(◎)→8(○)",
+      "finishLabel": "14番 ショコラキュイ(○)→16番 フェイスリフト(◎)→8番 コウソクルリアン(☆)",
       "aiMarks": {
-        "2": "▲",
-        "5": "△",
-        "8": "○",
-        "12": "☆",
-        "13": "△",
+        "4": "▲",
+        "8": "☆",
+        "12": "△",
+        "14": "○",
         "16": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
+          "invested": 100,
+          "payout": 540,
+          "isHit": true,
+          "formationHit": true
         },
         "WIDE": {
-          "invested": 500,
-          "payout": 270,
-          "isHit": true
+          "invested": 400,
+          "payout": 520,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
+          "invested": 500,
+          "payout": 800,
+          "isHit": true,
+          "formationHit": true
         }
       },
-      "totalInvested": 1200,
-      "totalPayout": 270,
+      "totalInvested": 1100,
+      "totalPayout": 1860,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": false,
-      "diagnosisLabel": "【部分的中】"
+      "diagnosisLabel": "【完璧】3連複的中"
     },
     {
       "raceId": "202605020502",
@@ -1429,45 +2136,46 @@
         5,
         11
       ],
-      "finishLabel": "6(▲)→5(◎)→11(─)",
+      "finishLabel": "6番 ソニックキャット(▲)→5番 ユイノサダハル(◎)→11番 コスモラムバック(─)",
       "aiMarks": {
-        "1": "△",
-        "2": "△",
-        "3": "△",
+        "3": "☆",
         "5": "◎",
         "6": "▲",
-        "8": "△",
-        "9": "☆",
+        "9": "△",
         "10": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 6540,
-          "isHit": true
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 1810,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
-      "totalPayout": 8350,
+      "totalInvested": 1100,
+      "totalPayout": 1810,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": false,
-      "diagnosisLabel": "【馬連のみ】3連複は不的中"
+      "diagnosisLabel": "【部分的中】"
     },
     {
       "raceId": "202605020503",
@@ -1482,40 +2190,41 @@
         6,
         9
       ],
-      "finishLabel": "13(─)→6(△)→9(▲)",
+      "finishLabel": "13番 アンシュウマト(─)→6番 ロイヤルアデレード(─)→9番 トルネードアイル(▲)",
       "aiMarks": {
-        "3": "△",
-        "5": "☆",
-        "6": "△",
+        "3": "☆",
         "9": "▲",
         "12": "○",
         "14": "△",
-        "15": "△",
         "16": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1535,44 +2244,46 @@
         3,
         6
       ],
-      "finishLabel": "4(◎)→3(─)→6(▲)",
+      "finishLabel": "4番 ニシノヒノトリ(◎)→3番 ボンボンベイビー(△)→6番 ガードオブオナー(○)",
       "aiMarks": {
-        "2": "○",
+        "2": "☆",
+        "3": "△",
         "4": "◎",
-        "6": "▲",
-        "7": "△",
-        "8": "△",
-        "9": "△",
-        "10": "△"
+        "6": "○",
+        "10": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 270,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
-          "payout": 160,
-          "isHit": true
+          "invested": 400,
+          "payout": 1800,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
+          "invested": 500,
+          "payout": 3090,
+          "isHit": true,
+          "formationHit": true
         }
       },
-      "totalInvested": 1300,
-      "totalPayout": 430,
+      "totalInvested": 1100,
+      "totalPayout": 5160,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": false,
-      "diagnosisLabel": "【単勝的中】"
+      "diagnosisLabel": "【完璧】3連複的中"
     },
     {
       "raceId": "202605020505",
@@ -1587,40 +2298,41 @@
         14,
         11
       ],
-      "finishLabel": "13(☆)→14(─)→11(○)",
+      "finishLabel": "13番 カズノダイジョウ(─)→14番 シャインアルプス(─)→11番 ワディアルリヤハ(○)",
       "aiMarks": {
         "1": "◎",
-        "4": "△",
-        "6": "△",
         "7": "▲",
+        "8": "☆",
         "9": "△",
-        "11": "○",
-        "13": "☆",
-        "18": "△"
+        "11": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1640,38 +2352,41 @@
         6,
         12
       ],
-      "finishLabel": "11(△)→6(─)→12(─)",
+      "finishLabel": "11番 リッツパーティー(─)→6番 ホールドザデイ(─)→12番 アメテュストス(▲)",
       "aiMarks": {
-        "3": "▲",
-        "4": "△",
-        "5": "△",
+        "2": "△",
+        "3": "☆",
         "7": "○",
         "8": "◎",
-        "11": "△"
+        "12": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
-        },
-        "WIDE": {
-          "invested": 500,
-          "payout": 0,
-          "isHit": false
-        },
-        "TRIFECTA_FORM": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1000,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1691,39 +2406,41 @@
         14,
         11
       ],
-      "finishLabel": "10(─)→14(☆)→11(△)",
+      "finishLabel": "10番 マウントバーノン(─)→14番 ローズマイスター(─)→11番 タケルゴールド(─)",
       "aiMarks": {
-        "1": "△",
+        "2": "▲",
         "3": "◎",
         "7": "○",
-        "8": "▲",
-        "9": "△",
-        "11": "△",
-        "14": "☆"
+        "8": "☆",
+        "12": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1743,43 +2460,46 @@
         2,
         6
       ],
-      "finishLabel": "8(◎)→2(▲)→6(△)",
+      "finishLabel": "8番 ショウナンマクベス(◎)→2番 ウィッシュツリー(▲)→6番 カリーニョ(─)",
       "aiMarks": {
         "1": "○",
         "2": "▲",
-        "3": "☆",
-        "5": "△",
-        "6": "△",
+        "3": "△",
+        "5": "☆",
         "8": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 570,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 700,
-          "isHit": true
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
-          "payout": 290,
-          "isHit": true
+          "invested": 400,
+          "payout": 150,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1400,
-      "totalPayout": 1560,
+      "totalInvested": 1100,
+      "totalPayout": 720,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": false,
-      "diagnosisLabel": "【馬連のみ】3連複は不的中"
+      "diagnosisLabel": "【単勝的中】"
     },
     {
       "raceId": "202605020509",
@@ -1794,40 +2514,41 @@
         8,
         3
       ],
-      "finishLabel": "7(△)→8(△)→3(▲)",
+      "finishLabel": "7番 アンパドゥ(─)→8番 アウフヘーベン(─)→3番 マテンロウブラボー(▲)",
       "aiMarks": {
-        "1": "△",
+        "1": "☆",
         "2": "○",
         "3": "▲",
-        "4": "△",
-        "5": "☆",
-        "7": "△",
-        "8": "△",
+        "5": "△",
         "11": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1847,45 +2568,47 @@
         2,
         4
       ],
-      "finishLabel": "10(─)→2(△)→4(▲)",
+      "finishLabel": "10番 ドンエレクトス(─)→2番 マクリール(─)→4番 エコロシード(─)",
       "aiMarks": {
-        "2": "△",
-        "4": "▲",
+        "8": "☆",
         "9": "○",
-        "11": "△",
-        "12": "☆",
+        "12": "△",
         "13": "◎",
-        "14": "△",
-        "15": "△"
+        "15": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
       "isSecondRowDead": false,
-      "diagnosisLabel": "【軸トビ】"
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
     },
     {
       "raceId": "202605020511",
@@ -1900,38 +2623,41 @@
         16,
         17
       ],
-      "finishLabel": "11(△)→16(─)→17(─)",
+      "finishLabel": "11番 トロヴァトーレ(─)→16番 ステレンボッシュ(─)→17番 レガーロデルシエロ(─)",
       "aiMarks": {
-        "3": "▲",
+        "2": "▲",
+        "3": "☆",
         "4": "◎",
         "5": "○",
-        "10": "△",
-        "11": "△",
-        "12": "△"
+        "6": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
-        },
-        "WIDE": {
-          "invested": 500,
-          "payout": 0,
-          "isHit": false
-        },
-        "TRIFECTA_FORM": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 600,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1000,
+      "totalInvested": 1200,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -1951,45 +2677,46 @@
         11,
         12
       ],
-      "finishLabel": "3(▲)→11(○)→12(─)",
+      "finishLabel": "3番 モーニングマジック(△)→11番 フィドルファドル(○)→12番 ベルブリエ(─)",
       "aiMarks": {
-        "1": "△",
-        "3": "▲",
+        "3": "△",
         "5": "☆",
-        "6": "△",
-        "7": "△",
+        "6": "▲",
         "9": "◎",
-        "11": "○",
-        "16": "△"
+        "11": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 1910,
-          "isHit": true
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 500,
+          "invested": 600,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
-      "totalPayout": 1910,
+      "totalInvested": 1200,
+      "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
       "isSecondRowDead": false,
-      "diagnosisLabel": "【馬連のみ】3連複は不的中"
+      "diagnosisLabel": "【軸トビ】"
     },
     {
       "raceId": "202605020701",
@@ -2004,40 +2731,41 @@
         10,
         3
       ],
-      "finishLabel": "1(▲)→10(△)→3(△)",
+      "finishLabel": "1番 オーシャンステラ(▲)→10番 カーボフリオ(☆)→3番 メリティス(─)",
       "aiMarks": {
         "1": "▲",
-        "3": "△",
         "4": "◎",
-        "5": "△",
         "7": "○",
-        "10": "△",
-        "11": "△",
-        "14": "☆"
+        "10": "☆",
+        "14": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2057,39 +2785,41 @@
         5,
         14
       ],
-      "finishLabel": "13(─)→5(▲)→14(△)",
+      "finishLabel": "13番 ターフクリスタル(─)→5番 アオイミズホ(▲)→14番 エターナルホープ(─)",
       "aiMarks": {
         "3": "○",
-        "4": "△",
         "5": "▲",
-        "6": "△",
-        "8": "☆",
+        "8": "△",
         "10": "◎",
-        "14": "△"
+        "11": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2109,41 +2839,42 @@
         12,
         16
       ],
-      "finishLabel": "10(◎)→12(☆)→16(△)",
+      "finishLabel": "10番 アヴァランチ(◎)→12番 ヴィスクレス(─)→16番 レイズレガシー(△)",
       "aiMarks": {
-        "3": "△",
-        "7": "△",
+        "7": "☆",
         "8": "▲",
-        "9": "△",
         "10": "◎",
         "11": "○",
-        "12": "☆",
         "16": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 280,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
-          "payout": 1170,
-          "isHit": true
+          "invested": 400,
+          "payout": 490,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
-      "totalPayout": 1450,
+      "totalInvested": 1100,
+      "totalPayout": 770,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": true,
@@ -2162,38 +2893,41 @@
         4,
         12
       ],
-      "finishLabel": "8(△)→4(─)→12(○)",
+      "finishLabel": "8番 カンティーナ(─)→4番 ヒシナスキロ(─)→12番 ブライトエアリー(△)",
       "aiMarks": {
         "1": "◎",
-        "7": "△",
-        "8": "△",
-        "10": "▲",
-        "12": "○",
-        "13": "△"
+        "2": "○",
+        "5": "▲",
+        "7": "☆",
+        "12": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1200,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2213,40 +2947,41 @@
         12,
         2
       ],
-      "finishLabel": "10(─)→12(◎)→2(☆)",
+      "finishLabel": "10番 エラルディーク(─)→12番 レヴェランジェ(◎)→2番 ハニージョー(△)",
       "aiMarks": {
-        "2": "☆",
-        "4": "△",
+        "2": "△",
+        "4": "☆",
         "7": "▲",
         "9": "○",
-        "12": "◎",
-        "13": "△",
-        "17": "△",
-        "18": "△"
+        "12": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 230,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 230,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
@@ -2266,14 +3001,11 @@
         4,
         8
       ],
-      "finishLabel": "3(△)→4(☆)→8(◎)",
+      "finishLabel": "3番 マジョレルブルー(─)→4番 イブキ(△)→8番 ブラウンバナナ(◎)",
       "aiMarks": {
-        "1": "△",
         "2": "○",
-        "3": "△",
-        "4": "☆",
-        "5": "△",
-        "6": "△",
+        "4": "△",
+        "5": "☆",
         "7": "▲",
         "8": "◎"
       },
@@ -2281,26 +3013,30 @@
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
-          "payout": 480,
-          "isHit": true
+          "invested": 400,
+          "payout": 240,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
-      "totalPayout": 480,
+      "totalInvested": 1100,
+      "totalPayout": 240,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": true,
@@ -2319,39 +3055,41 @@
         13,
         4
       ],
-      "finishLabel": "9(─)→13(△)→4(─)",
+      "finishLabel": "9番 ショーリバース(○)→13番 ムテキシャチョウ(─)→4番 エアサロメ(─)",
       "aiMarks": {
-        "1": "△",
-        "3": "▲",
-        "6": "△",
+        "3": "△",
         "8": "◎",
-        "10": "△",
-        "13": "△",
-        "14": "○"
+        "9": "○",
+        "10": "☆",
+        "14": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2371,40 +3109,41 @@
         14,
         15
       ],
-      "finishLabel": "1(△)→14(─)→15(△)",
+      "finishLabel": "1番 ノアヴィヴァーチェ(─)→14番 コッレヴェッキオ(─)→15番 ハクシンブライアン(─)",
       "aiMarks": {
-        "1": "△",
-        "2": "▲",
+        "2": "○",
         "3": "△",
         "4": "◎",
-        "7": "○",
-        "11": "☆",
-        "12": "△",
-        "15": "△"
+        "6": "☆",
+        "7": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2424,13 +3163,11 @@
         3,
         5
       ],
-      "finishLabel": "7(─)→3(△)→5(☆)",
+      "finishLabel": "7番 ヴォンフレ(─)→3番 シャンソンドール(☆)→5番 ミーントゥビー(△)",
       "aiMarks": {
-        "1": "△",
         "2": "▲",
-        "3": "△",
-        "4": "△",
-        "5": "☆",
+        "3": "☆",
+        "5": "△",
         "6": "◎",
         "8": "○"
       },
@@ -2438,25 +3175,29 @@
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1500,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2476,39 +3217,41 @@
         6,
         12
       ],
-      "finishLabel": "8(△)→6(○)→12(△)",
+      "finishLabel": "8番 メリディアンスター(▲)→6番 ベラジオワールド(△)→12番 レーティッシュ(─)",
       "aiMarks": {
         "1": "☆",
-        "3": "▲",
-        "6": "○",
-        "8": "△",
+        "6": "△",
+        "8": "▲",
         "9": "◎",
-        "11": "△",
-        "12": "△"
+        "10": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1500,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2528,38 +3271,41 @@
         8,
         4
       ],
-      "finishLabel": "7(○)→8(─)→4(◎)",
+      "finishLabel": "7番 キングスコール(☆)→8番 スピードリッチ(─)→4番 ハーツコンチェルト(◎)",
       "aiMarks": {
-        "2": "△",
+        "1": "○",
         "4": "◎",
-        "5": "△",
-        "7": "○",
-        "10": "△",
-        "12": "▲"
+        "7": "☆",
+        "11": "▲",
+        "12": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
-        },
-        "WIDE": {
-          "invested": 500,
-          "payout": 2040,
-          "isHit": true
-        },
-        "TRIFECTA_FORM": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 2040,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1000,
+      "totalInvested": 1100,
       "totalPayout": 2040,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
@@ -2579,44 +3325,706 @@
         9,
         11
       ],
-      "finishLabel": "4(─)→9(△)→11(─)",
+      "finishLabel": "4番 チギリ(─)→9番 ケープウィッカム(☆)→11番 プルーヴンウィナー(─)",
       "aiMarks": {
         "3": "◎",
         "7": "○",
-        "8": "△",
-        "9": "△",
-        "10": "☆",
-        "12": "△",
+        "9": "☆",
+        "10": "△",
         "14": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
       "isSecondRowDead": false,
       "diagnosisLabel": "【軸トビ】"
+    },
+    {
+      "raceId": "202605020801",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "東京",
+      "raceNumber": 1,
+      "date": "2026-05-17",
+      "actualResults": [
+        2,
+        13,
+        4
+      ],
+      "finishLabel": "2番 ミライヘノティアラ(◎)→13番 ビレッジルイーザ(○)→4番 イデアクリスタル(─)",
+      "aiMarks": {
+        "1": "☆",
+        "2": "◎",
+        "3": "△",
+        "8": "▲",
+        "13": "○"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 630,
+          "isHit": true,
+          "formationHit": true
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 3890,
+          "isHit": true,
+          "formationHit": true
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 1280,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 5800,
+      "dominantComment": "前傾ラップの激流想定。先行勢自滅時の差し馬の網に最も引っかかる。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印馬連的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020802",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "東京",
+      "raceNumber": 2,
+      "date": "2026-05-17",
+      "actualResults": [
+        14,
+        5,
+        4
+      ],
+      "finishLabel": "14番 デスサイズ(☆)→5番 マナイアカラニ(◎)→4番 エルアン(○)",
+      "aiMarks": {
+        "1": "△",
+        "4": "○",
+        "5": "◎",
+        "10": "▲",
+        "14": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 1790,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 2560,
+          "isHit": true,
+          "formationHit": true
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 4350,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印3連複的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020803",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "東京",
+      "raceNumber": 3,
+      "date": "2026-05-17",
+      "actualResults": [
+        4,
+        2,
+        9
+      ],
+      "finishLabel": "4番 エクストラプッシュ(◎)→2番 ブルーフレア(○)→9番 ネイティヴプライド(─)",
+      "aiMarks": {
+        "1": "△",
+        "2": "○",
+        "4": "◎",
+        "7": "☆",
+        "8": "▲"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 230,
+          "isHit": true,
+          "formationHit": true
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 520,
+          "isHit": true,
+          "formationHit": true
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 230,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 980,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印馬連的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020804",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "東京",
+      "raceNumber": 4,
+      "date": "2026-05-17",
+      "actualResults": [
+        16,
+        4,
+        9
+      ],
+      "finishLabel": "16番 クカイリモク(─)→4番 ニシノマルガリート(─)→9番 イニスフェイル(─)",
+      "aiMarks": {
+        "1": "○",
+        "2": "▲",
+        "5": "◎",
+        "6": "△",
+        "15": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "前傾ラップの激流想定。先行勢自滅時の差し馬の網に最も引っかかる。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020805",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "東京",
+      "raceNumber": 5,
+      "date": "2026-05-17",
+      "actualResults": [
+        5,
+        6,
+        11
+      ],
+      "finishLabel": "5番 ウルフマン(△)→6番 クリスタルドレス(─)→11番 ショウナンマルチ(─)",
+      "aiMarks": {
+        "1": "◎",
+        "3": "▲",
+        "5": "△",
+        "9": "○",
+        "10": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "前傾ラップの激流想定。先行勢自滅時の差し馬の網に最も引っかかる。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020806",
+      "raceName": "3歳1勝クラス",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "東京",
+      "raceNumber": 6,
+      "date": "2026-05-17",
+      "actualResults": [
+        6,
+        1,
+        7
+      ],
+      "finishLabel": "6番 ジュワネング(─)→1番 ヴンダーバール(○)→7番 ワイズギャング(△)",
+      "aiMarks": {
+        "1": "○",
+        "3": "☆",
+        "4": "▲",
+        "5": "◎",
+        "7": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020807",
+      "raceName": "3歳1勝クラス",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "東京",
+      "raceNumber": 7,
+      "date": "2026-05-17",
+      "actualResults": [
+        2,
+        5,
+        6
+      ],
+      "finishLabel": "2番 トミーバローズ(◎)→5番 ヴァロアーク(─)→6番 タイセイフレッサ(○)",
+      "aiMarks": {
+        "1": "☆",
+        "2": "◎",
+        "4": "▲",
+        "6": "○",
+        "7": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 390,
+          "isHit": true,
+          "formationHit": true
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 500,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 890,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印単勝的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020808",
+      "raceName": "4歳以上1勝クラス",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "東京",
+      "raceNumber": 8,
+      "date": "2026-05-17",
+      "actualResults": [
+        5,
+        8,
+        11
+      ],
+      "finishLabel": "5番 ディープキング(○)→8番 エデルクローネ(△)→11番 ウインファヴォリ(─)",
+      "aiMarks": {
+        "2": "▲",
+        "3": "☆",
+        "5": "○",
+        "8": "△",
+        "10": "◎"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020809",
+      "raceName": "テレ玉杯",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "東京",
+      "raceNumber": 9,
+      "date": "2026-05-17",
+      "actualResults": [
+        12,
+        1,
+        7
+      ],
+      "finishLabel": "12番 エルマーゴ(─)→1番 オリバナム(▲)→7番 ミッキースターダム(─)",
+      "aiMarks": {
+        "1": "▲",
+        "3": "○",
+        "4": "◎",
+        "9": "△",
+        "11": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020810",
+      "raceName": "青梅特別",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "東京",
+      "raceNumber": 10,
+      "date": "2026-05-17",
+      "actualResults": [
+        7,
+        13,
+        8
+      ],
+      "finishLabel": "7番 トルショー(─)→13番 トラヴェリンバンド(☆)→8番 キングツェッペリン(─)",
+      "aiMarks": {
+        "1": "◎",
+        "2": "▲",
+        "3": "○",
+        "13": "☆",
+        "15": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020811",
+      "raceName": "ヴィクトリアマイル",
+      "classTier": "G1_CLASS",
+      "classTierLabel": "G1",
+      "venue": "東京",
+      "raceNumber": 11,
+      "date": "2026-05-17",
+      "actualResults": [
+        12,
+        8,
+        7
+      ],
+      "finishLabel": "12番 エンブロイダリー(☆)→8番 カムニャック(─)→7番 クイーンズウォーク(─)",
+      "aiMarks": {
+        "4": "◎",
+        "5": "○",
+        "10": "▲",
+        "12": "☆",
+        "14": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 600,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1200,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202605020812",
+      "raceName": "BSイレブン賞",
+      "classTier": "OPEN_LISTED",
+      "classTierLabel": "OP・リステッド",
+      "venue": "東京",
+      "raceNumber": 12,
+      "date": "2026-05-17",
+      "actualResults": [
+        8,
+        11,
+        12
+      ],
+      "finishLabel": "8番 ラファル(─)→11番 サトノガレオン(─)→12番 スニーカースキル(─)",
+      "aiMarks": {
+        "3": "△",
+        "5": "◎",
+        "6": "▲",
+        "10": "○",
+        "14": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "前傾ラップの激流想定。先行勢自滅時の差し馬の網に最も引っかかる。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
     },
     {
       "raceId": "202608030501",
@@ -2631,41 +4039,42 @@
         7,
         14
       ],
-      "finishLabel": "15(☆)→7(◎)→14(△)",
+      "finishLabel": "15番 オウケンブラッド(─)→7番 ジャーナーリア(◎)→14番 ニホンピロローカス(─)",
       "aiMarks": {
         "3": "△",
         "5": "○",
-        "6": "△",
+        "6": "☆",
         "7": "◎",
-        "10": "▲",
-        "11": "△",
-        "14": "△",
-        "15": "☆"
+        "10": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
-          "payout": 1190,
-          "isHit": true
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
-      "totalPayout": 1190,
+      "totalInvested": 1100,
+      "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": true,
@@ -2684,44 +4093,46 @@
         9,
         6
       ],
-      "finishLabel": "5(△)→9(◎)→6(─)",
+      "finishLabel": "5番 ココロヅヨサ(△)→9番 クロンヌジャン(◎)→6番 ピエナブラック(▲)",
       "aiMarks": {
-        "1": "△",
-        "2": "△",
+        "3": "☆",
         "4": "○",
         "5": "△",
-        "9": "◎",
-        "14": "▲",
-        "15": "△"
+        "6": "▲",
+        "9": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
-          "payout": 600,
-          "isHit": true
+          "invested": 400,
+          "payout": 1320,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
+          "invested": 500,
+          "payout": 3830,
+          "isHit": true,
+          "formationHit": true
         }
       },
-      "totalInvested": 1300,
-      "totalPayout": 600,
+      "totalInvested": 1100,
+      "totalPayout": 5150,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
-      "isSecondRowDead": true,
-      "diagnosisLabel": "【2列目全滅】3着にヒモ決着"
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【完璧】3連複的中"
     },
     {
       "raceId": "202608030503",
@@ -2736,38 +4147,41 @@
         6,
         3
       ],
-      "finishLabel": "10(─)→6(△)→3(─)",
+      "finishLabel": "10番 キングケープ(─)→6番 チュウワメロディー(─)→3番 モンシーク(○)",
       "aiMarks": {
-        "1": "○",
-        "6": "△",
-        "7": "▲",
-        "11": "△",
-        "14": "△",
-        "15": "◎"
+        "1": "▲",
+        "3": "○",
+        "7": "☆",
+        "15": "◎",
+        "16": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
-        },
-        "WIDE": {
-          "invested": 500,
-          "payout": 0,
-          "isHit": false
-        },
-        "TRIFECTA_FORM": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1000,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2787,40 +4201,46 @@
         6,
         13
       ],
-      "finishLabel": "8(─)→6(○)→13(─)",
+      "finishLabel": "8番 マジカルアメジスト(─)→6番 ティタノマキア(○)→13番 プレスバーン(▲)",
       "aiMarks": {
+        "2": "◎",
         "6": "○",
-        "12": "△"
+        "10": "△",
+        "13": "▲",
+        "14": "☆"
       },
       "tickets": {
         "WIN": {
-          "invested": 0,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 0,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 0,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 0,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 0,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
       "isSecondRowDead": false,
-      "diagnosisLabel": "【スキップ】no_marks",
-      "skippedReason": "no_marks"
+      "diagnosisLabel": "【軸トビ】"
     },
     {
       "raceId": "202608030505",
@@ -2835,38 +4255,41 @@
         3,
         1
       ],
-      "finishLabel": "7(△)→3(☆)→1(△)",
+      "finishLabel": "7番 コルテオソレイユ(☆)→3番 ダークマルス(△)→1番 マイリトルヒーロー(─)",
       "aiMarks": {
-        "1": "△",
         "2": "◎",
-        "3": "☆",
+        "3": "△",
         "4": "○",
         "5": "▲",
-        "7": "△"
+        "7": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1400,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2886,38 +4309,41 @@
         7,
         5
       ],
-      "finishLabel": "1(─)→7(○)→5(◎)",
+      "finishLabel": "1番 アスクケンタッキー(─)→7番 マメタンク(○)→5番 ブルーマッキンジー(◎)",
       "aiMarks": {
-        "2": "△",
+        "3": "△",
+        "4": "☆",
         "5": "◎",
-        "6": "▲",
         "7": "○",
-        "11": "△",
-        "13": "△"
+        "11": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
+          "invested": 400,
           "payout": 700,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1200,
+      "totalInvested": 1100,
       "totalPayout": 700,
       "dominantComment": "想定される特有の持続力ラップへの適合度が極めて高い。",
       "isAnchorHit": true,
@@ -2937,40 +4363,41 @@
         6,
         11
       ],
-      "finishLabel": "8(△)→6(○)→11(▲)",
+      "finishLabel": "8番 テンエースワン(─)→6番 ガーデンカメリア(○)→11番 メイショウコナン(▲)",
       "aiMarks": {
         "1": "◎",
-        "3": "△",
-        "5": "☆",
+        "3": "☆",
+        "5": "△",
         "6": "○",
-        "8": "△",
-        "9": "△",
-        "10": "△",
         "11": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -2990,39 +4417,41 @@
         1,
         14
       ],
-      "finishLabel": "5(─)→1(○)→14(─)",
+      "finishLabel": "5番 ローマンレイク(─)→1番 ララバッカナール(○)→14番 グディンナ(─)",
       "aiMarks": {
         "1": "○",
-        "3": "☆",
-        "6": "△",
-        "7": "▲",
-        "8": "△",
-        "12": "△",
+        "2": "☆",
+        "4": "▲",
+        "7": "△",
         "15": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -3042,37 +4471,42 @@
         8,
         10
       ],
-      "finishLabel": "7(─)→8(◎)→10(─)",
+      "finishLabel": "7番 ウォータークラーク(△)→8番 ダガーリング(◎)→10番 クスクス(─)",
       "aiMarks": {
         "3": "○",
         "4": "▲",
-        "6": "△",
-        "8": "◎"
+        "7": "△",
+        "8": "◎",
+        "11": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
-        },
-        "WIDE": {
-          "invested": 300,
-          "payout": 0,
-          "isHit": false
-        },
-        "TRIFECTA_FORM": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 400,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 800,
-      "totalPayout": 0,
+      "totalInvested": 1100,
+      "totalPayout": 400,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": true,
@@ -3091,39 +4525,46 @@
         2,
         5
       ],
-      "finishLabel": "3(○)→2(─)→5(─)",
+      "finishLabel": "3番 ヴィスマール(○)→2番 メディテラニアン(◎)→5番 アオイタケル(☆)",
       "aiMarks": {
-        "3": "○"
+        "1": "▲",
+        "2": "◎",
+        "3": "○",
+        "4": "△",
+        "5": "☆"
       },
       "tickets": {
         "WIN": {
-          "invested": 0,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 0,
-          "payout": 0,
-          "isHit": false
+          "invested": 100,
+          "payout": 650,
+          "isHit": true,
+          "formationHit": true
         },
         "WIDE": {
-          "invested": 0,
-          "payout": 0,
-          "isHit": false
+          "invested": 400,
+          "payout": 340,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 0,
-          "payout": 0,
-          "isHit": false
+          "invested": 500,
+          "payout": 440,
+          "isHit": true,
+          "formationHit": true
         }
       },
-      "totalInvested": 0,
-      "totalPayout": 0,
+      "totalInvested": 1100,
+      "totalPayout": 1430,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
-      "isAnchorHit": false,
+      "isAnchorHit": true,
       "isSecondRowDead": false,
-      "diagnosisLabel": "【スキップ】no_marks",
-      "skippedReason": "no_marks"
+      "diagnosisLabel": "【完璧】3連複的中"
     },
     {
       "raceId": "202608030511",
@@ -3138,39 +4579,41 @@
         15,
         6
       ],
-      "finishLabel": "5(─)→15(△)→6(─)",
+      "finishLabel": "5番 コンジェスタス(─)→15番 ベレシート(☆)→6番 ラディアントスター(─)",
       "aiMarks": {
         "1": "◎",
         "2": "▲",
-        "7": "△",
         "8": "○",
-        "10": "△",
-        "15": "△",
-        "16": "△"
+        "14": "△",
+        "15": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -3190,39 +4633,41 @@
         10,
         13
       ],
-      "finishLabel": "8(─)→10(─)→13(─)",
+      "finishLabel": "8番 ロードヴォイジャー(─)→10番 スマートシーカー(─)→13番 サイモンシュバリエ(─)",
       "aiMarks": {
-        "2": "☆",
+        "1": "☆",
+        "2": "△",
         "3": "○",
         "4": "▲",
-        "6": "△",
-        "7": "◎",
-        "11": "△",
-        "12": "△"
+        "7": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -3242,40 +4687,41 @@
         8,
         4
       ],
-      "finishLabel": "5(○)→8(△)→4(▲)",
+      "finishLabel": "5番 ルージュバロン(○)→8番 プリンセスアツコ(─)→4番 エイユーサクラ(▲)",
       "aiMarks": {
-        "3": "△",
+        "3": "☆",
         "4": "▲",
         "5": "○",
-        "6": "△",
-        "7": "△",
-        "8": "△",
-        "9": "☆",
+        "9": "△",
         "14": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -3295,44 +4741,46 @@
         9,
         6
       ],
-      "finishLabel": "1(▲)→9(◎)→6(△)",
+      "finishLabel": "1番 ゴールドコット(─)→9番 レッドフロイデ(◎)→6番 ダイメイクマモト(△)",
       "aiMarks": {
-        "1": "▲",
-        "3": "○",
-        "4": "△",
-        "5": "△",
+        "3": "▲",
+        "4": "☆",
         "6": "△",
-        "9": "◎",
-        "11": "△"
+        "8": "○",
+        "9": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
-          "payout": 1480,
-          "isHit": true
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
-          "payout": 650,
-          "isHit": true
+          "invested": 400,
+          "payout": 170,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
-          "payout": 1560,
-          "isHit": true
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
-      "totalPayout": 3690,
+      "totalInvested": 1100,
+      "totalPayout": 170,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
-      "isSecondRowDead": false,
-      "diagnosisLabel": "【完璧】3連複的中"
+      "isSecondRowDead": true,
+      "diagnosisLabel": "【2列目全滅】3着にヒモ決着"
     },
     {
       "raceId": "202608030703",
@@ -3347,41 +4795,42 @@
         18,
         2
       ],
-      "finishLabel": "13(△)→18(◎)→2(─)",
+      "finishLabel": "13番 キシャール(─)→18番 タナブイハチターボ(◎)→2番 ジョービスコッティ(─)",
       "aiMarks": {
-        "1": "△",
-        "3": "☆",
+        "3": "△",
         "4": "○",
-        "11": "△",
-        "13": "△",
+        "11": "☆",
         "16": "▲",
-        "17": "△",
         "18": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
-          "payout": 750,
-          "isHit": true
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
-      "totalPayout": 750,
+      "totalInvested": 1100,
+      "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": true,
@@ -3400,40 +4849,42 @@
         2,
         6
       ],
-      "finishLabel": "9(△)→2(△)→6(◎)",
+      "finishLabel": "9番 サトノビダーヤ(☆)→2番 シャンドラファール(─)→6番 ドンテスタマスター(◎)",
       "aiMarks": {
-        "1": "○",
-        "2": "△",
-        "3": "▲",
+        "1": "▲",
+        "3": "△",
         "6": "◎",
-        "8": "△",
-        "9": "△",
-        "10": "△"
+        "7": "○",
+        "9": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
-          "payout": 4400,
-          "isHit": true
+          "invested": 400,
+          "payout": 4050,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
-      "totalPayout": 4400,
+      "totalInvested": 1100,
+      "totalPayout": 4050,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": true,
@@ -3452,40 +4903,41 @@
         14,
         2
       ],
-      "finishLabel": "5(○)→14(─)→2(△)",
+      "finishLabel": "5番 ロサルゴサ(○)→14番 メイショウプレマ(─)→2番 ウイルソン(☆)",
       "aiMarks": {
         "1": "◎",
-        "2": "△",
-        "4": "△",
+        "2": "☆",
         "5": "○",
         "7": "▲",
-        "9": "△",
-        "10": "△",
-        "12": "☆"
+        "12": "△"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -3505,38 +4957,41 @@
         7,
         14
       ],
-      "finishLabel": "5(△)→7(▲)→14(─)",
+      "finishLabel": "5番 ニホンピロカラット(☆)→7番 グランデスフィーダ(─)→14番 ダイアナクイーン(─)",
       "aiMarks": {
-        "2": "△",
-        "5": "△",
-        "7": "▲",
-        "9": "○",
+        "5": "☆",
+        "9": "△",
         "10": "◎",
-        "13": "△"
+        "11": "▲",
+        "12": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 500,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1200,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -3556,39 +5011,41 @@
         5,
         3
       ],
-      "finishLabel": "6(◎)→5(─)→3(☆)",
+      "finishLabel": "6番 コルドンブルー(◎)→5番 パスコード(─)→3番 ビップディラン(△)",
       "aiMarks": {
         "1": "○",
-        "2": "△",
-        "3": "☆",
+        "3": "△",
         "6": "◎",
-        "7": "△",
-        "10": "△",
+        "7": "☆",
         "11": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 330,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 650,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 980,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
@@ -3608,36 +5065,41 @@
         6,
         3
       ],
-      "finishLabel": "5(▲)→6(△)→3(○)",
+      "finishLabel": "5番 シホノスペランツァ(▲)→6番 ゴールデンスロープ(☆)→3番 メイショウアツイタ(○)",
       "aiMarks": {
+        "1": "△",
         "3": "○",
         "4": "◎",
         "5": "▲",
-        "6": "△"
+        "6": "☆"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 300,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1000,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -3657,39 +5119,41 @@
         1,
         8
       ],
-      "finishLabel": "2(△)→1(△)→8(─)",
+      "finishLabel": "2番 レッドラージャ(─)→1番 ミッキージャンプ(─)→8番 ワンダフルデイズ(─)",
       "aiMarks": {
-        "1": "△",
-        "2": "△",
-        "4": "△",
+        "4": "▲",
         "5": "◎",
-        "7": "▲",
-        "9": "△",
+        "6": "△",
+        "7": "☆",
         "10": "○"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
+          "invested": 400,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "TRIFECTA_FORM": {
-          "invested": 300,
+          "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1300,
+      "totalInvested": 1100,
       "totalPayout": 0,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": false,
@@ -3709,40 +5173,41 @@
         1,
         14
       ],
-      "finishLabel": "13(◎)→1(○)→14(─)",
+      "finishLabel": "13番 ヒルノハンブルク(◎)→1番 ペンナヴェローチェ(○)→14番 タイセイアディクト(─)",
       "aiMarks": {
         "1": "○",
         "2": "▲",
-        "4": "☆",
-        "6": "△",
         "7": "△",
-        "9": "△",
-        "12": "△",
+        "12": "☆",
         "13": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 780,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 3550,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 1160,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 5490,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
@@ -3762,40 +5227,41 @@
         6,
         3
       ],
-      "finishLabel": "12(◎)→6(─)→3(○)",
+      "finishLabel": "12番 フリッカージャブ(◎)→6番 アンクルクロス(─)→3番 ディアナザール(○)",
       "aiMarks": {
-        "2": "△",
+        "1": "☆",
         "3": "○",
-        "7": "△",
-        "9": "☆",
         "12": "◎",
         "13": "△",
-        "14": "▲",
-        "16": "△"
+        "14": "▲"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 180,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 700,
+          "invested": 400,
           "payout": 210,
-          "isHit": true
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1600,
+      "totalInvested": 1100,
       "totalPayout": 390,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
@@ -3815,45 +5281,707 @@
         13,
         15
       ],
-      "finishLabel": "10(─)→13(▲)→15(◎)",
+      "finishLabel": "10番 ライトニングゼウス(▲)→13番 フェデラー(─)→15番 メイショウドライブ(◎)",
       "aiMarks": {
-        "2": "△",
-        "4": "△",
         "6": "○",
-        "8": "☆",
-        "13": "▲",
-        "14": "△",
+        "8": "△",
+        "10": "▲",
+        "14": "☆",
         "15": "◎"
       },
       "tickets": {
         "WIN": {
           "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "MAIN_LINE": {
-          "invested": 300,
+          "invested": 100,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         },
         "WIDE": {
-          "invested": 600,
-          "payout": 1610,
-          "isHit": true
+          "invested": 400,
+          "payout": 840,
+          "isHit": true,
+          "formationHit": true
         },
         "TRIFECTA_FORM": {
           "invested": 500,
           "payout": 0,
-          "isHit": false
+          "isHit": false,
+          "formationHit": false
         }
       },
-      "totalInvested": 1500,
-      "totalPayout": 1610,
+      "totalInvested": 1100,
+      "totalPayout": 840,
       "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
       "isAnchorHit": true,
       "isSecondRowDead": false,
       "diagnosisLabel": "【部分的中】"
+    },
+    {
+      "raceId": "202608030801",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "京都",
+      "raceNumber": 1,
+      "date": "2026-05-17",
+      "actualResults": [
+        10,
+        12,
+        8
+      ],
+      "finishLabel": "10番 シエーナカラー(─)→12番 ルパピヨンブラン(○)→8番 ルージュエピック(─)",
+      "aiMarks": {
+        "3": "◎",
+        "6": "☆",
+        "7": "▲",
+        "11": "△",
+        "12": "○"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030802",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "京都",
+      "raceNumber": 2,
+      "date": "2026-05-17",
+      "actualResults": [
+        2,
+        10,
+        9
+      ],
+      "finishLabel": "2番 ジャカルタバオ(▲)→10番 モズプリフォール(─)→9番 サトノフレイ(○)",
+      "aiMarks": {
+        "1": "◎",
+        "2": "▲",
+        "6": "△",
+        "9": "○",
+        "11": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "現在のイン有利バイアスに内枠が合致。鞍上強化も含め勝負気配高。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030803",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "京都",
+      "raceNumber": 3,
+      "date": "2026-05-17",
+      "actualResults": [
+        3,
+        8,
+        1
+      ],
+      "finishLabel": "3番 ヒラボクソライア(◎)→8番 キタノトレボーネ(─)→1番 クリコバロー(○)",
+      "aiMarks": {
+        "1": "○",
+        "3": "◎",
+        "4": "☆",
+        "5": "△",
+        "11": "▲"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 910,
+          "isHit": true,
+          "formationHit": true
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 1700,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 2610,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印単勝的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030804",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "京都",
+      "raceNumber": 4,
+      "date": "2026-05-17",
+      "actualResults": [
+        4,
+        11,
+        8
+      ],
+      "finishLabel": "4番 ペプチドブッドレア(☆)→11番 エアヴァイブス(─)→8番 カステッロトゥーレ(─)",
+      "aiMarks": {
+        "4": "☆",
+        "6": "◎",
+        "9": "▲",
+        "16": "○",
+        "17": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030805",
+      "raceName": "3歳未勝利",
+      "classTier": "MAIDEN_NEW",
+      "classTierLabel": "新馬・未勝利",
+      "venue": "京都",
+      "raceNumber": 5,
+      "date": "2026-05-17",
+      "actualResults": [
+        3,
+        6,
+        10
+      ],
+      "finishLabel": "3番 エンジェルボイス(○)→6番 ショウナンアワード(△)→10番 ワンダーデリエール(─)",
+      "aiMarks": {
+        "2": "▲",
+        "3": "○",
+        "5": "◎",
+        "6": "△",
+        "8": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030806",
+      "raceName": "3歳1勝クラス",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "京都",
+      "raceNumber": 6,
+      "date": "2026-05-17",
+      "actualResults": [
+        8,
+        6,
+        4
+      ],
+      "finishLabel": "8番 ジャイアンバローズ(─)→6番 システマソラー(─)→4番 チェリヴェント(◎)",
+      "aiMarks": {
+        "4": "◎",
+        "9": "△",
+        "11": "▲",
+        "13": "☆",
+        "14": "○"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": true,
+      "isSecondRowDead": true,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030807",
+      "raceName": "4歳以上1勝クラス",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "京都",
+      "raceNumber": 7,
+      "date": "2026-05-17",
+      "actualResults": [
+        12,
+        3,
+        9
+      ],
+      "finishLabel": "12番 サミダレナイツ(─)→3番 ラブカ(☆)→9番 オーシンエス(─)",
+      "aiMarks": {
+        "1": "◎",
+        "2": "▲",
+        "3": "☆",
+        "4": "○",
+        "5": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "現在のイン有利バイアスに内枠が合致。鞍上強化も含め勝負気配高。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030808",
+      "raceName": "4歳以上2勝クラス",
+      "classTier": "CONDITIONAL_UPPER",
+      "classTierLabel": "3勝・2勝",
+      "venue": "京都",
+      "raceNumber": 8,
+      "date": "2026-05-17",
+      "actualResults": [
+        8,
+        3,
+        7
+      ],
+      "finishLabel": "8番 ブルーワール(△)→3番 ゴッドエスパーダ(◎)→7番 ジョータルマエ(☆)",
+      "aiMarks": {
+        "1": "▲",
+        "2": "○",
+        "3": "◎",
+        "7": "☆",
+        "8": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 590,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 590,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": true,
+      "isSecondRowDead": true,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030809",
+      "raceName": "白川特別",
+      "classTier": "CONDITIONAL_LOWER",
+      "classTierLabel": "1勝",
+      "venue": "京都",
+      "raceNumber": 9,
+      "date": "2026-05-17",
+      "actualResults": [
+        3,
+        5,
+        1
+      ],
+      "finishLabel": "3番 ベイラム(◎)→5番 ファーングロット(▲)→1番 サトノソティラス(○)",
+      "aiMarks": {
+        "1": "○",
+        "3": "◎",
+        "5": "▲",
+        "8": "△",
+        "10": "☆"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 790,
+          "isHit": true,
+          "formationHit": true
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 610,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 680,
+          "isHit": true,
+          "formationHit": true
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 2080,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印3連複的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030810",
+      "raceName": "錦S",
+      "classTier": "OPEN_LISTED",
+      "classTierLabel": "OP・リステッド",
+      "venue": "京都",
+      "raceNumber": 10,
+      "date": "2026-05-17",
+      "actualResults": [
+        12,
+        3,
+        7
+      ],
+      "finishLabel": "12番 カズミクラーシュ(○)→3番 バレルターン(─)→7番 キングメーカー(─)",
+      "aiMarks": {
+        "1": "▲",
+        "6": "☆",
+        "9": "△",
+        "10": "◎",
+        "12": "○"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030811",
+      "raceName": "栗東S",
+      "classTier": "OPEN_LISTED",
+      "classTierLabel": "OP・リステッド",
+      "venue": "京都",
+      "raceNumber": 11,
+      "date": "2026-05-17",
+      "actualResults": [
+        4,
+        11,
+        1
+      ],
+      "finishLabel": "4番 タガノミスト(◎)→11番 ベルジュロネット(─)→1番 インユアパレス(▲)",
+      "aiMarks": {
+        "1": "▲",
+        "3": "○",
+        "4": "◎",
+        "7": "☆",
+        "16": "△"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 1660,
+          "isHit": true,
+          "formationHit": true
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 1340,
+          "isHit": true,
+          "formationHit": true
+        },
+        "TRIFECTA_FORM": {
+          "invested": 600,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1200,
+      "totalPayout": 3000,
+      "dominantComment": "現在のイン有利バイアスに内枠が合致。鞍上強化も含め勝負気配高。",
+      "isAnchorHit": true,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【印単勝的中・見送り】",
+      "skippedReason": "no_ev_recommendation"
+    },
+    {
+      "raceId": "202608030812",
+      "raceName": "4歳以上2勝クラス",
+      "classTier": "CONDITIONAL_UPPER",
+      "classTierLabel": "3勝・2勝",
+      "venue": "京都",
+      "raceNumber": 12,
+      "date": "2026-05-17",
+      "actualResults": [
+        2,
+        10,
+        3
+      ],
+      "finishLabel": "2番 ビップジーニー(─)→10番 リアライズ(○)→3番 インブロリオ(☆)",
+      "aiMarks": {
+        "3": "☆",
+        "4": "▲",
+        "5": "△",
+        "8": "◎",
+        "10": "○"
+      },
+      "tickets": {
+        "WIN": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "MAIN_LINE": {
+          "invested": 100,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "WIDE": {
+          "invested": 400,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        },
+        "TRIFECTA_FORM": {
+          "invested": 500,
+          "payout": 0,
+          "isHit": false,
+          "formationHit": false
+        }
+      },
+      "totalInvested": 1100,
+      "totalPayout": 0,
+      "dominantComment": "近走の指数ピークがメンバー中突出。基礎能力の芯が違い力通り。",
+      "isAnchorHit": false,
+      "isSecondRowDead": false,
+      "diagnosisLabel": "【見送り推奨・印は的中】EV買い目なし",
+      "skippedReason": "no_ev_recommendation"
     }
   ],
-  "generatedAt": "2026-05-17T15:22:49.678Z"
+  "generatedAt": "2026-05-18T02:42:16.115Z"
 }

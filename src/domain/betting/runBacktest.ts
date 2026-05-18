@@ -12,13 +12,22 @@ import {
 } from "../race-evaluation/resolveEffectiveRaceClass";
 import { resolvePlaceToHorseId } from "../race-evaluation/markHitAnalysis";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
+import { ensureFrontendDisplayMarks } from "../../lib/race-display/ensureFrontendDisplayMarks";
+import { effectiveSoftmaxTemperature, softmaxDistribution } from "../../lib/pipeline/normalization";
 import {
   computeFavoriteMarkHit,
   emptyFavoriteMarkAggregate,
   finalizeFavoriteMarkAggregate,
   mergeFavoriteMarkHit,
 } from "./favoriteMarkStats";
-import { generateTickets, marksFromResults, resolvePostProcessFavoriteNumber } from "./bettingRules";
+import {
+  generateFormationBetTickets,
+  generateBetTicketsFromEvaluation,
+  marksFromResults,
+  resolveBettingAdvisoryReason,
+  resolvePostProcessFavoriteNumber,
+  buildOddsMapFromHorses,
+} from "./bettingRules";
 import { buildRaceDetailLog, finalizeRaceDetailLog } from "./raceDetailLog";
 import { aggregateSecondRowDead } from "./secondRowAnalysis";
 import {
@@ -88,6 +97,25 @@ function buildFinishOrder(
   return out;
 }
 
+function mathFirstByFinalRank(results: readonly HorseScoreResult[]): HorseScoreResult | undefined {
+  return [...results].sort((a, b) => {
+    const ra = a.finalRank ?? 99;
+    const rb = b.finalRank ?? 99;
+    if (ra !== rb) return ra - rb;
+    return b.finalEvaluationScore - a.finalEvaluationScore;
+  })[0];
+}
+
+function detectSkippableRace(results: readonly HorseScoreResult[]): boolean {
+  const mathFirst = mathFirstByFinalRank(results);
+  const displayFavorite = results.find((r) => r.mark === "◎");
+  return (
+    mathFirst != null &&
+    displayFavorite != null &&
+    mathFirst.horseId !== displayFavorite.horseId
+  );
+}
+
 function makeDetail(
   input: BacktestRaceInput,
   results: HorseScoreResult[],
@@ -107,6 +135,7 @@ function makeDetail(
       date: input.meta.date,
       marks,
       results,
+      horses: input.horses,
       finishOrder,
       row,
       favoriteNumber,
@@ -118,11 +147,20 @@ export function runBacktestOnRace(input: BacktestRaceInput): BacktestRaceOutput 
   const numberById = horseNumberMap(input.horses);
   if (numberById.size === 0) return null;
 
-  const results: HorseScoreResult[] = evaluateRace(input.horses, input.condition);
+  const rawResults = evaluateRace(input.horses, input.condition);
+  const results = ensureFrontendDisplayMarks(rawResults, input.horses, input.condition);
   const marks = marksFromResults(results, numberById);
   const classTier = resolveClassTier(input.condition);
   const classLevel = inferRaceClassBucket(input.condition);
-  const tickets = generateTickets(marks, 100, { classTier });
+  const isSkippableRace = detectSkippableRace(results);
+  const temperature = effectiveSoftmaxTemperature(
+    input.condition.softmaxTemperature,
+    input.condition.adjustmentStrength,
+  );
+  const winProbabilities = softmaxDistribution(
+    results.map((row) => ({ horseId: row.horseId, score: row.finalEvaluationScore })),
+    temperature,
+  );
   const favoriteNumber = resolvePostProcessFavoriteNumber(marks);
   const finishOrder = buildFinishOrder(input.places, input.horses, numberById);
   const favoriteHit = computeFavoriteMarkHit(favoriteNumber, finishOrder);
@@ -131,7 +169,28 @@ export function runBacktestOnRace(input: BacktestRaceInput): BacktestRaceOutput 
       ? { favoriteWinHit: favoriteHit.winHit, favoriteShowHit: favoriteHit.showHit }
       : {};
 
-  if (tickets.length === 0) {
+  const oddsMap = buildOddsMapFromHorses(input.horses);
+  const evTickets = generateBetTicketsFromEvaluation(
+    {
+      results,
+      winProbabilities,
+      horseNumberById: numberById,
+      oddsMap,
+      isSkippableRace,
+      classTier,
+    },
+    100,
+    { classTier },
+  );
+  const tickets = generateFormationBetTickets(marks, classTier, 100);
+  const evBetPointCount = evTickets.reduce((s, t) => s + t.combinations.length, 0);
+  const advisoryReason = resolveBettingAdvisoryReason({
+    isSkippableRace,
+    hasMarks: marks.length > 0,
+    evBetPointCount,
+  });
+
+  if (marks.length === 0) {
     const result: RaceBetResult = {
       raceId: input.raceId,
       classLevel,
@@ -176,7 +235,12 @@ export function runBacktestOnRace(input: BacktestRaceInput): BacktestRaceOutput 
     winOddsByNumber: winOddsMap(input.horses),
     officialPayouts: input.payouts,
   });
-  const result: RaceBetResult = { ...payout, classTier, ...favoriteFields };
+  const result: RaceBetResult = {
+    ...payout,
+    classTier,
+    skippedReason: advisoryReason,
+    ...favoriteFields,
+  };
   return { result, detail: makeDetail(input, results, marks, classTier, finishOrder, result, favoriteNumber) };
 }
 
@@ -234,7 +298,7 @@ export function aggregateBacktest(
       );
     }
 
-    if (row.skippedReason) {
+    if (row.skippedReason === "no_marks" || row.skippedReason === "insufficient_results") {
       skipped += 1;
       continue;
     }

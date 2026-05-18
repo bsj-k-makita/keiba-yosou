@@ -41,13 +41,24 @@ function formatDateTab(dateStr: string): string {
   return `${m}/${day}(${dow})`;
 }
 
-function formatPayoutShort(slot: { payout: number; isHit: boolean }): string {
-  if (!slot.isHit) return "—";
-  return slot.payout > 0 ? `${slot.payout.toLocaleString()}円` : "0円";
+function formatPayoutShort(slot: RaceDetailLog["tickets"]["WIN"]): string {
+  if (slot.isHit) {
+    return slot.payout > 0 ? `${slot.payout.toLocaleString()}円` : "0円";
+  }
+  if (slot.formationHit) return "印的中";
+  return "—";
+}
+
+function ticketHighlight(slot: RaceDetailLog["tickets"]["WIN"]): boolean {
+  return slot.isHit || slot.formationHit;
 }
 
 function cardTone(row: RaceDetailLog): "hit" | "miss" {
   if (row.totalPayout > 0) return "hit";
+  const t = row.tickets;
+  if (t.TRIFECTA_FORM.formationHit || t.MAIN_LINE.formationHit || t.WIN.formationHit) {
+    return "hit";
+  }
   return "miss";
 }
 
@@ -71,7 +82,9 @@ function HitRaceCard({ row }: { row: RaceDetailLog }) {
                 <span className="bt-hit-card__r-num">{row.raceNumber}</span>
               </div>
               {tone === "hit" ? (
-                <span className="bt-hit-card__status bt-hit-card__status--hit">🎯 的中</span>
+                <span className="bt-hit-card__status bt-hit-card__status--hit">
+                  {row.totalPayout > 0 ? "🎯 的中" : "印的中"}
+                </span>
               ) : (
                 <span className="bt-hit-card__status bt-hit-card__status--miss">{missStatusLabel(row)}</span>
               )}
@@ -91,26 +104,32 @@ function HitRaceCard({ row }: { row: RaceDetailLog }) {
             <p className="bt-hit-card__finish">{row.finishLabel || "着順未確定"}</p>
             <p className="bt-hit-card__diagnosis">{row.diagnosisLabel}</p>
             <div className="bt-hit-card__tickets">
-              <span className={row.tickets.WIN.isHit ? "bt-hit-card__ticket bt-hit-card__ticket--on" : "bt-hit-card__ticket"}>
+              <span
+                className={
+                  ticketHighlight(row.tickets.WIN) ? "bt-hit-card__ticket bt-hit-card__ticket--on" : "bt-hit-card__ticket"
+                }
+              >
                 単勝 {formatPayoutShort(row.tickets.WIN)}
               </span>
               <span
                 className={
-                  row.tickets.MAIN_LINE.isHit ? "bt-hit-card__ticket bt-hit-card__ticket--on" : "bt-hit-card__ticket"
+                  ticketHighlight(row.tickets.MAIN_LINE)
+                    ? "bt-hit-card__ticket bt-hit-card__ticket--on"
+                    : "bt-hit-card__ticket"
                 }
               >
                 馬連 {formatPayoutShort(row.tickets.MAIN_LINE)}
               </span>
               <span
                 className={
-                  row.tickets.WIDE.isHit ? "bt-hit-card__ticket bt-hit-card__ticket--on" : "bt-hit-card__ticket"
+                  ticketHighlight(row.tickets.WIDE) ? "bt-hit-card__ticket bt-hit-card__ticket--on" : "bt-hit-card__ticket"
                 }
               >
                 ワイド {formatPayoutShort(row.tickets.WIDE)}
               </span>
               <span
                 className={
-                  row.tickets.TRIFECTA_FORM.isHit
+                  ticketHighlight(row.tickets.TRIFECTA_FORM)
                     ? "bt-hit-card__ticket bt-hit-card__ticket--on"
                     : "bt-hit-card__ticket"
                 }

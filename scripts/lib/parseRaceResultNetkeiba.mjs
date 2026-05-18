@@ -9,6 +9,7 @@ import { parseChakusaToSeconds } from "./parseNetkeibaPastRuns.mjs";
  *   places: Array<{
  *     place: number,
  *     waku: number,
+ *     horseNumber: number,
  *     horseId: string,
  *     horseName: string,
  *     final3fSec: number | null,
@@ -41,6 +42,7 @@ export function parseRaceResultNetkeiba(html, raceId = "") {
 
   const iPlace = idx("着順");
   const iWaku = idx("枠");
+  const iUmaban = idx("馬番");
   const iHorse = idx("馬名") >= 0 ? idx("馬名") : 3;
   const iFinal3f = idx("後3F");
   const iCorner = idx("コーナー通過順") >= 0 ? idx("コーナー通過順") : idx("通過");
@@ -60,6 +62,9 @@ export function parseRaceResultNetkeiba(html, raceId = "") {
 
     const wakuRaw = (iWaku >= 0 ? tds.eq(iWaku) : tds.eq(1)).text().trim().replace(/[^\d]/g, "");
     const waku = parseInt(wakuRaw, 10) || 0;
+
+    const umabanRaw = (iUmaban >= 0 ? tds.eq(iUmaban) : tds.eq(2)).text().trim().replace(/[^\d]/g, "");
+    const horseNumber = parseInt(umabanRaw, 10) || 0;
 
     const horseLink = tds.eq(iHorse).find('a[href*="/horse/"]').first();
     const href = horseLink.attr("href") ?? "";
@@ -101,6 +106,7 @@ export function parseRaceResultNetkeiba(html, raceId = "") {
     places.push({
       place,
       waku,
+      horseNumber,
       horseId,
       horseName,
       final3fSec,

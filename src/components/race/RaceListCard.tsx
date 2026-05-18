@@ -20,8 +20,14 @@ type Props = {
 
 function cardTone(outcome: RaceBettingOutcome | null | undefined): "hit" | "miss" | "neutral" {
   if (outcome == null || outcome.status !== "resolved") return "neutral";
-  if (outcome.isHit) return "hit";
+  if (outcome.isHit || outcome.hasFormationHit) return "hit";
   return "miss";
+}
+
+function hitStatusLabel(outcome: RaceBettingOutcome): string {
+  if (outcome.isHit && outcome.totalPayout > 0) return "🎯 的中";
+  if (outcome.hasFormationHit) return "印的中";
+  return missStatusLabel(outcome);
 }
 
 function missStatusLabel(outcome: RaceBettingOutcome): string {
@@ -104,7 +110,7 @@ export function RaceListCard({
                     : "bt-hit-card__status bt-hit-card__status--miss"
                 }
               >
-                {tone === "hit" ? "🎯 的中" : missStatusLabel(outcome)}
+                {hitStatusLabel(outcome)}
               </span>
             ) : null}
           </div>

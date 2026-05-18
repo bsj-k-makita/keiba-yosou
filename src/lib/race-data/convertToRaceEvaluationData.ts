@@ -372,6 +372,8 @@ function toEnrichedHorse(e: AnalysisHorseEntry): EnrichedRaceHorse {
     l2_sustain_ratio: n(e.l2_sustain_ratio) ?? n(e.l2SustainRatio),
     signals: toEvaluationSignals(e),
     investment: toInvestmentInput(e),
+    aiPredictedWinRate: n(e.ai_predicted_win_rate) ?? n(e.aiPredictedWinRate) ?? undefined,
+    aiEffectiveEv: n(e.ai_effective_ev) ?? n(e.aiEffectiveEv) ?? undefined,
     position_x: n(e.position_x) ?? n(e.positionX),
     abilityIndex: n(e.ability_index) ?? n(e.abilityIndex),
     suitabilityFlags: parseSuitabilityFlags(e.suitability_flags ?? e.suitabilityFlags),

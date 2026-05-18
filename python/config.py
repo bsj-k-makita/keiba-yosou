@@ -85,6 +85,48 @@ RANDOM_SEED = 42
 CV_FOLDS = 5
 TEST_YEARS = [2024, 2025]   # テスト（評価）に使う年
 
+# OOF期待値に基づく学習サンプル重み（シグモイド）
+ENABLE_EV_SAMPLE_WEIGHT = True
+EV_WEIGHT_CENTER = 0.9
+EV_WEIGHT_TAU = 0.02
+
+
+def resolve_test_years(df, date_col: str = "race_date") -> list[int]:
+    """TEST_YEARS のうちデータに存在する年。無ければ最新年（collect-quick 2026 等）。"""
+    import pandas as pd
+
+    years = pd.to_datetime(df[date_col], errors="coerce").dt.year.dropna().astype(int)
+    if years.empty:
+        return list(TEST_YEARS)
+    avail = set(int(y) for y in years.unique())
+    hit = [y for y in TEST_YEARS if y in avail]
+    return hit if hit else [int(years.max())]
+
+
+def resolve_test_mask(
+    df,
+    date_col: str = "race_date",
+    race_col: str = "race_id",
+    min_train_rows: int = 50,
+):
+    """
+    評価用マスク。TEST_YEARS が全件を占める場合はレース時系列の末尾20%をホールドアウト。
+    Returns: (test_mask: pd.Series, test_years_label: list | str)
+    """
+    import pandas as pd
+
+    df = df.copy()
+    df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
+    years = resolve_test_years(df, date_col=date_col)
+    test_mask = df[date_col].dt.year.isin(years)
+    if int((~test_mask).sum()) < min_train_rows:
+        ordered = df.sort_values(date_col)[race_col].drop_duplicates()
+        n_test = max(5, len(ordered) // 5)
+        test_ids = set(ordered.iloc[-n_test:])
+        test_mask = df[race_col].isin(test_ids)
+        return test_mask, f"holdout_last_{n_test}_races"
+    return test_mask, years
+
 LGBM_PARAMS = {
     "objective": "binary",
     "metric": "auc",

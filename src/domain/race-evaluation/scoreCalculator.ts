@@ -5,14 +5,6 @@ import type {
 } from "./abilityTypes";
 import { assignBuyLabels } from "./buyLabel";
 import { collectDismissIds } from "./dismissalRules";
-import {
-  assignCompleteMarks,
-  assignHokkakeRoles,
-  assignMarks,
-  applyCornerLeadFavoritePromotion,
-  applyStabilityRescueMarks,
-} from "./markAssigner";
-import { hasRequiredTopMarks } from "./markHitAnalysis";
 import { generateScoreReason } from "./reasonGenerator";
 import {
   baseAbilityCore,
@@ -24,7 +16,6 @@ import {
 import { formatPastRunInsight } from "./pastRunDerivedSignals";
 import { getEffectiveEvaluationSignals } from "./resolveEvaluationSignals";
 import { reproducibilityDelta } from "./evaluationSignals";
-import { applyLongshotMarkGuard } from "./longshotGuard";
 import {
   calcHorseScore,
   getBaseWeights,
@@ -60,9 +51,7 @@ import { applyClassTriggerToIntrinsic } from "./classTriggerMultipliers";
 import { resolveClassTier } from "./raceClassLevel";
 import { isMaidenNewTier } from "./resolveEffectiveRaceClass";
 import { longshotReversalIntrinsicBoost } from "./longshotReversal";
-import { distributeMarkPortfolio } from "./markPortfolio";
 import { applyPredictionShortComments } from "./predictionComment";
-import { BUY_LABELS } from "./lingoConstants";
 import { ADJUSTMENT_STRENGTH } from "./adjustments";
 import { computeCourseTraitHits } from "./courseTraitResolver";
 import { computeStructuralPhysicalHits } from "./structuralPhysicalBonuses";
@@ -709,48 +698,10 @@ export function evaluateRace(
     r.oddsDistortionReasons = distortion.reasons;
   }
 
-  assignMarks(results);
-  const cornerRankMap = new Map(
-    [...fourthCornerByHorse].map(([id, est]) => [id, est.estimatedRank] as const),
-  );
-  applyCornerLeadFavoritePromotion(results, evalHorses, cornerRankMap);
-  applyLongshotMarkGuard(evalHorses, results);
+  // 印・4角振替・穴ガード・ポートフォリオ等の heuristics 後処理は廃止。
+  // 表示用の印は evaluationPipeline → ensureFrontendDisplayMarks で付与する。
   const dismissIds = collectDismissIds(evalHorses, results, evalCondition);
   assignBuyLabels(results, dismissIds, evalHorses);
-  for (const r of results) {
-    if (r.buyLabel === BUY_LABELS.DISMISS) {
-      r.mark = "";
-    }
-  }
-  applyStabilityRescueMarks(results);
-  assignHokkakeRoles(results, evalHorses, paceSeverity);
-  assignCompleteMarks(results, dismissIds);
-
-  // 最終安全策: 構造的消し（dismissIds）のみ印・ヒモ役をクリア。6位以下の buyLabel DISMISS でも △ は残す。
-  for (const r of results) {
-    if (dismissIds.has(r.horseId)) {
-      r.mark = "";
-      r.hokkakeRole = undefined;
-    }
-  }
-
-  // 条件変更で構造消し集合が変わったときも、◎〜△ と △ 複数が欠けないよう再割当（ヒモ役も構造消し後に付け直す）
-  assignHokkakeRoles(results, evalHorses, paceSeverity);
-  assignCompleteMarks(results, dismissIds);
-
-  // △ は「連下（相手）」として扱う。消しラベルのまま残さない。
-  for (const r of results) {
-    if (r.mark === "△" && r.buyLabel === BUY_LABELS.DISMISS) {
-      r.buyLabel = BUY_LABELS.GROUP;
-    }
-  }
-
-  // 条件変更・構造消しの直後に ◎○▲ が欠けるケースの最終ガード
-  if (!hasRequiredTopMarks(results, dismissIds) && results.length >= 3) {
-    assignCompleteMarks(results, dismissIds);
-  }
-
-  distributeMarkPortfolio(results, evalHorses);
 
   applyPredictionShortComments(results);
 

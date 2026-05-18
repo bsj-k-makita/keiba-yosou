@@ -2,6 +2,7 @@ import type { HorseAbility, HorseScoreResult, RaceCondition } from "../race-eval
 import { resolvePlaceToHorseId } from "../race-evaluation/markHitAnalysis";
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
 import { buildRaceBettingContext } from "./buildRaceBettingContext";
+import { computeFormationHits, hasAnyFormationHit } from "./markFormationHits";
 import { calculateRacePayout } from "./payoutCalculator";
 import { analyzeSecondRowStatus } from "./secondRowAnalysis";
 
@@ -10,7 +11,10 @@ export type RaceBettingOutcome = {
   recoveryRate: number;
   totalInvested: number;
   totalPayout: number;
+  /** 購入券の払戻あり */
   isHit: boolean;
+  /** 印フォーメ（◎単勝・◎○馬連等）上は的中 */
+  hasFormationHit: boolean;
   isSecondRowDead: boolean;
 };
 
@@ -47,6 +51,7 @@ export function computeRaceBettingOutcome(
       totalInvested: ctx.tickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0),
       totalPayout: 0,
       isHit: false,
+      hasFormationHit: false,
       isSecondRowDead: false,
     };
   }
@@ -59,6 +64,7 @@ export function computeRaceBettingOutcome(
       totalInvested: ctx.tickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0),
       totalPayout: 0,
       isHit: false,
+      hasFormationHit: false,
       isSecondRowDead: false,
     };
   }
@@ -72,6 +78,7 @@ export function computeRaceBettingOutcome(
   });
 
   const second = analyzeSecondRowStatus(ctx.marks, ctx.classTier, finishOrder, ctx.favoriteNumber);
+  const formationHits = computeFormationHits(ctx.marks, finishOrder, ctx.classTier);
   const recoveryRate =
     payout.totalInvested > 0
       ? Math.round((payout.totalPayout / payout.totalInvested) * 1000) / 10
@@ -83,6 +90,7 @@ export function computeRaceBettingOutcome(
     totalInvested: payout.totalInvested,
     totalPayout: payout.totalPayout,
     isHit: payout.totalPayout > 0,
+    hasFormationHit: hasAnyFormationHit(formationHits),
     isSecondRowDead: second.isSecondRowDead,
   };
 }

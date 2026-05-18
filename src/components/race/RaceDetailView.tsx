@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   BIAS_ADJUSTMENTS,
   GROUND_ADJUSTMENTS,
@@ -30,6 +31,12 @@ import {
 } from "../../lib/race-data";
 import type { RaceIndexItem } from "../../lib/race-data";
 import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
+import {
+  parseProbabilityEngine,
+  probabilityEngineLabel,
+  raceHasAiPredictions,
+  type ProbabilityEngine,
+} from "../../lib/pipeline/probabilityEngine";
 import { sortResultsForPredictionTable } from "../../domain/race-evaluation/markHitAnalysis";
 import { FIXED_SOFTMAX_TEMPERATURE } from "../../lib/pipeline/normalization";
 import {
@@ -251,12 +258,34 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     void ensureRaceResultFetched(race.raceId);
   }, [race.raceId]);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedEngine = parseProbabilityEngine(searchParams.get("engine"));
+  const aiDataAvailable = useMemo(() => raceHasAiPredictions(horses), [horses]);
+
+  const setProbabilityEngine = useCallback(
+    (engine: ProbabilityEngine) => {
+      const next = new URLSearchParams(searchParams);
+      if (engine === "ts") next.delete("engine");
+      else next.set("engine", "ai");
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
   const pipeline = useMemo(
     () =>
       horses.length && evalCondition
-        ? runRaceEvaluationPipeline(horses, evalCondition)
-        : { results: [], viewModel: { byHorseId: new Map() }, adjustedProbabilities: new Map<string, number>() },
-    [horses, evalCondition],
+        ? runRaceEvaluationPipeline(horses, evalCondition, {
+            probabilityEngine: requestedEngine,
+          })
+        : {
+            results: [],
+            viewModel: { byHorseId: new Map(), probabilityEngine: "ts" as const },
+            adjustedProbabilities: new Map<string, number>(),
+            probabilityEngine: "ts" as const,
+            isSkippableRace: false,
+          },
+    [horses, evalCondition, requestedEngine],
   );
   const results = pipeline.results;
 
@@ -424,6 +453,44 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             border: "1px solid var(--c-border, rgba(0,0,0,0.08))",
           }}
         >
+          <div
+            role="group"
+            aria-label="勝率エンジン"
+            style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}
+          >
+            <span style={{ fontSize: "0.85em", color: "var(--c-muted, #6c757d)" }}>勝率:</span>
+            <button
+              type="button"
+              className={`view-density__btn${pipeline.probabilityEngine === "ts" ? " view-density__btn--active" : ""}`}
+              onClick={() => setProbabilityEngine("ts")}
+              aria-pressed={pipeline.probabilityEngine === "ts"}
+            >
+              TS評価
+            </button>
+            <button
+              type="button"
+              className={`view-density__btn${pipeline.probabilityEngine === "ai" ? " view-density__btn--active" : ""}`}
+              onClick={() => setProbabilityEngine("ai")}
+              disabled={!aiDataAvailable}
+              title={
+                aiDataAvailable
+                  ? "Python ML（ai_predicted_win_rate）"
+                  : "先に scripts/backfill-ai-predictions.py を実行してください"
+              }
+              aria-pressed={pipeline.probabilityEngine === "ai"}
+            >
+              Python AI
+            </button>
+          </div>
+          {requestedEngine === "ai" && pipeline.probabilityEngine === "ts" ? (
+            <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
+              AIデータなし → TSにフォールバック
+            </span>
+          ) : pipeline.probabilityEngine === "ai" ? (
+            <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
+              表示: {probabilityEngineLabel("ai")}（印・スコアはTSのまま）
+            </span>
+          ) : null}
           <label
             style={{
               display: "inline-flex",
@@ -534,7 +601,14 @@ export function RaceDetailView({ race, raceIndex }: Props) {
           )}
 
           {tab === "bets" && (
-            <RaceBettingDashboard results={results} horses={horses} condition={evalCondition} />
+            <RaceBettingDashboard
+              results={results}
+              horses={horses}
+              condition={evalCondition}
+              adjustedProbabilities={pipeline.adjustedProbabilities}
+              isSkippableRace={pipeline.isSkippableRace}
+              probabilityEngine={pipeline.probabilityEngine}
+            />
           )}
 
           {tab === "result" && (
@@ -543,6 +617,8 @@ export function RaceDetailView({ race, raceIndex }: Props) {
               results={results}
               horses={horses}
               condition={evalCondition}
+              adjustedProbabilities={pipeline.adjustedProbabilities}
+              isSkippableRace={pipeline.isSkippableRace}
             />
           )}
 

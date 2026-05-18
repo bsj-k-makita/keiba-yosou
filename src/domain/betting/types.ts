@@ -43,7 +43,10 @@ export type RaceBetResult = {
 export type RaceDetailTicketSlot = {
   invested: number;
   payout: number;
+  /** 実際に購入した組み合わせが的中 */
   isHit: boolean;
+  /** 印フォーメーション（◎○▲等）上は的中していたか（購入有無と独立） */
+  formationHit: boolean;
 };
 
 export type RaceDetailLog = {

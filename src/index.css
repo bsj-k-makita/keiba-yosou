@@ -3995,6 +3995,15 @@ samp {
   color: var(--c-text);
 }
 
+.finish-place-label__mark {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--c-primary, #2563eb);
+  line-height: 1;
+}
+
 .result-panel__place-time {
   font-size: var(--font-size-body);
   color: var(--c-text-muted);
@@ -5023,6 +5032,15 @@ img[loading="lazy"] {
 
 .result-analysis-view__table {
   margin-top: 1rem;
+}
+
+.result-analysis-view__row--formation {
+  background: color-mix(in srgb, var(--c-primary, #2563eb) 8%, transparent);
+}
+
+.result-analysis-view__row--formation td:last-child {
+  color: var(--c-primary, #2563eb);
+  font-weight: 700;
 }
 
 .result-analysis-view__row--hit {

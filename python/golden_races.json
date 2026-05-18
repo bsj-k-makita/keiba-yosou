@@ -1,0 +1,56 @@
+{
+  "version": "1",
+  "description": "Phase 1 Feature Bridge 不変性テスト用。結果JSONが揃っているレースを固定シード。",
+  "races": [
+    {
+      "race_id": "202605020803",
+      "label": "maiden_dirt_tokyo",
+      "note": "◎○1-2着検証レース（12頭・未勝利）"
+    },
+    {
+      "race_id": "202604010612",
+      "label": "stakes_turf_niigata",
+      "note": "印フォーメ検証（新潟・芝ダート混合データ）"
+    },
+    {
+      "race_id": "202605020802",
+      "label": "formation_tri_hit",
+      "note": "☆◎○3着内・3連複印的中ケース"
+    },
+    {
+      "race_id": "202604010601",
+      "label": "hurdle_long",
+      "note": "障害・長距離"
+    },
+    {
+      "race_id": "202604010608",
+      "label": "small_field",
+      "note": "少頭数（10頭）"
+    },
+    {
+      "race_id": "202604010611",
+      "label": "graded_stakes",
+      "note": "重賞級（弥彦S）"
+    },
+    {
+      "race_id": "202604010603",
+      "label": "sprint_dirt",
+      "note": "短距離ダート1200"
+    },
+    {
+      "race_id": "202605020508",
+      "label": "minimal_field",
+      "note": "8頭立て"
+    },
+    {
+      "race_id": "202605020511",
+      "label": "large_field",
+      "note": "17頭立て"
+    },
+    {
+      "race_id": "202605020512",
+      "label": "tokyo_mixed",
+      "note": "東京・結果確定・EV見送り例"
+    }
+  ]
+}

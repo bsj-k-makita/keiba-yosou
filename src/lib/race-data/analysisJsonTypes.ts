@@ -199,4 +199,10 @@ export type AnalysisHorseEntry = {
   /** enrich: 脚質ポジションマップ（0=前方〜100=後方） */
   position_x?: number;
   positionX?: number;
+  /** Phase1 Python ML: Isotonic + レース内正規化済み勝率（TS の predicted_win_rate とは別） */
+  ai_predicted_win_rate?: number;
+  aiPredictedWinRate?: number;
+  /** Phase1 Python ML: (ai_predicted_win_rate × odds) - 0.15 */
+  ai_effective_ev?: number;
+  aiEffectiveEv?: number;
 };

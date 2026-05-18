@@ -12,6 +12,8 @@
 8. 馬齢・斤量・体重変動など基本情報
 """
 
+from __future__ import annotations
+
 import logging
 from typing import Optional
 
@@ -95,30 +97,33 @@ class FeatureEngineer:
 
         # 馬ごとに時系列ソート済みで累積集計（shift(1)でデータリーク防止）
         hr = hr.sort_values(["horse_id", "race_date"])
+        gb = hr.groupby("horse_id", sort=False)
 
-        def expanding_stats(group: pd.DataFrame) -> pd.DataFrame:
-            g = group.sort_values("race_date").reset_index(drop=True)
-            shift_pos = g["finish_pos"].shift(1)  # 前走より前
-            # 累積計算
-            g["horse_race_count"] = shift_pos.expanding().count()
-            g["horse_win_rate"] = shift_pos.eq(1).expanding().mean()
-            g["horse_top2_rate"] = shift_pos.le(2).expanding().mean()
-            g["horse_top3_rate"] = shift_pos.le(3).expanding().mean()
-            g["horse_avg_finish"] = shift_pos.expanding().mean()
-            g["horse_last_finish"] = shift_pos
-            g["horse_last_margin"] = g["margin"].shift(1)
-            g["horse_recent3_avg"] = (
-                shift_pos.shift(-1).rolling(3, min_periods=1).mean()
-                if len(g) > 1 else pd.Series([np.nan] * len(g))
-            )
-            # 前走からの経過日数
-            g["horse_days_since_last"] = (
-                g["race_date"] - g["race_date"].shift(1)
-            ).dt.days
-            return g
+        hr["horse_race_count"] = gb["finish_pos"].transform(
+            lambda s: s.shift(1).expanding().count()
+        )
+        hr["horse_win_rate"] = gb["finish_pos"].transform(
+            lambda s: s.shift(1).eq(1).expanding().mean()
+        )
+        hr["horse_top2_rate"] = gb["finish_pos"].transform(
+            lambda s: s.shift(1).le(2).expanding().mean()
+        )
+        hr["horse_top3_rate"] = gb["finish_pos"].transform(
+            lambda s: s.shift(1).le(3).expanding().mean()
+        )
+        hr["horse_avg_finish"] = gb["finish_pos"].transform(
+            lambda s: s.shift(1).expanding().mean()
+        )
+        hr["horse_last_finish"] = gb["finish_pos"].shift(1)
+        hr["horse_last_margin"] = gb["margin"].shift(1)
+        hr["horse_recent3_avg"] = gb["finish_pos"].transform(
+            lambda s: s.shift(1).rolling(3, min_periods=1).mean()
+        )
+        hr["horse_days_since_last"] = gb["race_date"].transform(
+            lambda s: s.diff().dt.days
+        )
 
-        stats = hr.groupby("horse_id", group_keys=False).apply(expanding_stats)
-        stats = stats[
+        stats = hr[
             ["horse_id", "race_date", "horse_race_count", "horse_win_rate",
              "horse_top2_rate", "horse_top3_rate", "horse_avg_finish",
              "horse_last_finish", "horse_last_margin", "horse_recent3_avg",
@@ -155,21 +160,15 @@ class FeatureEngineer:
         if "jockey_id" not in df.columns:
             return df
 
-        jockey_ref = df[["jockey_id", "race_date", "finish_pos", "venue"]].copy()
-        jockey_ref = jockey_ref.sort_values(["jockey_id", "race_date"])
-
-        def jockey_expanding(group: pd.DataFrame) -> pd.DataFrame:
-            g = group.sort_values("race_date").reset_index(drop=True)
-            shifted = g["finish_pos"].shift(1)
-            g["jockey_win_rate"] = shifted.eq(1).expanding().mean()
-            g["jockey_top3_rate"] = shifted.le(3).expanding().mean()
-            return g
-
-        jstats = jockey_ref.groupby("jockey_id", group_keys=False).apply(
-            jockey_expanding
-        )[["jockey_id", "race_date", "jockey_win_rate", "jockey_top3_rate"]]
-
-        df = df.merge(jstats, on=["jockey_id", "race_date"], how="left")
+        df = df.sort_values(["jockey_id", "race_date"])
+        jgb = df.groupby("jockey_id", sort=False)
+        # merge しない（同一日・同一騎手の複数頭で行が爆発するため）
+        df["jockey_win_rate"] = jgb["finish_pos"].transform(
+            lambda s: s.shift(1).eq(1).expanding().mean()
+        )
+        df["jockey_top3_rate"] = jgb["finish_pos"].transform(
+            lambda s: s.shift(1).le(3).expanding().mean()
+        )
 
         # 騎手×場所 勝率（全期間平均、推論時も利用可）
         venue_win = (
@@ -204,21 +203,14 @@ class FeatureEngineer:
         if "trainer_id" not in df.columns:
             return df
 
-        trainer_ref = df[["trainer_id", "race_date", "finish_pos"]].copy()
-        trainer_ref = trainer_ref.sort_values(["trainer_id", "race_date"])
-
-        def trainer_expanding(group: pd.DataFrame) -> pd.DataFrame:
-            g = group.sort_values("race_date").reset_index(drop=True)
-            shifted = g["finish_pos"].shift(1)
-            g["trainer_win_rate"] = shifted.eq(1).expanding().mean()
-            g["trainer_top3_rate"] = shifted.le(3).expanding().mean()
-            return g
-
-        tstats = trainer_ref.groupby("trainer_id", group_keys=False).apply(
-            trainer_expanding
-        )[["trainer_id", "race_date", "trainer_win_rate", "trainer_top3_rate"]]
-
-        df = df.merge(tstats, on=["trainer_id", "race_date"], how="left")
+        df = df.sort_values(["trainer_id", "race_date"])
+        tgb = df.groupby("trainer_id", sort=False)
+        df["trainer_win_rate"] = tgb["finish_pos"].transform(
+            lambda s: s.shift(1).eq(1).expanding().mean()
+        )
+        df["trainer_top3_rate"] = tgb["finish_pos"].transform(
+            lambda s: s.shift(1).le(3).expanding().mean()
+        )
         df["trainer_win_rate"] = df["trainer_win_rate"].fillna(
             df["trainer_win_rate"].median()
         )
@@ -290,16 +282,11 @@ class FeatureEngineer:
         """
         条件ごとに expanding 勝率を計算する（データリーク防止）。
         """
-        hr = hr.copy().sort_values(["horse_id", "race_date"])
-
-        def calc_group(group: pd.DataFrame) -> pd.DataFrame:
-            g = group.sort_values("race_date").reset_index(drop=True)
-            shifted = g["finish_pos"].shift(1)
-            g[out_col] = shifted.eq(1).expanding().mean()
-            return g
-
-        result = hr.groupby(["horse_id", cond_col], group_keys=False).apply(calc_group)
-        return result
+        hr = hr.copy().sort_values(["horse_id", cond_col, "race_date"])
+        hr[out_col] = hr.groupby(["horse_id", cond_col], sort=False)["finish_pos"].transform(
+            lambda s: s.shift(1).eq(1).expanding().mean()
+        )
+        return hr
 
     # ----------------------------------------------------------
     # 5. 季節・月別の過去成績
@@ -377,17 +364,10 @@ class FeatureEngineer:
 
         # 過去全走の第1コーナー平均
         hr = hr.sort_values(["horse_id", "race_date"])
-
-        def calc_style(group: pd.DataFrame) -> pd.DataFrame:
-            g = group.sort_values("race_date").reset_index(drop=True)
-            g["avg_first_corner"] = (
-                g["first_corner_rank"].shift(1).expanding().mean()
-            )
-            return g
-
-        style_df = hr.groupby("horse_id", group_keys=False).apply(calc_style)[
-            ["horse_id", "race_date", "avg_first_corner"]
-        ]
+        hr["avg_first_corner"] = hr.groupby("horse_id", sort=False)[
+            "first_corner_rank"
+        ].transform(lambda s: s.shift(1).expanding().mean())
+        style_df = hr[["horse_id", "race_date", "avg_first_corner"]]
 
         df = df.merge(style_df, on=["horse_id", "race_date"], how="left")
 
@@ -458,17 +438,12 @@ class FeatureEngineer:
         ].copy()
         hr_speed["race_date"] = pd.to_datetime(hr_speed["race_date"], errors="coerce")
         hr_speed = hr_speed.sort_values(["horse_id", "race_date"])
-
-        def speed_stats(group: pd.DataFrame) -> pd.DataFrame:
-            g = group.sort_values("race_date").reset_index(drop=True)
-            g["last_final3f"] = g["final_3f"].shift(1)
-            g["avg_final3f"] = g["final_3f"].shift(1).expanding().mean()
-            # 上がり3F順位（レース内）は horse_results にはないため省略
-            return g
-
-        speed_df = hr_speed.groupby("horse_id", group_keys=False).apply(speed_stats)[
-            ["horse_id", "race_date", "last_final3f", "avg_final3f"]
-        ]
+        sgb = hr_speed.groupby("horse_id", sort=False)
+        hr_speed["last_final3f"] = sgb["final_3f"].shift(1)
+        hr_speed["avg_final3f"] = sgb["final_3f"].transform(
+            lambda s: s.shift(1).expanding().mean()
+        )
+        speed_df = hr_speed[["horse_id", "race_date", "last_final3f", "avg_final3f"]]
 
         df = df.merge(speed_df, on=["horse_id", "race_date"], how="left")
         df["last_final3f"] = df["last_final3f"].fillna(df["last_final3f"].median())
@@ -531,14 +506,64 @@ class FeatureEngineer:
 
         Args:
             df: マスターDataFrame
-            target: "win"（単勝）/ "top3"（複勝）
+            target: "win"（単勝）/ "top3"（複勝）/ "win_mod"（実質同着を1着扱い）
 
         Returns:
             0/1のSeries
         """
         if target == "win":
             return (df["finish_pos"] == 1).astype(int)
-        elif target == "top3":
+        if target == "win_mod":
+            return FeatureEngineer.make_target_mod(df)
+        if target == "top3":
             return (df["finish_pos"] <= 3).astype(int)
-        else:
-            raise ValueError(f"Unknown target: {target}")
+        raise ValueError(f"Unknown target: {target}")
+
+    @staticmethod
+    def make_target_mod(df: pd.DataFrame) -> pd.Series:
+        """
+        実質同着対応: 1着、または1着とのタイム差が0（同着）の馬を正例とする。
+        `time` 列（秒）または `margin_to_winner_sec` が利用可能な場合に適用。
+        """
+        base = (df["finish_pos"] == 1).astype(int)
+        if "race_id" not in df.columns:
+            return base
+
+        out = base.copy()
+        time_sec = None
+        if "time_sec" in df.columns:
+            time_sec = pd.to_numeric(df["time_sec"], errors="coerce")
+        elif "time" in df.columns:
+            time_sec = df["time"].map(FeatureEngineer._time_to_sec_static)
+
+        if time_sec is not None:
+            for race_id, grp in df.groupby("race_id"):
+                idx = grp.index
+                times = time_sec.loc[idx]
+                winner_time = times[grp["finish_pos"] == 1].min()
+                if pd.isna(winner_time):
+                    continue
+                dead_heat = (times - winner_time).abs() <= 1e-6
+                out.loc[idx] = (out.loc[idx] | dead_heat.astype(int)).astype(int)
+            return out
+
+        if "margin_to_winner_sec" in df.columns:
+            margin = pd.to_numeric(df["margin_to_winner_sec"], errors="coerce")
+            dead_heat = margin.fillna(999) <= 1e-6
+            return (base | dead_heat.astype(int)).astype(int)
+
+        return base
+
+    @staticmethod
+    def _time_to_sec_static(time_str: object) -> float | None:
+        if pd.isna(time_str) or str(time_str).strip() == "":
+            return None
+        import re
+
+        m = re.match(r"(\d+):(\d+\.\d+)", str(time_str).strip())
+        if m:
+            return int(m.group(1)) * 60 + float(m.group(2))
+        try:
+            return float(time_str)
+        except (TypeError, ValueError):
+            return None

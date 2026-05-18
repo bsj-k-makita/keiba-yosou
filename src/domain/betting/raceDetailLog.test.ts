@@ -19,10 +19,10 @@ function baseDetail(overrides: Partial<RaceDetailLog> = {}): RaceDetailLog {
     finishLabel: "1(◎)→2(○)→3(△)",
     aiMarks: { "1": "◎", "2": "○" },
     tickets: {
-      WIN: { invested: 100, payout: 0, isHit: false },
-      MAIN_LINE: { invested: 300, payout: 0, isHit: false },
-      WIDE: { invested: 500, payout: 0, isHit: false },
-      TRIFECTA_FORM: { invested: 300, payout: 0, isHit: false },
+      WIN: { invested: 100, payout: 0, isHit: false, formationHit: false },
+      MAIN_LINE: { invested: 300, payout: 0, isHit: false, formationHit: false },
+      WIDE: { invested: 500, payout: 0, isHit: false, formationHit: false },
+      TRIFECTA_FORM: { invested: 300, payout: 0, isHit: false, formationHit: false },
     },
     totalInvested: 700,
     totalPayout: 0,
@@ -38,6 +38,14 @@ describe("raceDetailLog", () => {
   test("着順ラベルを印付きで整形", () => {
     expect(formatFinishWithMarks([12, 7, 3], { "12": "◎", "7": "○", "3": "△" })).toBe(
       "12(◎)→7(○)→3(△)",
+    );
+    const names = new Map([
+      [12, "サトノ"],
+      [7, "ラヴ"],
+      [3, "ヒット"],
+    ]);
+    expect(formatFinishWithMarks([12, 7, 3], { "12": "◎", "7": "○", "3": "△" }, names)).toBe(
+      "12番 サトノ(◎)→7番 ラヴ(○)→3番 ヒット(△)",
     );
   });
 

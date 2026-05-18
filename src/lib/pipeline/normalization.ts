@@ -8,16 +8,16 @@ function clamp(n: number, min: number, max: number): number {
 }
 
 export function clampSoftmaxTemperature(input: number | undefined): number {
-  const raw = input ?? 8.0;
-  if (!Number.isFinite(raw)) return 8.0;
-  return clamp(raw, 2.0, 16.0);
+  const raw = input ?? 1.5;
+  if (!Number.isFinite(raw)) return 1.5;
+  return clamp(raw, 1.0, 16.0);
 }
 
-/** アプリ表示の勝率 softmax で常に使う温度（旧「補正強度=強」時の 8→4 半減に相当） */
-export const FIXED_SOFTMAX_TEMPERATURE = 4;
+/** 期待値計算用 softmax 温度（T=1.5: 分布を適度に尖らせ EV のメリハリを出す） */
+export const FIXED_SOFTMAX_TEMPERATURE = 1.5;
 
 /**
- * 勝率の softmax 温度。UI は廃止し、常に尖った分布（T=4）を使用する。
+ * 勝率の softmax 温度。常に T=1.5 を使用する。
  * `softmaxTemperature` / `adjustmentStrength` は後方互換のため受け取るが無視する。
  */
 export function effectiveSoftmaxTemperature(

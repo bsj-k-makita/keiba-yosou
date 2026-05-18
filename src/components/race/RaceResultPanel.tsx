@@ -12,6 +12,7 @@ import { BIAS_ADJUSTMENTS, PACE_ADJUSTMENTS } from "../../domain/race-evaluation
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
 import { ensureRaceResultFetched } from "../../lib/race-data";
 import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
+import { FinishPlaceLabel } from "./FinishPlaceLabel";
 
 type ManualPlaces = Partial<Record<"1" | "2" | "3" | "4", string>>;
 
@@ -185,21 +186,29 @@ export function RaceResultPanel({ raceId, results, horses, condition, onApplySug
     });
   }, [results, horses]);
 
+  const markByHorseId = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const r of results) {
+      if (r.mark) m.set(r.horseId, r.mark);
+    }
+    return m;
+  }, [results]);
+
   const podiumLabels = useMemo(() => {
     const horseById = new Map(horses.map((h) => [h.horseId, h]));
     return [1, 2, 3].map((place) => {
       const row = activePlaces.find((p) => p.place === place);
-      if (!row) return { pos: `${place}着`, name: "—" as const };
+      if (!row) {
+        return { pos: `${place}着`, horseNumber: undefined, horseName: "—", mark: undefined };
+      }
       const id = resolvePlaceToHorseId(row, horses);
       const h = id ? horseById.get(id) : undefined;
-      const gate = h ? gateOf(h) : undefined;
-      const name = h?.horseName ?? row.horseName ?? "—";
-      return {
-        pos: `${place}着`,
-        name: gate != null ? `${gate}番 ${name}` : name,
-      };
+      const gate = h ? gateOf(h) : row.horseNumber;
+      const horseName = h?.horseName ?? row.horseName ?? "—";
+      const mark = id ? markByHorseId.get(id) : undefined;
+      return { pos: `${place}着`, horseNumber: gate, horseName, mark };
     });
-  }, [activePlaces, horses]);
+  }, [activePlaces, horses, markByHorseId]);
 
   function handleSubmit() {
     saveManualResult(raceId, manualPlaces);
@@ -291,16 +300,27 @@ export function RaceResultPanel({ raceId, results, horses, condition, onApplySug
         <div className="result-panel__auto-places">
           <h3 className="result-panel__analysis-h">確定着順</h3>
           <ol className="result-panel__place-list">
-            {autoResult.places.slice(0, 8).map((p) => (
+            {autoResult.places.slice(0, 8).map((p) => {
+              const id = resolvePlaceToHorseId(p, horses);
+              const h = id ? horses.find((x) => x.horseId === id) : undefined;
+              const gate = h ? gateOf(h) : p.horseNumber;
+              const mark = id ? markByHorseId.get(id) : undefined;
+              return (
               <li key={p.place} className="result-panel__place-item">
                 <span className="result-panel__place-num">{p.place}着</span>
-                <span className="result-panel__place-name">{p.horseName}</span>
+                <FinishPlaceLabel
+                  className="result-panel__place-name"
+                  horseNumber={gate}
+                  horseName={p.horseName ?? h?.horseName ?? "—"}
+                  mark={mark}
+                />
                 <span className="result-panel__place-time">{p.time}</span>
                 {p.margin != null && p.place > 1 && (
                   <span className="result-panel__place-margin">{p.margin.toFixed(2)}秒差</span>
                 )}
               </li>
-            ))}
+              );
+            })}
           </ol>
         </div>
       )}
@@ -310,10 +330,15 @@ export function RaceResultPanel({ raceId, results, horses, condition, onApplySug
           <h3 className="result-panel__analysis-h">的中チェック</h3>
 
           <div className="result-panel__podium">
-            {podiumLabels.map(({ pos, name }) => (
+            {podiumLabels.map(({ pos, horseNumber, horseName, mark }) => (
               <div key={pos} className="result-panel__podium-item">
                 <span className="result-panel__podium-pos">{pos}</span>
-                <span className="result-panel__podium-name">{name}</span>
+                <FinishPlaceLabel
+                  className="result-panel__podium-name"
+                  horseNumber={horseNumber}
+                  horseName={horseName}
+                  mark={mark}
+                />
               </div>
             ))}
           </div>

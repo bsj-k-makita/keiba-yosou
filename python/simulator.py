@@ -7,7 +7,10 @@
 - 閾値最適化
 """
 
+from __future__ import annotations
+
 import logging
+import re
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -173,7 +176,7 @@ class Simulator:
 
         # レース内確率正規化（レースごとに合計=1 にする）
         df["pred_prob_norm"] = df.groupby("race_id")["pred_prob"].transform(
-            lambda x: x / x.sum().clip(lower=1e-9)
+            lambda x: x / max(float(x.sum()), 1e-9)
         )
 
         # 実質期待値計算: E = (P × O) - Margin（単純な P×O ではなくマージン控除）
@@ -243,6 +246,21 @@ class Simulator:
         self._print_report(report)
         return report
 
+    @staticmethod
+    def _is_win_ticket_type(ticket_type: object) -> bool:
+        label = str(ticket_type).strip().lower()
+        return label in ("win", "単勝", "tansho") or "単勝" in label
+
+    @staticmethod
+    def _is_place_ticket_type(ticket_type: object) -> bool:
+        label = str(ticket_type).strip().lower()
+        return label in ("place", "複勝", "fukusho") or "複勝" in label
+
+    @staticmethod
+    def _combo_matches_single_horse(combination: object, horse_number: int) -> bool:
+        nums = [int(x) for x in re.findall(r"\d+", str(combination))]
+        return len(nums) == 1 and nums[0] == int(horse_number)
+
     def _get_win_payout(
         self,
         payout_df: pd.DataFrame,
@@ -250,14 +268,18 @@ class Simulator:
         horse_number: int,
     ) -> int:
         """単勝払い戻し金額を取得する（100円あたり）"""
-        rows = payout_df[
-            (payout_df["race_id"] == race_id) &
-            (payout_df["ticket_type"].str.contains("単勝")) &
-            (payout_df["combination"].astype(str) == str(int(horse_number)))
-        ]
-        if rows.empty:
+        if payout_df is None or payout_df.empty:
             return 0
-        return int(rows.iloc[0]["payout"])
+        race_rows = payout_df[payout_df["race_id"] == race_id]
+        for _, row in race_rows.iterrows():
+            if not self._is_win_ticket_type(row.get("ticket_type")):
+                continue
+            if not self._combo_matches_single_horse(row.get("combination"), horse_number):
+                continue
+            payout = row.get("payout")
+            if payout is not None and float(payout) > 0:
+                return int(payout)
+        return 0
 
     def _get_place_payout(
         self,
@@ -266,14 +288,18 @@ class Simulator:
         horse_number: int,
     ) -> int:
         """複勝払い戻し金額を取得する（100円あたり）"""
-        rows = payout_df[
-            (payout_df["race_id"] == race_id) &
-            (payout_df["ticket_type"].str.contains("複勝")) &
-            (payout_df["combination"].astype(str) == str(int(horse_number)))
-        ]
-        if rows.empty:
+        if payout_df is None or payout_df.empty:
             return 0
-        return int(rows.iloc[0]["payout"])
+        race_rows = payout_df[payout_df["race_id"] == race_id]
+        for _, row in race_rows.iterrows():
+            if not self._is_place_ticket_type(row.get("ticket_type")):
+                continue
+            if not self._combo_matches_single_horse(row.get("combination"), horse_number):
+                continue
+            payout = row.get("payout")
+            if payout is not None and float(payout) > 0:
+                return int(payout)
+        return 0
 
     # ----------------------------------------------------------
     # 閾値最適化
@@ -295,34 +321,43 @@ class Simulator:
         thresholds = np.linspace(ev_range[0], ev_range[1], n_steps)
         results = []
 
+        from baseline_metrics import summarize_grid_row
+
         for threshold in thresholds:
             sim = Simulator(ev_threshold=threshold, bet_unit=self.bet_unit)
             sim.calibrator = self.calibrator
             report = sim.run(df, payout_df, ticket_type=ticket_type)
-            results.append({
-                "ev_threshold": threshold,
-                "n_bets": report.n_bets,
-                "hit_rate": report.hit_rate,
-                "roi": report.roi,
-                "profit": report.profit,
-            })
+            results.append(summarize_grid_row(threshold, report))
 
         grid_df = pd.DataFrame(results)
 
-        # ROIが最大かつベット数が一定以上の閾値を選択
         valid = grid_df[grid_df["n_bets"] >= 10]
         if valid.empty:
             valid = grid_df
-        best_row = valid.loc[valid["roi"].idxmax()]
+        best_roi_row = valid.loc[valid["roi"].idxmax()]
+        best_sharp_row = valid.loc[valid["sharp_ratio"].idxmax()]
 
         logger.info(
-            "最適閾値: EV=%.2f, ROI=%.1f%%, ベット数=%d",
-            best_row["ev_threshold"], best_row["roi"], best_row["n_bets"],
+            "最適(ROI): EV=%.2f, ROI=%.1f%%, bets=%d, sharp=%.3f",
+            best_roi_row["ev_threshold"],
+            best_roi_row["roi"],
+            best_roi_row["n_bets"],
+            best_roi_row["sharp_ratio"],
+        )
+        logger.info(
+            "最適(Sharpe): EV=%.2f, ROI=%.1f%%, bets=%d, sharp=%.3f, std=%.4f",
+            best_sharp_row["ev_threshold"],
+            best_sharp_row["roi"],
+            best_sharp_row["n_bets"],
+            best_sharp_row["sharp_ratio"],
+            best_sharp_row["std_return"],
         )
 
         return {
-            "best_ev_threshold": best_row["ev_threshold"],
-            "best_roi": best_row["roi"],
+            "best_ev_threshold": float(best_roi_row["ev_threshold"]),
+            "best_roi": float(best_roi_row["roi"]),
+            "best_sharpe_threshold": float(best_sharp_row["ev_threshold"]),
+            "best_sharpe": float(best_sharp_row["sharp_ratio"]),
             "grid_results": grid_df,
         }
 

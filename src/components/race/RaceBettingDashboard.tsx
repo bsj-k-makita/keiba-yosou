@@ -7,19 +7,26 @@ import {
   formatHorseList,
 } from "../../domain/betting/buildRaceBettingContext";
 import type { BetTicket } from "../../domain/betting/types";
+import {
+  probabilityEngineLabel,
+  type ProbabilityEngine,
+} from "../../lib/pipeline/probabilityEngine";
 
 type Props = {
   results: HorseScoreResult[];
   horses: HorseAbility[];
   condition: RaceCondition;
   betAmount?: number;
+  adjustedProbabilities?: ReadonlyMap<string, number>;
+  isSkippableRace?: boolean;
+  probabilityEngine?: ProbabilityEngine;
 };
 
 function ticketLabel(type: BetTicket["ticketType"]): string {
   if (type === "WIN") return "単勝◎";
-  if (type === "MAIN_LINE") return "馬連◎○▲（3点BOX）";
+  if (type === "MAIN_LINE") return "馬連◎○";
   if (type === "WIDE") return "ワイド◎-印";
-  return "3連複フォーメーション";
+  return "3連複フォーメ";
 }
 
 function estimateWinReturn(odds: number | undefined, betAmount: number): string {
@@ -28,11 +35,24 @@ function estimateWinReturn(odds: number | undefined, betAmount: number): string 
   return `想定払戻 ${yen.toLocaleString()}円（単勝 ${odds.toFixed(1)}倍）`;
 }
 
-export function RaceBettingDashboard({ results, horses, condition, betAmount = 100 }: Props) {
+export function RaceBettingDashboard({
+  results,
+  horses,
+  condition,
+  betAmount = 100,
+  adjustedProbabilities,
+  isSkippableRace,
+  probabilityEngine = "ts",
+}: Props) {
   const [copied, setCopied] = useState(false);
   const ctx = useMemo(
-    () => buildRaceBettingContext(results, horses, condition, betAmount),
-    [results, horses, condition, betAmount],
+    () =>
+      buildRaceBettingContext(results, horses, condition, betAmount, {
+        adjustedProbabilities,
+        isSkippableRace,
+        probabilityEngine,
+      }),
+    [results, horses, condition, betAmount, adjustedProbabilities, isSkippableRace, probabilityEngine],
   );
 
   const copyText = useMemo(() => (ctx ? buildTicketsCopyText(ctx) : ""), [ctx]);
@@ -53,13 +73,15 @@ export function RaceBettingDashboard({ results, horses, condition, betAmount = 1
     }
   }, [copyText]);
 
-  if (ctx == null) {
+  if (ctx == null || ctx.tickets.length === 0) {
     return (
       <section className="betting-dashboard" aria-label="買い目ダッシュボード">
         <p className="app__meta">印が付いた馬がいないため、買い目を生成できません。</p>
       </section>
     );
   }
+
+  const evPointCount = ctx.evTickets.reduce((s, t) => s + t.combinations.length, 0);
 
   const fav = ctx.favoriteNumber;
   const favName = fav != null ? ctx.horseNameByNumber.get(fav) : undefined;
@@ -71,8 +93,14 @@ export function RaceBettingDashboard({ results, horses, condition, betAmount = 1
         <div>
           <h2 className="app__section-title app__section-title--pop">今回の買い目ダッシュボード</h2>
           <p className="app__meta">
-            最終印（4角振替・ポートフォリオ補正後）から定型ルールで生成。クラス:{" "}
+            定型フォーメ（◎単勝・◎○馬連・ワイド・3連複）を常に表示。クラス:{" "}
             {classTierLabelJa(ctx.classTier)}
+            {evPointCount > 0
+              ? ` / EV推奨 ${evPointCount}点`
+              : " / EV推奨なし（見送り推奨）"}
+            {" / 勝率: "}
+            {probabilityEngineLabel(probabilityEngine)}
+            {probabilityEngine === "ai" ? "（ai_*）" : ""}
           </p>
         </div>
         <div className="betting-dashboard__actions">

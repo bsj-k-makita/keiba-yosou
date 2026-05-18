@@ -12,6 +12,8 @@ netkeibaからレース結果・馬情報・血統情報をスクレイピング
   例: 202506010901 = 2025年 / 06=中山 / 01回 / 09日目 / 01レース
 """
 
+from __future__ import annotations
+
 import re
 import time
 import logging
@@ -87,7 +89,7 @@ class Scraper:
     - 全データはSQLiteに保存、取得済みはスキップ
     """
 
-    # race_table_01 の列インデックス（実サイト確認済み）
+    # race_table_01 の列インデックス（db.netkeiba.com 2026-05 時点）
     COL_FINISH_POS   = 0
     COL_FRAME_NUM    = 1
     COL_HORSE_NUM    = 2
@@ -97,12 +99,16 @@ class Scraper:
     COL_JOCKEY       = 6
     COL_FINISH_TIME  = 7
     COL_MARGIN       = 8
-    COL_ODDS         = 9   # 単勝オッズ
-    COL_POPULARITY   = 10  # 人気
-    COL_BODY_WEIGHT  = 11  # 馬体重 "480(+4)"
-    COL_TRAINER      = 12
-    COL_OWNER        = 13
-    COL_PRIZE        = 14  # 賞金
+    # 9-13: タイム指数・追走指数等（スキップ）
+    COL_PASSING      = 14  # 通過
+    COL_FINAL_3F     = 15  # 上り
+    COL_ODDS         = 16  # 単勝オッズ
+    COL_POPULARITY   = 17  # 人気
+    COL_BODY_WEIGHT  = 18  # 馬体重 "480(+4)"
+    # 19-21: 調教タイム・厩舎コメント・備考
+    COL_TRAINER      = 22
+    COL_OWNER        = 23
+    COL_PRIZE        = 24  # 賞金(万円)
 
     # db_h_race_results の列インデックス（実サイト確認済み）
     HR_DATE        = 0
@@ -446,11 +452,23 @@ class Scraper:
         Returns:
             True: 成功 / False: スキップ or 失敗
         """
-        # 取得済みスキップ
+        # 取得済みスキップ（オッズが入っている場合のみ）
         with sqlite3.connect(self.db_path) as conn:
-            if conn.execute(
+            has_info = conn.execute(
                 "SELECT 1 FROM race_info WHERE race_id=?", (race_id,)
-            ).fetchone():
+            ).fetchone()
+            has_odds = conn.execute(
+                "SELECT 1 FROM race_results WHERE race_id=? AND odds IS NOT NULL LIMIT 1",
+                (race_id,),
+            ).fetchone()
+            has_valid_payout = conn.execute(
+                """SELECT 1 FROM payouts WHERE race_id=?
+                   AND ticket_type IN ('win', '単勝')
+                   AND payout IS NOT NULL AND payout > 0
+                   LIMIT 1""",
+                (race_id,),
+            ).fetchone()
+            if has_info and has_odds and has_valid_payout:
                 return True
 
         url = RACE_URL.format(race_id=race_id)
@@ -480,8 +498,10 @@ class Scraper:
         results_df = self._parse_race_results(soup, race_id)
         payouts_df = self._parse_payouts(soup, race_id)
 
-        # DB保存
+        # DB保存（同一 race_id は上書き）
         with sqlite3.connect(self.db_path) as conn:
+            conn.execute("DELETE FROM race_results WHERE race_id=?", (race_id,))
+            conn.execute("DELETE FROM payouts WHERE race_id=?", (race_id,))
             conn.execute(
                 """INSERT OR REPLACE INTO race_info
                    (race_id, race_date, venue, venue_code, race_number, race_name,
@@ -627,9 +647,9 @@ class Scraper:
         """
         race_table_01 を解析してDataFrameを返す。
 
-        列構成（実サイト確認済み）:
-          0:着順 1:枠番 2:馬番 3:馬名 4:性齢 5:斤量 6:騎手 7:タイム
-          8:着差 9:単勝 10:人気 11:馬体重 12:調教師 13:馬主 14:賞金
+        列構成（db.netkeiba.com 2026-05 時点）:
+          0-8: 着順〜着差 / 9-13: 各種指数 / 14:通過 15:上り
+          16:単勝 17:人気 18:馬体重 / 22:調教師 23:馬主 24:賞金
         """
         table = soup.select_one("table.race_table_01")
         if table is None:
@@ -639,7 +659,7 @@ class Scraper:
         rows = []
         for tr in table.select("tr")[1:]:
             tds = tr.select("td")
-            if len(tds) < 10:
+            if len(tds) < 19:
                 continue
             try:
                 # 着順（数字のみ受け付け。取消・除外等は除外）
@@ -721,33 +741,58 @@ class Scraper:
 
         return pd.DataFrame(rows)
 
+    @staticmethod
+    def _normalize_ticket_type(label: str) -> str:
+        """netkeiba 日本語ラベル → シミュレータ照合用コード"""
+        key = label.strip()
+        mapping = {
+            "単勝": "win",
+            "複勝": "place",
+            "馬連": "quinella",
+            "ワイド": "wide",
+            "3連複": "trio",
+            "3連単": "trifecta",
+            "枠連": "bracket",
+        }
+        return mapping.get(key, key)
+
+    @staticmethod
+    def _parse_yen_amounts(text: str) -> list[int]:
+        pay_strs = re.findall(r"[\d,]+円", text)
+        if not pay_strs:
+            pay_strs = re.findall(r"[\d,]+", text)
+        out: list[int] = []
+        for p in pay_strs:
+            try:
+                out.append(int(p.replace(",", "").replace("円", "")))
+            except ValueError:
+                continue
+        return out
+
     def _parse_payouts(self, soup: BeautifulSoup, race_id: str) -> pd.DataFrame:
         """
         pay_table_01 から払い戻し情報を解析する。
-        各行: [馬券種別 | 組み合わせ | 払戻金 | 人気]
+        各行: [馬券種別(th) | 組み合わせ(td) | 払戻金(td) | 人気(td)]
+        ※ th を省略すると列がずれ ticket_type=馬番 になるため th,td を併用する。
         """
         rows = []
         for table in soup.select("table.pay_table_01"):
             for tr in table.select("tr"):
-                tds = tr.select("td")
-                if len(tds) < 3:
+                cells = tr.select("th, td")
+                if len(cells) < 3:
                     continue
                 try:
-                    ticket_type = tds[0].get_text(strip=True)
-                    # 組み合わせは改行で複数ある場合がある
-                    combos_raw = tds[1].get_text("\n", strip=True).split("\n")
+                    ticket_type = self._normalize_ticket_type(cells[0].get_text(strip=True))
+                    combos_raw = cells[1].get_text("\n", strip=True).split("\n")
                     combos = [c.strip() for c in combos_raw if c.strip()]
-                    # 払戻金（カンマ区切りの数字）
-                    pay_strs = re.findall(r"[\d,]+円", tds[2].get_text())
-                    payouts_val = [int(p.replace(",", "").replace("円", "")) for p in pay_strs]
-                    # 的中人気
-                    pop_strs = re.findall(r"\d+", tds[3].get_text()) if len(tds) > 3 else []
+                    payouts_val = self._parse_yen_amounts(cells[2].get_text())
+                    pop_strs = re.findall(r"\d+", cells[3].get_text()) if len(cells) > 3 else []
 
                     for i, combo in enumerate(combos):
                         rows.append({
                             "race_id":    race_id,
-                            "ticket_type":ticket_type,
-                            "combination":combo,
+                            "ticket_type": ticket_type,
+                            "combination": combo,
                             "payout":     payouts_val[i] if i < len(payouts_val) else None,
                             "popularity": int(pop_strs[i]) if i < len(pop_strs) else None,
                         })
@@ -1030,6 +1075,53 @@ class Scraper:
             self.close()
 
         logger.info("=== データ収集完了 ===")
+
+    def collect_race_ids(
+        self,
+        race_ids: list[str],
+        *,
+        skip_horse: bool = False,
+        skip_pedigree: bool = True,
+    ) -> tuple[int, int]:
+        """
+        指定 race_id のみレース結果・払戻を収集（クイック・インジェスト用）。
+        馬過去成績は当該レース出走馬に限定（skip_horse=False 時）。
+        """
+        ids = sorted({str(r).strip() for r in race_ids if r and str(r).strip()})
+        logger.info("=== 限定収集: %d レース ===", len(ids))
+
+        success = 0
+        for race_id in tqdm(ids, desc="Race results (quick)", unit="レース"):
+            if self.scrape_race(race_id):
+                success += 1
+        logger.info("レース結果収集完了: %d/%d件", success, len(ids))
+
+        if not skip_horse and success > 0:
+            with sqlite3.connect(self.db_path) as conn:
+                horse_ids = [
+                    row[0]
+                    for row in conn.execute(
+                        "SELECT DISTINCT horse_id FROM race_results "
+                        "WHERE horse_id IS NOT NULL AND horse_id != ''"
+                    ).fetchall()
+                ]
+            logger.info("馬過去成績（限定）: %d頭", len(horse_ids))
+            for horse_id in tqdm(horse_ids, desc="Horse results (quick)", unit="頭"):
+                self.scrape_horse(horse_id)
+
+        if not skip_pedigree and not skip_horse:
+            with sqlite3.connect(self.db_path) as conn:
+                horse_ids = [
+                    row[0]
+                    for row in conn.execute(
+                        "SELECT DISTINCT horse_id FROM race_results "
+                        "WHERE horse_id IS NOT NULL AND horse_id != ''"
+                    ).fetchall()
+                ]
+            for horse_id in tqdm(horse_ids, desc="Pedigree (quick)", unit="頭"):
+                self.scrape_pedigree(horse_id)
+
+        return success, len(ids)
 
     # ----------------------------------------------------------
     # ユーティリティ
