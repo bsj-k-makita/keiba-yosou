@@ -6,6 +6,7 @@ import {
   manualPlaceMapToPlaces,
   resolvePlaceToHorseId,
   type MarkHitRow,
+  type PlaceLike,
   type TopPredictionMark,
 } from "../../domain/race-evaluation/markHitAnalysis";
 import { BIAS_ADJUSTMENTS, PACE_ADJUSTMENTS } from "../../domain/race-evaluation/adjustments";
@@ -150,7 +151,7 @@ export function RaceResultPanel({ raceId, results, horses, condition, onApplySug
     })();
   }, [raceId]);
 
-  const activePlaces = useMemo(() => {
+  const activePlaces = useMemo((): PlaceLike[] => {
     if (autoResult) return autoResult.places;
     if (manualSubmitted) return manualPlaceMapToPlaces(manualPlaces);
     return [];
@@ -303,7 +304,7 @@ export function RaceResultPanel({ raceId, results, horses, condition, onApplySug
             {autoResult.places.slice(0, 8).map((p) => {
               const id = resolvePlaceToHorseId(p, horses);
               const h = id ? horses.find((x) => x.horseId === id) : undefined;
-              const gate = h ? gateOf(h) : p.horseNumber;
+              const gate = h ? gateOf(h) : undefined;
               const mark = id ? markByHorseId.get(id) : undefined;
               return (
               <li key={p.place} className="result-panel__place-item">
