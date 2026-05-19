@@ -1,6 +1,5 @@
-import { evaluateRace } from "../../domain/race-evaluation";
 import { computeRaceBettingOutcome, type RaceBettingOutcome } from "../../domain/betting/computeRaceBettingOutcome";
-import { ensureFrontendDisplayMarks } from "../race-display/ensureFrontendDisplayMarks";
+import { runRaceEvaluationPipeline } from "../pipeline/evaluationPipeline";
 import { getHorsesFromRaceData, getRaceEvaluationById, getRaceResultById } from "./raceDataRepository";
 
 export async function computeRaceBettingOutcomeById(
@@ -10,11 +9,7 @@ export async function computeRaceBettingOutcomeById(
   if (evalData == null) return null;
 
   const horses = getHorsesFromRaceData(evalData);
-  const results = ensureFrontendDisplayMarks(
-    evaluateRace(horses, evalData.condition),
-    horses,
-    evalData.condition,
-  );
+  const { results } = runRaceEvaluationPipeline(horses, evalData.condition);
   const result = await getRaceResultById(raceId);
 
   return computeRaceBettingOutcome(results, horses, evalData.condition, result ?? undefined);

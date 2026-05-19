@@ -1,16 +1,32 @@
 import type { HorseAbility } from "../../domain/race-evaluation/abilityTypes";
+import { raceHasFullAiBackfill } from "./aiMarkAssignment";
 
-/** 勝率ソース: TS Softmax（既定） or Python ML バックフィル（ai_* JSON） */
+export {
+  raceHasFullAiBackfill,
+  applyAiMarksByEffectiveEv,
+  sortResultsForAiDisplay,
+  sortResultsByAiEffectiveEv,
+  AI_MARK_SLOTS,
+  probabilityWinRateSuffix,
+} from "./aiMarkAssignment";
+
+/** 勝率ソース: TS Softmax or Python ML バックフィル（ai_* JSON） */
 export type ProbabilityEngine = "ts" | "ai";
 
+/** レース詳細の既定エンジン（URL 未指定時） */
+export const DEFAULT_PROBABILITY_ENGINE: ProbabilityEngine = "ai";
+
 export function parseProbabilityEngine(raw: string | null | undefined): ProbabilityEngine {
-  return raw === "ai" ? "ai" : "ts";
+  if (raw === "ts") return "ts";
+  if (raw === "ai") return "ai";
+  return DEFAULT_PROBABILITY_ENGINE;
 }
 
 export function probabilityEngineLabel(engine: ProbabilityEngine): string {
   return engine === "ai" ? "Python AI" : "TS 評価";
 }
 
+/** 1頭でも ai_* があれば true（後方互換・一覧用） */
 export function raceHasAiPredictions(horses: readonly HorseAbility[]): boolean {
   return horses.some(
     (h) =>
@@ -18,6 +34,11 @@ export function raceHasAiPredictions(horses: readonly HorseAbility[]): boolean {
       Number.isFinite(h.aiPredictedWinRate) &&
       h.aiPredictedWinRate >= 0,
   );
+}
+
+/** AI 完全連動モードに必要なフルバックフィル（全頭 ai_predicted_win_rate + ai_effective_ev） */
+export function raceHasAiEngineReady(horses: readonly HorseAbility[]): boolean {
+  return raceHasFullAiBackfill(horses);
 }
 
 /** JSON の ai_predicted_win_rate を horseId キーで返す（レース内正規化済み想定） */
@@ -45,9 +66,9 @@ export function resolveAdjustedProbabilities(
   tsProbabilities: ReadonlyMap<string, number>,
   requestedEngine: ProbabilityEngine,
 ): ResolvedProbabilities {
-  if (requestedEngine === "ai" && raceHasAiPredictions(horses)) {
+  if (requestedEngine === "ai" && raceHasFullAiBackfill(horses)) {
     const aiMap = buildAiProbabilityMap(horses);
-    if (aiMap.size > 0) {
+    if (aiMap.size === horses.length) {
       return { probabilities: aiMap, engineUsed: "ai" };
     }
   }

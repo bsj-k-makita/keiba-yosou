@@ -651,6 +651,8 @@ function toRaceEntryFromPreserved(
     ...(e.abilities_source === "past_runs_estimated" || h.abilitiesPrecomputedFromPastRuns
       ? { abilities_source: "past_runs_estimated" as const }
       : {}),
+    ...(h.aiPredictedWinRate != null ? { aiPredictedWinRate: h.aiPredictedWinRate } : {}),
+    ...(h.aiEffectiveEv != null ? { aiEffectiveEv: h.aiEffectiveEv } : {}),
   };
 }
 

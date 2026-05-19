@@ -25,7 +25,11 @@ import { ScoreDiffIndicator } from "./ScoreDiffIndicator";
 import { TypeMatchList } from "./TypeMatchList";
 import { computeConnectionSpecialBadges, computeMarketAlertLabel } from "./evaluationTags";
 import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
-import { FINAL_EXPECTED_RECOMMEND_THRESHOLD } from "../../domain/race-evaluation/investmentEvConstants";
+import {
+  AI_EFFECTIVE_EV_THRESHOLD,
+  FINAL_EXPECTED_RECOMMEND_THRESHOLD,
+} from "../../domain/race-evaluation/investmentEvConstants";
+import { probabilityWinRateSuffix } from "../../lib/pipeline/probabilityEngine";
 import { netkeibaHorseResultUrl } from "../../lib/netkeibaUrls";
 import { FinalExpectedRecommendBadge } from "./FinalExpectedRecommendBadge";
 import { runningStyleToStripShortLabel } from "./RunningStyleStrip";
@@ -107,22 +111,25 @@ export function HorseEvaluationCard({
   );
   const fitLevel = fitLevelFromScore(fitRaw);
 
+  const engine = viewModel?.probabilityEngine ?? "ts";
+  const useAiEngine = engine === "ai";
   const vmHorse = viewModel?.byHorseId.get(horse.horseId);
   const weightedRadar = vmHorse?.weightedRadar;
   const pipelineWinProb = vmHorse?.adjustedWinProbability;
   const hMap = useMemo(() => weightedRadar ?? horseToRadarMap(horse), [horse, weightedRadar]);
   const radarShape = useMemo(() => inferRadarShape(horse), [horse]);
-  /** JSON final_expected_value（無ければ ViewModel／旧 value_score）。フロントでは再計算しない */
-  const displayEv =
-    horse.investment?.finalExpectedValue ??
-    vmHorse?.effectiveEv ??
-    horse.investment?.valueScore ??
-    null;
+  const displayEv = useAiEngine
+    ? (horse.aiEffectiveEv ?? vmHorse?.effectiveEv ?? null)
+    : (horse.investment?.finalExpectedValue ??
+        vmHorse?.effectiveEv ??
+        horse.investment?.valueScore ??
+        null);
   const effectiveEv = useMemo(() => displayEv, [displayEv]);
+  const evRecommendThreshold = useAiEngine
+    ? AI_EFFECTIVE_EV_THRESHOLD
+    : FINAL_EXPECTED_RECOMMEND_THRESHOLD;
   const effectiveEvHot =
-    displayEv != null &&
-    Number.isFinite(displayEv) &&
-    displayEv > FINAL_EXPECTED_RECOMMEND_THRESHOLD;
+    displayEv != null && Number.isFinite(displayEv) && displayEv > evRecommendThreshold;
   const evBand =
     effectiveEv == null
       ? "muted"
@@ -295,11 +302,15 @@ export function HorseEvaluationCard({
         {pipelineWinProb != null && Number.isFinite(pipelineWinProb) ? (
           <p
             className="horse-card__scoreline horse-card__scoreline--pipeline-probs"
-            title="finalEvaluationScore をレース内 softmax した単勝確率"
+            title={
+              useAiEngine
+                ? "Python ML バックフィル ai_predicted_win_rate（レース内正規化済み）"
+                : "finalEvaluationScore をレース内 softmax した単勝確率"
+            }
           >
             <span className="horse-card__scoreline-lbl">予測勝率</span>
             <span className="horse-card__scoreline-val">{(pipelineWinProb * 100).toFixed(1)}%</span>
-            <span className="horse-card__scoreline-unit">（softmax）</span>
+            <span className="horse-card__scoreline-unit">{probabilityWinRateSuffix(engine)}</span>
           </p>
         ) : null}
         {horse.abilityIndex != null ? (

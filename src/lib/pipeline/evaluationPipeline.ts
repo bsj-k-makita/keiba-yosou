@@ -6,6 +6,8 @@ import {
 } from "../../viewModel/raceEvaluationViewModel";
 import { effectiveSoftmaxTemperature, softmaxDistribution } from "./normalization";
 import {
+  applyAiMarksByEffectiveEv,
+  DEFAULT_PROBABILITY_ENGINE,
   type ProbabilityEngine,
   resolveAdjustedProbabilities,
 } from "./probabilityEngine";
@@ -41,23 +43,29 @@ export function runRaceEvaluationPipeline(
   options?: EvaluationPipelineOptions,
 ): EvaluationPipelineResult {
   const raw = evaluateRace([...horses], condition);
-  const results = ensureFrontendDisplayMarks(raw, horses, condition);
+  const tsMarked = ensureFrontendDisplayMarks(raw, horses, condition);
   const temperature = effectiveSoftmaxTemperature(
     condition.softmaxTemperature,
     condition.adjustmentStrength,
   );
   const tsProbabilities = softmaxDistribution(
-    results.map((row) => ({ horseId: row.horseId, score: row.finalEvaluationScore })),
+    tsMarked.map((row) => ({ horseId: row.horseId, score: row.finalEvaluationScore })),
     temperature,
   );
 
-  const requestedEngine = options?.probabilityEngine ?? "ts";
+  const requestedEngine = options?.probabilityEngine ?? DEFAULT_PROBABILITY_ENGINE;
   const { probabilities: adjustedProbabilities, engineUsed: probabilityEngine } =
     resolveAdjustedProbabilities(horses, tsProbabilities, requestedEngine);
+
+  const results =
+    probabilityEngine === "ai"
+      ? applyAiMarksByEffectiveEv(tsMarked, horses)
+      : tsMarked;
 
   const mathFirst = mathFirstByFinalRank(results);
   const displayFavorite = results.find((r) => r.mark === "◎");
   const isSkippableRace =
+    probabilityEngine === "ts" &&
     mathFirst != null &&
     displayFavorite != null &&
     mathFirst.horseId !== displayFavorite.horseId;

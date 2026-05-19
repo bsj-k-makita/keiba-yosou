@@ -27,7 +27,9 @@
     "apply-prev-day-conditions": "node scripts/apply-prev-day-conditions.mjs",
     "apply-tokyo-meeting-bias-brief": "node scripts/apply-tokyo-meeting-bias-brief.mjs --target=2026-05-17",
     "reestimate-abilities": "node scripts/reestimate-abilities-from-past-runs.mjs",
-    "backtest:bets": "vitest run src/domain/betting/runFullBacktest.test.ts"
+    "backtest:bets": "vitest run src/domain/betting/runFullBacktest.test.ts",
+    "backtest:compare": "vitest run src/domain/betting/runBacktestCompare.test.ts",
+    "backtest:ts": "vitest run src/domain/betting/runFullBacktestTs.test.ts"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",

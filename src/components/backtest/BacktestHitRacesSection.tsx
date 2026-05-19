@@ -150,9 +150,11 @@ function HitRaceCard({ row }: { row: RaceDetailLog }) {
 
 type Props = {
   raceDetails: RaceDetailLog[];
+  /** 回収率サマリに含まれる AI 全頭バックフィル済みレース数（参考） */
+  aiComparableRaceCount?: number;
 };
 
-export function BacktestHitRacesSection({ raceDetails }: Props) {
+export function BacktestHitRacesSection({ raceDetails, aiComparableRaceCount }: Props) {
   const dates = useMemo(() => extractDates(raceDetails), [raceDetails]);
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [activeVenue, setActiveVenue] = useState<string | null>(null);
@@ -197,7 +199,14 @@ export function BacktestHitRacesSection({ raceDetails }: Props) {
         <div>
           <h2>的中レース</h2>
           <p className="app__meta" style={{ margin: 0 }}>
-            全{raceDetails.length}レース（払戻あり {hitCount}）。開催日・競馬場で絞り込み（レース選択と同じ操作）。
+            結果確定 {raceDetails.length}レース（払戻あり {hitCount}）。開催日・競馬場で絞り込み。
+            {aiComparableRaceCount != null && aiComparableRaceCount < raceDetails.length ? (
+              <>
+                {" "}
+                上部の回収率は AI 全頭バックフィル済み {aiComparableRaceCount}R のみ。ここには残り{" "}
+                {raceDetails.length - aiComparableRaceCount}R（TS印で再計算）も含みます。
+              </>
+            ) : null}
           </p>
         </div>
         <label className="backtest-hit-races__filter">

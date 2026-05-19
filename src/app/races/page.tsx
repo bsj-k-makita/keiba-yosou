@@ -562,7 +562,7 @@ export function RacesListPage() {
           不的中（2列目全滅含む）
         </span>
         <span className="backtest-hit-races__legend-item">
-          <span className="rl-race-list__legend-neutral" />
+          <span className="backtest-hit-races__legend-swatch backtest-hit-races__legend-swatch--neutral" />
           結果未確定
         </span>
       </div>

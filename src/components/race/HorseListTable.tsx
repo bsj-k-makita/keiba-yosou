@@ -12,6 +12,7 @@ import {
   getLapProfileVisual,
 } from "./evaluationTags";
 import type { RaceEvaluationViewModel } from "../../viewModel/raceEvaluationViewModel";
+import { probabilityWinRateSuffix } from "../../lib/pipeline/probabilityEngine";
 import { netkeibaHorseResultUrl } from "../../lib/netkeibaUrls";
 import { adjustedScoreToPoints100 } from "./adjustedScorePoints100";
 import { formatPredictedTop3Percent } from "./predictedTop3Display";
@@ -103,6 +104,11 @@ export function HorseListTable({
   renderExpandedRow,
 }: Props) {
   const compact = scanMode || summaryMode;
+  const probabilityEngine = viewModel?.probabilityEngine ?? "ts";
+  const winRateTitle =
+    probabilityEngine === "ai"
+      ? "ai_predicted_win_rate（Python ML・レース内正規化）"
+      : "finalEvaluationScore を同一レース内で softmax した単勝確率（表示はパイプラインのみ）。合計 100%。";
   const horseMap = useMemo(() => new Map(horses.map((h) => [h.horseId, h] as const)), [horses]);
   const maxAdjustedScoreInRace = useMemo(
     () => sorted.reduce((m, row) => Math.max(m, row.adjustedScore), 0),
@@ -155,10 +161,7 @@ export function HorseListTable({
             {scanMode && <th className="horse-list__th">騎手</th>}
             {scanMode && <th className="horse-list__th">脚質</th>}
             {!scanMode && (
-              <th
-                className="horse-list__th horse-list__th--pwin"
-                title="finalEvaluationScore を同一レース内で softmax した単勝確率（表示はパイプラインのみ）。合計 100%。"
-              >
+              <th className="horse-list__th horse-list__th--pwin" title={winRateTitle}>
                 予測勝率
               </th>
             )}
@@ -330,8 +333,11 @@ export function HorseListTable({
                 {!scanMode && (
                 <td className="horse-list__td horse-list__td--pwin">
                   {vm?.adjustedWinProbability != null && Number.isFinite(vm.adjustedWinProbability) ? (
-                    <span className="horse-list__pwin" title="finalEvaluationScore 由来 softmax（同一レース）">
+                    <span className="horse-list__pwin" title={winRateTitle}>
                       {(vm.adjustedWinProbability * 100).toFixed(1)}%
+                      <span className="horse-list__pwin-suffix">
+                        {probabilityWinRateSuffix(probabilityEngine)}
+                      </span>
                     </span>
                   ) : (
                     <span className="horse-list__role-na">—</span>

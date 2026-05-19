@@ -1299,6 +1299,12 @@ samp {
   color: var(--c-accent-contrast);
 }
 
+.view-density__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .app__grid {
   display: grid;
   gap: 16px;
@@ -5129,15 +5135,20 @@ img[loading="lazy"] {
 .backtest-hit-races__legend {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem 1rem;
   margin-bottom: 1rem;
   font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--c-text-2);
 }
 
 .backtest-hit-races__legend-item {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .backtest-hit-races__legend-swatch {
@@ -5153,6 +5164,11 @@ img[loading="lazy"] {
 
 .backtest-hit-races__legend-swatch--miss {
   background: #e5e7eb;
+}
+
+.backtest-hit-races__legend-swatch--neutral {
+  background: #f3f4f6;
+  border-color: #d1d5db;
 }
 
 /* 的中レースカード（色分け強調） */
@@ -5376,7 +5392,9 @@ img[loading="lazy"] {
 }
 
 .rl-page__legend {
-  margin: 0 1rem 0.75rem;
+  max-width: var(--page-max-width);
+  margin: 0 auto 0.75rem;
+  padding: 22px;
 }
 
 .rl-race-list__recovery {

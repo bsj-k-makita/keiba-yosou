@@ -3,6 +3,20 @@ import type { RaceEntryEvaluation, RaceEvaluationData } from "./raceEvaluationTy
 
 export type EnrichedRaceHorse = HorseAbility & { gate: number; frameNumber: number };
 
+function n(v: unknown): number | undefined {
+  return typeof v === "number" && Number.isFinite(v) ? v : undefined;
+}
+
+function entryAiWinRate(entry: RaceEntryEvaluation): number | undefined {
+  const ext = entry as RaceEntryEvaluation & { ai_predicted_win_rate?: number };
+  return n(entry.aiPredictedWinRate) ?? n(ext.ai_predicted_win_rate);
+}
+
+function entryAiEffectiveEv(entry: RaceEntryEvaluation): number | undefined {
+  const ext = entry as RaceEntryEvaluation & { ai_effective_ev?: number };
+  return n(entry.aiEffectiveEv) ?? n(ext.ai_effective_ev);
+}
+
 /** JRA 標準: 馬番 n → 枠 ceil(n/2)（1〜2→1枠 … 17〜18→8枠） */
 export function inferFrameNumberFromGate(gate: number): number {
   return Math.max(1, Math.min(8, Math.ceil(gate / 2)));
@@ -143,5 +157,7 @@ export function raceDataToHorses(data: RaceEvaluationData): EnrichedRaceHorse[] 
       ? { suitabilityFlags: e.suitabilityFlags }
       : {}),
     ...(e.abilities_source === "past_runs_estimated" ? { abilitiesPrecomputedFromPastRuns: true as const } : {}),
+    ...(entryAiWinRate(e) != null ? { aiPredictedWinRate: entryAiWinRate(e) } : {}),
+    ...(entryAiEffectiveEv(e) != null ? { aiEffectiveEv: entryAiEffectiveEv(e) } : {}),
   }));
 }

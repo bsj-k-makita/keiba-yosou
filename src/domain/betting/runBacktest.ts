@@ -13,6 +13,11 @@ import {
 import { resolvePlaceToHorseId } from "../race-evaluation/markHitAnalysis";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
 import { ensureFrontendDisplayMarks } from "../../lib/race-display/ensureFrontendDisplayMarks";
+import { applyAiMarksByEffectiveEv, raceHasFullAiBackfill } from "../../lib/pipeline/aiMarkAssignment";
+import {
+  type ProbabilityEngine,
+  resolveAdjustedProbabilities,
+} from "../../lib/pipeline/probabilityEngine";
 import { effectiveSoftmaxTemperature, softmaxDistribution } from "../../lib/pipeline/normalization";
 import {
   computeFavoriteMarkHit,
@@ -58,6 +63,10 @@ export type BacktestRaceInput = {
 export type BacktestRaceOutput = {
   result: RaceBetResult;
   detail: RaceDetailLog;
+};
+
+export type RunBacktestOnRaceOptions = {
+  probabilityEngine?: ProbabilityEngine;
 };
 
 function horseNumberMap(horses: readonly HorseAbility[]): Map<string, number> {
@@ -143,23 +152,39 @@ function makeDetail(
   );
 }
 
-export function runBacktestOnRace(input: BacktestRaceInput): BacktestRaceOutput | null {
+export function runBacktestOnRace(
+  input: BacktestRaceInput,
+  options?: RunBacktestOnRaceOptions,
+): BacktestRaceOutput | null {
+  const engine: ProbabilityEngine = options?.probabilityEngine ?? "ts";
+  if (engine === "ai" && !raceHasFullAiBackfill(input.horses)) {
+    return null;
+  }
+
   const numberById = horseNumberMap(input.horses);
   if (numberById.size === 0) return null;
 
   const rawResults = evaluateRace(input.horses, input.condition);
-  const results = ensureFrontendDisplayMarks(rawResults, input.horses, input.condition);
+  const tsMarked = ensureFrontendDisplayMarks(rawResults, input.horses, input.condition);
+  const results =
+    engine === "ai" ? applyAiMarksByEffectiveEv(tsMarked, input.horses) : tsMarked;
   const marks = marksFromResults(results, numberById);
   const classTier = resolveClassTier(input.condition);
   const classLevel = inferRaceClassBucket(input.condition);
-  const isSkippableRace = detectSkippableRace(results);
+  const isSkippableRace =
+    engine === "ts" ? detectSkippableRace(results) : false;
   const temperature = effectiveSoftmaxTemperature(
     input.condition.softmaxTemperature,
     input.condition.adjustmentStrength,
   );
-  const winProbabilities = softmaxDistribution(
+  const tsProbabilities = softmaxDistribution(
     results.map((row) => ({ horseId: row.horseId, score: row.finalEvaluationScore })),
     temperature,
+  );
+  const { probabilities: winProbabilities, engineUsed } = resolveAdjustedProbabilities(
+    input.horses,
+    tsProbabilities,
+    engine,
   );
   const favoriteNumber = resolvePostProcessFavoriteNumber(marks);
   const finishOrder = buildFinishOrder(input.places, input.horses, numberById);
@@ -180,7 +205,14 @@ export function runBacktestOnRace(input: BacktestRaceInput): BacktestRaceOutput 
       classTier,
     },
     100,
-    { classTier },
+    {
+      classTier,
+      probabilityEngine: engineUsed,
+      effectiveEvByGate:
+        engineUsed === "ai"
+          ? buildEffectiveEvByGateForBacktest(input.horses)
+          : undefined,
+    },
   );
   const tickets = generateFormationBetTickets(marks, classTier, 100);
   const evBetPointCount = evTickets.reduce((s, t) => s + t.combinations.length, 0);
@@ -242,6 +274,17 @@ export function runBacktestOnRace(input: BacktestRaceInput): BacktestRaceOutput 
     ...favoriteFields,
   };
   return { result, detail: makeDetail(input, results, marks, classTier, finishOrder, result, favoriteNumber) };
+}
+
+function buildEffectiveEvByGateForBacktest(horses: readonly HorseAbility[]): Map<number, number> {
+  const map = new Map<number, number>();
+  for (const h of horses) {
+    const gate = (h as HorseAbility & { gate?: number }).gate;
+    const ev = h.aiEffectiveEv;
+    if (gate == null || !Number.isFinite(gate) || ev == null || !Number.isFinite(ev)) continue;
+    map.set(Math.round(gate), ev);
+  }
+  return map;
 }
 
 function emptyStats(): TicketTypeStats {

@@ -72,12 +72,31 @@ export type RaceDetailLog = {
   skippedReason?: string;
 };
 
+/** TS印 vs Python AI印（同一レース集合）の回収率比較 */
+export type BacktestEngineComparison = {
+  generatedAt: string;
+  /** ai_* バックフィル済みかつ結果JSONありのレース数 */
+  comparableRaceCount: number;
+  /** 全結果JSONレース数（参考） */
+  totalResultRaceCount: number;
+  ts: BacktestSummary;
+  ai: BacktestSummary;
+  /** 券種別回収率差（AI − TS、%ポイント） */
+  recoveryRateDeltaByTicket: Record<BetTicketType, number>;
+};
+
 export type BacktestSummary = {
   totalRacesMatched: number;
   totalRacesSkipped: number;
   totalInvestedSum: number;
   totalPayoutSum: number;
   totalRecoveryRate: number;
+  /** 集計時の勝率エンジン */
+  probabilityEngine?: "ts" | "ai";
+  /** 結果JSONありの全レース数（AI集計時の分母表示用） */
+  totalResultRaceCount?: number;
+  /** 的中レース一覧用（結果確定全R・AI未全頭はTS印） */
+  raceDetailsForHitList?: RaceDetailLog[];
   byTicketType: Record<BetTicketType, TicketTypeStats>;
   byClassLevel: Record<
     RaceClassBucket,

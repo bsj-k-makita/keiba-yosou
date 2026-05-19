@@ -33,8 +33,7 @@ import type { RaceIndexItem } from "../../lib/race-data";
 import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
 import {
   parseProbabilityEngine,
-  probabilityEngineLabel,
-  raceHasAiPredictions,
+  raceHasAiEngineReady,
   type ProbabilityEngine,
 } from "../../lib/pipeline/probabilityEngine";
 import { sortResultsForPredictionTable } from "../../domain/race-evaluation/markHitAnalysis";
@@ -177,7 +176,7 @@ function loadManualTop3HorseIds(raceId: string): string[] {
 }
 
 export function RaceDetailView({ race, raceIndex }: Props) {
-  const [tab, setTab] = useState<ViewTab>("bets");
+  const [tab, setTab] = useState<ViewTab>("horses");
 
   const horses = useMemo(() => getHorsesFromRaceData(race), [race]);
   const entryGateRows = useMemo(() => getSortedRaceEntryGateRows(race), [race]);
@@ -260,13 +259,13 @@ export function RaceDetailView({ race, raceIndex }: Props) {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedEngine = parseProbabilityEngine(searchParams.get("engine"));
-  const aiDataAvailable = useMemo(() => raceHasAiPredictions(horses), [horses]);
+  const aiDataAvailable = useMemo(() => raceHasAiEngineReady(horses), [horses]);
 
   const setProbabilityEngine = useCallback(
     (engine: ProbabilityEngine) => {
       const next = new URLSearchParams(searchParams);
-      if (engine === "ts") next.delete("engine");
-      else next.set("engine", "ai");
+      if (engine === "ai") next.delete("engine");
+      else next.set("engine", "ts");
       setSearchParams(next, { replace: true });
     },
     [searchParams, setSearchParams],
@@ -341,7 +340,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     () => entryGateRows.map((r) => r.horseId),
     [entryGateRows],
   );
-  /** 出馬表・カード：印順（◎→○→▲→☆→△）→ 同印内は順位 → 枠馬番 */
+  /** 出馬表: ◎→○→▲→☆→△ の印順（AI/TS 共通） */
   const sortedForTable = useMemo(() => {
     if (evalCondition == null) return [];
     return sortResultsForPredictionTable(results, gateOrderHorseIds);
@@ -488,7 +487,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             </span>
           ) : pipeline.probabilityEngine === "ai" ? (
             <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
-              表示: {probabilityEngineLabel("ai")}（印・スコアはTSのまま）
+              方針B: 印・買い目は ai_effective_ev 順（スコア表示はTS参考）
             </span>
           ) : null}
           <label

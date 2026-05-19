@@ -232,6 +232,9 @@ export type RaceEntryEvaluation = {
   /** enrich: レース内 0〜100（枠・適性除くポテンシャル） */
   abilityIndex?: number;
   suitabilityFlags?: SuitabilityFlag[];
+  /** Phase1 Python ML バックフィル（scripts/backfill-ai-predictions.py） */
+  aiPredictedWinRate?: number;
+  aiEffectiveEv?: number;
 
   evaluation: EntryEvaluationBlock;
 };
