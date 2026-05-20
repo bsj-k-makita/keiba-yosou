@@ -1,6 +1,5 @@
 import type { HorseAbility, RaceCondition, HorseScoreResult } from "../race-evaluation/abilityTypes";
 import type { RaceGradeLabel } from "../../lib/race-data/raceEvaluationTypes";
-import { evaluateRace } from "../race-evaluation/scoreCalculator";
 import {
   inferRaceClassBucket,
   resolveClassTier,
@@ -12,13 +11,10 @@ import {
 } from "../race-evaluation/resolveEffectiveRaceClass";
 import { resolvePlaceToHorseId } from "../race-evaluation/markHitAnalysis";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
-import { ensureFrontendDisplayMarks } from "../../lib/race-display/ensureFrontendDisplayMarks";
-import { applyAiMarksByEffectiveEv, raceHasFullAiBackfill } from "../../lib/pipeline/aiMarkAssignment";
-import {
-  type ProbabilityEngine,
-  resolveAdjustedProbabilities,
-} from "../../lib/pipeline/probabilityEngine";
-import { effectiveSoftmaxTemperature, softmaxDistribution } from "../../lib/pipeline/normalization";
+import { raceHasFullAiBackfill } from "../../lib/pipeline/aiMarkAssignment";
+import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
+import { type ProbabilityEngine } from "../../lib/pipeline/probabilityEngine";
+import { buildRaceBettingContextFromPipeline } from "./buildRaceBettingContext";
 import {
   computeFavoriteMarkHit,
   emptyFavoriteMarkAggregate,
@@ -26,12 +22,10 @@ import {
   mergeFavoriteMarkHit,
 } from "./favoriteMarkStats";
 import {
-  generateFormationBetTickets,
-  generateBetTicketsFromEvaluation,
-  marksFromResults,
-  resolveBettingAdvisoryReason,
+  buildPayoutFallbackOddsMap,
+  countEvRecommendationPoints,
   resolvePostProcessFavoriteNumber,
-  buildOddsMapFromHorses,
+  type MarkedHorseRef,
 } from "./bettingRules";
 import { buildRaceDetailLog, finalizeRaceDetailLog } from "./raceDetailLog";
 import { aggregateSecondRowDead } from "./secondRowAnalysis";
@@ -41,7 +35,16 @@ import {
   mergeTicketStats,
 } from "./payoutCalculator";
 import type { RaceOfficialPayouts } from "../../lib/race-data/raceEvaluationTypes";
-import type { BacktestSummary, BetTicketType, RaceBetResult, RaceDetailLog, TicketTypeStats } from "./types";
+import type {
+  BacktestRaceOutput,
+  BacktestSummary,
+  BetTicketType,
+  RaceBetResult,
+  RaceDetailLog,
+  TicketTypeStats,
+} from "./types";
+
+export type { BacktestRaceOutput } from "./types";
 
 export type BacktestRaceInput = {
   raceId: string;
@@ -58,11 +61,6 @@ export type BacktestRaceInput = {
   horses: HorseAbility[];
   places: { place: number; horseId?: string; horseName?: string; horseNumber?: number }[];
   payouts?: RaceOfficialPayouts;
-};
-
-export type BacktestRaceOutput = {
-  result: RaceBetResult;
-  detail: RaceDetailLog;
 };
 
 export type RunBacktestOnRaceOptions = {
@@ -99,40 +97,59 @@ function buildFinishOrder(
   const out: number[] = [];
   for (const p of sorted) {
     const hid = resolvePlaceToHorseId(p, horses);
-    if (!hid) continue;
-    const num = numberById.get(hid);
+    const num =
+      (hid != null ? numberById.get(hid) : undefined) ??
+      (p.horseNumber != null && Number.isFinite(p.horseNumber) ? p.horseNumber : undefined);
     if (num != null) out.push(num);
   }
   return out;
 }
 
-function mathFirstByFinalRank(results: readonly HorseScoreResult[]): HorseScoreResult | undefined {
-  return [...results].sort((a, b) => {
-    const ra = a.finalRank ?? 99;
-    const rb = b.finalRank ?? 99;
-    if (ra !== rb) return ra - rb;
-    return b.finalEvaluationScore - a.finalEvaluationScore;
-  })[0];
+function emptyStats(): TicketTypeStats {
+  return {
+    invested: 0,
+    payout: 0,
+    rate: 0,
+    accuracy: 0,
+    hitCount: 0,
+    betCount: 0,
+    estimatedPayout: true,
+  };
 }
 
-function detectSkippableRace(results: readonly HorseScoreResult[]): boolean {
-  const mathFirst = mathFirstByFinalRank(results);
-  const displayFavorite = results.find((r) => r.mark === "◎");
-  return (
-    mathFirst != null &&
-    displayFavorite != null &&
-    mathFirst.horseId !== displayFavorite.horseId
-  );
+function emptyRaceResult(
+  raceId: string,
+  classLevel: RaceClassBucket,
+  classTier: ClassTier,
+  skippedReason: string,
+  favoriteFields: Partial<Pick<RaceBetResult, "favoriteWinHit" | "favoriteShowHit">>,
+): RaceBetResult {
+  return {
+    raceId,
+    classLevel,
+    classTier,
+    totalInvested: 0,
+    totalPayout: 0,
+    byType: {
+      WIN: emptyStats(),
+      MAIN_LINE: emptyStats(),
+      WIDE: emptyStats(),
+      TRIFECTA_FORM: emptyStats(),
+    },
+    skippedReason,
+    ...favoriteFields,
+  };
 }
 
 function makeDetail(
   input: BacktestRaceInput,
   results: HorseScoreResult[],
-  marks: ReturnType<typeof marksFromResults>,
+  marks: readonly MarkedHorseRef[],
   classTier: ClassTier,
   finishOrder: number[],
   row: RaceBetResult,
   favoriteNumber?: number,
+  probabilityEngine?: ProbabilityEngine,
 ): RaceDetailLog {
   return finalizeRaceDetailLog(
     buildRaceDetailLog({
@@ -148,6 +165,7 @@ function makeDetail(
       finishOrder,
       row,
       favoriteNumber,
+      probabilityEngine,
     }),
   );
 }
@@ -164,28 +182,23 @@ export function runBacktestOnRace(
   const numberById = horseNumberMap(input.horses);
   if (numberById.size === 0) return null;
 
-  const rawResults = evaluateRace(input.horses, input.condition);
-  const tsMarked = ensureFrontendDisplayMarks(rawResults, input.horses, input.condition);
-  const results =
-    engine === "ai" ? applyAiMarksByEffectiveEv(tsMarked, input.horses) : tsMarked;
-  const marks = marksFromResults(results, numberById);
+  const pipeline = runRaceEvaluationPipeline(input.horses, input.condition, {
+    probabilityEngine: engine,
+  });
+  if (engine === "ai" && pipeline.probabilityEngine !== "ai") {
+    return null;
+  }
+
+  const ctx = buildRaceBettingContextFromPipeline(
+    pipeline,
+    input.horses,
+    input.condition,
+    100,
+  );
+  const marks = ctx?.marks ?? [];
+  const evTickets = ctx?.evTickets ?? [];
   const classTier = resolveClassTier(input.condition);
   const classLevel = inferRaceClassBucket(input.condition);
-  const isSkippableRace =
-    engine === "ts" ? detectSkippableRace(results) : false;
-  const temperature = effectiveSoftmaxTemperature(
-    input.condition.softmaxTemperature,
-    input.condition.adjustmentStrength,
-  );
-  const tsProbabilities = softmaxDistribution(
-    results.map((row) => ({ horseId: row.horseId, score: row.finalEvaluationScore })),
-    temperature,
-  );
-  const { probabilities: winProbabilities, engineUsed } = resolveAdjustedProbabilities(
-    input.horses,
-    tsProbabilities,
-    engine,
-  );
   const favoriteNumber = resolvePostProcessFavoriteNumber(marks);
   const finishOrder = buildFinishOrder(input.places, input.horses, numberById);
   const favoriteHit = computeFavoriteMarkHit(favoriteNumber, finishOrder);
@@ -194,117 +207,102 @@ export function runBacktestOnRace(
       ? { favoriteWinHit: favoriteHit.winHit, favoriteShowHit: favoriteHit.showHit }
       : {};
 
-  const oddsMap = buildOddsMapFromHorses(input.horses);
-  const evTickets = generateBetTicketsFromEvaluation(
-    {
-      results,
-      winProbabilities,
-      horseNumberById: numberById,
-      oddsMap,
-      isSkippableRace,
-      classTier,
-    },
-    100,
-    {
-      classTier,
-      probabilityEngine: engineUsed,
-      effectiveEvByGate:
-        engineUsed === "ai"
-          ? buildEffectiveEvByGateForBacktest(input.horses)
-          : undefined,
-    },
-  );
-  const tickets = generateFormationBetTickets(marks, classTier, 100);
-  const evBetPointCount = evTickets.reduce((s, t) => s + t.combinations.length, 0);
-  const advisoryReason = resolveBettingAdvisoryReason({
-    isSkippableRace,
-    hasMarks: marks.length > 0,
-    evBetPointCount,
-  });
-
   if (marks.length === 0) {
-    const result: RaceBetResult = {
-      raceId: input.raceId,
-      classLevel,
-      classTier,
-      totalInvested: 0,
-      totalPayout: 0,
-      byType: {
-        WIN: emptyStats(),
-        MAIN_LINE: emptyStats(),
-        WIDE: emptyStats(),
-        TRIFECTA_FORM: emptyStats(),
-      },
-      skippedReason: "no_marks",
-      ...favoriteFields,
+    const empty = emptyRaceResult(input.raceId, classLevel, classTier, "no_marks", favoriteFields);
+    return {
+      result: empty,
+      detail: makeDetail(
+        input,
+        pipeline.results,
+        marks,
+        classTier,
+        finishOrder,
+        empty,
+        favoriteNumber,
+        pipeline.probabilityEngine,
+      ),
     };
-    return { result, detail: makeDetail(input, results, marks, classTier, finishOrder, result, favoriteNumber) };
   }
 
   if (finishOrder.length < 3) {
-    const result: RaceBetResult = {
-      raceId: input.raceId,
+    const empty = emptyRaceResult(
+      input.raceId,
       classLevel,
       classTier,
-      totalInvested: 0,
-      totalPayout: 0,
-      byType: {
-        WIN: emptyStats(),
-        MAIN_LINE: emptyStats(),
-        WIDE: emptyStats(),
-        TRIFECTA_FORM: emptyStats(),
-      },
-      skippedReason: "insufficient_results",
-      ...favoriteFields,
+      "insufficient_results",
+      favoriteFields,
+    );
+    return {
+      result: empty,
+      detail: makeDetail(
+        input,
+        pipeline.results,
+        marks,
+        classTier,
+        finishOrder,
+        empty,
+        favoriteNumber,
+        pipeline.probabilityEngine,
+      ),
     };
-    return { result, detail: makeDetail(input, results, marks, classTier, finishOrder, result, favoriteNumber) };
   }
 
-  const payout = calculateRacePayout(tickets, {
+  const probByGate = new Map<number, number>();
+  for (const [horseId, prob] of pipeline.adjustedProbabilities) {
+    const gate = numberById.get(horseId);
+    if (gate != null && Number.isFinite(prob)) probByGate.set(gate, prob);
+  }
+
+  const payoutInput = {
     raceId: input.raceId,
     classLevel,
     finishOrder,
     winOddsByNumber: winOddsMap(input.horses),
     officialPayouts: input.payouts,
-  });
+    fallbackExoticOdds: buildPayoutFallbackOddsMap(input.horses, input.payouts, probByGate),
+  };
+
+  const evPayout = calculateRacePayout(evTickets, payoutInput);
+
+  const evBetPointCount = countEvRecommendationPoints(evTickets);
+  const advisoryReason = ctx?.advisoryReason;
+  const evSkippedReason =
+    evBetPointCount === 0 ? "no_ev_recommendation" : advisoryReason;
+
   const result: RaceBetResult = {
-    ...payout,
+    ...evPayout,
     classTier,
-    skippedReason: advisoryReason,
+    skippedReason: evSkippedReason,
     ...favoriteFields,
   };
-  return { result, detail: makeDetail(input, results, marks, classTier, finishOrder, result, favoriteNumber) };
-}
 
-function buildEffectiveEvByGateForBacktest(horses: readonly HorseAbility[]): Map<number, number> {
-  const map = new Map<number, number>();
-  for (const h of horses) {
-    const gate = (h as HorseAbility & { gate?: number }).gate;
-    const ev = h.aiEffectiveEv;
-    if (gate == null || !Number.isFinite(gate) || ev == null || !Number.isFinite(ev)) continue;
-    map.set(Math.round(gate), ev);
-  }
-  return map;
-}
-
-function emptyStats(): TicketTypeStats {
   return {
-    invested: 0,
-    payout: 0,
-    rate: 0,
-    accuracy: 0,
-    hitCount: 0,
-    betCount: 0,
-    estimatedPayout: true,
+    result,
+    detail: makeDetail(
+      input,
+      pipeline.results,
+      marks,
+      classTier,
+      finishOrder,
+      result,
+      favoriteNumber,
+      pipeline.probabilityEngine,
+    ),
   };
 }
 
-export function aggregateBacktest(
-  outputs: BacktestRaceOutput[],
-): BacktestSummary {
-  const rows = outputs.map((o) => o.result);
-  const raceDetails = outputs.map((o) => o.detail);
+type AggregateSliceOptions = {
+  /** true: 投資0レースを matched に含めない */
+  skipZeroInvested: boolean;
+};
 
+function aggregateBettingSlice(
+  outputs: readonly BacktestRaceOutput[],
+  options: AggregateSliceOptions,
+): Omit<
+  BacktestSummary,
+  "favoriteMark" | "secondRowDead" | "raceDetails" | "generatedAt" | "probabilityEngine" | "totalResultRaceCount" | "raceDetailsForHitList"
+> {
   const byTicketType: Record<BetTicketType, TicketTypeStats> = {
     WIN: emptyStats(),
     MAIN_LINE: emptyStats(),
@@ -330,18 +328,14 @@ export function aggregateBacktest(
   let totalPayout = 0;
   let matched = 0;
   let skipped = 0;
-  const favoriteMark = emptyFavoriteMarkAggregate();
 
-  for (const row of rows) {
-    if (row.favoriteWinHit != null && row.favoriteShowHit != null) {
-      mergeFavoriteMarkHit(
-        favoriteMark,
-        { winHit: row.favoriteWinHit, showHit: row.favoriteShowHit },
-        true,
-      );
-    }
-
+  for (const o of outputs) {
+    const row = o.result;
     if (row.skippedReason === "no_marks" || row.skippedReason === "insufficient_results") {
+      skipped += 1;
+      continue;
+    }
+    if (options.skipZeroInvested && row.totalInvested === 0) {
       skipped += 1;
       continue;
     }
@@ -362,9 +356,6 @@ export function aggregateBacktest(
   }
 
   finalizeTicketStats(byTicketType);
-  finalizeFavoriteMarkAggregate(favoriteMark);
-  const secondRowDead = aggregateSecondRowDead(raceDetails);
-
   for (const k of Object.keys(byClassLevel) as RaceClassBucket[]) {
     const c = byClassLevel[k];
     c.rate = c.invested > 0 ? Math.round((c.payout / c.invested) * 1000) / 10 : 0;
@@ -384,6 +375,29 @@ export function aggregateBacktest(
     byTicketType,
     byClassLevel,
     byClassTier,
+  };
+}
+
+export function aggregateBacktest(outputs: BacktestRaceOutput[]): BacktestSummary {
+  const raceDetails = outputs.map((o) => o.detail);
+  const core = aggregateBettingSlice(outputs, { skipZeroInvested: true });
+
+  const favoriteMark = emptyFavoriteMarkAggregate();
+  for (const o of outputs) {
+    const row = o.result;
+    if (row.favoriteWinHit != null && row.favoriteShowHit != null) {
+      mergeFavoriteMarkHit(
+        favoriteMark,
+        { winHit: row.favoriteWinHit, showHit: row.favoriteShowHit },
+        true,
+      );
+    }
+  }
+  finalizeFavoriteMarkAggregate(favoriteMark);
+  const secondRowDead = aggregateSecondRowDead(raceDetails);
+
+  return {
+    ...core,
     favoriteMark,
     secondRowDead,
     raceDetails,

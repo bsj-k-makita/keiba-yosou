@@ -10,6 +10,13 @@ export {
   probabilityWinRateSuffix,
 } from "./aiMarkAssignment";
 
+export {
+  resolveAiRaceRegime,
+  clearMarksOnResults,
+  NO_EV_REGIME_BANNER_TEXT,
+  type AiRaceRegime,
+} from "./aiEvRegime";
+
 /** 勝率ソース: TS Softmax or Python ML バックフィル（ai_* JSON） */
 export type ProbabilityEngine = "ts" | "ai";
 

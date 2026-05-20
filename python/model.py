@@ -60,7 +60,7 @@ FEATURE_COLS = [
     "jockey_win_rate", "jockey_top3_rate", "jockey_venue_win_rate",
     "trainer_win_rate", "trainer_top3_rate",
     # 脚質・上がり（speed_index はリークのため除外）
-    "last_final3f", "avg_final3f",
+    "last_final3f", "avg_final3f", "final3f_rank", "last_final3f_z",
     "avg_first_corner",
 ]
 
@@ -71,26 +71,22 @@ def calculate_ev_weight(
     tau: float = EV_WEIGHT_TAU,
 ) -> np.ndarray:
     """
-    理論期待値からシグモイド学習重みを算出する。
+    事前期待値からシグモイド学習重みを算出する。
 
-    weight = 1.0 + sigmoid((ev - center) / tau)  → 範囲 [1.0, 2.0]
+    weight = 1.0 + (1.0 / (1.0 + exp(-(ev - center) / tau)))  → 範囲 [1.0, 2.0]
+    center=0.9, tau=0.02 で EV≈0.9 付近から立ち上がり最大2倍。
     """
     ev = np.asarray(ev, dtype=float)
     sig = 1.0 / (1.0 + np.exp(-(ev - center) / tau))
     return 1.0 + sig
 
 
-def _normalize_oof_per_race(oof_pred: pd.Series, race_id: pd.Series) -> pd.Series:
-    """OOF予測確率を race_id 単位で合計1に正規化（ゼロ除算ガード付き）。"""
-    frame = pd.DataFrame({"oof_pred": oof_pred, "race_id": race_id})
-
-    def _norm_group(s: pd.Series) -> pd.Series:
-        total = float(s.sum())
-        if total < _EPS:
-            return pd.Series(1.0 / len(s), index=s.index)
-        return s / max(total, _EPS)
-
-    return frame.groupby("race_id", sort=False)["oof_pred"].transform(_norm_group)
+def _resolve_win_odds_series(df: pd.DataFrame) -> pd.Series:
+    """単勝オッズ列（win_odds / odds）を解決する。"""
+    for col in ("win_odds", "odds"):
+        if col in df.columns:
+            return pd.to_numeric(df[col], errors="coerce")
+    return pd.Series(np.nan, index=df.index)
 
 
 def _normalize_raw_weights_per_race(
@@ -117,12 +113,12 @@ def compute_train_sample_weights(
     tau: float = EV_WEIGHT_TAU,
 ) -> np.ndarray:
     """
-    OOF予測と odds から学習用サンプル重みを算出する。
+    Pass1 OOF 予測から学習用サンプル重みを算出する（2パス学習の中間ステップ）。
 
-    1. race_id 単位で oof_pred を正規化
-    2. 理論EV = oof_pred_norm * odds
-    3. シグモイド重み（不正オッズは raw_weight=1.0）
-    4. race_id 単位で weight 合計=1
+    1. EV = oof_pred * win_odds（生の OOF 確率 × 単勝オッズ）
+    2. オッズ欠損・0 以下は raw_weight=1.0（フロント実質EV床 -0.15 と矛盾しないよう例外扱い）
+    3. calculate_ev_weight で raw_weight を算出
+    4. race_id 単位で weight 合計=1 に正規化
     """
     if len(df_train) != len(oof_preds):
         raise ValueError(
@@ -130,13 +126,12 @@ def compute_train_sample_weights(
         )
 
     race_id = df_train["race_id"].reset_index(drop=True)
-    odds = pd.to_numeric(df_train["odds"], errors="coerce").reset_index(drop=True)
-    oof_series = pd.Series(oof_preds, index=race_id.index)
+    odds = _resolve_win_odds_series(df_train).reset_index(drop=True)
+    oof = pd.Series(oof_preds, index=race_id.index, dtype=float)
 
-    oof_norm = _normalize_oof_per_race(oof_series, race_id)
-    ev = oof_norm * odds
-
+    ev = oof * odds
     valid_odds = odds.notna() & (odds > 0)
+
     raw_weight = np.ones(len(df_train), dtype=float)
     if valid_odds.any():
         raw_weight[valid_odds.to_numpy()] = calculate_ev_weight(
@@ -147,13 +142,17 @@ def compute_train_sample_weights(
 
     n_ev_gt_1 = int((ev[valid_odds] > 1.0).sum()) if valid_odds.any() else 0
     logger.info(
-        "EV sample weights: min=%.4f max=%.4f mean=%.4f | EV>1 rows=%d/%d (%.1f%%)",
+        "EV sample weights (center=%.2f tau=%.3f): min=%.4f max=%.4f mean=%.4f | "
+        "EV>1 rows=%d/%d (%.1f%%) | invalid_odds=%d",
+        center,
+        tau,
         weights.min(),
         weights.max(),
         weights.mean(),
         n_ev_gt_1,
         len(df_train),
         100.0 * n_ev_gt_1 / max(len(df_train), 1),
+        int((~valid_odds).sum()),
     )
     return weights
 
@@ -188,8 +187,10 @@ class Model:
         """
         データを学習・評価（TimeSeriesSplit的なGroupKFold）する。
 
-        ENABLE_EV_SAMPLE_WEIGHT=True のとき:
-          Pass1: 重みなしOOF → EV重み算出 → Pass2: 重み付きCV → 重み付き最終学習
+        ENABLE_EV_SAMPLE_WEIGHT=True のとき（2パス学習）:
+          Pass1: 重みなし StratifiedGroupKFold → OOF 予測
+          EV = oof_pred * win_odds → シグモイド raw_weight → race_id 単位で合計1
+          Pass2: 正規化 weight で CV 評価 → 同 weight で最終 lgb.train
         """
         feature_cols = feature_cols or self._available_features(df)
         logger.info("学習開始: %d rows, %d features", len(df), len(feature_cols))
@@ -233,6 +234,8 @@ class Model:
         train_weight: np.ndarray | None = None
 
         if use_ev_weights:
+            # --- Pass 1: 無重み OOF ---
+            logger.info("Pass1: 重みなし StratifiedGroupKFold で OOF 予測を算出")
             oof_preds = self._run_group_cv(
                 X_train_all,
                 y_train_all,
@@ -243,6 +246,12 @@ class Model:
             self.oof_auc_pass1_ = roc_auc_score(y_train_all, oof_preds)
             logger.info("Pass1 OOF AUC: %.4f", self.oof_auc_pass1_)
 
+            # --- EV → シグモイド重み → レース内正規化 ---
+            logger.info(
+                "EV weights: center=%.2f tau=%.2f (sigmoid → race_id sum=1)",
+                EV_WEIGHT_CENTER,
+                EV_WEIGHT_TAU,
+            )
             train_weight = compute_train_sample_weights(
                 df_train,
                 oof_preds,
@@ -251,10 +260,13 @@ class Model:
             )
             self.ev_weight_meta_ = {
                 "enable_ev_sample_weight": True,
-                "center": EV_WEIGHT_CENTER,
-                "tau": EV_WEIGHT_TAU,
+                "ev_weight_center": EV_WEIGHT_CENTER,
+                "ev_weight_tau": EV_WEIGHT_TAU,
+                "oof_auc_pass1": self.oof_auc_pass1_,
             }
 
+            # --- Pass 2: 重み付き CV（fold AUC）---
+            logger.info("Pass2: 正規化 weight 付き StratifiedGroupKFold")
             self.cv_scores_ = self._run_group_cv(
                 X_train_all,
                 y_train_all,
@@ -293,6 +305,8 @@ class Model:
         params.pop("early_stopping_rounds", None)
 
         final_weight = train_weight if use_ev_weights else None
+        if use_ev_weights:
+            logger.info("Pass2 最終学習: 全学習データ + EV sample weight")
         train_set = lgb.Dataset(
             X_train_all,
             label=y_train_all,

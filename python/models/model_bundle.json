@@ -1,6 +1,6 @@
 {
   "bundle_version": "1.0.0",
-  "created_at": "2026-05-18T14:24:14+00:00",
+  "created_at": "2026-05-20T11:59:11+00:00",
   "target_col": "target_win",
   "artifacts": {
     "model": "/Users/k.makita/競馬最強予想ファイルの改善版/python/models/lgbm_model.pkl",
@@ -14,5 +14,6 @@
   "target_mode": "win",
   "enable_ev_sample_weight": true,
   "ev_weight_center": 0.9,
-  "ev_weight_tau": 0.02
+  "ev_weight_tau": 0.02,
+  "oof_auc_pass1": 0.7808831656902842
 }

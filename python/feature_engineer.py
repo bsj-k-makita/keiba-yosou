@@ -22,6 +22,8 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+_FINAL3F_Z_EPS = 1e-6
+
 
 class FeatureEngineer:
     """
@@ -406,48 +408,151 @@ class FeatureEngineer:
         else:
             return "追込"
 
+    @staticmethod
+    def _distance_cat_series(distance: pd.Series) -> pd.Series:
+        return pd.cut(
+            pd.to_numeric(distance, errors="coerce"),
+            bins=[0, 1400, 1800, 2200, 9999],
+            labels=["短距離", "マイル", "中距離", "長距離"],
+        ).astype(str)
+
     # ----------------------------------------------------------
-    # 7. スピード指数（レース内相対タイム）
+    # 7. スピード指数・上がり3F
     # ----------------------------------------------------------
     def _add_speed_index(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        レース内でのスピード指数を計算する。
-
-        スピード指数 = 距離基準タイム - 実際のタイム（秒）を正規化
-        同一レース内での相対評価とする。
+        レース内スピード指数と、前走上がり3Fの相対化特徴量を追加する。
 
         追加特徴量:
-        - speed_index: レース内偏差値ベースのスピード指数
-        - horse_avg_speed_index: 過去走のスピード指数平均
-        - last_final3f: 前走の上がり3ハロン
-        - avg_final3f: 過去走の平均上がり3ハロン
-        - final3f_rank: 前走の上がり3ハロン順位
+        - speed_index: レース内偏差値（finish_time_sec がある場合のみ）
+        - last_final3f / avg_final3f: 前走・過去平均の上がり3F（秒）
+        - final3f_rank: 前走レース内の上がり3F順位（1=最速）
+        - last_final3f_z: 前走の馬場×距離帯ごとの標準化上がり3F
         """
-        # finish_time_sec がなければスキップ
-        if "finish_time_sec" not in df.columns:
+        if "finish_time_sec" in df.columns:
+            df["speed_index"] = df.groupby("race_id")["finish_time_sec"].transform(
+                lambda x: (x.mean() - x) / (x.std() + 1e-6) * 10 + 50
+            )
+
+        if "final_3f" not in self.horse_results.columns:
             return df
 
-        # レース内偏差値化
-        df["speed_index"] = df.groupby("race_id")["finish_time_sec"].transform(
-            lambda x: (x.mean() - x) / (x.std() + 1e-6) * 10 + 50
-        )
-
-        # 馬の過去走スピード指数平均（データリーク防止: shiftを使う）
+        hr_cols = [
+            "horse_id",
+            "race_date",
+            "final_3f",
+            "surface",
+            "ground_state",
+            "distance",
+            "venue",
+            "race_number",
+        ]
         hr_speed = self.horse_results[
-            ["horse_id", "race_date", "finish_pos", "final_3f"]
+            [c for c in hr_cols if c in self.horse_results.columns]
         ].copy()
         hr_speed["race_date"] = pd.to_datetime(hr_speed["race_date"], errors="coerce")
+        hr_speed["final_3f"] = pd.to_numeric(hr_speed["final_3f"], errors="coerce")
+        hr_speed = hr_speed[hr_speed["final_3f"].notna() & (hr_speed["final_3f"] > 0)]
+
+        if hr_speed.empty:
+            return df
+
+        if "distance" in hr_speed.columns:
+            hr_speed["distance_cat"] = self._distance_cat_series(hr_speed["distance"])
+        else:
+            hr_speed["distance_cat"] = "中距離"
+
+        for col in ("surface", "ground_state", "venue"):
+            if col not in hr_speed.columns:
+                hr_speed[col] = "不明"
+            hr_speed[col] = hr_speed[col].fillna("不明").astype(str)
+        if "race_number" not in hr_speed.columns:
+            hr_speed["race_number"] = 0
+
+        hr_speed["race_key"] = (
+            hr_speed["race_date"].astype(str)
+            + "_"
+            + hr_speed["venue"]
+            + "_"
+            + hr_speed["race_number"].astype(str)
+        )
+        hr_speed["final3f_inrace_rank"] = hr_speed.groupby("race_key", sort=False)[
+            "final_3f"
+        ].rank(method="min", ascending=True)
+
+        ref = hr_speed.dropna(subset=["final_3f"])
+        group_stats = (
+            ref.groupby(["surface", "ground_state", "distance_cat"], observed=True)[
+                "final_3f"
+            ]
+            .agg(mean="mean", std="std")
+            .reset_index()
+        )
+        group_stats["std"] = group_stats["std"].fillna(0).replace(0, np.nan)
+
         hr_speed = hr_speed.sort_values(["horse_id", "race_date"])
         sgb = hr_speed.groupby("horse_id", sort=False)
-        hr_speed["last_final3f"] = sgb["final_3f"].shift(1)
         hr_speed["avg_final3f"] = sgb["final_3f"].transform(
             lambda s: s.shift(1).expanding().mean()
         )
-        speed_df = hr_speed[["horse_id", "race_date", "last_final3f", "avg_final3f"]]
 
-        df = df.merge(speed_df, on=["horse_id", "race_date"], how="left")
-        df["last_final3f"] = df["last_final3f"].fillna(df["last_final3f"].median())
-        df["avg_final3f"] = df["avg_final3f"].fillna(df["avg_final3f"].median())
+        # 前走行: shift(1) 後の行（当該レース直前の出走）を merge_asof で master に接続
+        prev_run = hr_speed.copy()
+        prev_run["last_final3f"] = sgb["final_3f"].shift(1)
+        prev_run["final3f_rank"] = sgb["final3f_inrace_rank"].shift(1)
+        prev_run["prev_surface"] = sgb["surface"].shift(1)
+        prev_run["prev_ground"] = sgb["ground_state"].shift(1)
+        prev_run["prev_distance_cat"] = sgb["distance_cat"].shift(1)
+        prev_run = prev_run.dropna(subset=["last_final3f"])
+        prev_run = prev_run.merge(
+            group_stats,
+            left_on=["prev_surface", "prev_ground", "prev_distance_cat"],
+            right_on=["surface", "ground_state", "distance_cat"],
+            how="left",
+        )
+        std_safe = prev_run["std"].fillna(prev_run["mean"] * 0.05 + _FINAL3F_Z_EPS)
+        prev_run["last_final3f_z"] = (
+            prev_run["last_final3f"] - prev_run["mean"]
+        ) / (std_safe + _FINAL3F_Z_EPS)
+
+        asof_cols = [
+            "horse_id",
+            "race_date",
+            "last_final3f",
+            "avg_final3f",
+            "final3f_rank",
+            "last_final3f_z",
+        ]
+        prev_for_asof = prev_run[asof_cols].sort_values(["race_date", "horse_id"])
+        df_sorted = df.sort_values(["race_date", "horse_id"])
+        df_sorted = pd.merge_asof(
+            df_sorted,
+            prev_for_asof,
+            on="race_date",
+            by="horse_id",
+            direction="backward",
+        )
+        df = df_sorted.sort_index()
+
+        med_f3f = (
+            float(df["last_final3f"].median())
+            if df["last_final3f"].notna().any()
+            else 35.0
+        )
+        med_avg = (
+            float(df["avg_final3f"].median()) if df["avg_final3f"].notna().any() else 35.0
+        )
+        med_rank = (
+            float(df["final3f_rank"].median())
+            if df["final3f_rank"].notna().any()
+            else float(df["horse_count"].median())
+            if "horse_count" in df.columns and df["horse_count"].notna().any()
+            else 8.0
+        )
+        df["last_final3f"] = df["last_final3f"].fillna(med_f3f)
+        df["avg_final3f"] = df["avg_final3f"].fillna(med_avg)
+        df["final3f_rank"] = df["final3f_rank"].fillna(med_rank)
+        df["last_final3f_z"] = df["last_final3f_z"].fillna(0.0)
 
         return df
 

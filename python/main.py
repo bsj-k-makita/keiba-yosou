@@ -23,6 +23,9 @@
     # 閾値最適化
     python main.py optimize
 
+    # race_class 一括再分類（DB）
+    python main.py reclassify-race-classes
+
     # 本日のレース予測（推論）
     python main.py predict --race-id 202405050511
 """
@@ -108,18 +111,56 @@ def _golden_race_ids() -> list[str]:
     return [r["race_id"] for r in data.get("races", [])]
 
 
+def _index_race_ids_in_range(
+    start_date: str | None,
+    end_date: str | None,
+) -> list[str]:
+    """src/data/index.json から日付範囲（含む）の raceId を返す。"""
+    import json
+
+    if not start_date and not end_date:
+        return []
+    index_path = Path(__file__).resolve().parent.parent / "src" / "data" / "index.json"
+    if not index_path.is_file():
+        logger.warning("index.json not found: %s", index_path)
+        return []
+    rows = json.loads(index_path.read_text(encoding="utf-8"))
+    out: list[str] = []
+    for row in rows:
+        d = str(row.get("date") or "")
+        if start_date and d < start_date:
+            continue
+        if end_date and d > end_date:
+            continue
+        rid = row.get("raceId")
+        if rid:
+            out.append(str(rid))
+    return sorted(set(out))
+
+
 def cmd_collect_quick(args: argparse.Namespace) -> None:
     """
     クイック・インジェスト: TS 既存結果JSON + ゴールデンレースのみ netkeiba から取得。
     全期間 collect の代替（Phase 0 パイプライン疎通・108レース規模）。
     """
-    ids: set[str] = set(_repo_result_race_ids())
-    ids.update(_golden_race_ids())
+    start_d = getattr(args, "start_date", None)
+    end_d = getattr(args, "end_date", None)
+    if args.race_id and not (start_d or end_d or args.extra_years):
+        # 失敗レースの再取得など: --race-id のみ指定時はその ID だけ
+        ids: set[str] = set(args.race_id)
+    elif start_d or end_d:
+        # 日付範囲指定時は index.json の該当レースのみ（5/16〜5/31 等の部分反映用）
+        ids = set(_index_race_ids_in_range(start_d, end_d))
+    else:
+        ids = set(_repo_result_race_ids())
+        ids.update(_golden_race_ids())
+        if args.race_id:
+            ids.update(args.race_id)
     if args.extra_years:
         with Scraper() as scraper:
             for year in args.extra_years:
                 ids.update(scraper.get_race_id_list(years=[year], jra_only=True))
-    if args.race_id:
+    if args.race_id and (start_d or end_d or args.extra_years):
         ids.update(args.race_id)
 
     race_list = sorted(ids)
@@ -191,6 +232,7 @@ def cmd_train(args: argparse.Namespace) -> None:
             "enable_ev_sample_weight": ENABLE_EV_SAMPLE_WEIGHT,
             "ev_weight_center": EV_WEIGHT_CENTER,
             "ev_weight_tau": EV_WEIGHT_TAU,
+            **getattr(model, "ev_weight_meta_", {}),
         },
     )
     logger.info("Model bundle manifest: %s", bundle_path)
@@ -475,6 +517,63 @@ def cmd_predict(args: argparse.Namespace) -> None:
     evaluator.print_bets(bets, bankroll=100_000)
 
 
+def cmd_reclassify_race_classes(args: argparse.Namespace) -> None:
+    """
+    race_info / horse_results の race_class を race_class.infer_race_class で一括更新する。
+  title のみ（info2 未保存行）でも再分類する。
+    """
+    from race_class import infer_race_class
+
+    if not DB_PATH.is_file():
+        logger.error("DB not found: %s", DB_PATH)
+        sys.exit(1)
+
+    dry_run = bool(getattr(args, "dry_run", False))
+    with sqlite3.connect(DB_PATH) as conn:
+        info_rows = conn.execute(
+            "SELECT race_id, race_name FROM race_info"
+        ).fetchall()
+        info_updates: list[tuple[str, str]] = []
+        for race_id, race_name in info_rows:
+            new_cls = infer_race_class(str(race_name or ""))
+            info_updates.append((new_cls, race_id))
+
+        hr_rows = conn.execute(
+            "SELECT id, race_name FROM horse_results"
+        ).fetchall()
+        hr_updates: list[tuple[str, int]] = []
+        for row_id, race_name in hr_rows:
+            new_cls = infer_race_class(str(race_name or ""))
+            hr_updates.append((new_cls, row_id))
+
+        if dry_run:
+            from collections import Counter
+
+            dist = Counter(c for c, _ in info_updates)
+            logger.info(
+                "dry-run: race_info %d rows, class distribution: %s",
+                len(info_updates),
+                dict(dist),
+            )
+            return
+
+        conn.executemany(
+            "UPDATE race_info SET race_class = ? WHERE race_id = ?",
+            info_updates,
+        )
+        conn.executemany(
+            "UPDATE horse_results SET race_class = ? WHERE id = ?",
+            hr_updates,
+        )
+        conn.commit()
+
+    logger.info(
+        "reclassify-race-classes done: race_info=%d, horse_results=%d",
+        len(info_updates),
+        len(hr_updates),
+    )
+
+
 # ============================================================
 # メイン
 # ============================================================
@@ -526,6 +625,18 @@ def main() -> None:
         help="追加でJRA全年レースIDを日付巡回取得（例: 2024 2025）。重い",
     )
     p_quick.add_argument(
+        "--start-date",
+        type=str,
+        default=None,
+        help="index.json の日付範囲（開始）YYYY-MM-DD（例: 2026-05-16）",
+    )
+    p_quick.add_argument(
+        "--end-date",
+        type=str,
+        default=None,
+        help="index.json の日付範囲（終了）YYYY-MM-DD（例: 2026-05-31）",
+    )
+    p_quick.add_argument(
         "--with-horses",
         action="store_true",
         help="出走馬の過去成績も収集（推奨・train前にON）",
@@ -563,6 +674,16 @@ def main() -> None:
         help="Phase1: ゴールデンレース不変性テスト（DB vs feature_bridge）",
     )
 
+    p_reclass = subparsers.add_parser(
+        "reclassify-race-classes",
+        help="race_info / horse_results の race_class を一括再分類",
+    )
+    p_reclass.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="更新せず件数・分布のみ表示",
+    )
+
     # predict
     p_predict = subparsers.add_parser("predict", help="レース予測（推論）")
     p_predict.add_argument("--race-id", type=str, help="race_id（12桁）")
@@ -583,6 +704,8 @@ def main() -> None:
         from golden_invariance import main as golden_main
 
         raise SystemExit(golden_main())
+    elif args.command == "reclassify-race-classes":
+        cmd_reclassify_race_classes(args)
     elif args.command == "predict":
         cmd_predict(args)
     else:

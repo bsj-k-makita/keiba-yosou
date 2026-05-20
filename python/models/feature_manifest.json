@@ -49,6 +49,8 @@
     "trainer_top3_rate",
     "last_final3f",
     "avg_final3f",
+    "final3f_rank",
+    "last_final3f_z",
     "avg_first_corner"
   ],
   "feature_cols_full": [
@@ -100,6 +102,8 @@
     "trainer_top3_rate",
     "last_final3f",
     "avg_final3f",
+    "final3f_rank",
+    "last_final3f_z",
     "avg_first_corner"
   ],
   "dtypes": {
@@ -151,6 +155,8 @@
     "trainer_top3_rate": "float64",
     "last_final3f": "float64",
     "avg_final3f": "float64",
+    "final3f_rank": "float64",
+    "last_final3f_z": "float64",
     "avg_first_corner": "float64"
   },
   "target_col": "target_win",

@@ -16,6 +16,8 @@ describe("runFullBettingBacktest", () => {
       expect(summary.probabilityEngine).toBe("ai");
       expect(summary.totalRacesMatched).toBeGreaterThan(0);
       expect(summary.byTicketType.WIN.invested).toBeGreaterThan(0);
+      expect("formationSummary" in summary).toBe(false);
+      expect("evSummary" in summary).toBe(false);
 
       const raceDetailsForHitList = collectRaceDetailsForHitList();
       expect(raceDetailsForHitList.length).toBeGreaterThanOrEqual(summary.totalRacesMatched);
@@ -42,7 +44,8 @@ describe("runFullBettingBacktest", () => {
 
       // eslint-disable-next-line no-console
       console.log(
-        `\nPython AI: ${summary.totalRecoveryRate}% (${summary.totalRacesMatched}R / 全${summary.totalResultRaceCount ?? "?"}R)`,
+        `\nPython AI [EV推奨券]: ${summary.totalRecoveryRate}% ` +
+          `(${summary.totalRacesMatched}R matched / 全${summary.totalResultRaceCount ?? "?"}R)`,
       );
       // eslint-disable-next-line no-console
       console.log(`Wrote ${summaryPath}`);

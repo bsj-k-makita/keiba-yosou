@@ -10,8 +10,11 @@ describe("runTsVsAiBacktestComparison", () => {
     () => {
       const comparison = runTsVsAiBacktestComparison();
       expect(comparison.comparableRaceCount).toBeGreaterThan(0);
-      expect(comparison.ts.totalRacesMatched).toBe(comparison.comparableRaceCount);
-      expect(comparison.ai.totalRacesMatched).toBe(comparison.comparableRaceCount);
+      expect(comparison.ts.totalRacesMatched).toBeLessThanOrEqual(comparison.comparableRaceCount);
+      expect(comparison.ai.totalRacesMatched).toBeLessThanOrEqual(comparison.comparableRaceCount);
+      expect(comparison.ts.totalRacesMatched + comparison.ts.totalRacesSkipped).toBe(
+        comparison.comparableRaceCount,
+      );
 
       const outPath = join(process.cwd(), "src/data/backtest_comparison.json");
       writeFileSync(outPath, `${JSON.stringify(comparison, null, 2)}\n`, "utf8");

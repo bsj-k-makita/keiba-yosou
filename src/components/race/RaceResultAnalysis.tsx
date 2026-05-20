@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "../../domain/race-evaluation";
+import type { ProbabilityEngine } from "../../lib/pipeline/probabilityEngine";
 import { resolvePlaceToHorseId } from "../../domain/race-evaluation/markHitAnalysis";
+import { buildPayoutFallbackOddsMap } from "../../domain/betting/bettingRules";
 import { buildRaceBettingContext } from "../../domain/betting/buildRaceBettingContext";
+import { getEffectiveEvaluationSignals } from "../../domain/race-evaluation/resolveEvaluationSignals";
 import { calculateRacePayout, lookupOfficialDividend } from "../../domain/betting/payoutCalculator";
 import type { RaceOfficialPayoutRow } from "../../lib/race-data/raceEvaluationTypes";
 import { analyzeSecondRowStatus } from "../../domain/betting/secondRowAnalysis";
-import { computeFormationHits } from "../../domain/betting/markFormationHits";
-import {
-  formationHitForType,
-  isTicketDisplayHit,
-  ticketResultText,
-} from "../../domain/betting/ticketOutcomeDisplay";
+import { ticketResultText } from "../../domain/betting/ticketOutcomeDisplay";
 import { BET_TICKET_TYPES, type BetTicketType } from "../../domain/betting/types";
 import { ensureRaceResultFetched } from "../../lib/race-data";
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
@@ -50,9 +48,9 @@ function clearManualResult(raceId: string) {
 
 function ticketTypeName(t: BetTicketType): string {
   if (t === "WIN") return "単勝◎";
-  if (t === "MAIN_LINE") return "馬連◎○▲";
-  if (t === "WIDE") return "ワイド◎-印";
-  return "3連複フォーメ";
+  if (t === "MAIN_LINE") return "馬連EV（◎軸）";
+  if (t === "WIDE") return "ワイドEV（◎軸）";
+  return "3連複EV（◎軸）";
 }
 
 function formatOfficialPayoutRow(row: RaceOfficialPayoutRow): string {
@@ -77,8 +75,9 @@ function buildFinishOrder(
   const out: number[] = [];
   for (const p of sorted) {
     const hid = resolvePlaceToHorseId(p, horses);
-    if (!hid) continue;
-    const num = numberById.get(hid);
+    const num =
+      (hid != null ? numberById.get(hid) : undefined) ??
+      (p.horseNumber != null && Number.isFinite(p.horseNumber) ? p.horseNumber : undefined);
     if (num != null) out.push(num);
   }
   return out;
@@ -91,6 +90,8 @@ type Props = {
   condition: RaceCondition;
   adjustedProbabilities?: ReadonlyMap<string, number>;
   isSkippableRace?: boolean;
+  probabilityEngine?: ProbabilityEngine;
+  noAiEvRegime?: boolean;
 };
 
 export function RaceResultAnalysis({
@@ -100,6 +101,8 @@ export function RaceResultAnalysis({
   condition,
   adjustedProbabilities,
   isSkippableRace,
+  probabilityEngine,
+  noAiEvRegime,
 }: Props) {
   const [autoResult, setAutoResult] = useState<RaceResultData | null>(null);
   const [autoLoading, setAutoLoading] = useState(true);
@@ -137,8 +140,10 @@ export function RaceResultAnalysis({
       buildRaceBettingContext(results, horses, condition, 100, {
         adjustedProbabilities,
         isSkippableRace,
+        probabilityEngine,
+        noAiEvRegime,
       }),
-    [results, horses, condition, adjustedProbabilities, isSkippableRace],
+    [results, horses, condition, adjustedProbabilities, isSkippableRace, probabilityEngine, noAiEvRegime],
   );
 
   const activePlaces = useMemo(() => {
@@ -169,14 +174,30 @@ export function RaceResultAnalysis({
 
   const payoutRow = useMemo(() => {
     if (!ctx || finishOrder.length < 3) return null;
-    return calculateRacePayout(ctx.tickets, {
+    const probByGate = new Map<number, number>();
+    for (const h of horses) {
+      const gate = (h as HorseAbility & { gate?: number }).gate;
+      if (gate == null || !Number.isFinite(gate)) continue;
+      const g = Math.round(gate);
+      const fromAi = h.aiPredictedWinRate;
+      if (fromAi != null && fromAi > 0) {
+        probByGate.set(g, fromAi);
+        continue;
+      }
+      const winOdds = getEffectiveEvaluationSignals(h)?.winOdds;
+      if (winOdds != null && winOdds > 0) probByGate.set(g, 1 / winOdds);
+    }
+    return calculateRacePayout(ctx.evTickets, {
       raceId,
       classLevel: ctx.classLevel,
       finishOrder,
       winOddsByNumber: ctx.winOddsByNumber,
       officialPayouts: autoResult?.payouts,
+      fallbackExoticOdds: buildPayoutFallbackOddsMap(horses, autoResult?.payouts, probByGate),
     });
-  }, [ctx, finishOrder, raceId, autoResult?.payouts]);
+  }, [ctx, finishOrder, raceId, autoResult?.payouts, horses]);
+
+  const isEvSkip = payoutRow != null && payoutRow.totalInvested === 0;
 
   const sortedPlaces = useMemo(
     () => [...activePlaces].sort((a, b) => a.place - b.place),
@@ -185,12 +206,13 @@ export function RaceResultAnalysis({
 
   const secondStatus = useMemo(() => {
     if (!ctx || finishOrder.length < 3) return null;
-    return analyzeSecondRowStatus(ctx.marks, ctx.classTier, finishOrder, ctx.favoriteNumber);
-  }, [ctx, finishOrder]);
-
-  const formationHits = useMemo(() => {
-    if (!ctx || finishOrder.length < 3) return null;
-    return computeFormationHits(ctx.marks, finishOrder, ctx.classTier);
+    return analyzeSecondRowStatus(
+      ctx.marks,
+      ctx.classTier,
+      finishOrder,
+      ctx.favoriteNumber,
+      ctx.probabilityEngine,
+    );
   }, [ctx, finishOrder]);
 
   const officialPayouts = autoResult?.payouts;
@@ -213,7 +235,7 @@ export function RaceResultAnalysis({
       <h2 className="app__section-title app__section-title--pop">確定結果・回収率</h2>
       <NetkeibaRaceLinks raceId={raceId} />
       <p className="app__meta">
-        定型フォーメ（◎単勝・◎○馬連等）の投資・払戻を全レースで集計。見送りはEV推奨なしの目安です。
+        EV推奨券（閾値通過した買い目のみ）の投資・払戻を集計します。見送りは買い目0点のレースです。
       </p>
 
       {autoResult ? (
@@ -341,7 +363,13 @@ export function RaceResultAnalysis({
               </div>
             )}
 
-          {payoutRow && (
+          {payoutRow && isEvSkip && (
+            <p className="result-analysis-view__ev-skip">
+              投資: 0円 / 払戻: 0円 / 回収率: 0%（見送り判定成功）
+            </p>
+          )}
+
+          {payoutRow && !isEvSkip && (
             <table className="horse-list result-analysis-view__table">
               <thead>
                 <tr>
@@ -356,13 +384,7 @@ export function RaceResultAnalysis({
                 {BET_TICKET_TYPES.map((type) => {
                   const d = payoutRow.byType[type];
                   const purchasedHit = d.hitCount > 0;
-                  const formationHit =
-                    formationHits != null ? formationHitForType(formationHits, type) : false;
-                  const displayHit = isTicketDisplayHit({
-                    isHit: purchasedHit,
-                    formationHit,
-                  });
-                  const ticket = ctx?.tickets.find((t) => t.ticketType === type);
+                  const ticket = ctx?.evTickets.find((t) => t.ticketType === type);
                   const hitComb = purchasedHit && ticket
                     ? ticket.combinations.find((comb) => {
                         if (type === "WIN") return finishOrder[0] === comb[0];
@@ -386,11 +408,7 @@ export function RaceResultAnalysis({
                     <tr
                       key={type}
                       className={
-                        displayHit
-                          ? purchasedHit
-                            ? "result-analysis-view__row--hit"
-                            : "result-analysis-view__row--formation"
-                          : "result-analysis-view__row--miss"
+                        purchasedHit ? "result-analysis-view__row--hit" : "result-analysis-view__row--miss"
                       }
                     >
                       <td>
@@ -412,7 +430,7 @@ export function RaceResultAnalysis({
                         {d.rate}%
                       </td>
                       <td>
-                        {ticketResultText({ isHit: purchasedHit, formationHit }, d.payout)}
+                        {ticketResultText(purchasedHit, d.payout)}
                       </td>
                     </tr>
                   );

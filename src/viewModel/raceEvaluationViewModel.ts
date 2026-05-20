@@ -40,6 +40,8 @@ export type RaceEvaluationHorseViewModel = {
   kellyFraction: number;
   /** final_expected_value が閾値超え */
   evHot: boolean;
+  /** EV推奨券（evTickets）に実際に含まれる馬番 */
+  isEvRecommended: boolean;
   layerBreakdown: LayerBreakdownViewModel;
   oddsDistortion: OddsDistortionViewModel;
 };
@@ -150,9 +152,30 @@ export function buildRaceEvaluationViewModel(
       effectiveEv,
       kellyFraction,
       evHot: effectiveEv != null && effectiveEv > FINAL_EXPECTED_RECOMMEND_THRESHOLD,
+      isEvRecommended: false,
       layerBreakdown,
       oddsDistortion: NEUTRAL_DISTORTION,
     });
   }
   return { byHorseId, probabilityEngine };
+}
+
+export function applyEvRecommendedFlags(
+  viewModel: RaceEvaluationViewModel,
+  horses: readonly HorseAbility[],
+  evRecommendedGateNumbers: ReadonlySet<number>,
+): RaceEvaluationViewModel {
+  if (evRecommendedGateNumbers.size === 0) return viewModel;
+
+  const nextByHorseId = new Map(viewModel.byHorseId);
+  for (const horse of horses) {
+    const gate = (horse as HorseAbility & { gate?: number }).gate;
+    if (gate == null || !Number.isFinite(gate)) continue;
+    const vm = nextByHorseId.get(horse.horseId);
+    if (vm == null) continue;
+    if (!evRecommendedGateNumbers.has(Math.round(gate))) continue;
+    if (vm.isEvRecommended) continue;
+    nextByHorseId.set(horse.horseId, { ...vm, isEvRecommended: true });
+  }
+  return { ...viewModel, byHorseId: nextByHorseId };
 }

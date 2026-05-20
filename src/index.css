@@ -4732,6 +4732,11 @@ samp {
     flex: 0 0 auto;
   }
 
+  .rl-hero__aside {
+    width: 100%;
+    flex: none;
+  }
+
   .rl-hit-summary--hero {
     width: 100%;
     flex: none;
@@ -4796,6 +4801,109 @@ img[loading="lazy"] {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    Hit Summary Hero — after base rules (CSS order fix)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.rl-hero__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 0 1 300px;
+  min-width: 0;
+}
+
+.rl-ev-week-top__range {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.rl-ev-week-top__list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rl-ev-week-top__item {
+  margin: 0;
+}
+
+.rl-ev-week-top__link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: background 0.15s ease;
+}
+
+.rl-ev-week-top__link:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.rl-ev-week-top__rank {
+  flex: 0 0 18px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.rl-ev-week-top__meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rl-ev-week-top__race {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rl-ev-week-top__horse {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rl-ev-week-top__ev {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.rl-ev-week-top__ev strong {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rl-ev-week-top__badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.rl-ev-week-top__badge--s { background: #f59e0b; color: #1a1200; }
+.rl-ev-week-top__badge--a { background: #22c55e; color: #052e12; }
+.rl-ev-week-top__badge--b { background: #38bdf8; color: #0c2340; }
+.rl-ev-week-top__badge--c { background: rgba(255, 255, 255, 0.35); color: #fff; }
+.rl-ev-week-top__badge--d { background: rgba(255, 255, 255, 0.15); color: rgba(255, 255, 255, 0.85); }
+
 .rl-hit-summary--hero {
   flex: 0 1 280px;
   margin-top: 0;
@@ -4845,6 +4953,35 @@ img[loading="lazy"] {
 .rl-hit-summary--hero .rl-hit-summary__empty,
 .rl-hit-summary--hero .rl-hit-summary__sub {
   color: rgba(255, 255, 255, 0.65);
+}
+
+/* 当週TOP5 — 的中率サマリー（.rl-hit-summary--hero）と同じ文字色 */
+.rl-hit-summary--hero.rl-ev-week-top .rl-ev-week-top__range {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.rl-hit-summary--hero.rl-ev-week-top .rl-ev-week-top__link {
+  color: #fff;
+}
+
+.rl-hit-summary--hero.rl-ev-week-top .rl-ev-week-top__rank {
+  color: #fff;
+}
+
+.rl-hit-summary--hero.rl-ev-week-top .rl-ev-week-top__race {
+  color: #fff;
+}
+
+.rl-hit-summary--hero.rl-ev-week-top .rl-ev-week-top__horse {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.rl-hit-summary--hero.rl-ev-week-top .rl-ev-week-top__ev {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.rl-hit-summary--hero.rl-ev-week-top .rl-ev-week-top__ev strong {
+  color: #fff;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -5348,6 +5485,46 @@ img[loading="lazy"] {
   box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35);
 }
 
+/* ── EV見送り（0点） ── */
+.bt-hit-card--skip {
+  border-color: #93c5fd;
+  background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.bt-hit-card--skip::before {
+  content: "";
+  display: block;
+  height: 3px;
+  background: #3b82f6;
+}
+
+.bt-hit-card--skip .bt-hit-card__r-badge {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.bt-hit-card--skip .bt-hit-card__status--skip {
+  background: #2563eb;
+  color: #fff;
+}
+
+.bt-hit-card--ev-skip,
+.bt-hit-card__ev-skip,
+.result-analysis-view__ev-skip {
+  margin: 0.5rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  line-height: 1.5;
+}
+
+.result-analysis-view__ev-skip {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+}
+
 /* ── 不的中・2列目全滅：グレーアウト ── */
 .bt-hit-card--miss {
   border-color: #d1d5db;
@@ -5447,5 +5624,61 @@ img[loading="lazy"] {
 :root[data-theme="dark"] .bt-hit-card--miss {
   background: linear-gradient(145deg, #1f2937 0%, #374151 100%);
   border-color: #4b5563;
+}
+
+/* AI見送りレジーム（EV横並び） */
+.ai-no-ev-banner {
+  max-width: var(--page-max-width);
+  margin: 0 auto 1rem;
+  padding: 0 22px;
+}
+
+.ai-no-ev-banner--inline {
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.ai-no-ev-banner__text {
+  margin: 0 0 0.75rem;
+  padding: 12px 14px;
+  border-radius: var(--radius-cards, 10px);
+  border: 1px solid rgba(180, 83, 9, 0.35);
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--c-text, #1a1a1a);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.ts-reference-panel {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+}
+
+.ts-reference-panel__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm, 8px);
+  background: var(--c-surface, #f8f9fa);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--c-blue-dark, #1c5d5f);
+}
+
+.ts-reference-panel__body {
+  margin-top: 0.65rem;
+  padding: 0 0 0.5rem;
+}
+
+.ts-reference-panel__note {
+  margin: 0 0 0.5rem;
+}
+
+.race-conclusion--muted .race-conclusion__title {
+  margin-bottom: 0.35rem;
 }
 

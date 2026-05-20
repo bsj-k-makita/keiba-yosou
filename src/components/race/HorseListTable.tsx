@@ -31,6 +31,7 @@ type Props = {
   expandedHorseId?: string | null;
   onToggleExpand?: (horseId: string) => void;
   renderExpandedRow?: (result: HorseScoreResult) => ReactNode;
+  /** AI見送りレジームなど: 印列を非表示扱い */
 };
 
 function gradeClass(grade: string): string {

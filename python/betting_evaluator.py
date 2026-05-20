@@ -119,21 +119,59 @@ class BettingEvaluator:
         )
         return self
 
+    def require_calibrator(self) -> None:
+        """学習済みキャリブレーター必須チェック（バックフィル・本番推論用）。"""
+        if self.calibrator is None:
+            raise RuntimeError(
+                "キャリブレーションモデルが未ロードです。"
+                " `python main.py simulate` 実行後の betting_evaluator.pkl を配置するか、"
+                " evaluator.fit_calibration() を先に実行してください。"
+            )
+
     def _apply_calibration(self, scores: np.ndarray) -> np.ndarray:
         """
         学習済みキャリブレーターでスコアを確率に変換する。
-        キャリブレーターが未学習の場合はそのままの値を返す。
+        キャリブレーターが未学習の場合はそのままの値を返す（decide_bets 等の後方互換）。
         """
         if self.calibrator is None:
             logger.debug("キャリブレーターが未学習。スコアをそのまま使用します。")
-            return scores
+            return np.asarray(scores, dtype=float)
 
         if self._calibration_method == "sigmoid":
-            # LogisticRegression は predict_proba を持つ
             return self.calibrator.predict_proba(scores.reshape(-1, 1))[:, 1]
-        else:
-            # IsotonicRegression は predict を使用
-            return self.calibrator.predict(scores)
+        return self.calibrator.predict(scores)
+
+    def calibrated_normalized_probs(self, raw_scores: np.ndarray) -> np.ndarray:
+        """
+        LightGBM 生スコア → キャリブレーション → レース内合計1正規化。
+
+        JSON バックフィル用の単一レース確率（全頭分）を返す。
+        """
+        self.require_calibrator()
+        calibrated = np.asarray(self._apply_calibration(raw_scores), dtype=float)
+        total = float(np.sum(calibrated))
+        if total < 1e-9:
+            n = len(calibrated)
+            if n == 0:
+                return calibrated
+            return np.ones(n, dtype=float) / n
+        return calibrated / total
+
+    @classmethod
+    def load(cls, path: str | "Path") -> "BettingEvaluator":
+        """betting_evaluator.pkl を読み込み、キャリブレーター有無を検証する。"""
+        import pickle
+        from pathlib import Path as PathLib
+
+        p = PathLib(path)
+        if not p.is_file():
+            raise FileNotFoundError(f"betting_evaluator.pkl not found: {p}")
+        with p.open("rb") as f:
+            obj = pickle.load(f)
+        if not isinstance(obj, cls):
+            raise TypeError(f"Expected BettingEvaluator, got {type(obj).__name__}")
+        obj.require_calibrator()
+        return obj
 
     # ============================================================
     # B. 実質期待値（Effective EV）の算出

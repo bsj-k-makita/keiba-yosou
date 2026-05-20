@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   getHorsesFromRaceData,
   getRaceEvaluationById,
@@ -11,12 +12,21 @@ import {
 import { buildRacePreviewDataFromRace, evaluateRace, type RacePreviewBadgeType } from "../../domain/race-evaluation";
 import { analyzeMarkHits } from "../../domain/race-evaluation/markHitAnalysis";
 import { ensureFrontendDisplayMarks } from "../../lib/race-display/ensureFrontendDisplayMarks";
+import {
+  applyAiMarksByEffectiveEv,
+  raceHasFullAiBackfill,
+} from "../../lib/pipeline/aiMarkAssignment";
 import { RaceListCard } from "../../components/race/RaceListCard";
 import {
   mergeListBettingRecoveryStats,
   type RaceBettingOutcome,
 } from "../../domain/betting/computeRaceBettingOutcome";
 import { computeRaceBettingOutcomeById } from "../../lib/race-data/computeRaceBettingOutcomeById";
+import {
+  fetchWeeklyTopEvRaces,
+  formatUpcomingWeekScopeLabel,
+  type WeeklyTopEvRaceItem,
+} from "../../domain/race-evaluation/weeklyTopEvRaces";
 
 function surfaceBadgeClass(surface: string): string {
   return surface === "芝" ? "race-badge race-badge--turf" : "race-badge race-badge--dirt";
@@ -220,6 +230,15 @@ function groupByVenue(rows: RaceIndexItem[]): { venue: string; races: RaceIndexI
   }));
 }
 
+/** ローカル日付 YYYY-MM-DD（当週TOP5の「今日」基準） */
+function formatLocalTodayIso(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 /** "2026-04-26" → "4/26(土)" */
 function formatDateTab(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
@@ -241,6 +260,8 @@ export function RacesListPage() {
   const [hitStatsLoading, setHitStatsLoading] = useState(true);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkMessage, setBulkMessage] = useState<string | null>(null);
+  const [weeklyTopEv, setWeeklyTopEv] = useState<WeeklyTopEvRaceItem[] | null>(null);
+  const [weeklyTopEvLoading, setWeeklyTopEvLoading] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -278,6 +299,26 @@ export function RacesListPage() {
   }, [rows]);
 
   const dates = useMemo(() => (rows ? extractDates(rows) : []), [rows]);
+
+  const todayIso = useMemo(() => formatLocalTodayIso(), []);
+  const weekRangeLabel = useMemo(() => {
+    if (rows == null) return "";
+    return formatUpcomingWeekScopeLabel(rows, todayIso);
+  }, [rows, todayIso]);
+
+  useEffect(() => {
+    if (rows == null) return;
+    let live = true;
+    setWeeklyTopEvLoading(true);
+    void fetchWeeklyTopEvRaces(rows, todayIso, getRaceEvaluationById, 5).then((top) => {
+      if (!live) return;
+      setWeeklyTopEv(top);
+      setWeeklyTopEvLoading(false);
+    });
+    return () => {
+      live = false;
+    };
+  }, [rows, todayIso]);
 
   const venueGroups = useMemo(() => {
     if (!rows || !activeDate) return [];
@@ -371,13 +412,14 @@ export function RacesListPage() {
             const race = await getRaceEvaluationById(raceId);
             if (race == null) return null;
             const horses = getHorsesFromRaceData(race);
-            const results = ensureFrontendDisplayMarks(
-              evaluateRace(horses, race.condition),
-              horses,
-              race.condition,
-            );
+            const evaluated = evaluateRace(horses, race.condition);
+            const useAiMarks = raceHasFullAiBackfill(horses);
+            const results = useAiMarks
+              ? applyAiMarksByEffectiveEv(evaluated, horses)
+              : ensureFrontendDisplayMarks(evaluated, horses, race.condition);
             const preview = buildRacePreviewDataFromRace(horses, results);
-            if (!preview.hasGapSignals) return null;
+            if (!useAiMarks && !preview.hasGapSignals) return null;
+            if (useAiMarks && !preview.previewText) return null;
             return [
               raceId,
               {
@@ -460,6 +502,51 @@ export function RacesListPage() {
             <h1 className="rl-hero__title">今週のレースを<br />AIが分析</h1>
             <p className="rl-hero__sub">データサイエンスで勝利をつかもう</p>
           </div>
+          <div className="rl-hero__aside">
+          <section
+            className="rl-hit-summary rl-ev-week-top rl-hit-summary--hero"
+            aria-label="当週の期待値レースTOP5"
+          >
+            <p className="rl-hit-summary__title">
+              当週の期待値レース TOP5
+              {weekRangeLabel ? (
+                <span className="rl-ev-week-top__range">（{weekRangeLabel}）</span>
+              ) : null}
+            </p>
+            {weeklyTopEvLoading ? (
+              <p className="rl-hit-summary__empty">集計中…</p>
+            ) : weeklyTopEv == null || weeklyTopEv.length === 0 ? (
+              <p className="rl-hit-summary__empty">AI予測データ不足</p>
+            ) : (
+              <ol className="rl-ev-week-top__list">
+                {weeklyTopEv.map((item, idx) => (
+                  <li key={item.raceId} className="rl-ev-week-top__item">
+                    <Link to={`/race/${item.raceId}`} className="rl-ev-week-top__link">
+                      <span className="rl-ev-week-top__rank">{idx + 1}</span>
+                      <span className="rl-ev-week-top__meta">
+                        <span className="rl-ev-week-top__race">
+                          {formatDateTab(item.date).replace(/\(.+\)/, "")} {item.venue}
+                          {item.raceNumber}R {item.raceName ?? ""}
+                        </span>
+                        <span className="rl-ev-week-top__horse">
+                          ◎ {item.bestHorseNumber}番 {item.bestHorseName}
+                          {item.bestHorseJockey ? `(${item.bestHorseJockey})` : ""}
+                          {item.bestHorseOdds != null ? ` · ${item.bestHorseOdds.toFixed(1)}倍` : ""}
+                        </span>
+                      </span>
+                      <span className="rl-ev-week-top__ev">
+                        <span className={`rl-ev-week-top__badge rl-ev-week-top__badge--${item.valueRank.toLowerCase()}`}>
+                          {item.valueRank}
+                        </span>
+                        <strong>{item.maxEv.toFixed(2)}</strong>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            )}
+            <p className="rl-hit-summary__sub">※表示馬は Python AI の◎。今日以降・当週開催の全Rから上位5件</p>
+          </section>
           <section className="rl-hit-summary rl-hit-summary--hero" aria-label="直近30レース的中率サマリー">
             <div className="rl-hit-summary__head">
               <p className="rl-hit-summary__title">
@@ -515,6 +602,7 @@ export function RacesListPage() {
               </>
             )}
           </section>
+          </div>
         </div>
       </div>
 

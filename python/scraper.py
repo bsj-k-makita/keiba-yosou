@@ -35,6 +35,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from race_class import infer_race_class
 from config import (
     BASE_URL, RACE_URL, HORSE_URL, PED_URL,
     REQUEST_INTERVAL, REQUEST_TIMEOUT, MAX_RETRY,
@@ -601,7 +602,7 @@ class Scraper:
                 horse_count = len(result_table.select("tr")) - 1
 
             # レースクラス
-            race_class = self._infer_race_class(race_name, info_text)
+            race_class = infer_race_class(race_name, info_text)
 
             return {
                 "race_id":     race_id,
@@ -622,26 +623,6 @@ class Scraper:
         except Exception as e:
             logger.error("race_info解析エラー race_id=%s: %s", race_id, e)
             return None
-
-    def _infer_race_class(self, race_name: str, extra_text: str = "") -> str:
-        """レース名・テキストからクラスを推定する"""
-        text = race_name + " " + extra_text
-        patterns = [
-            (["GⅠ", "G1", "GI"],         "G1"),
-            (["GⅡ", "G2", "GII"],         "G2"),
-            (["GⅢ", "G3", "GIII"],        "G3"),
-            (["Listed", "L "],             "L"),
-            (["オープン", "オｰプン"],       "OP"),
-            (["3勝クラス", "1600万"],       "3勝クラス"),
-            (["2勝クラス", "1000万"],       "2勝クラス"),
-            (["1勝クラス",  "500万"],       "1勝クラス"),
-            (["新馬"],                      "新馬"),
-            (["未勝利"],                    "未勝利"),
-        ]
-        for keywords, cls in patterns:
-            if any(k in text for k in keywords):
-                return cls
-        return "不明"
 
     def _parse_race_results(self, soup: BeautifulSoup, race_id: str) -> pd.DataFrame:
         """
@@ -884,7 +865,7 @@ class Scraper:
 
                 # レースクラス（レース名から推定）
                 rname = tds[self.HR_RACE_NAME].get_text(strip=True) if len(tds) > self.HR_RACE_NAME else ""
-                race_class = self._infer_race_class(rname)
+                race_class = infer_race_class(rname)
 
                 rows.append({
                     "horse_id":        horse_id,

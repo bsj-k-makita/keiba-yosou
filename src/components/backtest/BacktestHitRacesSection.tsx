@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import type { RaceDetailLog } from "../../domain/betting/types";
-import { sortRaceDetailsForDisplay } from "../../domain/betting/raceDetailLog";
+import { isEvSkipDetail, sortRaceDetailsForDisplay } from "../../domain/betting/raceDetailLog";
 
 function extractDates(details: readonly RaceDetailLog[]): string[] {
   const seen = new Set<string>();
@@ -45,20 +45,12 @@ function formatPayoutShort(slot: RaceDetailLog["tickets"]["WIN"]): string {
   if (slot.isHit) {
     return slot.payout > 0 ? `${slot.payout.toLocaleString()}円` : "0円";
   }
-  if (slot.formationHit) return "印的中";
   return "—";
 }
 
-function ticketHighlight(slot: RaceDetailLog["tickets"]["WIN"]): boolean {
-  return slot.isHit || slot.formationHit;
-}
-
-function cardTone(row: RaceDetailLog): "hit" | "miss" {
+function cardTone(row: RaceDetailLog): "hit" | "skip" | "miss" {
+  if (isEvSkipDetail(row)) return "skip";
   if (row.totalPayout > 0) return "hit";
-  const t = row.tickets;
-  if (t.TRIFECTA_FORM.formationHit || t.MAIN_LINE.formationHit || t.WIN.formationHit) {
-    return "hit";
-  }
   return "miss";
 }
 
@@ -69,7 +61,9 @@ function missStatusLabel(row: RaceDetailLog): string {
 function HitRaceCard({ row }: { row: RaceDetailLog }) {
   const tone = cardTone(row);
   const recovery =
-    row.totalInvested > 0 ? Math.round((row.totalPayout / row.totalInvested) * 1000) / 10 : 0;
+    row.totalInvested > 0
+      ? Math.round((row.totalPayout / row.totalInvested) * 1000) / 10
+      : 0;
 
   return (
     <li>
@@ -82,14 +76,14 @@ function HitRaceCard({ row }: { row: RaceDetailLog }) {
                 <span className="bt-hit-card__r-num">{row.raceNumber}</span>
               </div>
               {tone === "hit" ? (
-                <span className="bt-hit-card__status bt-hit-card__status--hit">
-                  {row.totalPayout > 0 ? "🎯 的中" : "印的中"}
-                </span>
+                <span className="bt-hit-card__status bt-hit-card__status--hit">🎯 的中</span>
+              ) : tone === "skip" ? (
+                <span className="bt-hit-card__status bt-hit-card__status--skip">見送り</span>
               ) : (
                 <span className="bt-hit-card__status bt-hit-card__status--miss">{missStatusLabel(row)}</span>
               )}
             </div>
-            {tone === "hit" && (
+            {tone === "hit" && row.totalPayout > 0 && (
               <span className="bt-hit-card__payout">{row.totalPayout.toLocaleString()}円</span>
             )}
             <span className="bt-hit-card__arrow" aria-hidden>
@@ -102,44 +96,60 @@ function HitRaceCard({ row }: { row: RaceDetailLog }) {
               <span className="bt-hit-card__tier">{row.classTierLabel}</span>
             </div>
             <p className="bt-hit-card__finish">{row.finishLabel || "着順未確定"}</p>
-            <p className="bt-hit-card__diagnosis">{row.diagnosisLabel}</p>
-            <div className="bt-hit-card__tickets">
-              <span
-                className={
-                  ticketHighlight(row.tickets.WIN) ? "bt-hit-card__ticket bt-hit-card__ticket--on" : "bt-hit-card__ticket"
-                }
-              >
-                単勝 {formatPayoutShort(row.tickets.WIN)}
-              </span>
-              <span
-                className={
-                  ticketHighlight(row.tickets.MAIN_LINE)
-                    ? "bt-hit-card__ticket bt-hit-card__ticket--on"
-                    : "bt-hit-card__ticket"
-                }
-              >
-                馬連 {formatPayoutShort(row.tickets.MAIN_LINE)}
-              </span>
-              <span
-                className={
-                  ticketHighlight(row.tickets.WIDE) ? "bt-hit-card__ticket bt-hit-card__ticket--on" : "bt-hit-card__ticket"
-                }
-              >
-                ワイド {formatPayoutShort(row.tickets.WIDE)}
-              </span>
-              <span
-                className={
-                  ticketHighlight(row.tickets.TRIFECTA_FORM)
-                    ? "bt-hit-card__ticket bt-hit-card__ticket--on"
-                    : "bt-hit-card__ticket"
-                }
-              >
-                3連複 {formatPayoutShort(row.tickets.TRIFECTA_FORM)}
-              </span>
-              <span className={`bt-hit-card__recovery${recovery >= 100 ? " bt-hit-card__recovery--plus" : ""}`}>
-                回収 {row.totalInvested > 0 ? `${recovery}%` : "—"}
-              </span>
-            </div>
+            {tone === "skip" ? (
+              <p className="bt-hit-card__ev-skip">
+                投資: 0円 / 払戻: 0円 / 回収率: 0%（見送り判定成功）
+              </p>
+            ) : (
+              <>
+                <p className="bt-hit-card__diagnosis">{row.diagnosisLabel}</p>
+                <div className="bt-hit-card__tickets">
+                  <span
+                    className={
+                      row.tickets.WIN.isHit
+                        ? "bt-hit-card__ticket bt-hit-card__ticket--on"
+                        : "bt-hit-card__ticket"
+                    }
+                  >
+                    単勝 {formatPayoutShort(row.tickets.WIN)}
+                  </span>
+                  <span
+                    className={
+                      row.tickets.MAIN_LINE.isHit
+                        ? "bt-hit-card__ticket bt-hit-card__ticket--on"
+                        : "bt-hit-card__ticket"
+                    }
+                  >
+                    馬連 {formatPayoutShort(row.tickets.MAIN_LINE)}
+                  </span>
+                  <span
+                    className={
+                      row.tickets.WIDE.isHit
+                        ? "bt-hit-card__ticket bt-hit-card__ticket--on"
+                        : "bt-hit-card__ticket"
+                    }
+                  >
+                    ワイド {formatPayoutShort(row.tickets.WIDE)}
+                  </span>
+                  <span
+                    className={
+                      row.tickets.TRIFECTA_FORM.isHit
+                        ? "bt-hit-card__ticket bt-hit-card__ticket--on"
+                        : "bt-hit-card__ticket"
+                    }
+                  >
+                    3連複 {formatPayoutShort(row.tickets.TRIFECTA_FORM)}
+                  </span>
+                  <span
+                    className={`bt-hit-card__recovery${
+                      recovery >= 100 ? " bt-hit-card__recovery--plus" : ""
+                    }`}
+                  >
+                    回収 {row.totalInvested > 0 ? `${recovery}%` : "—"}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </Link>
       </div>
@@ -147,10 +157,8 @@ function HitRaceCard({ row }: { row: RaceDetailLog }) {
   );
 }
 
-
 type Props = {
   raceDetails: RaceDetailLog[];
-  /** 回収率サマリに含まれる AI 全頭バックフィル済みレース数（参考） */
   aiComparableRaceCount?: number;
 };
 
@@ -199,7 +207,7 @@ export function BacktestHitRacesSection({ raceDetails, aiComparableRaceCount }: 
         <div>
           <h2>的中レース</h2>
           <p className="app__meta" style={{ margin: 0 }}>
-            結果確定 {raceDetails.length}レース（払戻あり {hitCount}）。開催日・競馬場で絞り込み。
+            結果確定 {raceDetails.length}レース（EV払戻あり {hitCount}）。EV推奨券のみ集計。開催日・競馬場で絞り込み。
             {aiComparableRaceCount != null && aiComparableRaceCount < raceDetails.length ? (
               <>
                 {" "}
@@ -222,11 +230,15 @@ export function BacktestHitRacesSection({ raceDetails, aiComparableRaceCount }: 
       <div className="backtest-hit-races__legend" aria-label="カード色の凡例">
         <span className="backtest-hit-races__legend-item">
           <span className="backtest-hit-races__legend-swatch backtest-hit-races__legend-swatch--hit" />
-          的中（払戻あり）
+          的中（EV払戻あり）
+        </span>
+        <span className="backtest-hit-races__legend-item">
+          <span className="backtest-hit-races__legend-swatch backtest-hit-races__legend-swatch--skip" />
+          見送り（EV0点）
         </span>
         <span className="backtest-hit-races__legend-item">
           <span className="backtest-hit-races__legend-swatch backtest-hit-races__legend-swatch--miss" />
-          不的中（2列目全滅含む）
+          不的中
         </span>
       </div>
 

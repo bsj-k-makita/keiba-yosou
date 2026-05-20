@@ -1,5 +1,6 @@
 import { computeRaceBettingOutcome, type RaceBettingOutcome } from "../../domain/betting/computeRaceBettingOutcome";
 import { runRaceEvaluationPipeline } from "../pipeline/evaluationPipeline";
+import { DEFAULT_PROBABILITY_ENGINE } from "../pipeline/probabilityEngine";
 import { getHorsesFromRaceData, getRaceEvaluationById, getRaceResultById } from "./raceDataRepository";
 
 export async function computeRaceBettingOutcomeById(
@@ -9,8 +10,22 @@ export async function computeRaceBettingOutcomeById(
   if (evalData == null) return null;
 
   const horses = getHorsesFromRaceData(evalData);
-  const { results } = runRaceEvaluationPipeline(horses, evalData.condition);
+  const pipeline = runRaceEvaluationPipeline(horses, evalData.condition, {
+    probabilityEngine: DEFAULT_PROBABILITY_ENGINE,
+  });
   const result = await getRaceResultById(raceId);
 
-  return computeRaceBettingOutcome(results, horses, evalData.condition, result ?? undefined);
+  return computeRaceBettingOutcome(
+    pipeline.results,
+    horses,
+    evalData.condition,
+    result ?? undefined,
+    100,
+    {
+      adjustedProbabilities: pipeline.adjustedProbabilities,
+      isSkippableRace: pipeline.isSkippableRace,
+      probabilityEngine: pipeline.probabilityEngine,
+      noAiEvRegime: pipeline.aiRaceRegime === "NO_EV_REGIME",
+    },
+  );
 }

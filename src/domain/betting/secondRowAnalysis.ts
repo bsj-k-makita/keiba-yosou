@@ -1,4 +1,5 @@
 import type { ClassTier } from "../race-evaluation/resolveEffectiveRaceClass";
+import type { ProbabilityEngine } from "../../lib/pipeline/probabilityEngine";
 import {
   buildSecondRowNumbers,
   type MarkedHorseRef,
@@ -16,11 +17,12 @@ export function analyzeSecondRowStatus(
   classTier: ClassTier,
   actualTop3: readonly number[],
   favoriteNumber?: number,
+  probabilityEngine: ProbabilityEngine = "ts",
 ): SecondRowStatus {
   const omaru = favoriteNumber ?? resolvePostProcessFavoriteNumber(marks);
   const top3 = actualTop3.slice(0, 3);
   const isAnchorHit = omaru != null && top3.includes(omaru);
-  const secondRow = buildSecondRowNumbers(marks, classTier);
+  const secondRow = buildSecondRowNumbers(marks, classTier, probabilityEngine);
   const isSecondRowHit = secondRow.some((n) => top3.includes(n));
 
   return {

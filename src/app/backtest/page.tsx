@@ -58,9 +58,8 @@ export default function BacktestDashboardPage() {
       </p>
       <h1>馬券回収率バックテスト（Python AI）</h1>
       <p className="app__lead">
-        Python AI（方針B）の印 ◎○▲☆△△△ に基づく定型買い目の一括検証。印は{" "}
-        <code>ai_effective_ev</code> 降順。馬連・ワイド・3連複は netkeiba 確定払戻（未取得時は払戻0）。
-        集計は <code>ai_*</code> バックフィル済みレースのみ。
+        集計対象は <strong>EV推奨券（evTickets）</strong> のみ。閾値を通過した買い目にだけ投資します。
+        馬連・ワイド・3連複は netkeiba 確定払戻。集計は <code>ai_*</code> バックフィル済みレースのみ。
       </p>
 
       {comparison == null ? (
@@ -165,14 +164,14 @@ export default function BacktestDashboardPage() {
           </p>
 
           <section className="card" style={{ marginBottom: "1rem", padding: "1rem" }}>
-            <h2>全体（Python AI印）</h2>
+            <h2>全体（EV推奨券）</h2>
             <ul>
               <li>
                 対象レース: {summary.totalRacesMatched}
                 {summary.totalResultRaceCount != null
                   ? `（AIバックフィル済み / 全結果あり ${summary.totalResultRaceCount}）`
                   : ""}
-                （スキップ {summary.totalRacesSkipped}）
+                （スキップ {summary.totalRacesSkipped}・EV0点含む）
               </li>
               <li>総投資: {summary.totalInvestedSum.toLocaleString()}円</li>
               <li>総払戻: {summary.totalPayoutSum.toLocaleString()}円</li>

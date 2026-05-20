@@ -1,4 +1,5 @@
 import type { BetTicket, BetTicketType, RaceBetResult, RacePayoutInput, TicketTypeStats } from "./types";
+import type { OddsMap } from "./bettingRules";
 import type { RaceOfficialPayoutRow, RaceOfficialPayouts } from "../../lib/race-data/raceEvaluationTypes";
 
 function emptyTypeStats(estimated: boolean): TicketTypeStats {
@@ -15,6 +16,35 @@ function emptyTypeStats(estimated: boolean): TicketTypeStats {
 
 function combKey(nums: number[]): string {
   return [...nums].sort((a, b) => a - b).join("-");
+}
+
+function expectedCombinationSize(ticketType: BetTicketType): number {
+  if (ticketType === "WIN") return 1;
+  if (ticketType === "MAIN_LINE") return 2;
+  if (ticketType === "WIDE") return 2;
+  return 3;
+}
+
+function normalizeCombination(
+  comb: number[],
+  expectedSize: number,
+): number[] | null {
+  if (comb.length !== expectedSize) return null;
+  if (comb.some((n) => !Number.isFinite(n))) return null;
+  const sorted = [...comb].sort((a, b) => a - b);
+  if (new Set(sorted).size !== expectedSize) return null;
+  return sorted;
+}
+
+function isExactMatchCombination(
+  left: number[],
+  right: number[],
+): boolean {
+  if (left.length !== right.length) return false;
+  for (let i = 0; i < left.length; i++) {
+    if (left[i] !== right[i]) return false;
+  }
+  return true;
 }
 
 function isWinHit(comb: number[], finishOrder: number[]): boolean {
@@ -51,30 +81,103 @@ function poolForTicket(
   return null;
 }
 
+function findOfficialPayoutRow(
+  payouts: RaceOfficialPayouts | undefined,
+  ticketType: BetTicketType,
+  comb: number[],
+): RaceOfficialPayoutRow | null {
+  const pool = poolForTicket(payouts, ticketType);
+  if (!pool || pool.length === 0) return null;
+  const expectedSize = expectedCombinationSize(ticketType);
+  const normalizedComb = normalizeCombination(comb, expectedSize);
+  if (normalizedComb == null) return null;
+  for (const row of pool) {
+    const normalizedRow = normalizeCombination(row.numbers, expectedSize);
+    if (normalizedRow == null) continue;
+    if (isExactMatchCombination(normalizedComb, normalizedRow)) {
+      return row;
+    }
+  }
+  return null;
+}
+
+/** 公式払戻行に同一組み合わせが存在するか（ソート済み完全一致） */
+export function checkOfficialHit(
+  ticketType: BetTicketType,
+  myCombination: number[],
+  officialPayouts: RaceOfficialPayouts | undefined,
+): boolean {
+  return findOfficialPayoutRow(officialPayouts, ticketType, myCombination) != null;
+}
+
 /** 確定配当（100円あたり）を馬番組み合わせから検索 */
 export function lookupOfficialDividend(
   payouts: RaceOfficialPayouts | undefined,
   ticketType: BetTicketType,
   comb: number[],
 ): number | null {
-  const pool = poolForTicket(payouts, ticketType);
-  if (!pool || pool.length === 0) return null;
-  const key = combKey(comb);
-  for (const row of pool) {
-    if (combKey(row.numbers) === key) return row.dividend;
-  }
-  return null;
+  return findOfficialPayoutRow(payouts, ticketType, comb)?.dividend ?? null;
+}
+
+function lookupFallbackOddsMultiplier(
+  fallback: Pick<OddsMap, "ren" | "wide" | "trifecta"> | undefined,
+  ticketType: BetTicketType,
+  comb: number[],
+): number | undefined {
+  if (!fallback) return undefined;
+  const normalizedComb = normalizeCombination(comb, expectedCombinationSize(ticketType));
+  if (normalizedComb == null) return undefined;
+  const key = combKey(normalizedComb);
+  if (ticketType === "MAIN_LINE") return fallback.ren?.[key];
+  if (ticketType === "WIDE") return fallback.wide?.[key];
+  if (ticketType === "TRIFECTA_FORM") return fallback.trifecta?.[key];
+  return undefined;
+}
+
+function positiveMultiplier(value: number | undefined): number | undefined {
+  if (value == null || !Number.isFinite(value) || value <= 0) return undefined;
+  return value;
+}
+
+function payoutFromMultiplier(betAmount: number, multiplier: number): number {
+  return (betAmount / 100) * multiplier * 100;
 }
 
 function estimateWinPayout(horseNo: number, winOddsByNumber: Map<number, number>, betAmount: number): number {
   const odds = winOddsByNumber.get(horseNo);
-  if (odds == null || !Number.isFinite(odds) || odds <= 0) return 0;
-  return (betAmount / 100) * odds * 100;
+  const mult = positiveMultiplier(odds);
+  if (mult == null) return 0;
+  return payoutFromMultiplier(betAmount, mult);
+}
+
+function estimateExoticPayout(
+  ticketType: BetTicketType,
+  comb: number[],
+  betAmount: number,
+  input: RacePayoutInput,
+): number {
+  if (ticketType === "WIN") return 0;
+  const mult = positiveMultiplier(
+    lookupFallbackOddsMultiplier(input.fallbackExoticOdds, ticketType, comb),
+  );
+  if (mult == null) return 0;
+  return payoutFromMultiplier(betAmount, mult);
 }
 
 function usesOfficialPayouts(payouts: RaceOfficialPayouts | undefined, ticketType: BetTicketType): boolean {
   const pool = poolForTicket(payouts, ticketType);
   return pool != null && pool.length > 0;
+}
+
+function isWinningByFinishOrder(
+  ticketType: BetTicketType,
+  comb: number[],
+  finishOrder: number[],
+): boolean {
+  if (ticketType === "WIN") return isWinHit(comb, finishOrder);
+  if (ticketType === "MAIN_LINE") return isMainLineHit(comb, finishOrder);
+  if (ticketType === "WIDE") return isWideHit(comb, finishOrder);
+  return isTrifectaHit(comb, finishOrder);
 }
 
 export function calculateRacePayout(
@@ -100,23 +203,27 @@ export function calculateRacePayout(
     raceInvested += cost;
 
     for (const comb of ticket.combinations) {
-      let hit = false;
-      if (ticket.ticketType === "WIN") hit = isWinHit(comb, input.finishOrder);
-      else if (ticket.ticketType === "MAIN_LINE") hit = isMainLineHit(comb, input.finishOrder);
-      else if (ticket.ticketType === "WIDE") hit = isWideHit(comb, input.finishOrder);
-      else hit = isTrifectaHit(comb, input.finishOrder);
+      const expectedSize = expectedCombinationSize(ticket.ticketType);
+      const normalizedComb = normalizeCombination(comb, expectedSize);
+      if (normalizedComb == null) continue;
+      const officialMode = usesOfficialPayouts(official, ticket.ticketType);
+      const officialDividend = lookupOfficialDividend(official, ticket.ticketType, normalizedComb);
+      const hit = officialMode
+        ? checkOfficialHit(ticket.ticketType, normalizedComb, official)
+        : isWinningByFinishOrder(ticket.ticketType, normalizedComb, input.finishOrder);
 
       if (!hit) continue;
 
       bucket.hitCount += 1;
-      const officialDividend = lookupOfficialDividend(official, ticket.ticketType, comb);
       let payout = 0;
       if (officialDividend != null) {
         payout = (ticket.betAmount / 100) * officialDividend;
-        bucket.estimatedPayout = false;
       } else if (ticket.ticketType === "WIN") {
-        payout = estimateWinPayout(comb[0]!, input.winOddsByNumber, ticket.betAmount);
-        bucket.estimatedPayout = bucket.estimatedPayout && payout <= 0;
+        payout = estimateWinPayout(normalizedComb[0]!, input.winOddsByNumber, ticket.betAmount);
+        if (payout > 0) bucket.estimatedPayout = true;
+      } else {
+        payout = estimateExoticPayout(ticket.ticketType, normalizedComb, ticket.betAmount, input);
+        if (payout > 0) bucket.estimatedPayout = true;
       }
       bucket.payout += payout;
       racePayout += payout;

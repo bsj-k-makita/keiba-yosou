@@ -20,8 +20,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from config import MODEL_DIR
+from config import DB_PATH, MODEL_DIR
 from model import FEATURE_COLS
+from race_class import infer_race_class
 
 logger = logging.getLogger(__name__)
 
@@ -97,26 +98,6 @@ def _month_to_season(month: int) -> str:
     return "冬"
 
 
-def _infer_race_class(race_name: str) -> str:
-    text = race_name or ""
-    patterns = [
-        (["GⅠ", "G1", "GI"], "G1"),
-        (["GⅡ", "G2", "GII"], "G2"),
-        (["GⅢ", "G3", "GIII"], "G3"),
-        (["Listed", "L "], "L"),
-        (["オープン", "オｰプン"], "OP"),
-        (["3勝クラス", "1600万"], "3勝クラス"),
-        (["2勝クラス", "1000万"], "2勝クラス"),
-        (["1勝クラス", "500万"], "1勝クラス"),
-        (["新馬"], "新馬"),
-        (["未勝利"], "未勝利"),
-    ]
-    for keywords, cls in patterns:
-        if any(k in text for k in keywords):
-            return cls
-    return _UNKNOWN
-
-
 def _normalize_surface(surface: str) -> str:
     s = str(surface or "")
     if "ダ" in s or "ダート" in s:
@@ -141,8 +122,86 @@ def _entry_odds(entry: dict[str, Any]) -> float | None:
     return None
 
 
-def _horse_stats_from_past_runs(past_runs: list[dict[str, Any]]) -> dict[str, float]:
-    """TS JSON pastRuns から馬統計の近似値を算出。"""
+def _horse_final3f_from_db(horse_id: str, before_date: pd.Timestamp | None) -> dict[str, float] | None:
+    """
+    keiba.db の horse_results から直近の上がり3F関連特徴量を取得する。
+    学習パイプラインと乖離しないよう、DB がある場合は TS 定数より優先する。
+    """
+    if not horse_id or not DB_PATH.is_file():
+        return None
+
+    import sqlite3
+
+    # horse_results.race_date は netkeiba 由来で "2026/04/11" 形式が多い。
+    # "YYYY-MM-DD" との文字列比較では 5/3 以前の行がすべて除外されるため正規化する。
+    date_norm = "replace(replace(race_date, '/', '-'), '.', '-')"
+    query = f"""
+        SELECT final_3f, race_date, surface, ground_state, distance
+        FROM horse_results
+        WHERE horse_id = ? AND final_3f IS NOT NULL AND final_3f > 0
+    """
+    params: list[Any] = [horse_id]
+    if before_date is not None and pd.notna(before_date):
+        query += f" AND {date_norm} < ?"
+        params.append(before_date.strftime("%Y-%m-%d"))
+
+    query += f" ORDER BY {date_norm} DESC LIMIT 12"
+
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            rows = conn.execute(query, params).fetchall()
+    except sqlite3.Error as e:
+        logger.debug("horse_final3f DB lookup failed horse_id=%s: %s", horse_id, e)
+        return None
+
+    if not rows:
+        return None
+
+    final3fs = [float(r[0]) for r in rows]
+    last_row = rows[0]
+    last_f3f = float(last_row[0])
+
+    surface = str(last_row[2] or _UNKNOWN)
+    ground = str(last_row[3] or _UNKNOWN)
+
+    with sqlite3.connect(DB_PATH) as conn:
+        stat_rows = conn.execute(
+            """
+            SELECT final_3f FROM horse_results
+            WHERE final_3f IS NOT NULL AND final_3f > 0
+              AND surface = ? AND ground_state = ? AND distance BETWEEN ? AND ?
+            """,
+            (
+                surface,
+                ground,
+                max(0, int(last_row[4] or 1600) - 200),
+                int(last_row[4] or 1600) + 200,
+            ),
+        ).fetchall()
+
+    z_vals = [float(r[0]) for r in stat_rows] if stat_rows else final3fs
+    mean_f = float(np.mean(z_vals))
+    std_f = float(np.std(z_vals))
+    if std_f < _EPS:
+        std_f = mean_f * 0.05 + _EPS
+    last_z = (last_f3f - mean_f) / std_f
+
+    return {
+        "last_final3f": last_f3f,
+        "avg_final3f": float(np.mean(final3fs)),
+        "final3f_rank": float(len(final3fs)),
+        "last_final3f_z": float(last_z),
+    }
+
+
+def _horse_stats_from_past_runs(
+    past_runs: list[dict[str, Any]],
+    *,
+    horse_id: str = "",
+    race_date: pd.Timestamp | None = None,
+    db_final3f: dict[str, float] | None = None,
+) -> dict[str, float]:
+    """TS JSON pastRuns から馬統計の近似値を算出。DB 由来の上がり3Fがあれば優先。"""
     defaults = {
         "horse_race_count": 0.0,
         "horse_win_rate": 0.1,
@@ -154,6 +213,8 @@ def _horse_stats_from_past_runs(past_runs: list[dict[str, Any]]) -> dict[str, fl
         "horse_days_since_last": 90.0,
         "last_final3f": 35.0,
         "avg_final3f": 35.0,
+        "final3f_rank": 8.0,
+        "last_final3f_z": 0.0,
     }
     if not past_runs:
         return defaults
@@ -197,6 +258,18 @@ def _horse_stats_from_past_runs(past_runs: list[dict[str, Any]]) -> dict[str, fl
     else:
         out["last_final3f"] = defaults["last_final3f"]
         out["avg_final3f"] = defaults["avg_final3f"]
+
+    if db_final3f:
+        for key in ("last_final3f", "avg_final3f", "final3f_rank", "last_final3f_z"):
+            if key in db_final3f and np.isfinite(db_final3f[key]):
+                out[key] = float(db_final3f[key])
+    elif horse_id:
+        db_vals = _horse_final3f_from_db(horse_id, race_date)
+        if db_vals:
+            for key, val in db_vals.items():
+                if np.isfinite(val):
+                    out[key] = float(val)
+
     return out
 
 
@@ -224,7 +297,10 @@ def _rows_from_ts_race(
     weather = str(race_info.get("weather") or _UNKNOWN)
     ground_raw = condition.get("ground") or race_info.get("groundLabel") or "good"
     ground_state = _GROUND_MAP.get(str(ground_raw), str(ground_raw) if ground_raw else _UNKNOWN)
-    race_class = _infer_race_class(str(race_info.get("raceName") or ""))
+    race_class = infer_race_class(
+        str(race_info.get("raceName") or ""),
+        str(race_info.get("info2") or race_info.get("raceInfoText") or ""),
+    )
 
     month = int(race_date.month) if pd.notna(race_date) else 1
     day_of_week = int(race_date.dayofweek) if pd.notna(race_date) else 0
@@ -262,7 +338,14 @@ def _rows_from_ts_race(
         wc = 57.0
         weight_carrieds.append(wc)
 
-        past_stats = _horse_stats_from_past_runs(entry.get("pastRuns") or [])
+        horse_id = str(entry.get("horseId") or entry.get("horse_id") or "")
+        db_f3f = _horse_final3f_from_db(horse_id, race_date) if horse_id else None
+        past_stats = _horse_stats_from_past_runs(
+            entry.get("pastRuns") or [],
+            horse_id=horse_id,
+            race_date=race_date,
+            db_final3f=db_f3f,
+        )
 
         row: dict[str, Any] = {
             "race_id": race_id,
@@ -432,6 +515,7 @@ def build_features_for_race(
     if prefer_db:
         db_df = build_features_from_db(race_id)
         if db_df is not None and len(db_df) > 0:
+            logger.debug("build_features_for_race: DB path race_id=%s", race_id)
             return db_df
     return build_features_from_ts_json(
         race_id,

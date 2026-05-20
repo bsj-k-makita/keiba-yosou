@@ -1,14 +1,24 @@
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "../race-evaluation/abilityTypes";
-import type { ProbabilityEngine } from "../../lib/pipeline/probabilityEngine";
+import type { EvaluationPipelineResult } from "../../lib/pipeline/evaluationPipeline";
+import { resolveAiRaceRegime } from "../../lib/pipeline/aiEvRegime";
+import {
+  applyAiMarksByEffectiveEv,
+  buildAiProbabilityMap,
+  raceHasFullAiBackfill,
+  type ProbabilityEngine,
+} from "../../lib/pipeline/probabilityEngine";
 import { inferRaceClassBucket, resolveClassTier } from "../race-evaluation/raceClassLevel";
 import type { ClassTier } from "../race-evaluation/resolveEffectiveRaceClass";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
 import {
-  buildOddsMapFromHorses,
+  AI_EFFECTIVE_EV_THRESHOLD,
+} from "../race-evaluation/investmentEvConstants";
+import {
+  buildOddsMapForEvEvaluation,
   buildSecondRowNumbers,
   buildThirdRowNumbers,
+  countEvRecommendationPoints,
   generateBetTicketsFromEvaluation,
-  generateFormationBetTickets,
   marksFromResults,
   resolveBettingAdvisoryReason,
   resolvePostProcessFavoriteNumber,
@@ -20,7 +30,6 @@ export type RaceBettingContext = {
   marks: MarkedHorseRef[];
   classTier: ClassTier;
   classLevel: ReturnType<typeof inferRaceClassBucket>;
-  tickets: BetTicket[];
   favoriteNumber?: number;
   secondRow: number[];
   thirdRow: number[];
@@ -28,7 +37,8 @@ export type RaceBettingContext = {
   horseNumberById: Map<string, number>;
   winOddsByNumber: Map<number, number>;
   isSkippableRace: boolean;
-  /** EV基準を満たす買い目（ユーザー推奨用。集計は tickets を使用） */
+  probabilityEngine: ProbabilityEngine;
+  /** EV基準を満たす買い目（UI・集計の唯一のソース） */
   evTickets: BetTicket[];
   /** 見送り推奨理由（あれば UI 表示のみ） */
   advisoryReason?: string;
@@ -38,7 +48,26 @@ export type BuildRaceBettingContextOptions = {
   adjustedProbabilities?: ReadonlyMap<string, number>;
   isSkippableRace?: boolean;
   probabilityEngine?: ProbabilityEngine;
+  noAiEvRegime?: boolean;
 };
+
+/** 評価パイプライン出力から馬券コンテキストを組み立てる（印・EVエンジンを揃える） */
+export function buildRaceBettingContextFromPipeline(
+  pipeline: Pick<
+    EvaluationPipelineResult,
+    "results" | "adjustedProbabilities" | "probabilityEngine" | "isSkippableRace" | "aiRaceRegime"
+  >,
+  horses: readonly HorseAbility[],
+  condition: RaceCondition,
+  betAmount = 100,
+): RaceBettingContext | null {
+  return buildRaceBettingContext(pipeline.results, horses, condition, betAmount, {
+    adjustedProbabilities: pipeline.adjustedProbabilities,
+    isSkippableRace: pipeline.isSkippableRace,
+    probabilityEngine: pipeline.probabilityEngine,
+    noAiEvRegime: pipeline.aiRaceRegime === "NO_EV_REGIME",
+  });
+}
 
 function buildEffectiveEvByGate(horses: readonly HorseAbility[]): Map<number, number> {
   const map = new Map<number, number>();
@@ -87,19 +116,42 @@ export function buildRaceBettingContext(
   const { horseNumberById, horseNameByNumber, winOddsByNumber } = horseNumberMaps(horses);
   if (horseNumberById.size === 0) return null;
 
-  const marks = marksFromResults(results, horseNumberById);
+  const probabilityEngine: ProbabilityEngine =
+    pipelineOpts?.probabilityEngine ??
+    (raceHasFullAiBackfill(horses) ? "ai" : "ts");
+  const isSkippableRace =
+    probabilityEngine === "ai" ? false : (pipelineOpts?.isSkippableRace ?? false);
+  const noAiEvRegime =
+    pipelineOpts?.noAiEvRegime ??
+    (probabilityEngine === "ai" && resolveAiRaceRegime(horses) === "NO_EV_REGIME");
+
+  let resultsForBetting: readonly HorseScoreResult[] = results;
+  if (probabilityEngine === "ai" && raceHasFullAiBackfill(horses)) {
+    if (!results.some((r) => r.mark === "◎")) {
+      resultsForBetting = applyAiMarksByEffectiveEv(results, horses);
+    }
+  }
+
+  const marks = marksFromResults(resultsForBetting, horseNumberById, winOddsByNumber);
   const classTier = resolveClassTier(condition);
   const classLevel = inferRaceClassBucket(condition);
   const favoriteNumber = resolvePostProcessFavoriteNumber(marks);
   const longshotStar = marks.find((h) => h.mark === "☆" && h.longshotReversalTrigger)?.horseNumber;
-  const isSkippableRace = pipelineOpts?.isSkippableRace ?? false;
-  const winProbabilities = pipelineOpts?.adjustedProbabilities ?? new Map<string, number>();
+  const pipelineProbabilities = pipelineOpts?.adjustedProbabilities ?? new Map<string, number>();
+  const winProbabilities =
+    probabilityEngine === "ai" && raceHasFullAiBackfill(horses)
+      ? buildAiProbabilityMap(horses)
+      : new Map<string, number>(pipelineProbabilities);
 
-  const oddsMap = buildOddsMapFromHorses(horses);
-  const probabilityEngine = pipelineOpts?.probabilityEngine ?? "ts";
+  const probByGate = new Map<number, number>();
+  for (const [horseId, prob] of winProbabilities) {
+    const gate = horseNumberById.get(horseId);
+    if (gate != null && Number.isFinite(prob)) probByGate.set(gate, prob);
+  }
+  const oddsMap = buildOddsMapForEvEvaluation(horses, undefined, probByGate);
   const evTickets = generateBetTicketsFromEvaluation(
     {
-      results,
+      results: resultsForBetting,
       winProbabilities,
       horseNumberById,
       oddsMap,
@@ -114,28 +166,29 @@ export function buildRaceBettingContext(
         probabilityEngine === "ai" ? buildEffectiveEvByGate(horses) : undefined,
     },
   );
-  const tickets = generateFormationBetTickets(marks, classTier, betAmount);
-  const evBetPointCount = evTickets.reduce((s, t) => s + t.combinations.length, 0);
+  const evBetPointCount = countEvRecommendationPoints(evTickets);
   const advisoryReason = resolveBettingAdvisoryReason({
     isSkippableRace,
     hasMarks: marks.length > 0,
     evBetPointCount,
+    noAiEvRegime,
+    probabilityEngine,
   });
 
   return {
     marks,
     classTier,
     classLevel,
-    tickets,
     evTickets,
     advisoryReason,
     favoriteNumber,
-    secondRow: buildSecondRowNumbers(marks, classTier),
+    secondRow: buildSecondRowNumbers(marks, classTier, probabilityEngine),
     thirdRow: buildThirdRowNumbers(marks, longshotStar),
     horseNameByNumber,
     horseNumberById,
     winOddsByNumber,
     isSkippableRace,
+    probabilityEngine,
   };
 }
 
@@ -150,7 +203,7 @@ export function formatHorseList(numbers: readonly number[], nameByNumber: Map<nu
 
 export function buildTicketsCopyText(ctx: RaceBettingContext): string {
   const lines: string[] = [];
-  for (const t of ctx.tickets) {
+  for (const t of ctx.evTickets) {
     if (t.ticketType === "WIN") {
       const combos = t.combinations.map((c) => `${c[0]}番`).join(", ");
       lines.push(`【単勝】${combos} 各${t.betAmount}円（${t.combinations.length}点）`);
@@ -175,10 +228,21 @@ export function buildTicketsCopyText(ctx: RaceBettingContext): string {
       `【3連複】${preview}${more} 各${t.betAmount}円（${t.combinations.length}点・EV≥1.5）`,
     );
   }
-  if (ctx.advisoryReason === "contradictory_marks") {
-    lines.unshift("【見送り推奨】評価1位と表示◎が不一致（定型買い目は下記の通り）");
-  } else if (ctx.advisoryReason === "no_ev_recommendation") {
-    lines.unshift("【見送り推奨】EV≥1.3の買い目なし（定型フォーメは下記の通り）");
+  if (ctx.evTickets.length === 0) {
+    if (ctx.advisoryReason === "no_ai_ev_regime") {
+      return "【投資判断：低期待値につき見送り推奨】EV推奨なし（買い目0点）";
+    }
+    if (ctx.advisoryReason === "contradictory_marks") {
+      return "【見送り推奨】評価1位と表示◎が不一致（買い目0点）";
+    }
+    if (ctx.advisoryReason === "no_ev_recommendation") {
+      const evLabel =
+        ctx.probabilityEngine === "ai"
+          ? `EV≥${AI_EFFECTIVE_EV_THRESHOLD}`
+          : "EV≥1.3";
+      return `【見送り推奨】${evLabel}の買い目なし（買い目0点）`;
+    }
+    return "【見送り】EV推奨なし（買い目0点）";
   }
   return lines.join("\n");
 }

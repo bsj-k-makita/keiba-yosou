@@ -29,7 +29,8 @@
     "reestimate-abilities": "node scripts/reestimate-abilities-from-past-runs.mjs",
     "backtest:bets": "vitest run src/domain/betting/runFullBacktest.test.ts",
     "backtest:compare": "vitest run src/domain/betting/runBacktestCompare.test.ts",
-    "backtest:ts": "vitest run src/domain/betting/runFullBacktestTs.test.ts"
+    "backtest:ts": "vitest run src/domain/betting/runFullBacktestTs.test.ts",
+    "report:venue-hits": "vitest run src/domain/betting/generateVenueHitReport.test.ts"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",

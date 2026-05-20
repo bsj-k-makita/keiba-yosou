@@ -1,4 +1,5 @@
 import type { HorseAbility } from "../../domain/race-evaluation/abilityTypes";
+import { filterPastRunsForCurrentRace } from "./filterPastRuns";
 import type { RaceEntryEvaluation, RaceEvaluationData } from "./raceEvaluationTypes";
 
 export type EnrichedRaceHorse = HorseAbility & { gate: number; frameNumber: number };
@@ -122,6 +123,8 @@ export function getSortedRaceEntryGateRows(data: RaceEvaluationData): RaceEntryG
  */
 export function raceDataToHorses(data: RaceEvaluationData): EnrichedRaceHorse[] {
   const entries = sanitizeRaceEntriesForUi(data.entries);
+  const raceId = data.raceId;
+  const meetingDate = data.raceInfo.date;
   return entries.map((e) => ({
     // 生JSONの欠損に備え、gate/frameNumber は必ず埋める。
     gate: Number.isFinite(e.horseNumber) ? e.horseNumber : 1,
@@ -150,7 +153,7 @@ export function raceDataToHorses(data: RaceEvaluationData): EnrichedRaceHorse[] 
     bias_mismatch: e.bias_mismatch,
     pace_mismatch: e.pace_mismatch,
     l2_sustain_ratio: e.l2_sustain_ratio,
-    pastRuns: e.pastRuns,
+    pastRuns: filterPastRunsForCurrentRace(e.pastRuns, raceId, meetingDate),
     ...(e.position_x != null && Number.isFinite(e.position_x) ? { position_x: e.position_x } : {}),
     ...(e.abilityIndex != null && Number.isFinite(e.abilityIndex) ? { abilityIndex: e.abilityIndex } : {}),
     ...(e.suitabilityFlags != null && e.suitabilityFlags.length > 0

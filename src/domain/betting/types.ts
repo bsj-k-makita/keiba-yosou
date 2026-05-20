@@ -40,13 +40,16 @@ export type RaceBetResult = {
   favoriteShowHit?: boolean;
 };
 
+export type BacktestRaceOutput = {
+  result: RaceBetResult;
+  detail: RaceDetailLog;
+};
+
 export type RaceDetailTicketSlot = {
   invested: number;
   payout: number;
-  /** 実際に購入した組み合わせが的中 */
+  /** EV推奨券の購入組み合わせが的中 */
   isHit: boolean;
-  /** 印フォーメーション（◎○▲等）上は的中していたか（購入有無と独立） */
-  formationHit: boolean;
 };
 
 export type RaceDetailLog = {
@@ -91,18 +94,18 @@ export type BacktestSummary = {
   totalInvestedSum: number;
   totalPayoutSum: number;
   totalRecoveryRate: number;
-  /** 集計時の勝率エンジン */
-  probabilityEngine?: "ts" | "ai";
-  /** 結果JSONありの全レース数（AI集計時の分母表示用） */
-  totalResultRaceCount?: number;
-  /** 的中レース一覧用（結果確定全R・AI未全頭はTS印） */
-  raceDetailsForHitList?: RaceDetailLog[];
   byTicketType: Record<BetTicketType, TicketTypeStats>;
   byClassLevel: Record<
     RaceClassBucket,
     { races: number; invested: number; payout: number; rate: number }
   >;
   byClassTier: Record<ClassTier, { races: number; invested: number; payout: number; rate: number }>;
+  /** 集計時の勝率エンジン */
+  probabilityEngine?: "ts" | "ai";
+  /** 結果JSONありの全レース数（AI集計時の分母表示用） */
+  totalResultRaceCount?: number;
+  /** 的中レース一覧用（結果確定全R・AI未全頭はTS印） */
+  raceDetailsForHitList?: RaceDetailLog[];
   /** 最終◎の単勝・3着内（複勝圏）的中率 */
   favoriteMark: {
     races: number;
@@ -127,6 +130,15 @@ export type RacePayoutInput = {
   finishOrder: number[];
   /** 馬番 → 単勝オッズ（公式払戻が無い単勝のみフォールバック） */
   winOddsByNumber: Map<number, number>;
-  /** netkeiba 確定払戻（あれば馬連・3連複の推定を廃止） */
+  /** netkeiba 確定払戻 */
   officialPayouts?: RaceOfficialPayouts;
+  /**
+   * 的中時のフォールバック用推定オッズ（馬連・ワイド・3連複）。
+   * 確定配当行が無い組み合わせでも払戻0にしない。
+   */
+  fallbackExoticOdds?: {
+    ren?: Record<string, number>;
+    wide?: Record<string, number>;
+    trifecta?: Record<string, number>;
+  };
 };

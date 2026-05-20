@@ -18,15 +18,16 @@ type Props = {
   raceIcon: (surface: "芝" | "ダート") => string;
 };
 
-function cardTone(outcome: RaceBettingOutcome | null | undefined): "hit" | "miss" | "neutral" {
+function cardTone(outcome: RaceBettingOutcome | null | undefined): "hit" | "skip" | "miss" | "neutral" {
   if (outcome == null || outcome.status !== "resolved") return "neutral";
-  if (outcome.isHit || outcome.hasFormationHit) return "hit";
+  if (outcome.totalInvested === 0) return "skip";
+  if (outcome.isHit) return "hit";
   return "miss";
 }
 
 function hitStatusLabel(outcome: RaceBettingOutcome): string {
+  if (outcome.status === "resolved" && outcome.totalInvested === 0) return "見送り";
   if (outcome.isHit && outcome.totalPayout > 0) return "🎯 的中";
-  if (outcome.hasFormationHit) return "印的中";
   return missStatusLabel(outcome);
 }
 
@@ -107,7 +108,9 @@ export function RaceListCard({
                 className={
                   tone === "hit"
                     ? "bt-hit-card__status bt-hit-card__status--hit"
-                    : "bt-hit-card__status bt-hit-card__status--miss"
+                    : tone === "skip"
+                      ? "bt-hit-card__status bt-hit-card__status--skip"
+                      : "bt-hit-card__status bt-hit-card__status--miss"
                 }
               >
                 {hitStatusLabel(outcome)}

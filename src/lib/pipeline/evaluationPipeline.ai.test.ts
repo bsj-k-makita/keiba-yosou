@@ -33,7 +33,18 @@ describe("runRaceEvaluationPipeline AI mode", () => {
     const horses = [horse("1", 0.3, 40), horse("2", 1.6, 95), horse("3", 0.8, 70)];
     const pipeline = runRaceEvaluationPipeline(horses, condition, { probabilityEngine: "ai" });
     expect(pipeline.probabilityEngine).toBe("ai");
+    expect(pipeline.aiRaceRegime).toBe("NORMAL_AI_REGIME");
     expect(pipeline.results.find((r) => r.mark === "◎")?.horseId).toBe("2");
     expect(pipeline.isSkippableRace).toBe(false);
+  });
+
+  it("NO_EV_REGIME keeps relative AI marks when all ai_effective_ev are tied at floor", () => {
+    const horses = Array.from({ length: 8 }, (_, i) =>
+      horse(String(i + 1), -0.15, 50 + i),
+    );
+    const pipeline = runRaceEvaluationPipeline(horses, condition, { probabilityEngine: "ai" });
+    expect(pipeline.aiRaceRegime).toBe("NO_EV_REGIME");
+    expect(pipeline.results.some((r) => r.mark === "◎")).toBe(true);
+    expect(pipeline.results.filter((r) => r.mark !== "").length).toBeGreaterThanOrEqual(7);
   });
 });

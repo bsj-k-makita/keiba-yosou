@@ -31,6 +31,9 @@ import {
 } from "../../lib/race-data";
 import type { RaceIndexItem } from "../../lib/race-data";
 import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
+import { NO_EV_REGIME_BANNER_TEXT } from "../../lib/pipeline/aiEvRegime";
+import { buildRaceBettingContextFromPipeline } from "../../domain/betting/buildRaceBettingContext";
+import { applyEvRecommendedFlags } from "../../viewModel/raceEvaluationViewModel";
 import {
   parseProbabilityEngine,
   raceHasAiEngineReady,
@@ -282,11 +285,32 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             viewModel: { byHorseId: new Map(), probabilityEngine: "ts" as const },
             adjustedProbabilities: new Map<string, number>(),
             probabilityEngine: "ts" as const,
+            aiRaceRegime: "NORMAL_AI_REGIME" as const,
+            tsReferenceResults: [],
             isSkippableRace: false,
           },
     [horses, evalCondition, requestedEngine],
   );
+  const evGateNumbers = useMemo(() => {
+    if (evalCondition == null) return new Set<number>();
+    const ctx = buildRaceBettingContextFromPipeline(pipeline, horses, evalCondition, 100);
+    const gates = new Set<number>();
+    for (const ticket of ctx?.evTickets ?? []) {
+      for (const combination of ticket.combinations) {
+        for (const gate of combination) {
+          if (Number.isFinite(gate)) gates.add(gate);
+        }
+      }
+    }
+    return gates;
+  }, [pipeline, horses, evalCondition]);
+  const horsesViewModel = useMemo(
+    () => applyEvRecommendedFlags(pipeline.viewModel, horses, evGateNumbers),
+    [pipeline.viewModel, horses, evGateNumbers],
+  );
   const results = pipeline.results;
+  const isNoAiEvRegime =
+    pipeline.probabilityEngine === "ai" && pipeline.aiRaceRegime === "NO_EV_REGIME";
 
   const gradesMap = useMemo(() => computeAbilityLetterGrades(horses), [horses]);
 
@@ -411,7 +435,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         condition,
         horses,
         results,
-        viewModel: pipeline.viewModel,
+        viewModel: horsesViewModel,
         onConditionChange: handleConditionPanelChange,
         onQuickAdjustmentToggle: handleToggleQuickAdjustment,
       }}
@@ -485,6 +509,10 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
               AIデータなし → TSにフォールバック
             </span>
+          ) : isNoAiEvRegime ? (
+            <span style={{ fontSize: "0.82em", color: "var(--c-warning, #b45309)" }}>
+              低期待値見送り推奨（EV推奨なし）
+            </span>
           ) : pipeline.probabilityEngine === "ai" ? (
             <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
               方針B: 印・買い目は ai_effective_ev 順（スコア表示はTS参考）
@@ -553,6 +581,12 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         </div>
       </div>
 
+      {isNoAiEvRegime ? (
+        <div className="ai-no-ev-banner" role="status">
+          <p className="ai-no-ev-banner__text">{NO_EV_REGIME_BANNER_TEXT}</p>
+        </div>
+      ) : null}
+
       {/* タブ */}
       <div className="view-tabs" role="tablist" aria-label="表示切り替え">
         {TABS.map(({ key, label }) => (
@@ -593,7 +627,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 horses={horses}
                 gradesMap={gradesMap}
                 condition={evalCondition}
-                viewModel={pipeline.viewModel}
+                viewModel={horsesViewModel}
                 maxAdjustedScoreInRace={maxAdjustedScoreInRace}
               />
             </>
@@ -607,6 +641,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
               adjustedProbabilities={pipeline.adjustedProbabilities}
               isSkippableRace={pipeline.isSkippableRace}
               probabilityEngine={pipeline.probabilityEngine}
+              noAiEvRegime={isNoAiEvRegime}
             />
           )}
 
@@ -618,6 +653,8 @@ export function RaceDetailView({ race, raceIndex }: Props) {
               condition={evalCondition}
               adjustedProbabilities={pipeline.adjustedProbabilities}
               isSkippableRace={pipeline.isSkippableRace}
+              probabilityEngine={pipeline.probabilityEngine}
+              noAiEvRegime={isNoAiEvRegime}
             />
           )}
 

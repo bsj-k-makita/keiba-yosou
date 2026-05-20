@@ -1,4 +1,5 @@
 import type { ClassTier } from "../race-evaluation/resolveEffectiveRaceClass";
+import type { ProbabilityEngine } from "../../lib/pipeline/probabilityEngine";
 import type { BetTicketType } from "./types";
 import {
   buildOptimizedTrifectaCombinations,
@@ -23,12 +24,13 @@ function combInTop3(comb: number[], top3: Set<number>): boolean {
 
 /**
  * 印（◎○▲☆△）と着順から、旧フォーメーション戦略上の的中を判定する。
- * 購入チケット（EV）とは独立。BT画面の「印的中」表示に使う。
+ * 購入チケット（EV）とは独立。内部診断（G1レポート等）のみ。
  */
 export function computeFormationHits(
   marks: readonly MarkedHorseRef[],
   finishOrder: readonly number[],
   classTier: ClassTier,
+  probabilityEngine: ProbabilityEngine = "ts",
 ): FormationHitMap {
   const out: FormationHitMap = {
     WIN: false,
@@ -58,7 +60,7 @@ export function computeFormationHits(
   }
 
   if (finishOrder.length >= 3) {
-    const triCombs = buildOptimizedTrifectaCombinations(marks, { classTier });
+    const triCombs = buildOptimizedTrifectaCombinations(marks, { classTier, probabilityEngine });
     out.TRIFECTA_FORM = triCombs.some((comb) => combInTop3(comb, top3));
   }
 

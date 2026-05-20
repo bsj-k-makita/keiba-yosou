@@ -1,8 +1,12 @@
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "../race-evaluation/abilityTypes";
 import { resolvePlaceToHorseId } from "../race-evaluation/markHitAnalysis";
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
-import { buildRaceBettingContext } from "./buildRaceBettingContext";
-import { computeFormationHits, hasAnyFormationHit } from "./markFormationHits";
+import {
+  buildRaceBettingContext,
+  type BuildRaceBettingContextOptions,
+} from "./buildRaceBettingContext";
+import { buildPayoutFallbackOddsMap } from "./bettingRules";
+import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
 import { calculateRacePayout } from "./payoutCalculator";
 import { analyzeSecondRowStatus } from "./secondRowAnalysis";
 
@@ -11,10 +15,8 @@ export type RaceBettingOutcome = {
   recoveryRate: number;
   totalInvested: number;
   totalPayout: number;
-  /** 購入券の払戻あり */
+  /** EV推奨券の払戻あり */
   isHit: boolean;
-  /** 印フォーメ（◎単勝・◎○馬連等）上は的中 */
-  hasFormationHit: boolean;
   isSecondRowDead: boolean;
 };
 
@@ -27,8 +29,9 @@ function buildFinishOrder(
   const out: number[] = [];
   for (const p of sorted) {
     const hid = resolvePlaceToHorseId(p, horses);
-    if (!hid) continue;
-    const num = numberById.get(hid);
+    const num =
+      (hid != null ? numberById.get(hid) : undefined) ??
+      (p.horseNumber != null && Number.isFinite(p.horseNumber) ? p.horseNumber : undefined);
     if (num != null) out.push(num);
   }
   return out;
@@ -40,45 +43,66 @@ export function computeRaceBettingOutcome(
   condition: RaceCondition,
   result: RaceResultData | null | undefined,
   betAmount = 100,
+  pipelineOpts?: BuildRaceBettingContextOptions,
 ): RaceBettingOutcome | null {
-  const ctx = buildRaceBettingContext(results, horses, condition, betAmount);
+  const ctx = buildRaceBettingContext(results, horses, condition, betAmount, pipelineOpts);
   if (ctx == null) return null;
 
   if (result == null || result.places.length < 3) {
+    const invested = ctx.evTickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0);
     return {
       status: "pending",
       recoveryRate: 0,
-      totalInvested: ctx.tickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0),
+      totalInvested: invested,
       totalPayout: 0,
       isHit: false,
-      hasFormationHit: false,
       isSecondRowDead: false,
     };
   }
 
   const finishOrder = buildFinishOrder(result.places, horses, ctx.horseNumberById);
   if (finishOrder.length < 3) {
+    const invested = ctx.evTickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0);
     return {
       status: "pending",
       recoveryRate: 0,
-      totalInvested: ctx.tickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0),
+      totalInvested: invested,
       totalPayout: 0,
       isHit: false,
-      hasFormationHit: false,
       isSecondRowDead: false,
     };
   }
 
-  const payout = calculateRacePayout(ctx.tickets, {
+  const probByGate = new Map<number, number>();
+  for (const h of horses) {
+    const gate = (h as { gate?: number }).gate;
+    if (gate == null || !Number.isFinite(gate)) continue;
+    const g = Math.round(gate);
+    const fromAi = h.aiPredictedWinRate;
+    if (fromAi != null && fromAi > 0) {
+      probByGate.set(g, fromAi);
+      continue;
+    }
+    const winOdds = getEffectiveEvaluationSignals(h)?.winOdds;
+    if (winOdds != null && winOdds > 0) probByGate.set(g, 1 / winOdds);
+  }
+
+  const payout = calculateRacePayout(ctx.evTickets, {
     raceId: result.raceId,
     classLevel: ctx.classLevel,
     finishOrder,
     winOddsByNumber: ctx.winOddsByNumber,
     officialPayouts: result.payouts,
+    fallbackExoticOdds: buildPayoutFallbackOddsMap(horses, result.payouts, probByGate),
   });
 
-  const second = analyzeSecondRowStatus(ctx.marks, ctx.classTier, finishOrder, ctx.favoriteNumber);
-  const formationHits = computeFormationHits(ctx.marks, finishOrder, ctx.classTier);
+  const second = analyzeSecondRowStatus(
+    ctx.marks,
+    ctx.classTier,
+    finishOrder,
+    ctx.favoriteNumber,
+    ctx.probabilityEngine,
+  );
   const recoveryRate =
     payout.totalInvested > 0
       ? Math.round((payout.totalPayout / payout.totalInvested) * 1000) / 10
@@ -90,7 +114,6 @@ export function computeRaceBettingOutcome(
     totalInvested: payout.totalInvested,
     totalPayout: payout.totalPayout,
     isHit: payout.totalPayout > 0,
-    hasFormationHit: hasAnyFormationHit(formationHits),
     isSecondRowDead: second.isSecondRowDead,
   };
 }
@@ -113,6 +136,7 @@ export function mergeListBettingRecoveryStats(
 
   for (const o of outcomes) {
     if (o == null || o.status !== "resolved") continue;
+    if (o.totalInvested <= 0) continue;
     sampleSize += 1;
     totalInvested += o.totalInvested;
     totalPayout += o.totalPayout;

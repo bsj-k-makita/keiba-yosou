@@ -253,6 +253,39 @@ function toAbilities(e: AnalysisHorseEntry): { speed: number; stamina: number; k
   };
 }
 
+type EntryWithMarketOdds = RaceEntryEvaluation & {
+  market_win_odds?: number;
+  marketWinOdds?: number;
+  estimated_actual_odds?: number;
+  estimatedActualOdds?: number;
+};
+
+/** UI形式JSONで evaluationSignals が欠けていても market_win_odds を単勝オッズへ反映 */
+function enrichEntryEvaluationSignals(entries: readonly RaceEntryEvaluation[]): RaceEntryEvaluation[] {
+  let touched = false;
+  const out = entries.map((entry) => {
+    const ext = entry as EntryWithMarketOdds;
+    const marketWinOdds =
+      n(ext.market_win_odds) ??
+      n(ext.marketWinOdds) ??
+      n(ext.estimated_actual_odds) ??
+      n(ext.estimatedActualOdds);
+    if (marketWinOdds == null || marketWinOdds <= 0) return entry;
+    if (entry.evaluationSignals?.winOdds != null && entry.evaluationSignals.winOdds > 0) {
+      return entry;
+    }
+    touched = true;
+    return {
+      ...entry,
+      evaluationSignals: {
+        ...entry.evaluationSignals,
+        winOdds: entry.evaluationSignals?.winOdds ?? marketWinOdds,
+      },
+    };
+  });
+  return touched ? out : [...entries];
+}
+
 function toEvaluationSignals(e: AnalysisHorseEntry): HorseEvaluationSignals | undefined {
   const base = e.evaluationSignals;
   const marketWinOdds = n(e.market_win_odds) ?? n(e.marketWinOdds);
@@ -752,7 +785,12 @@ function normalizeRaceEvaluationDataForUi(data: RaceEvaluationData): RaceEvaluat
 export function convertToRaceEvaluationData(raw: unknown): RaceEvaluationData {
   const un = unwrapAnalysisPayload(raw);
   if (isRaceEvaluationDataShape(un)) {
-    const v = normalizeRaceEvaluationDataForUi(un as RaceEvaluationData);
+    const shaped = un as RaceEvaluationData;
+    const withSignals: RaceEvaluationData = {
+      ...shaped,
+      entries: enrichEntryEvaluationSignals(shaped.entries),
+    };
+    const v = normalizeRaceEvaluationDataForUi(withSignals);
     assertIsRaceEvaluationData(v);
     if (needsEvaluationV2Migration(v)) {
       return recomputeEvaluationData(v);
