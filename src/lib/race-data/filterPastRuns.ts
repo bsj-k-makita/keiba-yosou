@@ -7,7 +7,6 @@ import type { PastRunRecord } from "../../domain/race-evaluation/pastRunTypes";
 export function filterPastRunsForCurrentRace(
   pastRuns: readonly PastRunRecord[] | undefined,
   raceId: string,
-  meetingDate?: string,
 ): PastRunRecord[] {
   if (!pastRuns?.length) return [];
   return pastRuns.filter((r) => {

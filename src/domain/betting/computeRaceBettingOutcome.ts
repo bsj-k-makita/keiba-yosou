@@ -29,9 +29,7 @@ function buildFinishOrder(
   const out: number[] = [];
   for (const p of sorted) {
     const hid = resolvePlaceToHorseId(p, horses);
-    const num =
-      (hid != null ? numberById.get(hid) : undefined) ??
-      (p.horseNumber != null && Number.isFinite(p.horseNumber) ? p.horseNumber : undefined);
+    const num = hid != null ? numberById.get(hid) : undefined;
     if (num != null) out.push(num);
   }
   return out;

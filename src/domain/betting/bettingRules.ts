@@ -1,9 +1,7 @@
 import type { HorseAbility, HorseScoreResult } from "../race-evaluation/abilityTypes";
 import {
-  AI_EFFECTIVE_EV_THRESHOLD,
   EV_MAX_TICKETS_PER_TYPE,
   EV_MAX_WIDE_TICKETS_PER_TYPE,
-  PYTHON_EV_MARGIN,
   REN_EV_THRESHOLD,
   WIDE_EV_THRESHOLD,
 } from "../race-evaluation/investmentEvConstants";
@@ -280,14 +278,10 @@ export function generateTicketsFromEvaluation(
   if (engine === "ai") {
     return createFixedAiFormationTickets(context);
   }
-  const effectiveEvByGate = evOptions?.effectiveEvByGate;
-  const winThreshold =
-    engine === "ai"
-      ? (evOptions?.thresholdEV ?? AI_EFFECTIVE_EV_THRESHOLD)
-      : (evOptions?.thresholdEV ?? thresholdEV);
+  const winThreshold = evOptions?.thresholdEV ?? thresholdEV;
   const renThreshold = REN_EV_THRESHOLD;
   const wideThreshold = WIDE_EV_THRESHOLD;
-  const margin = engine === "ai" ? PYTHON_EV_MARGIN : 0;
+  const margin = 0;
   const triThreshold = TRI_EV_THRESHOLD;
   const topMarkGate = context.topMarkGate;
 
@@ -295,20 +289,6 @@ export function generateTicketsFromEvaluation(
   const tickets: EvTicket[] = [];
 
   for (const horse of validHorses) {
-    if (engine === "ai") {
-      const effectiveEv = effectiveEvByGate?.get(horse.gate);
-      if (effectiveEv == null || !Number.isFinite(effectiveEv)) continue;
-      if (effectiveEv >= winThreshold) {
-        tickets.push({
-          type: "WIN",
-          gates: [horse.gate],
-          estimatedProbability: horse.prob,
-          expectedValue: effectiveEv,
-        });
-      }
-      continue;
-    }
-
     const winOdds = positiveOdds(oddsMap.win[horse.gate]);
     if (winOdds == null) continue;
 
