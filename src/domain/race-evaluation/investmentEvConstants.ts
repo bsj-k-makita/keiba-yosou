@@ -33,3 +33,9 @@ export const EV_MAX_WIDE_TICKETS_PER_TYPE = 5;
 
 /** 3連複のみ EV 上位厳選上限 */
 export const EV_MAX_TRI_TICKETS_PER_TYPE = 3;
+
+/** ◎軸として採用する最低予測勝率（8%） */
+export const ANCHOR_MIN_PREDICTED_WIN_RATE = 0.08;
+
+/** 動的EVしきい値の勝率ペナルティ係数（base + coeff / p） */
+export const DYNAMIC_EV_THRESHOLD_PENALTY_COEFFICIENT = 0.05;
