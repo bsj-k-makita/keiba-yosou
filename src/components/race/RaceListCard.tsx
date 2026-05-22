@@ -59,19 +59,22 @@ export function RaceListCard({
                 <span className="rl-race-row__r-label">R</span>
                 <span className="rl-race-row__r-num">{item.raceNumber}</span>
               </div>
-              <div className="rl-race-row__lead">
-                {previewBadge ? (
-                  <span className={`rl-race-row__feature rl-race-row__feature--${previewBadge.tone}`}>
-                    {previewBadge.label}
-                  </span>
-                ) : null}
-              </div>
             </div>
             <span className="rl-race-row__arrow" aria-hidden>
               ›
             </span>
           </div>
           <div className="rl-race-row__info">
+            <div className="rl-race-row__badge-row" aria-hidden={!previewBadge}>
+              {previewBadge ? (
+                <span
+                  className={`rl-race-row__feature rl-race-row__feature--${previewBadge.tone}`}
+                  title={previewBadge.label}
+                >
+                  {previewBadge.label}
+                </span>
+              ) : null}
+            </div>
             <div className="rl-race-row__name-row">
               <span className="rl-race-row__name" title={item.raceName}>
                 {item.raceName ?? `${item.raceNumber}R`}
@@ -80,7 +83,9 @@ export function RaceListCard({
                 <span className={`rl-race-grade rl-race-grade--${gradeBadge.variant}`}>{gradeBadge.label}</span>
               ) : null}
             </div>
-            {previewText ? <p className="rl-race-row__preview">{previewText}</p> : null}
+            <p className="rl-race-row__preview" aria-hidden={!previewText}>
+              {previewText ?? "\u00A0"}
+            </p>
             <div className="rl-race-row__meta">
               <span className={surfaceBadgeClass(item.surface)}>
                 {raceIcon(item.surface)} {surfaceShort(item.surface)} {item.distance}m
@@ -136,7 +141,9 @@ export function RaceListCard({
             <span className="bt-hit-card__name">{item.raceName ?? `${item.raceNumber}R`}</span>
             {gradeBadge ? <span className="bt-hit-card__tier">{gradeBadge.label}</span> : null}
           </div>
-          {previewText ? <p className="bt-hit-card__diagnosis">{previewText}</p> : null}
+          <p className="bt-hit-card__diagnosis" aria-hidden={!previewText}>
+            {previewText ?? "\u00A0"}
+          </p>
           <div className="bt-hit-card__tickets">
             <span className={surfaceBadgeClass(item.surface)}>
               {raceIcon(item.surface)} {surfaceShort(item.surface)} {item.distance}m

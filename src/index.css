@@ -2741,6 +2741,12 @@ samp {
   display: grid;
   gap: 10px;
   grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+.rl-race-list > li:not(.rl-empty) {
+  display: flex;
+  min-height: 0;
 }
 
 @media (min-width: 680px) {
@@ -2755,12 +2761,23 @@ samp {
 .rl-race-card-wrap {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-height: 100%;
   border-radius: var(--radius-cards);
   overflow: hidden;
   border: 1px solid var(--c-border);
   background: var(--c-white);
   transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   animation: card-enter 0.35s ease both;
+}
+
+.rl-race-card-wrap::before {
+  content: "";
+  display: block;
+  height: 3px;
+  flex-shrink: 0;
+  background: transparent;
 }
 
 @keyframes card-enter {
@@ -2794,20 +2811,16 @@ samp {
   box-shadow: 0 8px 28px rgba(28, 93, 95, 0.18), 0 2px 8px rgba(28, 93, 95, 0.1);
 }
 
-/* Featured top accent bar */
 .rl-race-card-wrap--featured::before {
-  content: "";
-  display: block;
-  height: 3px;
   background: linear-gradient(90deg, var(--c-pop-accent), #0f766e);
-  flex-shrink: 0;
 }
 
 .rl-race-row {
   display: grid;
-  grid-template-columns: max-content 1fr auto;
-  align-items: center;
+  grid-template-columns: 48px 1fr auto;
+  align-items: stretch;
   gap: 0 12px;
+  flex: 1;
   padding: 14px 16px;
   background: transparent;
   border: none;
@@ -2832,25 +2845,27 @@ samp {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  align-self: start;
+  width: 48px;
+  flex-shrink: 0;
 }
 
-.rl-race-row__lead {
+.rl-race-row__badge-row {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
   align-items: center;
+  min-width: 0;
+  min-height: 22px;
 }
 
-.rl-race-row__lead:empty {
-  display: none;
+.rl-race-row__badge-row[aria-hidden="true"] {
+  visibility: hidden;
 }
 
 .rl-race-row__feature {
   display: inline-flex;
   align-items: center;
-  white-space: nowrap;
-  word-break: keep-all;
+  max-width: 100%;
+  min-width: 0;
   min-height: 22px;
   padding: 0 10px;
   border-radius: var(--r-pill);
@@ -2860,6 +2875,9 @@ samp {
   font-weight: 700;
   letter-spacing: 0.02em;
   font-family: "Kalam", "Comic Sans MS", cursive;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rl-race-row__feature--high {
@@ -2950,6 +2968,7 @@ samp {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1;
 }
 
 .rl-race-row__name {
@@ -2972,7 +2991,7 @@ samp {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .rl-race-row__name-row .rl-race-row__name {
@@ -3024,6 +3043,16 @@ samp {
   color: var(--c-text-3);
   font-size: var(--font-size-body);
   line-height: 1.35;
+  min-height: 2.7em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.rl-race-row__preview[aria-hidden="true"] {
+  visibility: hidden;
 }
 
 .rl-race-row__meta {
@@ -3031,6 +3060,7 @@ samp {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  margin-top: auto;
 }
 
 .rl-race-row__dist {
@@ -3042,6 +3072,7 @@ samp {
 .rl-race-row__arrow {
   grid-column: 3;
   grid-row: 1;
+  align-self: center;
   flex-shrink: 0;
   color: var(--c-border-m);
   font-size: 18px;
@@ -4659,6 +4690,7 @@ samp {
   font-size: 12px;
   line-height: 1.45;
   color: var(--c-text-3);
+  min-height: calc(1.45em * 2);
 }
 
 /* Hit summary — improved spacing */
@@ -5341,10 +5373,19 @@ img[loading="lazy"] {
 }
 
 .bt-hit-card__link {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   padding: 0.85rem 1rem;
   text-decoration: none;
   color: inherit;
+}
+
+.bt-hit-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .bt-hit-card__top {
@@ -5436,6 +5477,16 @@ img[loading="lazy"] {
   margin: 0 0 0.5rem;
   font-size: 0.82rem;
   opacity: 0.88;
+  min-height: 2.7em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.bt-hit-card__diagnosis[aria-hidden="true"] {
+  visibility: hidden;
 }
 
 .bt-hit-card__tickets {
@@ -5443,6 +5494,7 @@ img[loading="lazy"] {
   flex-wrap: wrap;
   gap: 0.35rem 0.5rem;
   font-size: 0.78rem;
+  margin-top: auto;
 }
 
 .bt-hit-card__ticket {
@@ -5634,6 +5686,18 @@ img[loading="lazy"] {
 .rl-race-list li > .rl-race-card-wrap {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-height: 100%;
+}
+
+/* 一覧内はカード種別・アクセントの有無で高さがずれないよう統一 */
+.rl-race-list .bt-hit-card::before {
+  flex-shrink: 0;
+}
+
+.rl-race-list .bt-hit-card--hit::before {
+  height: 3px;
 }
 
 :root[data-theme="dark"] .bt-hit-card--hit {
