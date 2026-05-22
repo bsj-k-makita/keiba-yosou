@@ -828,6 +828,9 @@ class Scraper:
             logger.warning("db_h_race_results not found: horse_id=%s", horse_id)
             return False
 
+        hr_col_map = self._resolve_hr_column_map(table)
+        idx = lambda key, fallback: hr_col_map.get(key, fallback)
+
         rows = []
         # th ヘッダー行以外の全 tr を処理（クラス名に依存しない）
         for tr in table.select("tbody tr, tr:not(:first-child)"):
@@ -836,66 +839,71 @@ class Scraper:
                 continue
             try:
                 # 日付
-                race_date_raw = tds[self.HR_DATE].get_text(strip=True)
+                race_date_raw = tds[idx("race_date", self.HR_DATE)].get_text(strip=True)
                 # コース文字列 "芝1600右" を分解
-                course_text = tds[self.HR_COURSE].get_text(strip=True) if len(tds) > self.HR_COURSE else ""
+                hr_course_idx = idx("course", self.HR_COURSE)
+                course_text = tds[hr_course_idx].get_text(strip=True) if len(tds) > hr_course_idx else ""
                 surface, distance, around = self._parse_course(course_text)
 
                 # 馬体重
-                bw_text = tds[self.HR_BODY_WEIGHT].get_text(strip=True) if len(tds) > self.HR_BODY_WEIGHT else ""
+                hr_bw_idx = idx("body_weight", self.HR_BODY_WEIGHT)
+                bw_text = tds[hr_bw_idx].get_text(strip=True) if len(tds) > hr_bw_idx else ""
                 body_weight, body_weight_diff = None, None
                 mw = re.match(r"(\d+)\(([+-]?\d+)\)", bw_text)
                 if mw:
                     body_weight = int(mw.group(1))
                     body_weight_diff = int(mw.group(2))
 
-                # 上がり3F
-                final_3f = self._to_float(
-                    tds[self.HR_FINAL_3F].get_text(strip=True)
-                ) if len(tds) > self.HR_FINAL_3F else None
+                # 上がり3F（列ズレ対策: ヘッダー解決 + 値域バリデーション）
+                hr_f3_idx = idx("final_3f", self.HR_FINAL_3F)
+                f3_text = tds[hr_f3_idx].get_text(strip=True) if len(tds) > hr_f3_idx else ""
+                final_3f = self._parse_final_3f(f3_text)
 
                 # 通過順位（コーナー通過順）
-                passage = tds[self.HR_PASSAGE].get_text(strip=True) if len(tds) > self.HR_PASSAGE else ""
+                hr_passage_idx = idx("passage", self.HR_PASSAGE)
+                passage = tds[hr_passage_idx].get_text(strip=True) if len(tds) > hr_passage_idx else ""
 
                 # 着順（数字以外は除外）
-                pos_text = tds[self.HR_FINISH_POS].get_text(strip=True)
+                hr_finish_idx = idx("finish_pos", self.HR_FINISH_POS)
+                pos_text = tds[hr_finish_idx].get_text(strip=True)
                 if not re.match(r"^\d{1,2}$", pos_text):
                     continue
                 finish_pos = int(pos_text)
 
                 # レースクラス（レース名から推定）
-                rname = tds[self.HR_RACE_NAME].get_text(strip=True) if len(tds) > self.HR_RACE_NAME else ""
+                hr_rname_idx = idx("race_name", self.HR_RACE_NAME)
+                rname = tds[hr_rname_idx].get_text(strip=True) if len(tds) > hr_rname_idx else ""
                 race_class = infer_race_class(rname)
 
                 rows.append({
                     "horse_id":        horse_id,
                     "race_date":       race_date_raw,
-                    "venue":           tds[self.HR_VENUE].get_text(strip=True) if len(tds) > self.HR_VENUE else "",
-                    "weather":         tds[self.HR_WEATHER].get_text(strip=True) if len(tds) > self.HR_WEATHER else "",
-                    "race_number":     self._to_int(tds[self.HR_RACE_NUM].get_text(strip=True)) if len(tds) > self.HR_RACE_NUM else None,
+                    "venue":           tds[idx("venue", self.HR_VENUE)].get_text(strip=True) if len(tds) > idx("venue", self.HR_VENUE) else "",
+                    "weather":         tds[idx("weather", self.HR_WEATHER)].get_text(strip=True) if len(tds) > idx("weather", self.HR_WEATHER) else "",
+                    "race_number":     self._to_int(tds[idx("race_number", self.HR_RACE_NUM)].get_text(strip=True)) if len(tds) > idx("race_number", self.HR_RACE_NUM) else None,
                     "race_name":       rname,
                     "surface":         surface,
                     "distance":        distance,
                     "around":          around,
-                    "ground_state":    tds[self.HR_GROUND].get_text(strip=True) if len(tds) > self.HR_GROUND else "",
-                    "horse_count":     self._to_int(tds[self.HR_HORSE_COUNT].get_text(strip=True)) if len(tds) > self.HR_HORSE_COUNT else None,
-                    "frame_number":    self._to_int(tds[self.HR_FRAME_NUM].get_text(strip=True)) if len(tds) > self.HR_FRAME_NUM else None,
-                    "horse_number":    self._to_int(tds[self.HR_HORSE_NUM].get_text(strip=True)) if len(tds) > self.HR_HORSE_NUM else None,
-                    "odds":            self._to_float(tds[self.HR_ODDS].get_text(strip=True)) if len(tds) > self.HR_ODDS else None,
-                    "popularity":      self._to_int(tds[self.HR_POPULARITY].get_text(strip=True)) if len(tds) > self.HR_POPULARITY else None,
+                    "ground_state":    tds[idx("ground_state", self.HR_GROUND)].get_text(strip=True) if len(tds) > idx("ground_state", self.HR_GROUND) else "",
+                    "horse_count":     self._to_int(tds[idx("horse_count", self.HR_HORSE_COUNT)].get_text(strip=True)) if len(tds) > idx("horse_count", self.HR_HORSE_COUNT) else None,
+                    "frame_number":    self._to_int(tds[idx("frame_number", self.HR_FRAME_NUM)].get_text(strip=True)) if len(tds) > idx("frame_number", self.HR_FRAME_NUM) else None,
+                    "horse_number":    self._to_int(tds[idx("horse_number", self.HR_HORSE_NUM)].get_text(strip=True)) if len(tds) > idx("horse_number", self.HR_HORSE_NUM) else None,
+                    "odds":            self._to_float(tds[idx("odds", self.HR_ODDS)].get_text(strip=True)) if len(tds) > idx("odds", self.HR_ODDS) else None,
+                    "popularity":      self._to_int(tds[idx("popularity", self.HR_POPULARITY)].get_text(strip=True)) if len(tds) > idx("popularity", self.HR_POPULARITY) else None,
                     "finish_pos":      finish_pos,
-                    "jockey_name":     tds[self.HR_JOCKEY].get_text(strip=True) if len(tds) > self.HR_JOCKEY else "",
-                    "weight_carried":  self._to_float(tds[self.HR_WEIGHT_CARR].get_text(strip=True)) if len(tds) > self.HR_WEIGHT_CARR else None,
-                    "finish_time":     tds[self.HR_FINISH_TIME].get_text(strip=True) if len(tds) > self.HR_FINISH_TIME else "",
-                    "margin":          tds[self.HR_MARGIN].get_text(strip=True) if len(tds) > self.HR_MARGIN else "",
-                    "pace":            tds[self.HR_PACE].get_text(strip=True) if len(tds) > self.HR_PACE else "",
+                    "jockey_name":     tds[idx("jockey", self.HR_JOCKEY)].get_text(strip=True) if len(tds) > idx("jockey", self.HR_JOCKEY) else "",
+                    "weight_carried":  self._to_float(tds[idx("weight_carried", self.HR_WEIGHT_CARR)].get_text(strip=True)) if len(tds) > idx("weight_carried", self.HR_WEIGHT_CARR) else None,
+                    "finish_time":     tds[idx("finish_time", self.HR_FINISH_TIME)].get_text(strip=True) if len(tds) > idx("finish_time", self.HR_FINISH_TIME) else "",
+                    "margin":          tds[idx("margin", self.HR_MARGIN)].get_text(strip=True) if len(tds) > idx("margin", self.HR_MARGIN) else "",
+                    "pace":            tds[idx("pace", self.HR_PACE)].get_text(strip=True) if len(tds) > idx("pace", self.HR_PACE) else "",
                     "final_3f":        final_3f,
                     "body_weight":     body_weight,
                     "body_weight_diff":body_weight_diff,
                     "passage_rank":    passage,
                     "prize":           self._to_float(
-                        tds[self.HR_PRIZE].get_text(strip=True).replace(",", "")
-                    ) if len(tds) > self.HR_PRIZE else None,
+                        tds[idx("prize", self.HR_PRIZE)].get_text(strip=True).replace(",", "")
+                    ) if len(tds) > idx("prize", self.HR_PRIZE) else None,
                     "race_class":      race_class,
                 })
             except Exception as e:
@@ -1107,6 +1115,98 @@ class Scraper:
     # ----------------------------------------------------------
     # ユーティリティ
     # ----------------------------------------------------------
+    @staticmethod
+    def _normalize_hr_header(text: str) -> str:
+        normalized = text.strip()
+        normalized = re.sub(r"\s+", "", normalized)
+        normalized = normalized.replace("　", "")
+        normalized = normalized.replace("（", "(").replace("）", ")")
+        return normalized
+
+    def _resolve_hr_column_map(self, table: BeautifulSoup) -> dict[str, int]:
+        """
+        馬過去成績テーブルのヘッダーから列インデックスを動的に解決する。
+        サイト側列ズレ時でも「上り」等を名前で取る。
+        """
+        col_map: dict[str, int] = {}
+        header_row = None
+        for tr in table.select("tr"):
+            ths = tr.select("th")
+            tds = tr.select("td")
+            if len(ths) >= 10 and len(tds) == 0:
+                header_row = tr
+                break
+        if header_row is None:
+            return col_map
+
+        headers = [self._normalize_hr_header(th.get_text(" ", strip=True)) for th in header_row.select("th")]
+        for i, h in enumerate(headers):
+            if "日付" in h:
+                col_map["race_date"] = i
+            elif "開催" in h:
+                col_map["venue"] = i
+            elif "天気" in h:
+                col_map["weather"] = i
+            elif h in {"R", "R数"} or h.endswith("R"):
+                col_map["race_number"] = i
+            elif "レース名" in h or "レース" == h:
+                col_map["race_name"] = i
+            elif "頭数" in h:
+                col_map["horse_count"] = i
+            elif "枠番" in h:
+                col_map["frame_number"] = i
+            elif "馬番" in h:
+                col_map["horse_number"] = i
+            elif "オッズ" in h or "単勝" in h:
+                col_map["odds"] = i
+            elif "人気" in h:
+                col_map["popularity"] = i
+            elif "着順" in h or h == "着":
+                col_map["finish_pos"] = i
+            elif "騎手" in h:
+                col_map["jockey"] = i
+            elif "斤量" in h:
+                col_map["weight_carried"] = i
+            elif "距離" in h:
+                col_map["course"] = i
+            elif "馬場" in h:
+                col_map["ground_state"] = i
+            elif "タイム" == h:
+                col_map["finish_time"] = i
+            elif "着差" in h:
+                col_map["margin"] = i
+            elif "ペース" in h:
+                col_map["pace"] = i
+            elif "上り" in h or "上がり" in h:
+                col_map["final_3f"] = i
+            elif "馬体重" in h:
+                col_map["body_weight"] = i
+            elif "通過" in h:
+                col_map["passage"] = i
+            elif "賞金" in h:
+                col_map["prize"] = i
+        return col_map
+
+    @staticmethod
+    def _parse_final_3f(text: str) -> float | None:
+        """
+        上り3Fは通常 "34.5" 形式。
+        列ズレで混入した整数指数（例: 99）を弾くため、厳格に判定する。
+        """
+        if not text:
+            return None
+        s = text.strip().replace("　", "").replace(" ", "").replace("．", ".")
+        m = re.search(r"(\d{2}\.\d)", s)
+        if not m:
+            return None
+        try:
+            v = float(m.group(1))
+        except ValueError:
+            return None
+        if v < 20.0 or v > 60.0:
+            return None
+        return v
+
     @staticmethod
     def _parse_course(text: str) -> tuple[str, int, str]:
         """

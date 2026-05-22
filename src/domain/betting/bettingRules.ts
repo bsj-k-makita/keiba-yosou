@@ -84,6 +84,7 @@ export const KELLY_MIN_BET_AMOUNT = 100;
 export const KELLY_MAX_BET_AMOUNT = 3_000;
 export const KELLY_BET_UNIT = 100;
 export const MAX_INVESTMENT_PER_RACE = 8_000;
+export const MAX_INVESTMENT_PER_RACE_ENV_KEY = "BETTING_MAX_INVESTMENT_PER_RACE";
 
 /** @deprecated REN_EV_THRESHOLD を使用 */
 export const PAIR_EV_THRESHOLD = REN_EV_THRESHOLD;
@@ -119,7 +120,7 @@ type AiScoredHorse = {
 export type RunningStyleGroup = "front" | "mid" | "back" | "other";
 export type RunningStyleDiversifyPattern = "A" | "B" | "C";
 
-const DEFAULT_RUNNING_STYLE_DIVERSIFY_PATTERN: RunningStyleDiversifyPattern = "A";
+const DEFAULT_RUNNING_STYLE_DIVERSIFY_PATTERN: RunningStyleDiversifyPattern = "B";
 
 export function resolveRunningStyleDiversifyPattern(
   envValue: string | undefined =
@@ -127,6 +128,18 @@ export function resolveRunningStyleDiversifyPattern(
 ): RunningStyleDiversifyPattern {
   if (envValue === "A" || envValue === "B" || envValue === "C") return envValue;
   return DEFAULT_RUNNING_STYLE_DIVERSIFY_PATTERN;
+}
+
+export function resolveMaxInvestmentPerRace(
+  envValue: string | undefined =
+    typeof process !== "undefined" ? process.env[MAX_INVESTMENT_PER_RACE_ENV_KEY] : undefined,
+): number {
+  if (envValue == null) return MAX_INVESTMENT_PER_RACE;
+  const parsed = Number(envValue);
+  if (!Number.isFinite(parsed) || parsed < KELLY_MIN_BET_AMOUNT) {
+    return MAX_INVESTMENT_PER_RACE;
+  }
+  return normalizeToBetUnit(parsed, KELLY_MIN_BET_AMOUNT, Number.MAX_SAFE_INTEGER, KELLY_BET_UNIT);
 }
 
 function sortPair(a: number, b: number): [number, number] {
@@ -254,21 +267,22 @@ function resolveKellyBetAmount(ticket: EvTicket, fallbackAmount: number): number
 
 function applyRaceInvestmentCap(amounts: readonly number[]): number[] {
   if (amounts.length === 0) return [];
+  const maxInvestmentPerRace = resolveMaxInvestmentPerRace();
   const normalized = amounts.map((a) =>
     normalizeToBetUnit(a, KELLY_MIN_BET_AMOUNT, KELLY_MAX_BET_AMOUNT, KELLY_BET_UNIT),
   );
   const total = normalized.reduce((s, a) => s + a, 0);
-  if (total <= MAX_INVESTMENT_PER_RACE) return normalized;
+  if (total <= maxInvestmentPerRace) return normalized;
 
   const minTotal = KELLY_MIN_BET_AMOUNT * normalized.length;
-  if (MAX_INVESTMENT_PER_RACE <= minTotal) {
+  if (maxInvestmentPerRace <= minTotal) {
     return normalized.map(() => KELLY_MIN_BET_AMOUNT);
   }
 
   const distributable = normalized.map((a) => a - KELLY_MIN_BET_AMOUNT);
   const distributableTotal = distributable.reduce((s, d) => s + d, 0);
   if (distributableTotal <= 0) return normalized;
-  const targetDistributable = MAX_INVESTMENT_PER_RACE - minTotal;
+  const targetDistributable = maxInvestmentPerRace - minTotal;
   const scale = targetDistributable / distributableTotal;
 
   const scaled = distributable.map((d) =>
@@ -282,7 +296,7 @@ function applyRaceInvestmentCap(amounts: readonly number[]): number[] {
 
   let capped = [...scaled];
   let cappedTotal = capped.reduce((s, a) => s + a, 0);
-  while (cappedTotal > MAX_INVESTMENT_PER_RACE) {
+  while (cappedTotal > maxInvestmentPerRace) {
     let idx = -1;
     let maxAmount = -1;
     for (let i = 0; i < capped.length; i += 1) {

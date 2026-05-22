@@ -43,6 +43,7 @@ from model import Model  # noqa: E402
 TS_RACES_DIR = REPO_ROOT / "src" / "data" / "races"
 INDEX_PATH = REPO_ROOT / "src" / "data" / "index.json"
 EV_MARGIN = 0.15
+EV_ODDS_CAP = 100.0
 
 
 @dataclass(frozen=True)
@@ -123,18 +124,32 @@ def compute_race_entry_predictions(
         prob = float(ai_win_rates[i])
         pred_by_horse[hn] = prob
         o = row.get("odds")
-        odds_by_horse[hn] = (
-            float(o) if o is not None and np.isfinite(o) and o > 0 else 0.0
-        )
+        if o is not None and np.isfinite(o) and o > 0:
+            odds_by_horse[hn] = float(o)
+            continue
+        # 特徴量に odds 列が残らない場合は log_odds から復元する。
+        # feature_engineer は log1p(odds) を保持するため expm1 で戻す。
+        lo = row.get("log_odds")
+        if lo is not None and np.isfinite(lo):
+            restored = float(np.expm1(lo))
+            odds_by_horse[hn] = restored if restored > 0 and np.isfinite(restored) else 0.0
+            continue
+        odds_by_horse[hn] = 0.0
 
     return pred_by_horse, odds_by_horse
 
 
-def effective_ev_from_prob(prob: float, odds: float, margin: float = EV_MARGIN) -> float:
-    """実質 EV = P × O - margin（オッズ欠損時は -margin）。"""
+def effective_ev_from_prob(
+    prob: float,
+    odds: float,
+    margin: float = EV_MARGIN,
+    odds_cap: float = EV_ODDS_CAP,
+) -> float:
+    """実質 EV = P × min(O, cap) - margin（オッズ欠損時は -margin）。"""
     if odds <= 0 or not np.isfinite(odds):
         return -margin
-    return prob * odds - margin
+    effective_odds = min(float(odds), float(odds_cap)) if odds_cap > 0 else float(odds)
+    return prob * effective_odds - margin
 
 
 def backfill_one_race(

@@ -68,7 +68,7 @@ export function runRaceEvaluationPipeline(
 
   let results: HorseScoreResult[] =
     probabilityEngine === "ai"
-      ? applyAiMarksByEffectiveEv(tsMarked, horses)
+      ? applyAiMarksByEffectiveEv(tsMarked, horses, condition)
       : tsMarked;
 
   if (
@@ -76,7 +76,7 @@ export function runRaceEvaluationPipeline(
     raceHasFullAiBackfill(horses) &&
     !results.some((r) => r.mark === "◎")
   ) {
-    results = applyAiMarksByEffectiveEv(tsMarked, horses);
+    results = applyAiMarksByEffectiveEv(tsMarked, horses, condition);
   }
 
   const mathFirst = mathFirstByFinalRank(results);

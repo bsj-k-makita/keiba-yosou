@@ -1,27 +1,38 @@
 {
   "raceId": "202604010811",
-  "meta": {
+  "raceInfo": {
+    "raceId": "202604010811",
     "date": "2026-05-24",
     "venue": "新潟",
     "raceNumber": 11,
     "raceName": "韋駄天S",
     "surface": "芝",
     "distance": 1000,
-    "groundLabel": null,
-    "weather": null,
     "netkeibaGradeType": 5
+  },
+  "condition": {
+    "meetingDate": "2026-05-24",
+    "venue": "新潟",
+    "raceName": "韋駄天S",
+    "netkeibaGradeType": 5,
+    "surface": "芝",
+    "distance": 1000,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle"
   },
   "entries": [
     {
       "horseId": "2017100583",
       "horseName": "ディヴィナシオン",
-      "frameNumber": 1,
       "horseNumber": 1,
+      "frameNumber": 1,
+      "jockey": "丸山",
+      "trainer": "森秀",
       "sex": "牡",
       "age": 9,
-      "jockey": "菅原明",
-      "trainer": "森秀",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "好位",
       "abilities": {
         "speed": 74.9,
@@ -30,9 +41,82 @@
         "sustain": 51,
         "power": 56
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "A",
+        "kick": "A",
+        "sustain": "A",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 68.6,
+        "adjustedScore": 58.6,
+        "scoreDiff": -10,
+        "baseAbilityCore": 65.6,
+        "intrinsicAbilityScore": 82,
+        "raceAdjustedInput": 73.5,
+        "conditionFitDelta": -23.4,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 1,
+        "raceRelativeScore": 44.1,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 4,
+        "classLevelBonus": 1.2,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0.1,
+        "connectionsBonus": 0,
+        "trendBonus": -1,
+        "paceBalanceBonus": -0.9,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 36.1,
+        "evaluationBaselineScore": 38.1,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 13.5,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.5,
+        "adjustmentBadges": [
+          "ラップ適合"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 14.2,
+        "roleHint": "軸",
+        "pastRunInsight": "直近3走・大敗1回(好走1回あり) · 2桁着順3回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 9.4
+      },
+      "investment": {
+        "predictedProbability": 0.11,
+        "predictedWinRate": 0.0061,
+        "finalExpectedValue": -0.14,
+        "actualOdds": 9.4,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "末脚性能",
+          "先行力"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.9358,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.75,
       "pastRuns": [
         {
           "date": "2026-01-17",
@@ -145,48 +229,20 @@
           "final3fSec": 33.6
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 0.9358,
-      "l2_sustain_ratio": 0.75,
-      "pace_mismatch": false,
       "position_x": 66,
-      "predicted_win_rate": 0.0061,
-      "ability_index": 83.5,
-      "suitability_flags": [],
-      "final_expected_value": -0.14,
-      "predicted_probability": 0.11,
-      "estimated_actual_odds": 3.57,
-      "odds_source": "estimated",
-      "market_popularity": 9,
-      "market_win_odds": 9.4,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "末脚性能",
-        "先行力"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0742,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 83.5,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2018103205",
       "horseName": "クムシラコ",
-      "frameNumber": 1,
       "horseNumber": 2,
+      "frameNumber": 1,
+      "jockey": "黛",
+      "trainer": "千葉",
       "sex": "牡",
       "age": 8,
-      "jockey": "嶋田",
-      "trainer": "千葉",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "好位",
       "abilities": {
         "speed": 84.3,
@@ -195,9 +251,82 @@
         "sustain": 58.2,
         "power": 63.7
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "A+",
+        "kick": "S",
+        "sustain": "A+",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 78.1,
+        "adjustedScore": 66.9,
+        "scoreDiff": -11.3,
+        "baseAbilityCore": 75.5,
+        "intrinsicAbilityScore": 76.5,
+        "raceAdjustedInput": 84,
+        "conditionFitDelta": -9.6,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 2,
+        "raceRelativeScore": 51.5,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 4,
+        "classLevelBonus": 1.4,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0.1,
+        "connectionsBonus": 0,
+        "trendBonus": -1,
+        "paceBalanceBonus": -1.4,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 43.5,
+        "evaluationBaselineScore": 45.5,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 13.4,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.4,
+        "adjustmentBadges": [
+          "ラップ適合"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 3.7,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順4回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 5.25
+      },
+      "investment": {
+        "predictedProbability": 0.27,
+        "predictedWinRate": 0.0787,
+        "finalExpectedValue": 0.21,
+        "actualOdds": 5.25,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "B",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "末脚性能",
+          "先行力"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 1,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.6563,
       "pastRuns": [
         {
           "date": "2026-04-26",
@@ -308,48 +437,20 @@
           "final3fSec": 34.6
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 1,
-      "l2_sustain_ratio": 0.6563,
-      "pace_mismatch": false,
       "position_x": 66,
-      "predicted_win_rate": 0.0787,
-      "ability_index": 92.6,
-      "suitability_flags": [],
-      "final_expected_value": 0.21,
-      "predicted_probability": 0.27,
-      "estimated_actual_odds": 2,
-      "odds_source": "estimated",
-      "market_popularity": 5,
-      "market_win_odds": 5.25,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "B",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "末脚性能",
-        "先行力"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 92.6,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2019103422",
       "horseName": "テイエムスパーダ",
-      "frameNumber": 2,
       "horseNumber": 3,
+      "frameNumber": 2,
+      "jockey": "荻野極",
+      "trainer": "小椋",
       "sex": "牝",
       "age": 7,
-      "jockey": "斎藤",
-      "trainer": "小椋",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 96.3,
@@ -358,9 +459,83 @@
         "sustain": 66.6,
         "power": 73.2
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "S",
+        "kick": "S",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 87.5,
+        "adjustedScore": 75.8,
+        "scoreDiff": -11.8,
+        "baseAbilityCore": 82.8,
+        "intrinsicAbilityScore": 96.7,
+        "raceAdjustedInput": 109.4,
+        "conditionFitDelta": -20.9,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 2,
+        "raceRelativeScore": 69.3,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 4,
+        "classLevelBonus": 2,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0.2,
+        "connectionsBonus": 0,
+        "trendBonus": -1,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 61.3,
+        "evaluationBaselineScore": 63.3,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 13.4,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.4,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 31.7,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗2回(好走3回あり) · 2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "対抗"
+      },
+      "evaluationSignals": {
+        "winOdds": 1.79
+      },
+      "investment": {
+        "predictedProbability": 0.42,
+        "predictedWinRate": 0.1468,
+        "finalExpectedValue": 0.06,
+        "actualOdds": 1.79,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "A",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 1,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.5,
       "pastRuns": [
         {
           "date": "2026-03-15",
@@ -470,48 +645,20 @@
           "final3fSec": 32.1
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 1,
-      "l2_sustain_ratio": 0.5,
-      "pace_mismatch": false,
       "position_x": 23,
-      "predicted_win_rate": 0.1468,
-      "ability_index": 94.8,
-      "suitability_flags": [],
-      "final_expected_value": 0.06,
-      "predicted_probability": 0.42,
-      "estimated_actual_odds": 1.1,
-      "odds_source": "estimated",
-      "market_popularity": 1,
-      "market_win_odds": 1.79,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "A",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 94.8,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2019104385",
       "horseName": "カンパニョーラ",
-      "frameNumber": 2,
       "horseNumber": 4,
-      "sex": "牝",
-      "age": 7,
+      "frameNumber": 2,
       "jockey": "嶋田",
       "trainer": "伊坂",
-      "weight": 57,
+      "sex": "牝",
+      "age": 7,
+      "pedigree": {},
       "runningStyle": "好位",
       "abilities": {
         "speed": 86.8,
@@ -520,9 +667,83 @@
         "sustain": 59.7,
         "power": 65.4
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "A+",
+        "kick": "A+",
+        "sustain": "A+",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 78.9,
+        "adjustedScore": 68,
+        "scoreDiff": -10.9,
+        "baseAbilityCore": 74.7,
+        "intrinsicAbilityScore": 78,
+        "raceAdjustedInput": 87.6,
+        "conditionFitDelta": -10,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 54,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 4,
+        "classLevelBonus": 1.7,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0.1,
+        "connectionsBonus": 0,
+        "trendBonus": -1,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 46,
+        "evaluationBaselineScore": 48,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 13.3,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.3,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 14.2,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 6.24
+      },
+      "investment": {
+        "predictedProbability": 0.13,
+        "predictedWinRate": 0.0123,
+        "finalExpectedValue": -0.12,
+        "actualOdds": 6.24,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.7983,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.6563,
       "pastRuns": [
         {
           "date": "2026-03-22",
@@ -637,48 +858,20 @@
           "final3fSec": 35.2
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 0.7983,
-      "l2_sustain_ratio": 0.6563,
-      "pace_mismatch": false,
       "position_x": 92,
-      "predicted_win_rate": 0.0123,
-      "ability_index": 86,
-      "suitability_flags": [],
-      "final_expected_value": -0.12,
-      "predicted_probability": 0.13,
-      "estimated_actual_odds": 2.37,
-      "odds_source": "estimated",
-      "market_popularity": 6,
-      "market_win_odds": 6.24,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 86,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2019106179",
       "horseName": "ハートホイップ",
-      "frameNumber": 3,
       "horseNumber": 5,
+      "frameNumber": 3,
+      "jockey": "石田",
+      "trainer": "蛯名利",
       "sex": "牝",
       "age": 7,
-      "jockey": "石川",
-      "trainer": "蛯名利",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "先行",
       "abilities": {
         "speed": 71.9,
@@ -687,9 +880,83 @@
         "sustain": 48.4,
         "power": 53.3
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "B",
+        "kick": "B",
+        "sustain": "B",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 65.1,
+        "adjustedScore": 55.6,
+        "scoreDiff": -9.4,
+        "baseAbilityCore": 61.5,
+        "intrinsicAbilityScore": 64,
+        "raceAdjustedInput": 65.8,
+        "conditionFitDelta": -8.4,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 38.7,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 2.1,
+        "classLevelBonus": 0.8,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0.1,
+        "connectionsBonus": 0,
+        "trendBonus": -1,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 30.7,
+        "evaluationBaselineScore": 32.7,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 12.9,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 12.9,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 20.3,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走3回あり) · 2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 13.96
+      },
+      "investment": {
+        "predictedProbability": 0.1,
+        "predictedWinRate": 0.0005,
+        "finalExpectedValue": -0.19,
+        "actualOdds": 13.96,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.7647,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.6875,
       "pastRuns": [
         {
           "date": "2026-05-09",
@@ -801,48 +1068,20 @@
           "final3fSec": 34.7
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 0.7647,
-      "l2_sustain_ratio": 0.6875,
-      "pace_mismatch": false,
       "position_x": 70,
-      "predicted_win_rate": 0.0005,
-      "ability_index": 74.3,
-      "suitability_flags": [],
-      "final_expected_value": -0.19,
-      "predicted_probability": 0.1,
-      "estimated_actual_odds": 5.3,
-      "odds_source": "estimated",
-      "market_popularity": 13,
-      "market_win_odds": 13.96,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 74.3,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2019110102",
       "horseName": "デュガ",
-      "frameNumber": 3,
       "horseNumber": 6,
-      "sex": "セ",
-      "age": 7,
+      "frameNumber": 3,
       "jockey": "江田照",
       "trainer": "森秀",
-      "weight": 57,
+      "sex": "セ",
+      "age": 7,
+      "pedigree": {},
       "runningStyle": "先行",
       "abilities": {
         "speed": 93.8,
@@ -851,9 +1090,83 @@
         "sustain": 63.9,
         "power": 70.3
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "S",
+        "kick": "S",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 85.3,
+        "adjustedScore": 73.2,
+        "scoreDiff": -12.1,
+        "baseAbilityCore": 80.9,
+        "intrinsicAbilityScore": 96.9,
+        "raceAdjustedInput": 108.3,
+        "conditionFitDelta": -23.7,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 68.5,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 4,
+        "classLevelBonus": 2.2,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0.1,
+        "connectionsBonus": 0,
+        "trendBonus": -1,
+        "paceBalanceBonus": -1.9,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 60.5,
+        "evaluationBaselineScore": 62.5,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 13.4,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.4,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 7.2,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "単穴"
+      },
+      "evaluationSignals": {
+        "winOdds": 3.4
+      },
+      "investment": {
+        "predictedProbability": 0.26,
+        "predictedWinRate": 0.0715,
+        "finalExpectedValue": 0.04,
+        "actualOdds": 3.4,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "B",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 1,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.4375,
       "pastRuns": [
         {
           "date": "2026-04-12",
@@ -966,48 +1279,20 @@
           "final3fSec": 31.8
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 1,
-      "l2_sustain_ratio": 0.4375,
-      "pace_mismatch": false,
       "position_x": 15,
-      "predicted_win_rate": 0.0715,
-      "ability_index": 92.2,
-      "suitability_flags": [],
-      "final_expected_value": 0.04,
-      "predicted_probability": 0.26,
-      "estimated_actual_odds": 1.29,
-      "odds_source": "estimated",
-      "market_popularity": 3,
-      "market_win_odds": 3.4,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "B",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 92.2,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2020101262",
       "horseName": "エコロレジーナ",
-      "frameNumber": 4,
       "horseNumber": 7,
+      "frameNumber": 4,
+      "jockey": "菊沢",
+      "trainer": "菊沢",
       "sex": "牝",
       "age": 6,
-      "jockey": "横山典",
-      "trainer": "菊沢",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "追込",
       "abilities": {
         "speed": 85.4,
@@ -1016,9 +1301,83 @@
         "sustain": 58.9,
         "power": 64.5
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "A+",
+        "kick": "A+",
+        "sustain": "A+",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 77.7,
+        "adjustedScore": 66.5,
+        "scoreDiff": -11.2,
+        "baseAbilityCore": 73.6,
+        "intrinsicAbilityScore": 88,
+        "raceAdjustedInput": 87,
+        "conditionFitDelta": -21.5,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 1,
+        "raceRelativeScore": 53.6,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 4,
+        "classLevelBonus": 1.7,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -0.4,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 48.5,
+        "evaluationBaselineScore": 47.6,
+        "evaluationAdjustmentDelta": 0.9,
+        "lastMinuteAdjustmentBonus": 13.4,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.4,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 3.9,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順3回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "△",
+        "buyLabel": "相手"
+      },
+      "evaluationSignals": {
+        "winOdds": 7.27
+      },
+      "investment": {
+        "predictedProbability": 0.11,
+        "predictedWinRate": 0.0065,
+        "finalExpectedValue": -0.15,
+        "actualOdds": 7.27,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 1,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.5,
       "pastRuns": [
         {
           "date": "2026-04-12",
@@ -1130,48 +1489,20 @@
           "final3fSec": 32.6
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 1,
-      "l2_sustain_ratio": 0.5,
-      "pace_mismatch": false,
       "position_x": 76,
-      "predicted_win_rate": 0.0065,
-      "ability_index": 86.9,
-      "suitability_flags": [],
-      "final_expected_value": -0.15,
-      "predicted_probability": 0.11,
-      "estimated_actual_odds": 2.76,
-      "odds_source": "estimated",
-      "market_popularity": 7,
-      "market_win_odds": 7.27,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 86.9,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2020104613",
       "horseName": "タツダイヤモンド",
-      "frameNumber": 4,
       "horseNumber": 8,
+      "frameNumber": 4,
+      "jockey": "丸田",
+      "trainer": "的場",
       "sex": "牡",
       "age": 6,
-      "jockey": "長浜",
-      "trainer": "的場",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "追込",
       "abilities": {
         "speed": 64.2,
@@ -1180,9 +1511,82 @@
         "sustain": 44.5,
         "power": 48.6
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "C",
+        "stamina": "C",
+        "kick": "A+",
+        "sustain": "C",
+        "power": "C"
+      },
+      "evaluation": {
+        "baseScore": 61,
+        "adjustedScore": 51.3,
+        "scoreDiff": -9.7,
+        "baseAbilityCore": 60.5,
+        "intrinsicAbilityScore": 55.8,
+        "raceAdjustedInput": 59.7,
+        "conditionFitDelta": -4.5,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 6,
+        "raceRelativeScore": 34.4,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 2,
+        "classLevelBonus": 0.3,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 26.4,
+        "evaluationBaselineScore": 28.4,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 13.4,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.4,
+        "adjustmentBadges": [
+          "ラップ適合"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 8.3,
+        "roleHint": "軸",
+        "pastRunInsight": "直近3走・大敗2回 · 2桁着順5回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 12.79
+      },
+      "investment": {
+        "predictedProbability": 0.1,
+        "predictedWinRate": 0.0007,
+        "finalExpectedValue": -0.19,
+        "actualOdds": 12.79,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "末脚性能",
+          "先行力"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 1,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.5625,
       "pastRuns": [
         {
           "date": "2026-05-09",
@@ -1293,48 +1697,20 @@
           "final3fSec": 34.9
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 1,
-      "l2_sustain_ratio": 0.5625,
-      "pace_mismatch": false,
       "position_x": 34,
-      "predicted_win_rate": 0.0007,
-      "ability_index": 78.8,
-      "suitability_flags": [],
-      "final_expected_value": -0.19,
-      "predicted_probability": 0.1,
-      "estimated_actual_odds": 4.86,
-      "odds_source": "estimated",
-      "market_popularity": 12,
-      "market_win_odds": 12.79,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "末脚性能",
-        "先行力"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 78.8,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2020106015",
       "horseName": "バグラダス",
-      "frameNumber": 5,
       "horseNumber": 9,
+      "frameNumber": 5,
+      "jockey": "杉原",
+      "trainer": "嘉藤",
       "sex": "牡",
       "age": 6,
-      "jockey": "岩田望",
-      "trainer": "嘉藤",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "差し",
       "abilities": {
         "speed": 71.8,
@@ -1343,9 +1719,83 @@
         "sustain": 49,
         "power": 53.8
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "B",
+        "kick": "A+",
+        "sustain": "B",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 66.7,
+        "adjustedScore": 56.3,
+        "scoreDiff": -10.4,
+        "baseAbilityCore": 64.8,
+        "intrinsicAbilityScore": 81.1,
+        "raceAdjustedInput": 70.6,
+        "conditionFitDelta": -24.8,
+        "reproducibilityDelta": 0.1,
+        "riskPenalty": 0,
+        "raceRelativeScore": 42,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 4,
+        "classLevelBonus": 1.2,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 34,
+        "evaluationBaselineScore": 36,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 13.3,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.3,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 25.9,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走2回あり) · 2桁着順2回/5走 · 展開一貫性52%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 10.51
+      },
+      "investment": {
+        "predictedProbability": 0.11,
+        "predictedWinRate": 0.0051,
+        "finalExpectedValue": -0.15,
+        "actualOdds": 10.51,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "末脚性能",
+          "先行力"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 1,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.8125,
       "pastRuns": [
         {
           "date": "2026-04-04",
@@ -1459,48 +1909,20 @@
           "final3fSec": 35.7
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 1,
-      "l2_sustain_ratio": 0.8125,
-      "pace_mismatch": false,
       "position_x": 77,
-      "predicted_win_rate": 0.0051,
-      "ability_index": 86.1,
-      "suitability_flags": [],
-      "final_expected_value": -0.15,
-      "predicted_probability": 0.11,
-      "estimated_actual_odds": 3.99,
-      "odds_source": "estimated",
-      "market_popularity": 10,
-      "market_win_odds": 10.51,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "末脚性能",
-        "先行力"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 86.1,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2020109094",
       "horseName": "ナスノカンゲツ",
-      "frameNumber": 5,
       "horseNumber": 10,
+      "frameNumber": 5,
+      "jockey": "小崎",
+      "trainer": "武井",
       "sex": "牡",
       "age": 6,
-      "jockey": "国分恭",
-      "trainer": "武井",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "好位",
       "abilities": {
         "speed": 67.2,
@@ -1509,9 +1931,83 @@
         "sustain": 45.7,
         "power": 50.2
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "B",
+        "kick": "B",
+        "sustain": "B",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 60.7,
+        "adjustedScore": 52.2,
+        "scoreDiff": -8.5,
+        "baseAbilityCore": 57.2,
+        "intrinsicAbilityScore": 57.9,
+        "raceAdjustedInput": 60.5,
+        "conditionFitDelta": -5.7,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 34.9,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 3.8,
+        "classLevelBonus": 0.9,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 26.9,
+        "evaluationBaselineScore": 28.9,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 6.3,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 6.3,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 18.3,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 18.8
+      },
+      "investment": {
+        "predictedProbability": 0.1,
+        "predictedWinRate": 0,
+        "finalExpectedValue": -0.2,
+        "actualOdds": 18.8,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.4751,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.8125,
       "pastRuns": [
         {
           "date": "2026-04-19",
@@ -1624,48 +2120,20 @@
           "final3fSec": 36.9
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 0.4751,
-      "l2_sustain_ratio": 0.8125,
-      "pace_mismatch": false,
       "position_x": 48,
-      "predicted_win_rate": 0,
-      "ability_index": 65.9,
-      "suitability_flags": [],
-      "final_expected_value": -0.2,
-      "predicted_probability": 0.1,
-      "estimated_actual_odds": 7.14,
-      "odds_source": "estimated",
-      "market_popularity": 17,
-      "market_win_odds": 18.8,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0742,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 65.9,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021102413",
       "horseName": "シークレットヴァウ",
-      "frameNumber": 6,
       "horseNumber": 11,
-      "sex": "牡",
-      "age": 5,
+      "frameNumber": 6,
       "jockey": "武藤",
       "trainer": "武藤",
-      "weight": 57,
+      "sex": "牡",
+      "age": 5,
+      "pedigree": {},
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 78.9,
@@ -1674,8 +2142,83 @@
         "sustain": 53.3,
         "power": 58.7
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "A",
+        "kick": "C",
+        "sustain": "A",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 68.9,
+        "adjustedScore": 60.1,
+        "scoreDiff": -8.8,
+        "baseAbilityCore": 62.7,
+        "intrinsicAbilityScore": 74.9,
+        "raceAdjustedInput": 84.7,
+        "conditionFitDelta": -14.8,
+        "reproducibilityDelta": 0.1,
+        "riskPenalty": 3,
+        "raceRelativeScore": 51.9,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 3.6,
+        "classLevelBonus": 1.2,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": -0.1,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 43.9,
+        "evaluationBaselineScore": 45.9,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 1.9,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 1.9,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "一貫型",
+        "varianceScore": 24.8,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗2回(好走2回あり) · 2桁着順3回/5走 · 展開一貫性52%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 17.57
+      },
+      "investment": {
+        "predictedProbability": 0.1,
+        "predictedWinRate": 0,
+        "finalExpectedValue": -0.2,
+        "actualOdds": 17.57,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "馬場対応力"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.1784,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.875,
       "pastRuns": [
         {
           "date": "2026-03-22",
@@ -1789,49 +2332,20 @@
           "final3fSec": 36.9
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 0.1784,
-      "l2_sustain_ratio": 0.875,
-      "pace_mismatch": false,
       "position_x": 18,
-      "running_style_source": "pack_position_x",
-      "predicted_win_rate": 0,
-      "ability_index": 62.7,
-      "suitability_flags": [],
-      "final_expected_value": -0.2,
-      "predicted_probability": 0.1,
-      "estimated_actual_odds": 6.68,
-      "odds_source": "estimated",
-      "market_popularity": 16,
-      "market_win_odds": 17.57,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "馬場対応力"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 62.7,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021103095",
       "horseName": "オーブルクール",
-      "frameNumber": 6,
       "horseNumber": 12,
+      "frameNumber": 6,
+      "jockey": "丹内",
+      "trainer": "矢野",
       "sex": "牝",
       "age": 5,
-      "jockey": "原",
-      "trainer": "矢野",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 78.6,
@@ -1840,8 +2354,83 @@
         "sustain": 53.1,
         "power": 58.5
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "A",
+        "kick": "B",
+        "sustain": "A",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 68.9,
+        "adjustedScore": 60,
+        "scoreDiff": -8.9,
+        "baseAbilityCore": 62.8,
+        "intrinsicAbilityScore": 78.1,
+        "raceAdjustedInput": 83.5,
+        "conditionFitDelta": -18.1,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 2,
+        "raceRelativeScore": 51.1,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 3.8,
+        "classLevelBonus": 1.3,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": -0.1,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 43.1,
+        "evaluationBaselineScore": 45.1,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 3.8,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 3.8,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "一貫型",
+        "varianceScore": 32,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗2回(好走3回あり) · 2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 16.35
+      },
+      "investment": {
+        "predictedProbability": 0.1,
+        "predictedWinRate": 0,
+        "finalExpectedValue": -0.2,
+        "actualOdds": 16.35,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.3534,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.5625,
       "pastRuns": [
         {
           "date": "2026-04-25",
@@ -1954,49 +2543,20 @@
           "final3fSec": 36.5
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 0.3534,
-      "l2_sustain_ratio": 0.5625,
-      "pace_mismatch": false,
       "position_x": 0,
-      "running_style_source": "pack_position_x",
-      "predicted_win_rate": 0,
-      "ability_index": 61.8,
-      "suitability_flags": [],
-      "final_expected_value": -0.2,
-      "predicted_probability": 0.1,
-      "estimated_actual_odds": 6.21,
-      "odds_source": "estimated",
-      "market_popularity": 15,
-      "market_win_odds": 16.35,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 61.8,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2021103725",
       "horseName": "テイエムリステット",
-      "frameNumber": 7,
       "horseNumber": 13,
+      "frameNumber": 7,
+      "jockey": "川須",
+      "trainer": "秋山",
       "sex": "牡",
       "age": 5,
-      "jockey": "荻野琢",
-      "trainer": "秋山",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "先行",
       "abilities": {
         "speed": 87.9,
@@ -2005,9 +2565,82 @@
         "sustain": 60.4,
         "power": 66.2
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "S",
+        "kick": "S",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 80.9,
+        "adjustedScore": 69.3,
+        "scoreDiff": -11.6,
+        "baseAbilityCore": 77.6,
+        "intrinsicAbilityScore": 91.8,
+        "raceAdjustedInput": 89.6,
+        "conditionFitDelta": -22.5,
+        "reproducibilityDelta": 0.1,
+        "riskPenalty": 1,
+        "raceRelativeScore": 55.4,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 3.5,
+        "classLevelBonus": 1.3,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": -0.2,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -1.9,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 47.4,
+        "evaluationBaselineScore": 49.4,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 13.3,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.3,
+        "adjustmentBadges": [
+          "ラップ適合"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 18.5,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順3回/5走 · 展開一貫性52%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "相手"
+      },
+      "evaluationSignals": {
+        "winOdds": 4.3
+      },
+      "investment": {
+        "predictedProbability": 0.85,
+        "predictedWinRate": 0.6403,
+        "finalExpectedValue": 2.55,
+        "actualOdds": 4.3,
+        "oddsSource": "estimated",
+        "valueRank": "C",
+        "confidenceRank": "S",
+        "betType": "軸",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "末脚性能",
+          "先行力"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0.13
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 1,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 1,
       "pastRuns": [
         {
           "date": "2026-04-26",
@@ -2123,48 +2756,20 @@
           "final3fSec": 32.9
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 1,
-      "l2_sustain_ratio": 1,
-      "pace_mismatch": false,
       "position_x": 26,
-      "predicted_win_rate": 0.6403,
-      "ability_index": 100,
-      "suitability_flags": [],
-      "final_expected_value": 2.55,
-      "predicted_probability": 0.85,
-      "estimated_actual_odds": 1.63,
-      "odds_source": "estimated",
-      "market_popularity": 4,
-      "market_win_odds": 4.3,
-      "value_rank": "C",
-      "kelly_weight": 0.13,
-      "confidence_rank": "S",
-      "bet_type": "軸",
-      "value_change": "STABLE",
-      "key_factors": [
-        "末脚性能",
-        "先行力"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 100,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2022100490",
       "horseName": "モズナナスター",
-      "frameNumber": 7,
       "horseNumber": 14,
+      "frameNumber": 7,
+      "jockey": "○○",
+      "trainer": "矢作",
       "sex": "牝",
       "age": 4,
-      "jockey": "柴田大",
-      "trainer": "矢作",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "好位",
       "abilities": {
         "speed": 80.6,
@@ -2173,9 +2778,83 @@
         "sustain": 54.3,
         "power": 59.9
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "A+",
+        "stamina": "A+",
+        "kick": "A",
+        "sustain": "A+",
+        "power": "A+"
+      },
+      "evaluation": {
+        "baseScore": 73,
+        "adjustedScore": 62.4,
+        "scoreDiff": -10.6,
+        "baseAbilityCore": 69,
+        "intrinsicAbilityScore": 86.4,
+        "raceAdjustedInput": 78.7,
+        "conditionFitDelta": -24,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 47.7,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 4,
+        "classLevelBonus": 1.6,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": -0.1,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -0.5,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 43,
+        "evaluationBaselineScore": 41.7,
+        "evaluationAdjustmentDelta": 1.3,
+        "lastMinuteAdjustmentBonus": 13.4,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.4,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 9,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 8.32
+      },
+      "investment": {
+        "predictedProbability": 0.13,
+        "predictedWinRate": 0.0131,
+        "finalExpectedValue": -0.09,
+        "actualOdds": 8.32,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 1,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.6875,
       "pastRuns": [
         {
           "date": "2026-04-26",
@@ -2289,48 +2968,20 @@
           "final3fSec": 33.9
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 1,
-      "l2_sustain_ratio": 0.6875,
-      "pace_mismatch": false,
       "position_x": 65,
-      "predicted_win_rate": 0.0131,
-      "ability_index": 86.2,
-      "suitability_flags": [],
-      "final_expected_value": -0.09,
-      "predicted_probability": 0.13,
-      "estimated_actual_odds": 3.16,
-      "odds_source": "estimated",
-      "market_popularity": 8,
-      "market_win_odds": 8.32,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 86.2,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2022102514",
       "horseName": "ベイビーキッス",
-      "frameNumber": 8,
       "horseNumber": 15,
+      "frameNumber": 8,
+      "jockey": "横山琉",
+      "trainer": "青木",
       "sex": "牝",
       "age": 4,
-      "jockey": "菊沢",
-      "trainer": "青木",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "追込",
       "abilities": {
         "speed": 71.3,
@@ -2339,9 +2990,83 @@
         "sustain": 48,
         "power": 52.9
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "B",
+        "stamina": "B",
+        "kick": "B",
+        "sustain": "B",
+        "power": "B"
+      },
+      "evaluation": {
+        "baseScore": 64.6,
+        "adjustedScore": 54.8,
+        "scoreDiff": -9.9,
+        "baseAbilityCore": 61.2,
+        "intrinsicAbilityScore": 63.8,
+        "raceAdjustedInput": 65.5,
+        "conditionFitDelta": -9,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 38.4,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 2.2,
+        "classLevelBonus": 0.9,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0.2,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 33.2,
+        "evaluationBaselineScore": 32.4,
+        "evaluationAdjustmentDelta": 0.8,
+        "lastMinuteAdjustmentBonus": 12.9,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 12.9,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 14.5,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順2回/5走 · 展開一貫性72%相当",
+        "fitLevel": "高",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 15.14
+      },
+      "investment": {
+        "predictedProbability": 0.1,
+        "predictedWinRate": 0.0001,
+        "finalExpectedValue": -0.2,
+        "actualOdds": 15.14,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.7647,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.6563,
       "pastRuns": [
         {
           "date": "2026-05-09",
@@ -2453,48 +3178,20 @@
           "final3fSec": 35.7
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 0.7647,
-      "l2_sustain_ratio": 0.6563,
-      "pace_mismatch": false,
       "position_x": 43,
-      "predicted_win_rate": 0.0001,
-      "ability_index": 73.5,
-      "suitability_flags": [],
-      "final_expected_value": -0.2,
-      "predicted_probability": 0.1,
-      "estimated_actual_odds": 5.75,
-      "odds_source": "estimated",
-      "market_popularity": 14,
-      "market_win_odds": 15.14,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 73.5,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2022103324",
       "horseName": "シュラフ",
-      "frameNumber": 8,
       "horseNumber": 16,
-      "sex": "牝",
-      "age": 4,
+      "frameNumber": 8,
       "jockey": "嶋田",
       "trainer": "佐藤吉",
-      "weight": 57,
+      "sex": "牝",
+      "age": 4,
+      "pedigree": {},
       "runningStyle": "追込",
       "abilities": {
         "speed": 74,
@@ -2503,9 +3200,83 @@
         "sustain": 49.7,
         "power": 54.8
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "A",
+        "stamina": "A",
+        "kick": "A",
+        "sustain": "A",
+        "power": "A"
+      },
+      "evaluation": {
+        "baseScore": 67,
+        "adjustedScore": 56.7,
+        "scoreDiff": -10.2,
+        "baseAbilityCore": 63.3,
+        "intrinsicAbilityScore": 66.4,
+        "raceAdjustedInput": 68,
+        "conditionFitDelta": -9.7,
+        "reproducibilityDelta": 0.9,
+        "riskPenalty": 0,
+        "raceRelativeScore": 40.2,
+        "paceFitBonus": 1.6,
+        "distanceFitBonus": 2.5,
+        "classLevelBonus": 0.7,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": 0.2,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 35.7,
+        "evaluationBaselineScore": 34.2,
+        "evaluationAdjustmentDelta": 1.5,
+        "lastMinuteAdjustmentBonus": 13.4,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 13.4,
+        "adjustmentBadges": [
+          "ラップ適合",
+          "耐性バフ"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "瞬発戦型",
+        "varianceScore": 21,
+        "roleHint": "頭",
+        "pastRunInsight": "直近3走・大敗1回(好走3回あり) · 2桁着順1回/5走 · 展開一貫性72%相当",
+        "fitLevel": "中",
+        "paceFit": "△",
+        "buyLabel": "消し"
+      },
+      "evaluationSignals": {
+        "winOdds": 11.64
+      },
+      "investment": {
+        "predictedProbability": 0.1,
+        "predictedWinRate": 0.0004,
+        "finalExpectedValue": -0.2,
+        "actualOdds": 11.64,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "末脚性能"
+        ],
+        "riskFactors": [
+          "持続力不足"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 1,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.4688,
       "pastRuns": [
         {
           "date": "2026-05-09",
@@ -2615,48 +3386,20 @@
           "final3fSec": 32.7
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 1,
-      "l2_sustain_ratio": 0.4688,
-      "pace_mismatch": false,
       "position_x": 23,
-      "predicted_win_rate": 0.0004,
-      "ability_index": 77.3,
-      "suitability_flags": [],
-      "final_expected_value": -0.2,
-      "predicted_probability": 0.1,
-      "estimated_actual_odds": 4.42,
-      "odds_source": "estimated",
-      "market_popularity": 11,
-      "market_win_odds": 11.64,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "末脚性能"
-      ],
-      "risk_factors": [
-        "持続力不足"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 77.3,
+      "abilities_source": "past_runs_estimated"
     },
     {
       "horseId": "2022110105",
       "horseName": "アメリカンステージ",
-      "frameNumber": 8,
       "horseNumber": 17,
+      "frameNumber": 8,
+      "jockey": "富田",
+      "trainer": "矢作",
       "sex": "牡",
       "age": 4,
-      "jockey": "坂井",
-      "trainer": "矢作",
-      "weight": 57,
+      "pedigree": {},
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 90.8,
@@ -2665,9 +3408,82 @@
         "sustain": 78.8,
         "power": 84.3
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
-      "running_style_source": "netkeiba_shutuba_past",
+      "abilityGrades": {
+        "speed": "S",
+        "stamina": "S",
+        "kick": "A",
+        "sustain": "S",
+        "power": "S"
+      },
+      "evaluation": {
+        "baseScore": 85.9,
+        "adjustedScore": 83.3,
+        "scoreDiff": -2.6,
+        "baseAbilityCore": 83.7,
+        "intrinsicAbilityScore": 96.3,
+        "raceAdjustedInput": 116.4,
+        "conditionFitDelta": -13,
+        "reproducibilityDelta": -0.2,
+        "riskPenalty": 0,
+        "raceRelativeScore": 74.2,
+        "paceFitBonus": 0,
+        "distanceFitBonus": 1.3,
+        "classLevelBonus": 2.7,
+        "pedigreeBonus": 0,
+        "gateBiasBonus": 0,
+        "gateStyleSynergyBonus": -0.3,
+        "connectionsBonus": 0,
+        "trendBonus": 0,
+        "paceBalanceBonus": -2.6,
+        "tripContextBonus": 0,
+        "finalEvaluationScore": 66.2,
+        "evaluationBaselineScore": 68.2,
+        "evaluationAdjustmentDelta": -2,
+        "lastMinuteAdjustmentBonus": 11.6,
+        "lastRunResetBonus": 0,
+        "lapFocusBonus": 11.6,
+        "adjustmentBadges": [
+          "ラップ適合"
+        ],
+        "lapShapeFitBonus": 0,
+        "raceAnalysisBonus": 0,
+        "lapSustainBonus": 0,
+        "lapQualityBonus": 0,
+        "stepPatternBonus": 0,
+        "lapProfile": "消耗戦型",
+        "varianceScore": 14.5,
+        "roleHint": "軸",
+        "pastRunInsight": "2桁着順2回/5走 · 展開一貫性45%相当",
+        "fitLevel": "中",
+        "paceFit": "○",
+        "buyLabel": "本命候補"
+      },
+      "evaluationSignals": {
+        "winOdds": 2.55
+      },
+      "investment": {
+        "predictedProbability": 0.14,
+        "predictedWinRate": 0.0177,
+        "finalExpectedValue": -0.15,
+        "actualOdds": 2.55,
+        "oddsSource": "estimated",
+        "valueRank": "D",
+        "confidenceRank": "C",
+        "betType": "見送り",
+        "valueChange": "STABLE",
+        "keyFactors": [
+          "先行力",
+          "長距離実績"
+        ],
+        "riskFactors": [
+          "末脚のキレ負け"
+        ],
+        "kellyWeight": 0
+      },
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.7314,
+      "pace_mismatch": false,
+      "l2_sustain_ratio": 0.5,
       "pastRuns": [
         {
           "date": "2026-03-28",
@@ -2741,38 +3557,9 @@
           "final3fSec": 34.9
         }
       ],
-      "pedigree": {},
-      "abilities_source": "past_runs_estimated",
-      "was_bias_disadvantaged": false,
-      "l2_top_speed": 0.7314,
-      "l2_sustain_ratio": 0.5,
-      "pace_mismatch": false,
       "position_x": 0,
-      "predicted_win_rate": 0.0177,
-      "ability_index": 87.3,
-      "suitability_flags": [],
-      "final_expected_value": -0.15,
-      "predicted_probability": 0.14,
-      "estimated_actual_odds": 1.1,
-      "odds_source": "estimated",
-      "market_popularity": 2,
-      "market_win_odds": 2.55,
-      "value_rank": "D",
-      "kelly_weight": 0,
-      "confidence_rank": "C",
-      "bet_type": "見送り",
-      "value_change": "STABLE",
-      "key_factors": [
-        "先行力",
-        "長距離実績"
-      ],
-      "risk_factors": [
-        "末脚のキレ負け"
-      ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0568,
-      "ai_effective_ev": -0.15
+      "abilityIndex": 87.3,
+      "abilities_source": "past_runs_estimated"
     }
-  ],
-  "ev_margin_dynamic": 0.2
+  ]
 }

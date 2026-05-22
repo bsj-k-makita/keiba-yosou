@@ -62,6 +62,7 @@ from baseline_metrics import (
     print_baseline_summary,
     write_baseline_report,
 )
+from update_race_classes import reclassify_database
 
 # ============================================================
 # ロガー設定
@@ -181,6 +182,101 @@ def cmd_collect_quick(args: argparse.Namespace) -> None:
             skip_pedigree=not args.with_pedigree,
         )
     logger.info("collect-quick 完了: %d/%d", ok, total)
+
+
+def cmd_diagnose_calibration(args: argparse.Namespace) -> None:
+    from calibration_diagnostics import main as diag_main
+
+    argv_backup = sys.argv[:]
+    sys.argv = [argv_backup[0]]
+    if args.race_id:
+        for rid in args.race_id:
+            sys.argv.append(f"--race-id={rid}")
+    if args.start_date:
+        sys.argv.append(f"--start-date={args.start_date}")
+    if args.end_date:
+        sys.argv.append(f"--end-date={args.end_date}")
+    if args.head is not None:
+        sys.argv.append(f"--head={args.head}")
+    try:
+        rc = diag_main()
+    finally:
+        sys.argv = argv_backup
+    if rc != 0:
+        raise SystemExit(rc)
+
+
+def _run_diagnose_calibration(
+    race_ids: list[str] | None,
+    start_date: str | None,
+    end_date: str | None,
+    head: int | None,
+) -> int:
+    from calibration_diagnostics import main as diag_main
+
+    argv_backup = sys.argv[:]
+    sys.argv = [argv_backup[0]]
+    if race_ids:
+        for rid in race_ids:
+            sys.argv.append(f"--race-id={rid}")
+    if start_date:
+        sys.argv.append(f"--start-date={start_date}")
+    if end_date:
+        sys.argv.append(f"--end-date={end_date}")
+    if head is not None:
+        sys.argv.append(f"--head={head}")
+    try:
+        return int(diag_main())
+    finally:
+        sys.argv = argv_backup
+
+
+def cmd_quality_gate(args: argparse.Namespace) -> None:
+    """
+    中期改善向け品質ゲート:
+      1) golden-test が全通すること
+      2) calibration diagnostics の flat 比率が閾値以下であること
+    """
+    from golden_invariance import main as golden_main
+    import json
+
+    rc = int(golden_main())
+    if rc != 0:
+        raise SystemExit(rc)
+
+    rc = _run_diagnose_calibration(
+        race_ids=args.race_id,
+        start_date=args.start_date,
+        end_date=args.end_date,
+        head=args.head,
+    )
+    if rc != 0:
+        raise SystemExit(rc)
+
+    diag_path = MODEL_DIR / "calibration_diagnostics.json"
+    if not diag_path.is_file():
+        logger.error("calibration_diagnostics.json が見つかりません: %s", diag_path)
+        raise SystemExit(1)
+    payload = json.loads(diag_path.read_text(encoding="utf-8"))
+    summary = payload.get("summary", {})
+    ratio = float(summary.get("flagged_ratio", 0.0))
+    races = int(summary.get("races", 0))
+    flagged = int(summary.get("flagged_winrate_flat", 0))
+    logger.info(
+        "quality-gate calibration summary: races=%d flagged=%d ratio=%.2f%% (threshold=%.2f%%)",
+        races,
+        flagged,
+        ratio * 100,
+        args.max_flat_ratio * 100,
+    )
+    if ratio > args.max_flat_ratio:
+        logger.error(
+            "quality-gate NG: flat ratio %.2f%% > %.2f%%",
+            ratio * 100,
+            args.max_flat_ratio * 100,
+        )
+        raise SystemExit(1)
+    logger.info("quality-gate PASS")
 
 
 def cmd_train(args: argparse.Namespace) -> None:
@@ -519,59 +615,15 @@ def cmd_predict(args: argparse.Namespace) -> None:
 
 def cmd_reclassify_race_classes(args: argparse.Namespace) -> None:
     """
-    race_info / horse_results の race_class を race_class.infer_race_class で一括更新する。
-  title のみ（info2 未保存行）でも再分類する。
+    race_class 一括再分類（update_race_classes の共通ロジックを利用）。
     """
-    from race_class import infer_race_class
-
-    if not DB_PATH.is_file():
+    dry_run = bool(getattr(args, "dry_run", False))
+    try:
+        result = reclassify_database(DB_PATH, dry_run=dry_run)
+    except FileNotFoundError:
         logger.error("DB not found: %s", DB_PATH)
         sys.exit(1)
-
-    dry_run = bool(getattr(args, "dry_run", False))
-    with sqlite3.connect(DB_PATH) as conn:
-        info_rows = conn.execute(
-            "SELECT race_id, race_name FROM race_info"
-        ).fetchall()
-        info_updates: list[tuple[str, str]] = []
-        for race_id, race_name in info_rows:
-            new_cls = infer_race_class(str(race_name or ""))
-            info_updates.append((new_cls, race_id))
-
-        hr_rows = conn.execute(
-            "SELECT id, race_name FROM horse_results"
-        ).fetchall()
-        hr_updates: list[tuple[str, int]] = []
-        for row_id, race_name in hr_rows:
-            new_cls = infer_race_class(str(race_name or ""))
-            hr_updates.append((new_cls, row_id))
-
-        if dry_run:
-            from collections import Counter
-
-            dist = Counter(c for c, _ in info_updates)
-            logger.info(
-                "dry-run: race_info %d rows, class distribution: %s",
-                len(info_updates),
-                dict(dist),
-            )
-            return
-
-        conn.executemany(
-            "UPDATE race_info SET race_class = ? WHERE race_id = ?",
-            info_updates,
-        )
-        conn.executemany(
-            "UPDATE horse_results SET race_class = ? WHERE id = ?",
-            hr_updates,
-        )
-        conn.commit()
-
-    logger.info(
-        "reclassify-race-classes done: race_info=%d, horse_results=%d",
-        len(info_updates),
-        len(hr_updates),
-    )
+    logger.info("reclassify-race-classes result: %s", result)
 
 
 # ============================================================
@@ -674,6 +726,30 @@ def main() -> None:
         help="Phase1: ゴールデンレース不変性テスト（DB vs feature_bridge）",
     )
 
+    p_diag = subparsers.add_parser(
+        "diagnose-calibration",
+        help="Phase1: ai_predicted_win_rate の過収縮（横並び）監査",
+    )
+    p_diag.add_argument("--race-id", action="append", help="対象 race_id（複数指定可）")
+    p_diag.add_argument("--start-date", type=str, default=None, help="YYYY-MM-DD")
+    p_diag.add_argument("--end-date", type=str, default=None, help="YYYY-MM-DD")
+    p_diag.add_argument("--head", type=int, default=20, help="表示件数")
+
+    p_gate = subparsers.add_parser(
+        "quality-gate",
+        help="Phase1: golden-test + calibration過収縮監査の統合ゲート",
+    )
+    p_gate.add_argument("--race-id", action="append", help="対象 race_id（複数指定可）")
+    p_gate.add_argument("--start-date", type=str, default=None, help="YYYY-MM-DD")
+    p_gate.add_argument("--end-date", type=str, default=None, help="YYYY-MM-DD")
+    p_gate.add_argument("--head", type=int, default=20, help="診断表示件数")
+    p_gate.add_argument(
+        "--max-flat-ratio",
+        type=float,
+        default=0.10,
+        help="許容する flat 比率の上限（0.10 = 10%）",
+    )
+
     p_reclass = subparsers.add_parser(
         "reclassify-race-classes",
         help="race_info / horse_results の race_class を一括再分類",
@@ -704,6 +780,10 @@ def main() -> None:
         from golden_invariance import main as golden_main
 
         raise SystemExit(golden_main())
+    elif args.command == "diagnose-calibration":
+        cmd_diagnose_calibration(args)
+    elif args.command == "quality-gate":
+        cmd_quality_gate(args)
     elif args.command == "reclassify-race-classes":
         cmd_reclassify_race_classes(args)
     elif args.command == "predict":

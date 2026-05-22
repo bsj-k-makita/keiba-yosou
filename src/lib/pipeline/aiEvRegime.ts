@@ -9,6 +9,8 @@ export const EV_WORTHLESS_THRESHOLD = -0.10;
 
 /** 印候補7頭のEV標準偏差がこれ未満なら横並び */
 export const EV_STDEV_THRESHOLD = 0.01;
+/** 印候補7頭の勝率標準偏差がこれ未満なら識別力不足（横並び） */
+export const WIN_RATE_STDEV_THRESHOLD = 0.005;
 
 export const AI_MARK_CANDIDATE_COUNT = 7;
 
@@ -22,21 +24,47 @@ export const NO_EV_REGIME_BANNER_TEXT =
  * AI 印・EV 推奨を出さないレジームを検知する。
  */
 export function resolveAiRaceRegime(horses: readonly HorseAbility[]): AiRaceRegime {
-  const evs = horses
-    .map((h) => h.aiEffectiveEv)
-    .filter((v): v is number => v != null && Number.isFinite(v));
+  const candidates = horses
+    .map((h) => ({
+      ev: h.aiEffectiveEv,
+      winRate: h.aiPredictedWinRate,
+    }))
+    .filter(
+      (x): x is { ev: number; winRate: number } =>
+        x.ev != null &&
+        Number.isFinite(x.ev) &&
+        x.winRate != null &&
+        Number.isFinite(x.winRate) &&
+        x.winRate >= 0,
+    );
+  const evs = candidates.map((c) => c.ev);
   if (evs.length === 0) return "NORMAL_AI_REGIME";
 
   const maxEv = Math.max(...evs);
-  const topEvs = [...evs].sort((a, b) => b - a).slice(0, AI_MARK_CANDIDATE_COUNT);
-  if (topEvs.length < 2) return "NORMAL_AI_REGIME";
+  const topCandidates = [...candidates]
+    .sort((a, b) => b.ev - a.ev)
+    .slice(0, AI_MARK_CANDIDATE_COUNT);
+  if (topCandidates.length < 2) return "NORMAL_AI_REGIME";
+  const topEvs = topCandidates.map((c) => c.ev);
+  const topWinRates = topCandidates.map((c) => c.winRate);
 
-  const avg = topEvs.reduce((sum, val) => sum + val, 0) / topEvs.length;
-  const variance =
-    topEvs.reduce((sum, val) => sum + (val - avg) ** 2, 0) / topEvs.length;
-  const stdev = Math.sqrt(variance);
+  const avgEv = topEvs.reduce((sum, val) => sum + val, 0) / topEvs.length;
+  const varianceEv =
+    topEvs.reduce((sum, val) => sum + (val - avgEv) ** 2, 0) / topEvs.length;
+  const stdevEv = Math.sqrt(varianceEv);
+  const avgWinRate =
+    topWinRates.reduce((sum, val) => sum + val, 0) / topWinRates.length;
+  const varianceWinRate =
+    topWinRates.reduce((sum, val) => sum + (val - avgWinRate) ** 2, 0) /
+    topWinRates.length;
+  const stdevWinRate = Math.sqrt(varianceWinRate);
 
-  if (maxEv < EV_WORTHLESS_THRESHOLD && stdev < EV_STDEV_THRESHOLD) {
+  // EV分散だけだと高オッズ寄与で見逃すため、勝率の横並びも独立に検知する。
+  if (stdevWinRate < WIN_RATE_STDEV_THRESHOLD) {
+    return "NO_EV_REGIME";
+  }
+
+  if (maxEv < EV_WORTHLESS_THRESHOLD && stdevEv < EV_STDEV_THRESHOLD) {
     return "NO_EV_REGIME";
   }
 

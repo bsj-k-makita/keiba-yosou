@@ -26,6 +26,10 @@ from config import (
     ENABLE_EV_SAMPLE_WEIGHT,
     EV_WEIGHT_CENTER,
     EV_WEIGHT_TAU,
+    EV_WEIGHT_CENTER_GRADED,
+    EV_WEIGHT_TAU_GRADED,
+    EV_WEIGHT_GRADED_CLASSES,
+    EV_WEIGHT_ODDS_CAP,
 )
 
 logger = logging.getLogger(__name__)
@@ -42,6 +46,7 @@ FEATURE_COLS = [
     "body_weight", "body_weight_diff", "distance", "horse_count",
     "log_odds", "popularity_ratio",
     "is_outer_frame", "is_inner_frame", "weight_carried_diff_from_avg",
+    "graded_race_tier", "class_adjusted_score",
     # 日付
     "month", "day_of_week",
     # カテゴリ（Label Encoded / category型）
@@ -61,6 +66,8 @@ FEATURE_COLS = [
     "trainer_win_rate", "trainer_top3_rate",
     # 脚質・上がり（speed_index はリークのため除外）
     "last_final3f", "avg_final3f", "final3f_rank", "last_final3f_z",
+    # G1専用 interaction
+    "is_g1", "g1_last_final3f_z", "g1_final3f_rank",
     "avg_first_corner",
 ]
 
@@ -89,6 +96,13 @@ def _resolve_win_odds_series(df: pd.DataFrame) -> pd.Series:
     return pd.Series(np.nan, index=df.index)
 
 
+def _resolve_race_class_series(df: pd.DataFrame) -> pd.Series:
+    """race_class を文字列シリーズで解決する。"""
+    if "race_class" not in df.columns:
+        return pd.Series("", index=df.index, dtype=object)
+    return df["race_class"].astype(str)
+
+
 def _normalize_raw_weights_per_race(
     raw_weight: np.ndarray,
     race_id: pd.Series,
@@ -103,6 +117,12 @@ def _normalize_raw_weights_per_race(
         return s / max(total, _EPS)
 
     return series.groupby(race_id, sort=False).transform(_norm_group).to_numpy()
+
+
+def _resolve_graded_tier_series(df: pd.DataFrame) -> pd.Series:
+    if "graded_race_tier" in df.columns:
+        return pd.to_numeric(df["graded_race_tier"], errors="coerce").fillna(0.0)
+    return pd.Series(0.0, index=df.index, dtype=float)
 
 
 def compute_train_sample_weights(
@@ -127,31 +147,54 @@ def compute_train_sample_weights(
 
     race_id = df_train["race_id"].reset_index(drop=True)
     odds = _resolve_win_odds_series(df_train).reset_index(drop=True)
+    odds = odds.clip(upper=EV_WEIGHT_ODDS_CAP)
+    graded_tier = _resolve_graded_tier_series(df_train).reset_index(drop=True)
     oof = pd.Series(oof_preds, index=race_id.index, dtype=float)
 
     ev = oof * odds
     valid_odds = odds.notna() & (odds > 0)
 
     raw_weight = np.ones(len(df_train), dtype=float)
+    fallback_proxy_rows = 0
     if valid_odds.any():
-        raw_weight[valid_odds.to_numpy()] = calculate_ev_weight(
-            ev[valid_odds].to_numpy(), center=center, tau=tau
-        )
+        valid_idx = valid_odds.to_numpy()
+        valid_ev = ev[valid_odds].to_numpy()
+        valid_graded_tier = graded_tier[valid_odds].to_numpy()
+        # race_class は LabelEncoding 後に整数化されるため、重み判定は graded_race_tier を主軸にする。
+        graded_mask = valid_graded_tier >= 7.0
+        if not graded_mask.any():
+            # 旧データ互換: graded_race_tier が未計算なら race_class の文字列一致を試す。
+            race_class = _resolve_race_class_series(df_train).reset_index(drop=True)
+            valid_race_class = race_class[valid_odds].to_numpy()
+            graded_mask = np.isin(valid_race_class, np.asarray(EV_WEIGHT_GRADED_CLASSES, dtype=object))
+        if not graded_mask.any():
+            # 学習分割にG1/G2が無い場合、G3を proxy として graded パラメータを有効化。
+            proxy_mask = valid_graded_tier >= 6.0
+            if proxy_mask.any():
+                graded_mask = proxy_mask
+                fallback_proxy_rows = int(proxy_mask.sum())
+        centers = np.where(graded_mask, EV_WEIGHT_CENTER_GRADED, center)
+        taus = np.where(graded_mask, EV_WEIGHT_TAU_GRADED, tau)
+        raw_weight[valid_idx] = 1.0 + (1.0 / (1.0 + np.exp(-(valid_ev - centers) / taus)))
 
     weights = _normalize_raw_weights_per_race(raw_weight, race_id)
 
     n_ev_gt_1 = int((ev[valid_odds] > 1.0).sum()) if valid_odds.any() else 0
     logger.info(
-        "EV sample weights (center=%.2f tau=%.3f): min=%.4f max=%.4f mean=%.4f | "
-        "EV>1 rows=%d/%d (%.1f%%) | invalid_odds=%d",
+        "EV sample weights (base center=%.2f tau=%.3f, graded center=%.2f tau=%.3f): "
+        "min=%.4f max=%.4f mean=%.4f | EV>1 rows=%d/%d (%.1f%%) | graded_rows=%d | proxy_graded_rows=%d | invalid_odds=%d",
         center,
         tau,
+        EV_WEIGHT_CENTER_GRADED,
+        EV_WEIGHT_TAU_GRADED,
         weights.min(),
         weights.max(),
         weights.mean(),
         n_ev_gt_1,
         len(df_train),
         100.0 * n_ev_gt_1 / max(len(df_train), 1),
+        int((graded_tier >= 7.0).sum()),
+        fallback_proxy_rows,
         int((~valid_odds).sum()),
     )
     return weights

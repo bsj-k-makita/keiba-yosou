@@ -11,7 +11,12 @@ const condition: RaceCondition = {
   adjustmentStrength: "middle",
 };
 
-function horse(id: string, ev: number, score: number): HorseAbility & { gate: number; frameNumber: number } {
+function horse(
+  id: string,
+  ev: number,
+  score: number,
+  aiWinRate: number = 0.1,
+): HorseAbility & { gate: number; frameNumber: number } {
   return {
     horseId: id,
     horseName: id,
@@ -23,14 +28,18 @@ function horse(id: string, ev: number, score: number): HorseAbility & { gate: nu
     power: score,
     gate: Number(id.replace(/\D/g, "")) || 1,
     frameNumber: 1,
-    aiPredictedWinRate: 0.1,
+    aiPredictedWinRate: aiWinRate,
     aiEffectiveEv: ev,
   };
 }
 
 describe("runRaceEvaluationPipeline AI mode", () => {
   it("reassigns ◎ to highest ai_effective_ev and disables skippable", () => {
-    const horses = [horse("1", 0.3, 40), horse("2", 1.6, 95), horse("3", 0.8, 70)];
+    const horses = [
+      horse("1", 0.3, 40, 0.42),
+      horse("2", 1.6, 95, 0.35),
+      horse("3", 0.8, 70, 0.11),
+    ];
     const pipeline = runRaceEvaluationPipeline(horses, condition, { probabilityEngine: "ai" });
     expect(pipeline.probabilityEngine).toBe("ai");
     expect(pipeline.aiRaceRegime).toBe("NORMAL_AI_REGIME");

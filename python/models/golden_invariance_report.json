@@ -1,68 +1,2962 @@
 {
   "n_races": 10,
   "bridge_pass": 0,
-  "bridge_pending": 10,
-  "failed": 0,
+  "bridge_pending": 0,
+  "failed": 10,
+  "mismatch_top_columns": [
+    [
+      "running_style",
+      10
+    ],
+    [
+      "class_adjusted_score",
+      5
+    ],
+    [
+      "graded_race_tier",
+      1
+    ]
+  ],
   "races": [
     {
       "race_id": "202605020803",
       "label": "maiden_dirt_tokyo",
-      "status": "bridge_pending",
-      "db_rows": 12
+      "status": "fail",
+      "ok": false,
+      "n_horses": 12,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": NaN,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 2.0
+        }
+      ]
     },
     {
       "race_id": "202604010612",
       "label": "stakes_turf_niigata",
-      "status": "bridge_pending",
-      "db_rows": 11
+      "status": "fail",
+      "ok": false,
+      "n_horses": 11,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": NaN,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "max_abs_diff": 1.8738918532310207
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 2.0
+        }
+      ]
     },
     {
       "race_id": "202605020802",
       "label": "formation_tri_hit",
-      "status": "bridge_pending",
-      "db_rows": 16
+      "status": "fail",
+      "ok": false,
+      "n_horses": 16,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": NaN,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 2.0
+        }
+      ]
     },
     {
       "race_id": "202604010601",
       "label": "hurdle_long",
-      "status": "bridge_pending",
-      "db_rows": 14
+      "status": "fail",
+      "ok": false,
+      "n_horses": 14,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": NaN,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 2.0
+        }
+      ]
     },
     {
       "race_id": "202604010608",
       "label": "small_field",
-      "status": "bridge_pending",
-      "db_rows": 10
+      "status": "fail",
+      "ok": false,
+      "n_horses": 10,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": NaN,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "max_abs_diff": 1.2961700531390525
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 2.0
+        }
+      ]
     },
     {
       "race_id": "202604010611",
       "label": "graded_stakes",
-      "status": "bridge_pending",
-      "db_rows": 15
+      "status": "fail",
+      "ok": false,
+      "n_horses": 15,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": NaN,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 2.0
+        }
+      ]
     },
     {
       "race_id": "202604010603",
       "label": "sprint_dirt",
-      "status": "bridge_pending",
-      "db_rows": 15
+      "status": "fail",
+      "ok": false,
+      "n_horses": 15,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": NaN,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 2.0
+        }
+      ]
     },
     {
       "race_id": "202605020508",
       "label": "minimal_field",
-      "status": "bridge_pending",
-      "db_rows": 8
+      "status": "fail",
+      "ok": false,
+      "n_horses": 8,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": 0.0591635711883977,
+          "allclose": false
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": 1.0,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "class_adjusted_score",
+          "corr": 0.0591635711883977,
+          "max_abs_diff": 2.3183416381139317
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 1.0
+        }
+      ]
     },
     {
       "race_id": "202605020511",
       "label": "large_field",
-      "status": "bridge_pending",
-      "db_rows": 17
+      "status": "fail",
+      "ok": false,
+      "n_horses": 17,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": NaN,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "max_abs_diff": 6.0
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "max_abs_diff": 1.603902225476413
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 1.0
+        }
+      ]
     },
     {
       "race_id": "202605020512",
       "label": "tokyo_mixed",
-      "status": "bridge_pending",
-      "db_rows": 16
+      "status": "fail",
+      "ok": false,
+      "n_horses": 16,
+      "columns_compared": [
+        {
+          "col": "frame_number",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "age",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "body_weight_diff",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "distance",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "log_odds",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "popularity_ratio",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_outer_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_inner_frame",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "weight_carried_diff_from_avg",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "graded_race_tier",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "month",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "day_of_week",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "venue",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "surface",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "ground_state",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "weather",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "race_class",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "around",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sex",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "dam_sire",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "allclose": false
+        },
+        {
+          "col": "horse_age_group",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "season",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_race_count",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top2_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_top3_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_avg_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_last_finish",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_recent3_avg",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_days_since_last",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_distance_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_surface_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_ground_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_same_venue_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_month_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "horse_season_win_rate",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "jockey_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "jockey_top3_rate",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "jockey_venue_win_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "trainer_win_rate",
+          "corr": 0.9999999999999998,
+          "allclose": true
+        },
+        {
+          "col": "trainer_top3_rate",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "avg_final3f",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "final3f_rank",
+          "corr": 0.9999999999999999,
+          "allclose": true
+        },
+        {
+          "col": "last_final3f_z",
+          "corr": 1.0,
+          "allclose": true
+        },
+        {
+          "col": "is_g1",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_last_final3f_z",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "g1_final3f_rank",
+          "corr": NaN,
+          "allclose": true
+        },
+        {
+          "col": "avg_first_corner",
+          "corr": NaN,
+          "allclose": true
+        }
+      ],
+      "mismatches": [
+        {
+          "col": "class_adjusted_score",
+          "corr": NaN,
+          "max_abs_diff": 1.9341300734074591
+        },
+        {
+          "col": "running_style",
+          "corr": NaN,
+          "max_abs_diff": 2.0
+        }
+      ]
     }
   ]
 }

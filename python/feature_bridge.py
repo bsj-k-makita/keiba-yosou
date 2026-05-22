@@ -22,7 +22,7 @@ import pandas as pd
 
 from config import DB_PATH, MODEL_DIR
 from model import FEATURE_COLS
-from race_class import infer_race_class
+from race_class import infer_race_class, normalize_grade_token
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,19 @@ _RUNNING_STYLE_MAP = {
     "差し": "差し",
     "追込": "追込",
     "マクリ": "マクリ",
+}
+
+_RACE_CLASS_TIER_MAP = {
+    "未勝利": 0.0,
+    "新馬": 0.0,
+    "1勝クラス": 1.0,
+    "2勝クラス": 2.0,
+    "3勝クラス": 3.0,
+    "OP": 4.0,
+    "L": 5.0,
+    "G3": 6.0,
+    "G2": 7.0,
+    "G1": 8.0,
 }
 
 
@@ -98,6 +111,37 @@ def _month_to_season(month: int) -> str:
     return "冬"
 
 
+def _distance_category(distance: Any) -> str:
+    try:
+        d = int(float(distance))
+    except (TypeError, ValueError):
+        d = 1600
+    if d <= 1400:
+        return "短距離"
+    if d <= 1800:
+        return "マイル"
+    if d <= 2200:
+        return "中距離"
+    return "長距離"
+
+
+def _distance_bounds_for_category(category: str) -> tuple[int, int]:
+    if category == "短距離":
+        return 1, 1400
+    if category == "マイル":
+        return 1401, 1800
+    if category == "中距離":
+        return 1801, 2200
+    return 2201, 9999
+
+
+def _coalesce_not_none(*vals: Any) -> Any:
+    for v in vals:
+        if v is not None:
+            return v
+    return None
+
+
 def _normalize_surface(surface: str) -> str:
     s = str(surface or "")
     if "ダ" in s or "ダート" in s:
@@ -110,6 +154,18 @@ def _normalize_surface(surface: str) -> str:
 def _entry_odds(entry: dict[str, Any]) -> float | None:
     inv = entry.get("investment") or {}
     signals = entry.get("signals") or entry.get("evaluationSignals") or {}
+    for val in (
+        entry.get("actual_odds"),
+        entry.get("market_win_odds"),
+        entry.get("estimated_actual_odds"),
+    ):
+        if val is not None:
+            try:
+                o = float(val)
+                if o > 0 and np.isfinite(o):
+                    return o
+            except (TypeError, ValueError):
+                pass
     for key in ("actualOdds", "winOdds", "odds"):
         val = inv.get(key) if key in inv else signals.get(key)
         if val is not None:
@@ -120,6 +176,183 @@ def _entry_odds(entry: dict[str, Any]) -> float | None:
             except (TypeError, ValueError):
                 pass
     return None
+
+
+def _entry_popularity(entry: dict[str, Any]) -> int | None:
+    inv = entry.get("investment") or {}
+    for val in (
+        entry.get("market_popularity"),
+        entry.get("marketPopularity"),
+        inv.get("expectedPopularity"),
+        inv.get("popularity"),
+    ):
+        if val is None:
+            continue
+        try:
+            p = int(float(val))
+            if p > 0:
+                return p
+        except (TypeError, ValueError):
+            pass
+    return None
+
+
+def _infer_weight_carried(entry: dict[str, Any]) -> float:
+    """
+    出馬JSONに斤量が欠けるケース向けの安全推定。
+    実値が無ければ、3歳牝馬55kg、それ以外57kgを既定にする。
+    """
+    for key in ("weight_carried", "weightCarried", "weight", "carriedWeight"):
+        val = entry.get(key)
+        if val is None:
+            continue
+        try:
+            wc = float(val)
+            if np.isfinite(wc) and wc > 0:
+                return wc
+        except (TypeError, ValueError):
+            pass
+    sex = str(entry.get("sex") or "")
+    age = entry.get("age")
+    try:
+        age_n = int(age) if age is not None else None
+    except (TypeError, ValueError):
+        age_n = None
+    if sex == "牝" and age_n == 3:
+        return 55.0
+    return 57.0
+
+
+def _entry_body_weight_diff(entry: dict[str, Any]) -> float:
+    for key in ("bodyWeightDiff", "body_weight_diff"):
+        val = entry.get(key)
+        if val is None:
+            continue
+        try:
+            x = float(val)
+            if np.isfinite(x):
+                return x
+        except (TypeError, ValueError):
+            pass
+    return 0.0
+
+
+def _load_db_race_context(race_id: str) -> dict[str, Any] | None:
+    """
+    DB があるとき、同一 race_id の race_info / race_results を読み出す。
+    parity 向上目的の補助情報として利用する。
+    """
+    if not race_id or not DB_PATH.is_file():
+        return None
+    import sqlite3
+
+    ctx: dict[str, Any] = {"race_info": None, "entries_by_horse_number": {}}
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            row = conn.execute(
+                """
+                SELECT race_date, venue, surface, distance, around, weather, ground_state, race_class
+                FROM race_info
+                WHERE race_id = ?
+                """,
+                (race_id,),
+            ).fetchone()
+            if row is not None:
+                ctx["race_info"] = {
+                    "race_date": row[0],
+                    "venue": row[1],
+                    "surface": row[2],
+                    "distance": row[3],
+                    "around": row[4],
+                    "weather": row[5],
+                    "ground_state": row[6],
+                    "race_class": row[7],
+                }
+            rows = conn.execute(
+                """
+                SELECT horse_number, horse_id, frame_number, odds, popularity, weight_carried, body_weight_diff
+                FROM race_results
+                WHERE race_id = ?
+                """,
+                (race_id,),
+            ).fetchall()
+            for r in rows:
+                try:
+                    hn = int(r[0])
+                except (TypeError, ValueError):
+                    continue
+                ctx["entries_by_horse_number"][hn] = {
+                    "horse_id": r[1],
+                    "frame_number": r[2],
+                    "odds": r[3],
+                    "popularity": r[4],
+                    "weight_carried": r[5],
+                    "body_weight_diff": r[6],
+                }
+    except sqlite3.Error as e:
+        logger.debug("load_db_race_context failed race_id=%s: %s", race_id, e)
+        return None
+    return ctx
+
+
+def _horse_stats_from_db(horse_id: str, before_date: pd.Timestamp | None) -> dict[str, float] | None:
+    """
+    horse_results から horse_* 派生指標を算出する。
+    """
+    if not horse_id or not DB_PATH.is_file():
+        return None
+    import sqlite3
+
+    date_norm = "replace(replace(race_date, '/', '-'), '.', '-')"
+    query = f"""
+        SELECT finish_pos, {date_norm}
+        FROM horse_results
+        WHERE horse_id = ? AND finish_pos IS NOT NULL AND finish_pos > 0
+    """
+    params: list[Any] = [horse_id]
+    if before_date is not None and pd.notna(before_date):
+        query += f" AND {date_norm} < ?"
+        params.append(before_date.strftime("%Y-%m-%d"))
+    query += f" ORDER BY {date_norm} DESC LIMIT 50"
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            rows = conn.execute(query, params).fetchall()
+    except sqlite3.Error as e:
+        logger.debug("horse_stats DB lookup failed horse_id=%s: %s", horse_id, e)
+        return None
+    if not rows:
+        return None
+    finishes: list[float] = []
+    dates: list[pd.Timestamp] = []
+    for finish_pos, date_text in rows:
+        try:
+            fp = float(finish_pos)
+            if not np.isfinite(fp) or fp <= 0:
+                continue
+            finishes.append(fp)
+            dt = pd.to_datetime(str(date_text), errors="coerce")
+            dates.append(dt)
+        except (TypeError, ValueError):
+            continue
+    if not finishes:
+        return None
+    arr = np.array(finishes, dtype=float)
+    recent = arr[:3] if len(arr) >= 3 else arr
+    days_since = 60.0
+    if before_date is not None and pd.notna(before_date) and len(dates) > 0 and pd.notna(dates[0]):
+        days_since = float((before_date - dates[0]).days)
+        if not np.isfinite(days_since):
+            days_since = 60.0
+    return {
+        "horse_race_count": float(len(arr)),
+        "horse_win_rate": float((arr == 1).mean()),
+        "horse_top2_rate": float((arr <= 2).mean()),
+        "horse_top3_rate": float((arr <= 3).mean()),
+        "horse_avg_finish": float(arr.mean()),
+        "horse_last_finish": float(arr[0]),
+        "horse_recent3_avg": float(recent.mean()),
+        "horse_days_since_last": max(0.0, days_since),
+    }
 
 
 def _horse_final3f_from_db(horse_id: str, before_date: pd.Timestamp | None) -> dict[str, float] | None:
@@ -161,8 +394,10 @@ def _horse_final3f_from_db(horse_id: str, before_date: pd.Timestamp | None) -> d
     last_row = rows[0]
     last_f3f = float(last_row[0])
 
-    surface = str(last_row[2] or _UNKNOWN)
+    surface = _normalize_surface(str(last_row[2] or _UNKNOWN))
     ground = str(last_row[3] or _UNKNOWN)
+    dist_cat = _distance_category(last_row[4])
+    dist_lo, dist_hi = _distance_bounds_for_category(dist_cat)
 
     with sqlite3.connect(DB_PATH) as conn:
         stat_rows = conn.execute(
@@ -174,8 +409,8 @@ def _horse_final3f_from_db(horse_id: str, before_date: pd.Timestamp | None) -> d
             (
                 surface,
                 ground,
-                max(0, int(last_row[4] or 1600) - 200),
-                int(last_row[4] or 1600) + 200,
+                dist_lo,
+                dist_hi,
             ),
         ).fetchall()
 
@@ -189,8 +424,9 @@ def _horse_final3f_from_db(horse_id: str, before_date: pd.Timestamp | None) -> d
     return {
         "last_final3f": last_f3f,
         "avg_final3f": float(np.mean(final3fs)),
-        "final3f_rank": float(len(final3fs)),
+        "final3f_rank": float("nan"),
         "last_final3f_z": float(last_z),
+        "_final3f_has_history": 1.0,
     }
 
 
@@ -202,7 +438,7 @@ def _horse_stats_from_past_runs(
     db_final3f: dict[str, float] | None = None,
 ) -> dict[str, float]:
     """TS JSON pastRuns から馬統計の近似値を算出。DB 由来の上がり3Fがあれば優先。"""
-    defaults = {
+    out = {
         "horse_race_count": 0.0,
         "horse_win_rate": 0.1,
         "horse_top2_rate": 0.2,
@@ -215,9 +451,8 @@ def _horse_stats_from_past_runs(
         "avg_final3f": 35.0,
         "final3f_rank": 8.0,
         "last_final3f_z": 0.0,
+        "_final3f_has_history": 0.0,
     }
-    if not past_runs:
-        return defaults
 
     places = []
     final3fs = []
@@ -236,39 +471,42 @@ def _horse_stats_from_past_runs(
                 pass
 
     n = len(places)
-    if n == 0:
-        return defaults
+    if n > 0:
+        arr = np.array(places, dtype=float)
+        recent = arr[:3] if len(arr) >= 3 else arr
+        out.update(
+            {
+                "horse_race_count": float(n),
+                "horse_win_rate": float((arr == 1).mean()),
+                "horse_top2_rate": float((arr <= 2).mean()),
+                "horse_top3_rate": float((arr <= 3).mean()),
+                "horse_avg_finish": float(arr.mean()),
+                "horse_last_finish": float(arr[0]),
+                "horse_recent3_avg": float(recent.mean()),
+                "horse_days_since_last": 60.0,
+            }
+        )
 
-    arr = np.array(places, dtype=float)
-    recent = arr[:3] if len(arr) >= 3 else arr
-    out = {
-        "horse_race_count": float(n),
-        "horse_win_rate": float((arr == 1).mean()),
-        "horse_top2_rate": float((arr <= 2).mean()),
-        "horse_top3_rate": float((arr <= 3).mean()),
-        "horse_avg_finish": float(arr.mean()),
-        "horse_last_finish": float(arr[0]),
-        "horse_recent3_avg": float(recent.mean()),
-        "horse_days_since_last": 60.0,
-    }
     if final3fs:
         farr = np.array(final3fs[:3], dtype=float)
         out["last_final3f"] = float(farr[0])
         out["avg_final3f"] = float(farr.mean())
-    else:
-        out["last_final3f"] = defaults["last_final3f"]
-        out["avg_final3f"] = defaults["avg_final3f"]
+        out["_final3f_has_history"] = 1.0
 
     if db_final3f:
         for key in ("last_final3f", "avg_final3f", "final3f_rank", "last_final3f_z"):
             if key in db_final3f and np.isfinite(db_final3f[key]):
                 out[key] = float(db_final3f[key])
+        if np.isfinite(db_final3f.get("last_final3f", np.nan)):
+            out["_final3f_has_history"] = 1.0
     elif horse_id:
         db_vals = _horse_final3f_from_db(horse_id, race_date)
         if db_vals:
             for key, val in db_vals.items():
                 if np.isfinite(val):
                     out[key] = float(val)
+            if np.isfinite(db_vals.get("last_final3f", np.nan)):
+                out["_final3f_has_history"] = 1.0
 
     return out
 
@@ -285,48 +523,92 @@ def _rows_from_ts_race(
     snapshot: dict[str, Any],
 ) -> list[dict[str, Any]]:
     race_info = race_data.get("raceInfo") or {}
+    race_meta = race_data.get("meta") or {}
     condition = race_data.get("condition") or {}
-    race_id = str(race_data.get("raceId") or race_info.get("raceId") or "")
-    race_date = pd.to_datetime(race_info.get("date"), errors="coerce")
+    race_id = str(race_data.get("raceId") or race_info.get("raceId") or race_meta.get("raceId") or "")
+    db_ctx = _load_db_race_context(race_id)
+    db_info = (db_ctx or {}).get("race_info") or {}
+
+    race_date = pd.to_datetime(
+        db_info.get("race_date")
+        or race_info.get("date")
+        or race_meta.get("date"),
+        errors="coerce",
+    )
+    race_date_fallback = pd.to_datetime(
+        race_info.get("date") or race_meta.get("date"),
+        errors="coerce",
+    )
     entries = race_data.get("entries") or []
     horse_count = max(len(entries), 1)
 
-    venue = str(race_info.get("venue") or condition.get("venue") or _UNKNOWN)
-    surface = _normalize_surface(race_info.get("surface") or condition.get("surface") or "")
-    distance = int(race_info.get("distance") or condition.get("distance") or 1600)
-    weather = str(race_info.get("weather") or _UNKNOWN)
-    ground_raw = condition.get("ground") or race_info.get("groundLabel") or "good"
+    venue = str(
+        db_info.get("venue")
+        or race_info.get("venue")
+        or race_meta.get("venue")
+        or condition.get("venue")
+        or _UNKNOWN
+    )
+    surface = _normalize_surface(
+        db_info.get("surface")
+        or race_info.get("surface")
+        or race_meta.get("surface")
+        or condition.get("surface")
+        or ""
+    )
+    distance = int(
+        _coalesce_not_none(
+            db_info.get("distance"),
+            race_info.get("distance"),
+            race_meta.get("distance"),
+            condition.get("distance"),
+            1600,
+        )
+    )
+    weather = str(db_info.get("weather") or race_info.get("weather") or race_meta.get("weather") or _UNKNOWN)
+    ground_raw = (
+        db_info.get("ground_state")
+        or condition.get("ground")
+        or race_info.get("groundLabel")
+        or race_meta.get("groundLabel")
+        or "good"
+    )
     ground_state = _GROUND_MAP.get(str(ground_raw), str(ground_raw) if ground_raw else _UNKNOWN)
-    race_class = infer_race_class(
-        str(race_info.get("raceName") or ""),
+    race_class = normalize_grade_token(race_meta.get("raceGrade")) or infer_race_class(
+        str(race_info.get("raceName") or race_meta.get("raceName") or ""),
         str(race_info.get("info2") or race_info.get("raceInfoText") or ""),
     )
 
-    month = int(race_date.month) if pd.notna(race_date) else 1
-    day_of_week = int(race_date.dayofweek) if pd.notna(race_date) else 0
+    month = int(race_date.month) if pd.notna(race_date) else (int(race_date_fallback.month) if pd.notna(race_date_fallback) else 1)
+    day_of_week = int(race_date.dayofweek) if pd.notna(race_date) else (int(race_date_fallback.dayofweek) if pd.notna(race_date_fallback) else 0)
     season = _month_to_season(month)
 
     rows: list[dict[str, Any]] = []
     weight_carrieds: list[float] = []
 
     for entry in entries:
-        horse_number = int(entry.get("horseNumber") or entry.get("gate") or 0)
+        horse_number = int(
+            entry.get("horseNumber")
+            or entry.get("gate")
+            or entry.get("horse_number")
+            or 0
+        )
         if horse_number <= 0:
             continue
+        db_entry = ((db_ctx or {}).get("entries_by_horse_number") or {}).get(horse_number, {})
         frame_number = int(
-            entry.get("frameNumber")
+            db_entry.get("frame_number")
+            or entry.get("frameNumber")
             or max(1, (horse_number + 1) // 2)
         )
         age = int(entry.get("age") or 4)
         sex = str(entry.get("sex") or _UNKNOWN)
         body_weight = entry.get("bodyWeightKg")
         body_weight = int(body_weight) if body_weight is not None else np.nan
-        odds = _entry_odds(entry)
-        popularity = entry.get("investment", {}).get("expectedPopularity")
-        try:
-            popularity = int(popularity) if popularity is not None else 0
-        except (TypeError, ValueError):
-            popularity = 0
+        db_odds = db_entry.get("odds")
+        odds = float(db_odds) if db_odds is not None and np.isfinite(db_odds) and db_odds > 0 else _entry_odds(entry)
+        db_pop = db_entry.get("popularity")
+        popularity = int(db_pop) if db_pop is not None and np.isfinite(db_pop) and db_pop > 0 else (_entry_popularity(entry) or 0)
 
         running_style = _RUNNING_STYLE_MAP.get(
             str(entry.get("runningStyle") or ""), _UNKNOWN
@@ -335,10 +617,12 @@ def _rows_from_ts_race(
         sire = str(pedigree.get("sire") or entry.get("sire") or _UNKNOWN)
         dam_sire = str(pedigree.get("damSire") or entry.get("dam_sire") or _UNKNOWN)
 
-        wc = 57.0
+        db_wc = db_entry.get("weight_carried")
+        wc = float(db_wc) if db_wc is not None and np.isfinite(db_wc) and db_wc > 0 else _infer_weight_carried(entry)
         weight_carrieds.append(wc)
 
-        horse_id = str(entry.get("horseId") or entry.get("horse_id") or "")
+        db_horse_id = str(db_entry.get("horse_id") or "")
+        horse_id = str(entry.get("horseId") or entry.get("horse_id") or db_horse_id or "")
         db_f3f = _horse_final3f_from_db(horse_id, race_date) if horse_id else None
         past_stats = _horse_stats_from_past_runs(
             entry.get("pastRuns") or [],
@@ -346,6 +630,9 @@ def _rows_from_ts_race(
             race_date=race_date,
             db_final3f=db_f3f,
         )
+        db_stats = _horse_stats_from_db(horse_id, race_date)
+        if db_stats:
+            past_stats.update(db_stats)
 
         row: dict[str, Any] = {
             "race_id": race_id,
@@ -356,7 +643,11 @@ def _rows_from_ts_race(
             "sex": sex,
             "weight_carried": wc,
             "body_weight": body_weight,
-            "body_weight_diff": 0,
+            "body_weight_diff": (
+                float(db_entry.get("body_weight_diff"))
+                if db_entry.get("body_weight_diff") is not None and np.isfinite(db_entry.get("body_weight_diff"))
+                else _entry_body_weight_diff(entry)
+            ),
             "distance": distance,
             "horse_count": horse_count,
             "odds": odds,
@@ -405,6 +696,59 @@ def _rows_from_ts_race(
         row["popularity_ratio"] = (
             float(pop) / horse_count if pop is not None and pd.notna(pop) and pop > 0 else np.nan
         )
+        tier = _RACE_CLASS_TIER_MAP.get(str(row.get("race_class") or ""), 0.0)
+        row["graded_race_tier"] = float(tier)
+        recent3 = row.get("horse_recent3_avg")
+        try:
+            recent3_val = float(recent3)
+        except (TypeError, ValueError):
+            recent3_val = 8.0
+        recent3_score = max(0.0, min(1.0, 1.0 - ((recent3_val - 1.0) / 17.0)))
+        row["class_adjusted_score"] = float(tier * recent3_score)
+
+    # レース内で相対化し、同レース内の序列比較に使えるようにする
+    class_scores = np.array(
+        [float(r.get("class_adjusted_score", 0.0) or 0.0) for r in rows],
+        dtype=float,
+    )
+    cs_mean = float(np.mean(class_scores)) if class_scores.size > 0 else 0.0
+    cs_std = float(np.std(class_scores)) if class_scores.size > 0 else 0.0
+    if cs_std < _EPS:
+        for row in rows:
+            row["class_adjusted_score"] = 0.0
+    else:
+        for row in rows:
+            row["class_adjusted_score"] = float((row["class_adjusted_score"] - cs_mean) / cs_std)
+
+    # 学習時と同様に、同レース出走馬内での前走上がり3F順位を計算する。
+    # DB/JSONの履歴が取れた馬のみで順位付けし、欠損は頭数中央値で補完する。
+    ranked: list[tuple[int, float]] = []
+    for i, r in enumerate(rows):
+        try:
+            has_hist = float(r.get("_final3f_has_history", 0.0) or 0.0)
+            sec = float(r.get("last_final3f", np.nan))
+        except (TypeError, ValueError):
+            continue
+        if has_hist <= 0 or not np.isfinite(sec) or sec <= 0:
+            continue
+        ranked.append((i, sec))
+    ranked.sort(key=lambda x: x[1])
+    next_rank = 1
+    prev_time = None
+    for idx, sec in ranked:
+        if prev_time is None or abs(sec - prev_time) > 1e-9:
+            rank_val = float(next_rank)
+        rows[idx]["final3f_rank"] = rank_val
+        prev_time = sec
+        next_rank += 1
+
+    fallback_rank = float(np.median([r.get("horse_count", horse_count) for r in rows])) if rows else float(horse_count)
+    if not np.isfinite(fallback_rank) or fallback_rank <= 0:
+        fallback_rank = float(horse_count)
+    for row in rows:
+        rank_val = row.get("final3f_rank")
+        if rank_val is None or not np.isfinite(float(rank_val)):
+            row["final3f_rank"] = fallback_rank
 
     return rows
 
@@ -474,6 +818,7 @@ def build_features_from_ts_json(
     *,
     processor=None,
     manifest: dict[str, Any] | None = None,
+    parity_use_db: bool = False,
 ) -> pd.DataFrame | None:
     """
     TS 出走表 JSON から LightGBM 推論用特徴量 DataFrame を構築する。
@@ -499,7 +844,48 @@ def build_features_from_ts_json(
 
     df = pd.DataFrame(rows)
     df = df.sort_values("horse_number").reset_index(drop=True)
-    return _finalize_feature_df(df, feature_cols, processor)
+    out = _finalize_feature_df(df, feature_cols, processor)
+
+    if parity_use_db:
+        db_df = build_features_from_db(race_id)
+        if db_df is not None and len(db_df) > 0 and "horse_number" in out.columns and "horse_number" in db_df.columns:
+            merge_cols = [
+                "horse_race_count",
+                "horse_win_rate",
+                "horse_top2_rate",
+                "horse_top3_rate",
+                "horse_avg_finish",
+                "horse_last_finish",
+                "horse_recent3_avg",
+                "horse_days_since_last",
+                "avg_first_corner",
+                "last_final3f",
+                "avg_final3f",
+                "final3f_rank",
+                "last_final3f_z",
+                "jockey_win_rate",
+                "jockey_top3_rate",
+                "jockey_venue_win_rate",
+                "trainer_win_rate",
+                "trainer_top3_rate",
+                "horse_same_distance_win_rate",
+                "horse_same_surface_win_rate",
+                "horse_same_ground_win_rate",
+                "horse_same_venue_win_rate",
+                "horse_month_win_rate",
+                "horse_season_win_rate",
+                "body_weight",
+                "weight_carried_diff_from_avg",
+            ]
+            dbm = db_df.set_index("horse_number")
+            outm = out.set_index("horse_number")
+            common = sorted(set(outm.index) & set(dbm.index))
+            if common:
+                for col in merge_cols:
+                    if col in outm.columns and col in dbm.columns:
+                        outm.loc[common, col] = dbm.loc[common, col]
+                out = outm.reset_index()
+    return out
 
 
 def build_features_for_race(

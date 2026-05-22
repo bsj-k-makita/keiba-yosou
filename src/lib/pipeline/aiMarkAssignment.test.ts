@@ -72,4 +72,38 @@ describe("aiMarkAssignment", () => {
     expect(sorted.map((r) => r.mark)).toEqual(["◎", "○", "▲"]);
     expect(sorted.map((r) => r.horseId)).toEqual(["b", "c", "a"]);
   });
+
+  it("G1 uses hybrid score (ev + finalEvaluationScore blend)", () => {
+    const horses = [horse("ev_top", 1.0), horse("ability_top", 0.99)];
+    const results = applyAiMarksByEffectiveEv(
+      [row("ev_top", 40), row("ability_top", 99)],
+      horses,
+      { venue: "東京", ground: "良", bias: "flat", pace: "middle", adjustmentStrength: "middle", raceGrade: "G1" },
+    );
+    expect(results.find((r) => r.horseId === "ability_top")?.mark).toBe("◎");
+  });
+
+  it("勝率8%未満の馬は◎にならず、条件を満たす馬が◎になる", () => {
+    const horses = [
+      horse("longshot", 2.2, 0.03),
+      horse("solid", 1.4, 0.11),
+      horse("other", 1.1, 0.1),
+    ];
+    const results = applyAiMarksByEffectiveEv(
+      [row("longshot", 95), row("solid", 80), row("other", 70)],
+      horses,
+    );
+    expect(results.find((r) => r.horseId === "longshot")?.mark).not.toBe("◎");
+    expect(results.find((r) => r.horseId === "solid")?.mark).toBe("◎");
+  });
+
+  it("全頭が勝率8%未満でも◎は必ず1頭に付与される", () => {
+    const horses = [horse("ev_top", 2.0, 0.07), horse("second", 1.4, 0.06), horse("third", 1.1, 0.05)];
+    const results = applyAiMarksByEffectiveEv(
+      [row("ev_top", 95), row("second", 80), row("third", 70)],
+      horses,
+    );
+    expect(results.find((r) => r.horseId === "ev_top")?.mark).toBe("◎");
+    expect(results.filter((r) => r.mark === "◎")).toHaveLength(1);
+  });
 });

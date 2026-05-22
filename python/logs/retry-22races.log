@@ -1,0 +1,428 @@
+/Users/k.makita/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+2026-05-19 16:50:38,188 [INFO] __main__: collect-quick: 22 race_ids (repo_results=108, golden=10)
+2026-05-19 16:50:38,193 [INFO] scraper: Database initialized: /Users/k.makita/競馬最強予想ファイルの改善版/python/data/db/keiba.db
+2026-05-19 16:50:38,193 [INFO] scraper: === 限定収集: 22 レース ===
+Race results (quick):   0%|          | 0/22 [00:00<?, ?レース/s]2026-05-19 16:50:39,458 [INFO] scraper: Chrome WebDriver 起動
+2026-05-19 16:51:00,346 [ERROR] scraper: レースページ読込失敗 race_id=202604010709: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):   5%|▍         | 1/22 [00:23<08:16, 23.65s/レース]2026-05-19 16:51:22,555 [ERROR] scraper: レースページ読込失敗 race_id=202604010710: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):   9%|▉         | 2/22 [00:45<07:36, 22.80s/レース]2026-05-19 16:51:44,742 [ERROR] scraper: レースページ読込失敗 race_id=202604010711: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  14%|█▎        | 3/22 [01:08<07:07, 22.52s/レース]2026-05-19 16:52:07,201 [ERROR] scraper: レースページ読込失敗 race_id=202604010809: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  18%|█▊        | 4/22 [01:30<06:44, 22.49s/レース]2026-05-19 16:52:29,513 [ERROR] scraper: レースページ読込失敗 race_id=202604010810: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  23%|██▎       | 5/22 [01:52<06:21, 22.43s/レース]2026-05-19 16:52:51,781 [ERROR] scraper: レースページ読込失敗 race_id=202604010811: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  27%|██▋       | 6/22 [02:15<05:57, 22.37s/レース]2026-05-19 16:53:14,040 [ERROR] scraper: レースページ読込失敗 race_id=202605020909: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  32%|███▏      | 7/22 [02:37<05:35, 22.34s/レース]2026-05-19 16:53:36,254 [ERROR] scraper: レースページ読込失敗 race_id=202605020910: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  36%|███▋      | 8/22 [02:59<05:12, 22.30s/レース]2026-05-19 16:53:58,423 [ERROR] scraper: レースページ読込失敗 race_id=202605020911: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  41%|████      | 9/22 [03:21<04:49, 22.26s/レース]2026-05-19 16:54:20,617 [ERROR] scraper: レースページ読込失敗 race_id=202605021008: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  45%|████▌     | 10/22 [03:43<04:26, 22.24s/レース]2026-05-19 16:54:42,791 [ERROR] scraper: レースページ読込失敗 race_id=202605021009: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  50%|█████     | 11/22 [04:06<04:04, 22.22s/レース]2026-05-19 16:55:04,961 [ERROR] scraper: レースページ読込失敗 race_id=202605021010: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  55%|█████▍    | 12/22 [04:28<03:42, 22.20s/レース]2026-05-19 16:55:27,227 [ERROR] scraper: レースページ読込失敗 race_id=202605021011: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  59%|█████▉    | 13/22 [04:50<03:20, 22.22s/レース]2026-05-19 16:55:49,422 [ERROR] scraper: レースページ読込失敗 race_id=202605021012: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  64%|██████▎   | 14/22 [05:12<02:57, 22.21s/レース]2026-05-19 16:56:11,601 [ERROR] scraper: レースページ読込失敗 race_id=202605021211: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  68%|██████▊   | 15/22 [05:34<02:35, 22.20s/レース]2026-05-19 16:56:33,831 [ERROR] scraper: レースページ読込失敗 race_id=202608030909: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  73%|███████▎  | 16/22 [05:57<02:13, 22.21s/レース]2026-05-19 16:56:56,104 [ERROR] scraper: レースページ読込失敗 race_id=202608030910: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  77%|███████▋  | 17/22 [06:19<01:51, 22.23s/レース]2026-05-19 16:57:18,343 [ERROR] scraper: レースページ読込失敗 race_id=202608030911: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  82%|████████▏ | 18/22 [06:41<01:28, 22.23s/レース]2026-05-19 16:57:40,468 [ERROR] scraper: レースページ読込失敗 race_id=202608030912: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  86%|████████▋ | 19/22 [07:03<01:06, 22.20s/レース]2026-05-19 16:58:02,676 [ERROR] scraper: レースページ読込失敗 race_id=202608031009: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  91%|█████████ | 20/22 [07:25<00:44, 22.20s/レース]2026-05-19 16:58:24,915 [ERROR] scraper: レースページ読込失敗 race_id=202608031010: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick):  95%|█████████▌| 21/22 [07:48<00:22, 22.21s/レース]2026-05-19 16:58:47,114 [ERROR] scraper: レースページ読込失敗 race_id=202608031011: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100f2e584 cxxbridge1$str$ptr + 3225716
+1   chromedriver                        0x0000000100f2645c cxxbridge1$str$ptr + 3192652
+2   chromedriver                        0x00000001009e78f4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 75152
+3   chromedriver                        0x0000000100a2ffe4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 371840
+4   chromedriver                        0x0000000100a6f6e4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 631680
+5   chromedriver                        0x0000000100a259a4 _RNvCsiKAbIcglKMQ_7___rustc35___rust_no_alloc_shim_is_unstable_v2 + 329280
+6   chromedriver                        0x0000000100eeb748 cxxbridge1$str$ptr + 2951736
+7   chromedriver                        0x0000000100eeeea0 cxxbridge1$str$ptr + 2965904
+8   chromedriver                        0x0000000100ed0ad8 cxxbridge1$str$ptr + 2842056
+9   chromedriver                        0x0000000100eef720 cxxbridge1$str$ptr + 2968080
+10  chromedriver                        0x0000000100ec15c8 cxxbridge1$str$ptr + 2779320
+11  chromedriver                        0x0000000100f14dec cxxbridge1$str$ptr + 3121372
+12  chromedriver                        0x0000000100f14f4c cxxbridge1$str$ptr + 3121724
+13  chromedriver                        0x0000000100f260b4 cxxbridge1$str$ptr + 3191716
+14  libsystem_pthread.dylib             0x000000019759fc08 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000019759aba8 thread_start + 8
+
+Race results (quick): 100%|██████████| 22/22 [08:10<00:00, 22.21s/レース]Race results (quick): 100%|██████████| 22/22 [08:10<00:00, 22.29s/レース]
+2026-05-19 16:58:48,632 [INFO] scraper: レース結果収集完了: 0/22件
+2026-05-19 16:58:48,762 [INFO] scraper: Chrome WebDriver 終了
+2026-05-19 16:58:48,763 [INFO] __main__: collect-quick 完了: 0/22

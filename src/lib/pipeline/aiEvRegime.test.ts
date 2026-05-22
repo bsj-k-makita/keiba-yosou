@@ -5,12 +5,11 @@ import type { HorseAbility } from "../../domain/race-evaluation/abilityTypes";
 import { convertToRaceEvaluationData } from "../race-data/convertToRaceEvaluationData";
 import { raceDataToHorses } from "../race-data/raceDataToHorses";
 import {
-  EV_STDEV_THRESHOLD,
-  EV_WORTHLESS_THRESHOLD,
+  WIN_RATE_STDEV_THRESHOLD,
   resolveAiRaceRegime,
 } from "./aiEvRegime";
 
-function horse(id: string, ev: number): HorseAbility {
+function horse(id: string, ev: number, winRate: number = 0.05): HorseAbility {
   return {
     horseId: id,
     horseName: id,
@@ -20,14 +19,18 @@ function horse(id: string, ev: number): HorseAbility {
     kick: 70,
     sustain: 70,
     power: 70,
-    aiPredictedWinRate: 0.05,
+    aiPredictedWinRate: winRate,
     aiEffectiveEv: ev,
   };
 }
 
 describe("resolveAiRaceRegime", () => {
   it("最高EVが閾値以上なら NORMAL", () => {
-    const horses = [horse("a", 0.2), horse("b", -0.05), horse("c", -0.12)];
+    const horses = [
+      horse("a", 0.2, 0.35),
+      horse("b", -0.05, 0.18),
+      horse("c", -0.12, 0.07),
+    ];
     expect(resolveAiRaceRegime(horses)).toBe("NORMAL_AI_REGIME");
   });
 
@@ -38,8 +41,8 @@ describe("resolveAiRaceRegime", () => {
 
   it("最高EVは低いが上位に差があれば NORMAL", () => {
     const horses = [
-      horse("a", -0.05),
-      ...Array.from({ length: 6 }, (_, i) => horse(`b${i}`, -0.15)),
+      horse("a", -0.05, 0.32),
+      ...Array.from({ length: 6 }, (_, i) => horse(`b${i}`, -0.15, 0.04 + i * 0.01)),
     ];
     expect(resolveAiRaceRegime(horses)).toBe("NORMAL_AI_REGIME");
   });
@@ -51,13 +54,13 @@ describe("resolveAiRaceRegime", () => {
     const data = convertToRaceEvaluationData(raw);
     const horses = raceDataToHorses(data);
     expect(resolveAiRaceRegime(horses)).toBe("NO_EV_REGIME");
-    const evs = horses.map((h) => h.aiEffectiveEv).filter((v) => v != null) as number[];
-    expect(Math.max(...evs)).toBeLessThan(EV_WORTHLESS_THRESHOLD);
-    const top7 = [...evs].sort((a, b) => b - a).slice(0, 7);
-    const avg = top7.reduce((s, v) => s + v, 0) / top7.length;
-    const stdev = Math.sqrt(
-      top7.reduce((s, v) => s + (v - avg) ** 2, 0) / top7.length,
-    );
-    expect(stdev).toBeLessThan(EV_STDEV_THRESHOLD);
+    const top7ByEv = [...horses]
+      .filter((h) => h.aiEffectiveEv != null && h.aiPredictedWinRate != null)
+      .sort((a, b) => (b.aiEffectiveEv ?? -Infinity) - (a.aiEffectiveEv ?? -Infinity))
+      .slice(0, 7);
+    const ps = top7ByEv.map((h) => h.aiPredictedWinRate as number);
+    const avgP = ps.reduce((s, v) => s + v, 0) / ps.length;
+    const stdevP = Math.sqrt(ps.reduce((s, v) => s + (v - avgP) ** 2, 0) / ps.length);
+    expect(stdevP).toBeLessThan(WIN_RATE_STDEV_THRESHOLD);
   });
 });

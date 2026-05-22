@@ -106,6 +106,31 @@ def _win_class_from_text(text: str) -> str | None:
     return None
 
 
+def normalize_grade_token(grade: str | None) -> str | None:
+    """
+    外部ソースの raceGrade / grade 表記を race_class ラベルへ正規化する。
+    例: G1, GI, ＧⅠ, jpn1, JpnII, listed, L
+    """
+    if grade is None:
+        return None
+    g = _normalize_text(str(grade)).upper()
+    if not g:
+        return None
+    g = g.replace("JPN", "G")
+
+    if g in {"G1", "GI"}:
+        return "G1"
+    if g in {"G2", "GII"}:
+        return "G2"
+    if g in {"G3", "GIII"}:
+        return "G3"
+    if g in {"L", "LISTED"}:
+        return "L"
+    if g in {"OPEN", "OP"}:
+        return "OP"
+    return None
+
+
 def infer_race_class(title: str = "", info2: str = "") -> str:
     """
     レース名 (title) とレース情報 (info2) から race_class を推定する。

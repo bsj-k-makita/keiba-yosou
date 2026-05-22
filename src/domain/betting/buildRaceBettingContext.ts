@@ -17,9 +17,11 @@ import {
   buildOddsMapForEvEvaluation,
   buildSecondRowNumbers,
   buildThirdRowNumbers,
+  classifyRunningStyleForDiversification,
   countEvRecommendationPoints,
   generateBetTicketsFromEvaluation,
   marksFromResults,
+  resolveRunningStyleDiversifyPattern,
   resolveBettingAdvisoryReason,
   resolvePostProcessFavoriteNumber,
   type MarkedHorseRef,
@@ -78,6 +80,21 @@ function buildEffectiveEvByGate(horses: readonly HorseAbility[]): Map<number, nu
     if (ev != null && Number.isFinite(ev)) {
       map.set(Math.round(gate), ev);
     }
+  }
+  return map;
+}
+
+function buildRunningStyleGroupByGate(
+  horses: readonly HorseAbility[],
+): Map<number, "front" | "mid" | "back" | "other"> {
+  const map = new Map<number, "front" | "mid" | "back" | "other">();
+  const pattern = resolveRunningStyleDiversifyPattern();
+  for (const h of horses) {
+    const gate = (h as HorseAbility & { gate?: number }).gate;
+    if (gate == null || !Number.isFinite(gate)) continue;
+    const style = typeof h.runningStyle === "string" ? h.runningStyle : undefined;
+    const group = classifyRunningStyleForDiversification(style, pattern);
+    map.set(Math.round(gate), group);
   }
   return map;
 }
@@ -164,6 +181,8 @@ export function buildRaceBettingContext(
       probabilityEngine,
       effectiveEvByGate:
         probabilityEngine === "ai" ? buildEffectiveEvByGate(horses) : undefined,
+      runningStyleGroupByGate:
+        probabilityEngine === "ai" ? buildRunningStyleGroupByGate(horses) : undefined,
     },
   );
   const evBetPointCount = countEvRecommendationPoints(evTickets);

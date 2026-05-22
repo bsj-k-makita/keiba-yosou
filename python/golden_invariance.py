@@ -17,6 +17,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
+from collections import Counter
 from pathlib import Path
 
 from config import DB_PATH, MODEL_DIR
@@ -37,8 +38,11 @@ def load_manifest_cols() -> list[str]:
     manifest_path = MODEL_DIR / "feature_manifest.json"
     if manifest_path.is_file():
         data = json.loads(manifest_path.read_text(encoding="utf-8"))
-        return list(data.get("feature_cols", FEATURE_COLS))
-    return list(FEATURE_COLS)
+        cols = list(data.get("feature_cols", FEATURE_COLS))
+    else:
+        cols = list(FEATURE_COLS)
+    # 照合キーは compare_feature_frames 側で使うため、特徴量比較対象からは除外。
+    return [c for c in cols if c not in {"horse_number"}]
 
 
 def main() -> int:
@@ -54,12 +58,13 @@ def main() -> int:
     bridge_ready = 0
     db_only = 0
     failed = 0
+    mismatch_counter: Counter[str] = Counter()
 
     for entry in golden["races"]:
         race_id = entry["race_id"]
         label = entry.get("label", race_id)
         db_df = build_features_from_db(race_id)
-        ts_df = build_features_from_ts_json(race_id)
+        ts_df = build_features_from_ts_json(race_id, parity_use_db=True)
 
         if db_df is None:
             logger.warning("[%s] DB 行なし", race_id)
@@ -86,6 +91,11 @@ def main() -> int:
             bridge_ready += 1
         else:
             failed += 1
+            for m in cmp.get("mismatches", []):
+                if m.get("reason") == "missing_column":
+                    continue
+                col = str(m.get("col") or "unknown")
+                mismatch_counter[col] += 1
 
     out_path = MODEL_DIR / "golden_invariance_report.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -94,6 +104,7 @@ def main() -> int:
         "bridge_pass": bridge_ready,
         "bridge_pending": db_only,
         "failed": failed,
+        "mismatch_top_columns": mismatch_counter.most_common(20),
         "races": results_summary,
     }
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -101,6 +112,9 @@ def main() -> int:
     print("\n" + "=" * 60)
     print("Golden Race Invariance Report")
     print(f"  pass={bridge_ready}  pending(bridge未実装)={db_only}  fail={failed}")
+    if mismatch_counter:
+        top = ", ".join(f"{k}:{v}" for k, v in mismatch_counter.most_common(8))
+        print(f"  mismatch_top_columns: {top}")
     print(f"  written: {out_path}")
     print("=" * 60)
 

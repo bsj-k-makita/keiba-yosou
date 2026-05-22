@@ -2,7 +2,7 @@
 
 import unittest
 
-from race_class import infer_race_class
+from race_class import infer_race_class, normalize_grade_token
 
 
 class TestInferRaceClass(unittest.TestCase):
@@ -46,6 +46,14 @@ class TestInferRaceClass(unittest.TestCase):
 
     def test_listed_before_open_in_name(self) -> None:
         self.assertEqual(infer_race_class("オープン(L)"), "L")
+
+    def test_normalize_grade_token(self) -> None:
+        self.assertEqual(normalize_grade_token("G1"), "G1")
+        self.assertEqual(normalize_grade_token("ＧⅡ"), "G2")
+        self.assertEqual(normalize_grade_token("Jpn3"), "G3")
+        self.assertEqual(normalize_grade_token("Listed"), "L")
+        self.assertEqual(normalize_grade_token("OP"), "OP")
+        self.assertIsNone(normalize_grade_token("S"))
 
 
 if __name__ == "__main__":

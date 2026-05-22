@@ -14,6 +14,8 @@
     "is_outer_frame",
     "is_inner_frame",
     "weight_carried_diff_from_avg",
+    "graded_race_tier",
+    "class_adjusted_score",
     "month",
     "day_of_week",
     "venue",
@@ -51,6 +53,9 @@
     "avg_final3f",
     "final3f_rank",
     "last_final3f_z",
+    "is_g1",
+    "g1_last_final3f_z",
+    "g1_final3f_rank",
     "avg_first_corner"
   ],
   "feature_cols_full": [
@@ -67,6 +72,8 @@
     "is_outer_frame",
     "is_inner_frame",
     "weight_carried_diff_from_avg",
+    "graded_race_tier",
+    "class_adjusted_score",
     "month",
     "day_of_week",
     "venue",
@@ -104,6 +111,9 @@
     "avg_final3f",
     "final3f_rank",
     "last_final3f_z",
+    "is_g1",
+    "g1_last_final3f_z",
+    "g1_final3f_rank",
     "avg_first_corner"
   ],
   "dtypes": {
@@ -120,6 +130,8 @@
     "is_outer_frame": "int64",
     "is_inner_frame": "int64",
     "weight_carried_diff_from_avg": "float64",
+    "graded_race_tier": "float64",
+    "class_adjusted_score": "float64",
     "month": "int32",
     "day_of_week": "int32",
     "venue": "category",
@@ -157,9 +169,12 @@
     "avg_final3f": "float64",
     "final3f_rank": "float64",
     "last_final3f_z": "float64",
+    "is_g1": "float64",
+    "g1_last_final3f_z": "float64",
+    "g1_final3f_rank": "float64",
     "avg_first_corner": "float64"
   },
   "target_col": "target_win",
-  "row_count_train": 1459,
+  "row_count_train": 1621,
   "categorical_unknown_token": "不明"
 }

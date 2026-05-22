@@ -89,6 +89,10 @@ TEST_YEARS = [2024, 2025]   # テスト（評価）に使う年
 ENABLE_EV_SAMPLE_WEIGHT = True
 EV_WEIGHT_CENTER = 0.9
 EV_WEIGHT_TAU = 0.02
+EV_WEIGHT_CENTER_GRADED = 0.75
+EV_WEIGHT_TAU_GRADED = 0.04
+EV_WEIGHT_GRADED_CLASSES = ("G1", "G2")
+EV_WEIGHT_ODDS_CAP = 100.0
 
 
 def resolve_test_years(df, date_col: str = "race_date") -> list[int]:

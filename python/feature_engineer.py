@@ -22,6 +22,19 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+_RACE_CLASS_TIER_MAP = {
+    "未勝利": 0.0,
+    "新馬": 0.0,
+    "1勝クラス": 1.0,
+    "2勝クラス": 2.0,
+    "3勝クラス": 3.0,
+    "OP": 4.0,
+    "L": 5.0,
+    "G3": 6.0,
+    "G2": 7.0,
+    "G1": 8.0,
+}
+
 _FINAL3F_Z_EPS = 1e-6
 
 
@@ -426,7 +439,7 @@ class FeatureEngineer:
         追加特徴量:
         - speed_index: レース内偏差値（finish_time_sec がある場合のみ）
         - last_final3f / avg_final3f: 前走・過去平均の上がり3F（秒）
-        - final3f_rank: 前走レース内の上がり3F順位（1=最速）
+        - final3f_rank: 同レース出走馬内での前走上がり3F順位（1=最速）
         - last_final3f_z: 前走の馬場×距離帯ごとの標準化上がり3F
         """
         if "finish_time_sec" in df.columns:
@@ -469,17 +482,6 @@ class FeatureEngineer:
         if "race_number" not in hr_speed.columns:
             hr_speed["race_number"] = 0
 
-        hr_speed["race_key"] = (
-            hr_speed["race_date"].astype(str)
-            + "_"
-            + hr_speed["venue"]
-            + "_"
-            + hr_speed["race_number"].astype(str)
-        )
-        hr_speed["final3f_inrace_rank"] = hr_speed.groupby("race_key", sort=False)[
-            "final_3f"
-        ].rank(method="min", ascending=True)
-
         ref = hr_speed.dropna(subset=["final_3f"])
         group_stats = (
             ref.groupby(["surface", "ground_state", "distance_cat"], observed=True)[
@@ -499,7 +501,6 @@ class FeatureEngineer:
         # 前走行: shift(1) 後の行（当該レース直前の出走）を merge_asof で master に接続
         prev_run = hr_speed.copy()
         prev_run["last_final3f"] = sgb["final_3f"].shift(1)
-        prev_run["final3f_rank"] = sgb["final3f_inrace_rank"].shift(1)
         prev_run["prev_surface"] = sgb["surface"].shift(1)
         prev_run["prev_ground"] = sgb["ground_state"].shift(1)
         prev_run["prev_distance_cat"] = sgb["distance_cat"].shift(1)
@@ -520,19 +521,39 @@ class FeatureEngineer:
             "race_date",
             "last_final3f",
             "avg_final3f",
-            "final3f_rank",
             "last_final3f_z",
         ]
-        prev_for_asof = prev_run[asof_cols].sort_values(["race_date", "horse_id"])
-        df_sorted = df.sort_values(["race_date", "horse_id"])
-        df_sorted = pd.merge_asof(
-            df_sorted,
-            prev_for_asof,
-            on="race_date",
-            by="horse_id",
-            direction="backward",
-        )
-        df = df_sorted.sort_index()
+        prev_for_asof = prev_run[asof_cols].dropna(subset=["race_date"]).sort_values(["race_date", "horse_id"])
+
+        # merge_asof は key 列の NaT を許容しないため、左辺も非NaTのみで実行して戻す
+        df_base = df.copy()
+        df_sorted = df_base.sort_values(["race_date", "horse_id"])
+        valid_left = df_sorted[df_sorted["race_date"].notna()].copy()
+        invalid_left = df_sorted[df_sorted["race_date"].isna()].copy()
+
+        if not valid_left.empty and not prev_for_asof.empty:
+            valid_left = pd.merge_asof(
+                valid_left,
+                prev_for_asof,
+                on="race_date",
+                by="horse_id",
+                direction="backward",
+            )
+        else:
+            for col in ("last_final3f", "avg_final3f", "last_final3f_z"):
+                if col not in valid_left.columns:
+                    valid_left[col] = np.nan
+
+        merged = pd.concat([valid_left, invalid_left], axis=0).sort_index()
+        df = merged
+
+        if "race_id" in df.columns:
+            df["final3f_rank"] = df.groupby("race_id", sort=False)["last_final3f"].rank(
+                method="min",
+                ascending=True,
+            )
+        else:
+            df["final3f_rank"] = np.nan
 
         med_f3f = (
             float(df["last_final3f"].median())
@@ -598,6 +619,34 @@ class FeatureEngineer:
 
         if "popularity" in df.columns and "horse_count" in df.columns:
             df["popularity_ratio"] = df["popularity"] / df["horse_count"].replace(0, 1)
+
+        # クラスの段階を数値化（G1/G2文脈の識別用）
+        race_class = df.get("race_class", pd.Series("", index=df.index)).astype(str)
+        df["graded_race_tier"] = race_class.map(_RACE_CLASS_TIER_MAP).fillna(0.0).astype(float)
+        df["is_g1"] = race_class.eq("G1").astype(float)
+
+        # G1限定で上がり相対値を独立学習できる交差特徴量
+        last_f3f_z = pd.to_numeric(
+            df.get("last_final3f_z", pd.Series(0.0, index=df.index)),
+            errors="coerce",
+        ).fillna(0.0)
+        f3f_rank = pd.to_numeric(
+            df.get("final3f_rank", pd.Series(0.0, index=df.index)),
+            errors="coerce",
+        ).fillna(0.0)
+        df["g1_last_final3f_z"] = df["is_g1"] * last_f3f_z
+        df["g1_final3f_rank"] = df["is_g1"] * f3f_rank
+
+        # 前走近傍フォームをクラス文脈で補正（同じ着順でも重賞実績を相対的に高評価）
+        recent3 = pd.to_numeric(
+            df.get("horse_recent3_avg", pd.Series(np.nan, index=df.index)),
+            errors="coerce",
+        ).fillna(8.0)
+        recent3_score = (1.0 - ((recent3 - 1.0) / 17.0)).clip(0.0, 1.0)
+        base_score = df["graded_race_tier"] * recent3_score
+        grp_mean = base_score.groupby(df["race_id"]).transform("mean")
+        grp_std = base_score.groupby(df["race_id"]).transform("std").replace(0, np.nan)
+        df["class_adjusted_score"] = ((base_score - grp_mean) / grp_std).fillna(0.0)
 
         return df
 

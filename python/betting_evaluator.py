@@ -366,7 +366,7 @@ class BettingEvaluator:
         # レース内の各馬の確率の合計を1に正規化する。
         # ----------------------------------------------------------
         df["prob_normalized"] = df.groupby("race_id")["calibrated_prob"].transform(
-            lambda x: x / x.sum().clip(lower=1e-9)
+            lambda x: x / max(float(x.sum()), 1e-9)
         )
 
         # ----------------------------------------------------------
