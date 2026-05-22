@@ -5,11 +5,11 @@ import { resolvePlaceToHorseId } from "../../domain/race-evaluation/markHitAnaly
 import { buildPayoutFallbackOddsMap } from "../../domain/betting/bettingRules";
 import { buildRaceBettingContext } from "../../domain/betting/buildRaceBettingContext";
 import { getEffectiveEvaluationSignals } from "../../domain/race-evaluation/resolveEvaluationSignals";
-import { calculateRacePayout, lookupOfficialDividend } from "../../domain/betting/payoutCalculator";
+import {
+  calculateRacePayout,
+} from "../../domain/betting/payoutCalculator";
 import type { RaceOfficialPayoutRow } from "../../lib/race-data/raceEvaluationTypes";
 import { analyzeSecondRowStatus } from "../../domain/betting/secondRowAnalysis";
-import { ticketResultText } from "../../domain/betting/ticketOutcomeDisplay";
-import { BET_TICKET_TYPES, type BetTicketType } from "../../domain/betting/types";
 import { ensureRaceResultFetched } from "../../lib/race-data";
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
 import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
@@ -44,13 +44,6 @@ function clearManualResult(raceId: string) {
   } catch {
     // ignore
   }
-}
-
-function ticketTypeName(t: BetTicketType): string {
-  if (t === "WIN") return "単勝◎";
-  if (t === "MAIN_LINE") return "馬連EV（◎軸）";
-  if (t === "WIDE") return "ワイドEV（◎軸）";
-  return "3連複EV（◎軸）";
 }
 
 function formatOfficialPayoutRow(row: RaceOfficialPayoutRow): string {
@@ -370,92 +363,9 @@ export function RaceResultAnalysis({
           )}
 
           {payoutRow && !isEvSkip && (
-            <table className="horse-list result-analysis-view__table">
-              <thead>
-                <tr>
-                  <th>券種</th>
-                  <th>投資</th>
-                  <th>払戻</th>
-                  <th>回収率</th>
-                  <th>結果</th>
-                </tr>
-              </thead>
-              <tbody>
-                {BET_TICKET_TYPES.map((type) => {
-                  const d = payoutRow.byType[type];
-                  const purchasedHit = d.hitCount > 0;
-                  const ticket = ctx?.evTickets.find((t) => t.ticketType === type);
-                  const hitComb = purchasedHit && ticket
-                    ? ticket.combinations.find((comb) => {
-                        if (type === "WIN") return finishOrder[0] === comb[0];
-                        if (type === "MAIN_LINE") {
-                          const top2 = new Set(finishOrder.slice(0, 2));
-                          return top2.has(comb[0]!) && top2.has(comb[1]!);
-                        }
-                        if (type === "WIDE") {
-                          const top3 = new Set(finishOrder.slice(0, 3));
-                          return top3.has(comb[0]!) && top3.has(comb[1]!);
-                        }
-                        const top3 = new Set(finishOrder.slice(0, 3));
-                        return top3.has(comb[0]!) && top3.has(comb[1]!) && top3.has(comb[2]!);
-                      })
-                    : undefined;
-                  const officialDiv =
-                    hitComb != null
-                      ? lookupOfficialDividend(officialPayouts, type, hitComb)
-                      : null;
-                  return (
-                    <tr
-                      key={type}
-                      className={
-                        purchasedHit ? "result-analysis-view__row--hit" : "result-analysis-view__row--miss"
-                      }
-                    >
-                      <td>
-                        {ticketTypeName(type)}
-                        {hitComb != null && (
-                          <span className="result-analysis-view__hit-comb">
-                            {" "}
-                            {hitComb.join("-")}
-                            {officialDiv != null ? `（${officialDiv.toLocaleString()}円）` : ""}
-                          </span>
-                        )}
-                        {d.estimatedPayout && type !== "WIN" && (
-                          <span className="result-analysis-view__payout-warn"> 払戻未取得</span>
-                        )}
-                      </td>
-                      <td>{d.invested.toLocaleString()}円</td>
-                      <td>{d.payout.toLocaleString()}円</td>
-                      <td className={d.rate >= 100 ? "result-analysis-view__rate--plus" : ""}>
-                        {d.rate}%
-                      </td>
-                      <td>
-                        {ticketResultText(purchasedHit, d.payout)}
-                      </td>
-                    </tr>
-                  );
-                })}
-                <tr className="result-analysis-view__row--total">
-                  <td>合計</td>
-                  <td>{payoutRow.totalInvested.toLocaleString()}円</td>
-                  <td>{payoutRow.totalPayout.toLocaleString()}円</td>
-                  <td
-                    className={
-                      payoutRow.totalInvested > 0 &&
-                      payoutRow.totalPayout / payoutRow.totalInvested >= 1
-                        ? "result-analysis-view__rate--plus"
-                        : ""
-                    }
-                  >
-                    {payoutRow.totalInvested > 0
-                      ? Math.round((payoutRow.totalPayout / payoutRow.totalInvested) * 1000) / 10
-                      : 0}
-                    %
-                  </td>
-                  <td>{payoutRow.totalPayout > 0 ? "🎯" : "—"}</td>
-                </tr>
-              </tbody>
-            </table>
+            <p className="app__meta">
+              券種ごとの投資・払戻・的中判定は上部の「買い目ダッシュボード」で表示しています。
+            </p>
           )}
 
           {secondStatus && (

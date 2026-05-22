@@ -194,6 +194,22 @@ async function computeListBettingStats(rows: RaceIndexItem[], limit = 30): Promi
   };
 }
 
+async function computeOutcomeMapForRaceIds(
+  raceIds: readonly string[],
+): Promise<Record<string, RaceBettingOutcome>> {
+  const entries = await Promise.all(
+    raceIds.map(async (raceId): Promise<[string, RaceBettingOutcome] | null> => {
+      try {
+        const outcome = await computeRaceBettingOutcomeById(raceId);
+        return outcome != null ? [raceId, outcome] : null;
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return Object.fromEntries(entries.filter((v): v is [string, RaceBettingOutcome] => v != null));
+}
+
 /** ◎〜▲ の試行をまとめた全体複勝圏（3着以内）的中率 */
 function formatPooledHitRate(marks: MarkSummary[]): string {
   let hit = 0;
@@ -342,13 +358,17 @@ export function RacesListPage() {
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
       if (cancelled || rows == null) return;
-      const [markStats, betStats] = await Promise.all([
+      const [markStats, betStats, refreshedOutcomeMap] = await Promise.all([
         computeListHitStats(rows, 30),
         computeListBettingStats(rows, 30),
+        computeOutcomeMapForRaceIds(racesOnActiveDate.map((r) => r.raceId)),
       ]);
       if (!cancelled) {
         setHitStats(markStats);
         setBettingStats(betStats);
+        if (Object.keys(refreshedOutcomeMap).length > 0) {
+          setOutcomeMap((prev) => ({ ...prev, ...refreshedOutcomeMap }));
+        }
       }
     })();
     return () => {
@@ -386,12 +406,16 @@ export function RacesListPage() {
     );
     if (rows != null && rows.length > 0) {
       setHitStatsLoading(true);
-      const [markStats, betStats] = await Promise.all([
+      const [markStats, betStats, refreshedOutcomeMap] = await Promise.all([
         computeListHitStats(rows, 30),
         computeListBettingStats(rows, 30),
+        computeOutcomeMapForRaceIds(racesOnActiveDate.map((r) => r.raceId)),
       ]);
       setHitStats(markStats);
       setBettingStats(betStats);
+      if (Object.keys(refreshedOutcomeMap).length > 0) {
+        setOutcomeMap((prev) => ({ ...prev, ...refreshedOutcomeMap }));
+      }
       setHitStatsLoading(false);
     }
     setBulkLoading(false);
@@ -447,16 +471,14 @@ export function RacesListPage() {
 
   useEffect(() => {
     if (activeRaces.length === 0) return;
-    const missing = activeRaces.map((r) => r.raceId).filter((id) => outcomeMap[id] == null);
-    if (missing.length === 0) return;
 
     let live = true;
     void (async () => {
       const entries = await Promise.all(
-        missing.map(async (raceId): Promise<[string, RaceBettingOutcome] | null> => {
+        activeRaces.map(async (race): Promise<[string, RaceBettingOutcome] | null> => {
           try {
-            const o = await computeRaceBettingOutcomeById(raceId);
-            return o != null ? [raceId, o] : null;
+            const o = await computeRaceBettingOutcomeById(race.raceId);
+            return o != null ? [race.raceId, o] : null;
           } catch {
             return null;
           }
@@ -471,7 +493,7 @@ export function RacesListPage() {
     return () => {
       live = false;
     };
-  }, [activeRaces, outcomeMap]);
+  }, [activeRaces]);
 
   if (err != null) {
     return (

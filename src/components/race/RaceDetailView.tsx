@@ -635,6 +635,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
 
           {tab === "bets" && (
             <RaceBettingDashboard
+              raceId={race.raceId}
               results={results}
               horses={horses}
               condition={evalCondition}
@@ -646,16 +647,28 @@ export function RaceDetailView({ race, raceIndex }: Props) {
           )}
 
           {tab === "result" && (
-            <RaceResultAnalysis
-              raceId={race.raceId}
-              results={results}
-              horses={horses}
-              condition={evalCondition}
-              adjustedProbabilities={pipeline.adjustedProbabilities}
-              isSkippableRace={pipeline.isSkippableRace}
-              probabilityEngine={pipeline.probabilityEngine}
-              noAiEvRegime={isNoAiEvRegime}
-            />
+            <>
+              <RaceBettingDashboard
+                raceId={race.raceId}
+                results={results}
+                horses={horses}
+                condition={evalCondition}
+                adjustedProbabilities={pipeline.adjustedProbabilities}
+                isSkippableRace={pipeline.isSkippableRace}
+                probabilityEngine={pipeline.probabilityEngine}
+                noAiEvRegime={isNoAiEvRegime}
+              />
+              <RaceResultAnalysis
+                raceId={race.raceId}
+                results={results}
+                horses={horses}
+                condition={evalCondition}
+                adjustedProbabilities={pipeline.adjustedProbabilities}
+                isSkippableRace={pipeline.isSkippableRace}
+                probabilityEngine={pipeline.probabilityEngine}
+                noAiEvRegime={isNoAiEvRegime}
+              />
+            </>
           )}
 
         </div>

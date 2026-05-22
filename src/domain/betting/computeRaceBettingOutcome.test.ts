@@ -11,6 +11,7 @@ import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline
 import { buildRaceBettingContextFromPipeline } from "./buildRaceBettingContext";
 import { calculateRacePayout } from "./payoutCalculator";
 import { computeRaceBettingOutcome } from "./computeRaceBettingOutcome";
+import { runBacktestOnRace } from "./runBacktest";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -85,13 +86,59 @@ describe("computeRaceBettingOutcome", () => {
       ...p,
       horseId: `missing-${p.horseId}`,
       horseNumber: horseNumberById.get(p.horseId) ?? undefined,
-    }));
+    })) as unknown as RaceResultData["places"];
     const brokenResult: RaceResultData = {
       ...result,
       places: brokenPlaces,
     };
     const outcome = computeRaceBettingOutcome(results, horses, data.condition, brokenResult);
     expect(outcome?.status).toBe("resolved");
+  });
+
+  test("着順が horseId/horseName で解決不能でも horseNumber があれば resolved になる", () => {
+    const { data, horses, results, result } = loadRacePair("202605020803");
+    const brokenResult: RaceResultData = {
+      ...result,
+      places: [
+        { place: 1, horseId: "unknown-1", horseName: "不明A", horseNumber: 21 },
+        { place: 2, horseId: "unknown-2", horseName: "不明B", horseNumber: 22 },
+        { place: 3, horseId: "unknown-3", horseName: "不明C", horseNumber: 23 },
+      ] as unknown as RaceResultData["places"],
+    };
+    const outcome = computeRaceBettingOutcome(results, horses, data.condition, brokenResult);
+    expect(outcome?.status).toBe("resolved");
+  });
+
+  test("一覧判定とBT判定は horseNumber フォールバック時も resolved で一致する", () => {
+    const { data, horses, results, result } = loadRacePair("202605020803");
+    const brokenResult: RaceResultData = {
+      ...result,
+      places: [
+        { place: 1, horseId: "unknown-1", horseName: "不明A", horseNumber: 21 },
+        { place: 2, horseId: "unknown-2", horseName: "不明B", horseNumber: 22 },
+        { place: 3, horseId: "unknown-3", horseName: "不明C", horseNumber: 23 },
+      ] as unknown as RaceResultData["places"],
+    };
+
+    const listOutcome = computeRaceBettingOutcome(results, horses, data.condition, brokenResult);
+    const bt = runBacktestOnRace({
+      raceId: brokenResult.raceId,
+      meta: {
+        date: data.raceInfo.date,
+        venue: data.raceInfo.venue,
+        raceNumber: data.raceInfo.raceNumber,
+        raceName: data.raceInfo.raceName ?? undefined,
+        surface: data.raceInfo.surface,
+        distance: data.raceInfo.distance,
+      },
+      condition: data.condition,
+      horses: [...horses],
+      places: brokenResult.places,
+      payouts: brokenResult.payouts,
+    });
+
+    expect(listOutcome?.status).toBe("resolved");
+    expect(bt?.result.skippedReason).not.toBe("insufficient_results");
   });
 
   test("202608030806: 馬連は公式配当6-8のみ的中し、EV推奨に6-8が含まれる", () => {
@@ -124,5 +171,12 @@ describe("computeRaceBettingOutcome", () => {
     });
     expect(payout.byType.MAIN_LINE.hitCount).toBe(1);
     expect(payout.byType.MAIN_LINE.payout).toBe(2360);
+  });
+
+  test("202604010601: 回収判定は pending にならず resolved になる", () => {
+    const { data, horses, results, result } = loadRacePair("202604010601");
+    const outcome = computeRaceBettingOutcome(results, horses, data.condition, result);
+    expect(outcome).not.toBeNull();
+    expect(outcome?.status).toBe("resolved");
   });
 });
