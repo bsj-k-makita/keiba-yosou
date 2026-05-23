@@ -312,7 +312,23 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     const snap = pipeline.pendingMarkSnapshot;
     if (snap == null) return;
     saveMarkSnapshotToLocalStorage(race.raceId, snap);
-    setMarkSnapshot(snap);
+    setMarkSnapshot((prev) => {
+      if (prev != null && prev.frozenAt === snap.frozenAt) {
+        const prevKeys = Object.keys(prev.marksByHorseId).sort().join();
+        const nextKeys = Object.keys(snap.marksByHorseId).sort().join();
+        if (prevKeys === nextKeys) {
+          let same = true;
+          for (const k of Object.keys(snap.marksByHorseId)) {
+            if (prev.marksByHorseId[k] !== snap.marksByHorseId[k]) {
+              same = false;
+              break;
+            }
+          }
+          if (same) return prev;
+        }
+      }
+      return snap;
+    });
   }, [pipeline.pendingMarkSnapshot, race.raceId]);
   const evGateNumbers = useMemo(() => {
     if (evalCondition == null) return new Set<number>();

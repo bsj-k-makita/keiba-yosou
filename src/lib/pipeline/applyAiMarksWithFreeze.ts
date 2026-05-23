@@ -41,7 +41,8 @@ export function applyAiMarksWithFreeze(
       results,
       marksFrozen: false,
       usedStoredSnapshot: false,
-      createdSnapshot: marksToSnapshot(results),
+      /** 固定前は印を毎回再計算。スナップショット保存は固定開始時のみ。 */
+      createdSnapshot: null,
     };
   }
 

@@ -117,20 +117,31 @@ export function HorseListTable({
   );
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
   const prevTopsRef = useRef<Map<string, number>>(new Map());
+  const tbodyRef = useRef<HTMLTableSectionElement>(null);
+  const sortOrderKey = useMemo(() => sorted.map((r) => r.horseId).join("\0"), [sorted]);
 
+  /** 印順の入れ替え時のみ FLIP。viewport 座標はスクロールで変わるため offsetTop を使う。 */
   useLayoutEffect(() => {
+    const tbody = tbodyRef.current;
+    if (!tbody) return;
+
     const nextTops = new Map<string, number>();
     const timers: number[] = [];
+    const tbodyTop = tbody.offsetTop;
+
     for (const [horseId, el] of rowRefs.current.entries()) {
-      nextTops.set(horseId, el.getBoundingClientRect().top);
+      nextTops.set(horseId, el.offsetTop - tbodyTop);
     }
+
+    const hadPrevious = prevTopsRef.current.size > 0;
+
     for (const row of sorted) {
       const el = rowRefs.current.get(row.horseId);
       const prevTop = prevTopsRef.current.get(row.horseId);
       const nextTop = nextTops.get(row.horseId);
       if (!el || prevTop == null || nextTop == null) continue;
       const delta = prevTop - nextTop;
-      if (Math.abs(delta) < 1) continue;
+      if (!hadPrevious || Math.abs(delta) < 1) continue;
       el.style.transition = "none";
       el.style.transform = `translateY(${delta}px)`;
       requestAnimationFrame(() => {
@@ -147,7 +158,7 @@ export function HorseListTable({
     return () => {
       for (const timer of timers) window.clearTimeout(timer);
     };
-  }, [sorted]);
+  }, [sortOrderKey]);
 
   return (
     <div className="horse-list-wrap">
@@ -220,7 +231,7 @@ export function HorseListTable({
             {onToggleExpand && <th className="horse-list__th horse-list__th--expand" aria-label="詳細" />}
           </tr>
         </thead>
-        <tbody>
+        <tbody ref={tbodyRef}>
           {sorted.map((r) => {
             const horse = horseMap.get(r.horseId);
             if (!horse) return null;

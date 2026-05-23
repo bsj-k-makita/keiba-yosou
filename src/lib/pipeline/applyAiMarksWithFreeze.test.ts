@@ -88,6 +88,6 @@ describe("applyAiMarksWithFreeze", () => {
     });
     expect(applied.marksFrozen).toBe(false);
     expect(applied.results.find((r) => r.mark === "◎")?.horseId).toBe("b");
-    expect(applied.createdSnapshot).not.toBeNull();
+    expect(applied.createdSnapshot).toBeNull();
   });
 });
