@@ -37,7 +37,7 @@ from urllib3.util.retry import Retry
 
 from race_class import infer_race_class
 from config import (
-    BASE_URL, RACE_URL, HORSE_URL, PED_URL,
+    BASE_URL, RACE_URL, RACE_RESULT_URL, HORSE_URL, PED_URL,
     REQUEST_INTERVAL, REQUEST_TIMEOUT, MAX_RETRY,
     HEADLESS, TARGET_YEARS,
     DB_PATH, LOG_FILE, LOG_LEVEL,
@@ -472,23 +472,25 @@ class Scraper:
             if has_info and has_odds and has_valid_payout:
                 return True
 
-        url = RACE_URL.format(race_id=race_id)
-        driver = self._get_driver()
-
-        try:
-            driver.get(url)
-            # レース結果テーブルが描画されるまで待機
-            WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, "table.race_table_01, table.Tx_r")
+        soup = self._fetch_race_soup_http(race_id)
+        if soup is None:
+            url = RACE_URL.format(race_id=race_id)
+            driver = self._get_driver()
+            try:
+                driver.get(url)
+                WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "table.race_table_01, table.Tx_r")
+                    )
                 )
-            )
-            time.sleep(0.5)  # 追加描画の余裕
-            soup = BeautifulSoup(driver.page_source, "html.parser")
-        except Exception as e:
-            logger.error("レースページ読込失敗 race_id=%s: %s", race_id, e)
-            return False
-        finally:
+                time.sleep(0.5)
+                soup = BeautifulSoup(driver.page_source, "html.parser")
+            except Exception as e:
+                logger.error("レースページ読込失敗 race_id=%s: %s", race_id, e)
+                return False
+            finally:
+                time.sleep(REQUEST_INTERVAL)
+        else:
             time.sleep(REQUEST_INTERVAL)
 
         # 解析
@@ -624,7 +626,168 @@ class Scraper:
             logger.error("race_info解析エラー race_id=%s: %s", race_id, e)
             return None
 
+    def _fetch_race_soup_http(self, race_id: str) -> BeautifulSoup | None:
+        """race.netkeiba.com 結果ページを requests で取得（Selenium 不要）。"""
+        url = RACE_RESULT_URL.format(race_id=race_id)
+        try:
+            resp = self.session.get(url, timeout=REQUEST_TIMEOUT)
+            resp.encoding = "euc-jp"
+            soup = BeautifulSoup(resp.text, "html.parser")
+            if soup.select_one(
+                "table.race_table_01, #All_Result_Table, .RaceTable01"
+            ):
+                return soup
+        except Exception as e:
+            logger.warning("HTTP結果ページ取得失敗 race_id=%s: %s", race_id, e)
+        return None
+
     def _parse_race_results(self, soup: BeautifulSoup, race_id: str) -> pd.DataFrame:
+        """
+        レース結果テーブルを解析してDataFrameを返す。
+        db.netkeiba race_table_01 と race.netkeiba RaceTable01 の両方に対応。
+        """
+        table = soup.select_one("table.race_table_01")
+        if table is not None:
+            return self._parse_race_results_legacy(table, race_id)
+        table = soup.select_one("#All_Result_Table, .RaceTable01")
+        if table is not None:
+            return self._parse_race_results_modern(table, race_id)
+        logger.warning("race result table not found: %s", race_id)
+        return pd.DataFrame()
+
+    def _parse_race_results_modern(self, table, race_id: str) -> pd.DataFrame:
+        """race.netkeiba.com RaceTable01（ヘッダー行ベース）。"""
+        header_cells = [
+            th.get_text(strip=True).replace(" ", "")
+            for th in table.select("thead tr th")
+        ]
+
+        def col_idx(label: str) -> int:
+            for i, h in enumerate(header_cells):
+                if h == label or label in h:
+                    return i
+            return -1
+
+        i_finish = col_idx("着順")
+        if i_finish < 0:
+            i_finish = col_idx("入線")
+        i_frame = col_idx("枠")
+        i_horse_num = col_idx("馬番")
+        i_horse_name = col_idx("馬名")
+        i_sex_age = col_idx("性齢")
+        i_weight = col_idx("斤量")
+        i_jockey = col_idx("騎手")
+        i_time = col_idx("タイム")
+        i_margin = col_idx("着差")
+        i_pop = col_idx("人気")
+        i_odds = col_idx("単勝オッズ")
+        if i_odds < 0:
+            i_odds = col_idx("オッズ")
+        i_body = col_idx("馬体重")
+        i_trainer = col_idx("厩舎")
+        if i_trainer < 0:
+            i_trainer = col_idx("調教師")
+
+        rows = []
+        for tr in table.select("tbody tr"):
+            tds = tr.select("td")
+            if len(tds) < 8 or i_finish < 0:
+                continue
+            try:
+                finish_text = tds[i_finish].get_text(strip=True)
+                if not re.match(r"^\d{1,2}$", finish_text):
+                    continue
+                finish_pos = int(finish_text)
+
+                horse_link = tr.select_one("a[href*='/horse/']")
+                horse_id = ""
+                if horse_link:
+                    m = re.search(r"/horse/(\w+)/?", horse_link.get("href", ""))
+                    horse_id = m.group(1) if m else ""
+
+                jockey_link = tr.select_one("a[href*='/jockey/']")
+                jockey_id = ""
+                if jockey_link:
+                    m = re.search(r"/jockey/(?:result/recent/)?(\w+)/?", jockey_link.get("href", ""))
+                    jockey_id = m.group(1) if m else ""
+
+                trainer_link = tr.select_one("a[href*='/trainer/']")
+                trainer_id = ""
+                trainer_name = ""
+                if trainer_link:
+                    m = re.search(r"/trainer/(\w+)/?", trainer_link.get("href", ""))
+                    trainer_id = m.group(1) if m else ""
+                    trainer_name = trainer_link.get_text(strip=True)
+                elif i_trainer >= 0 and i_trainer < len(tds):
+                    trainer_name = tds[i_trainer].get_text(strip=True)
+
+                sex, age = "", None
+                if i_sex_age >= 0 and i_sex_age < len(tds):
+                    sex_age = tds[i_sex_age].get_text(strip=True)
+                    sex_m = re.match(r"[牡牝セ騸]", sex_age)
+                    sex = sex_m.group(0) if sex_m else ""
+                    age_m = re.search(r"\d+", sex_age)
+                    age = int(age_m.group(0)) if age_m else None
+
+                body_weight, body_weight_diff = None, None
+                if i_body >= 0 and i_body < len(tds):
+                    weight_text = tds[i_body].get_text(strip=True)
+                    mw = re.match(r"(\d+)\(([+-]?\d+)\)", weight_text)
+                    if mw:
+                        body_weight = int(mw.group(1))
+                        body_weight_diff = int(mw.group(2))
+
+                finish_time_str = (
+                    tds[i_time].get_text(strip=True) if i_time >= 0 and i_time < len(tds) else ""
+                )
+
+                rows.append({
+                    "race_id": race_id,
+                    "finish_pos": finish_pos,
+                    "frame_number": self._to_int(
+                        tds[i_frame].get_text(strip=True) if i_frame >= 0 else None
+                    ),
+                    "horse_number": self._to_int(
+                        tds[i_horse_num].get_text(strip=True) if i_horse_num >= 0 else None
+                    ),
+                    "horse_id": horse_id,
+                    "horse_name": (
+                        tds[i_horse_name].get_text(strip=True)
+                        if i_horse_name >= 0
+                        else (horse_link.get_text(strip=True) if horse_link else "")
+                    ),
+                    "sex": sex,
+                    "age": age,
+                    "weight_carried": self._to_float(
+                        tds[i_weight].get_text(strip=True) if i_weight >= 0 else None
+                    ),
+                    "jockey_id": jockey_id,
+                    "jockey_name": (
+                        tds[i_jockey].get_text(strip=True) if i_jockey >= 0 else ""
+                    ),
+                    "finish_time": finish_time_str,
+                    "finish_time_sec": self._time_to_sec(finish_time_str),
+                    "margin": (
+                        tds[i_margin].get_text(strip=True) if i_margin >= 0 else ""
+                    ),
+                    "odds": self._to_float(
+                        tds[i_odds].get_text(strip=True) if i_odds >= 0 else None
+                    ),
+                    "popularity": self._to_int(
+                        tds[i_pop].get_text(strip=True) if i_pop >= 0 else None
+                    ),
+                    "body_weight": body_weight,
+                    "body_weight_diff": body_weight_diff,
+                    "trainer_id": trainer_id,
+                    "trainer_name": trainer_name,
+                    "prize": None,
+                })
+            except Exception as e:
+                logger.debug("modern row parse error race_id=%s: %s", race_id, e)
+                continue
+        return pd.DataFrame(rows)
+
+    def _parse_race_results_legacy(self, table, race_id: str) -> pd.DataFrame:
         """
         race_table_01 を解析してDataFrameを返す。
 
@@ -632,11 +795,6 @@ class Scraper:
           0-8: 着順〜着差 / 9-13: 各種指数 / 14:通過 15:上り
           16:単勝 17:人気 18:馬体重 / 22:調教師 23:馬主 24:賞金
         """
-        table = soup.select_one("table.race_table_01")
-        if table is None:
-            logger.warning("race_table_01 not found: %s", race_id)
-            return pd.DataFrame()
-
         rows = []
         for tr in table.select("tr")[1:]:
             tds = tr.select("td")

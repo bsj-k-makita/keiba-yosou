@@ -27,6 +27,7 @@ DB_PATH = DB_DIR / "keiba.db"
 # ============================================================
 BASE_URL = "https://db.netkeiba.com"
 RACE_URL = BASE_URL + "/race/{race_id}/"
+RACE_RESULT_URL = "https://race.netkeiba.com/race/result.html?race_id={race_id}"
 HORSE_URL = BASE_URL + "/horse/{horse_id}/"
 PED_URL = BASE_URL + "/horse/ped/{horse_id}/"
 
