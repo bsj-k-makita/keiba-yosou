@@ -1,11 +1,33 @@
 import { describe, expect, it } from "vitest";
-import type { HorseAbility, HorseScoreResult } from "../../domain/race-evaluation/abilityTypes";
+import type {
+  HorseAbility,
+  HorseScoreResult,
+  InvestmentCommentInput,
+} from "../../domain/race-evaluation/abilityTypes";
 import {
   AI_MARK_SLOTS,
   applyAiMarksByEffectiveEv,
   raceHasFullAiBackfill,
   sortResultsForAiDisplay,
 } from "./aiMarkAssignment";
+
+function investment(
+  overrides: Pick<InvestmentCommentInput, "predictedWinRate" | "finalExpectedValue"> &
+    Partial<InvestmentCommentInput>,
+): InvestmentCommentInput {
+  return {
+    predictedProbability: overrides.predictedWinRate ?? 0.1,
+    predictedWinRate: overrides.predictedWinRate,
+    finalExpectedValue: overrides.finalExpectedValue,
+    actualOdds: overrides.actualOdds ?? 10,
+    valueRank: overrides.valueRank ?? "B",
+    betType: overrides.betType ?? "見送り",
+    valueChange: overrides.valueChange ?? "STABLE",
+    keyFactors: overrides.keyFactors ?? [],
+    riskFactors: overrides.riskFactors ?? [],
+    ...overrides,
+  };
+}
 
 function horse(id: string, ev: number, rate = 0.1): HorseAbility {
   return {
@@ -111,11 +133,11 @@ describe("aiMarkAssignment", () => {
     const horses = [
       {
         ...horse("ai_ev_top", 2.2, 0.12),
-        investment: { predictedWinRate: 0.05, finalExpectedValue: 1.0 },
+        investment: investment({ predictedWinRate: 0.05, finalExpectedValue: 1.0 }),
       },
       {
         ...horse("ts_anchor", 1.0, 0.09),
-        investment: { predictedWinRate: 0.11, finalExpectedValue: 1.6 },
+        investment: investment({ predictedWinRate: 0.11, finalExpectedValue: 1.6 }),
       },
     ];
     const results = applyAiMarksByEffectiveEv(
