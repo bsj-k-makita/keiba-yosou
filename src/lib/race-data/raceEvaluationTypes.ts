@@ -34,6 +34,8 @@ export type RaceIndexItem = {
 export type AiMarkSnapshot = {
   frozenAt: string;
   marksByHorseId: Record<string, string>;
+  /** 印ロジック改定時に increment。不一致ならスナップショットを破棄して再計算 */
+  logicVersion?: number;
 };
 
 export type RaceInfo = {

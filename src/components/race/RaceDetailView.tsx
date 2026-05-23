@@ -32,6 +32,8 @@ import {
 import {
   loadMarkSnapshotFromLocalStorage,
   saveMarkSnapshotToLocalStorage,
+  isValidMarkSnapshot,
+  clearStaleMarkSnapshotsFromLocalStorage,
 } from "../../lib/race-data/markSnapshotStorage";
 import {
   formatPostTimeLabel,
@@ -272,9 +274,16 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedEngine = parseProbabilityEngine(searchParams.get("engine"));
   const aiDataAvailable = useMemo(() => raceHasAiEngineReady(horses), [horses]);
-  const [markSnapshot, setMarkSnapshot] = useState<AiMarkSnapshot | null>(
-    () => race.raceInfo.aiMarkSnapshot ?? loadMarkSnapshotFromLocalStorage(race.raceId) ?? null,
-  );
+  const [markSnapshot, setMarkSnapshot] = useState<AiMarkSnapshot | null>(() => {
+    const fromRace = race.raceInfo.aiMarkSnapshot;
+    const fromStorage = loadMarkSnapshotFromLocalStorage(race.raceId);
+    const snap = fromRace ?? fromStorage;
+    return isValidMarkSnapshot(snap) ? snap : null;
+  });
+
+  useEffect(() => {
+    clearStaleMarkSnapshotsFromLocalStorage();
+  }, []);
 
   const setProbabilityEngine = useCallback(
     (engine: ProbabilityEngine) => {
@@ -723,6 +732,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
               horses={horses}
               results={results}
               peers={peers}
+              probabilityEngine={pipeline.probabilityEngine}
             />
           </aside>
         )}

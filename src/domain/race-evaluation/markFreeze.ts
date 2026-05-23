@@ -63,7 +63,10 @@ export function isMarkFrozen(input: RacePostTimeInput, now: Date = new Date()): 
   return now.getTime() >= markFreezeStartsAtMs(input);
 }
 
-export function marksToSnapshot(results: readonly HorseScoreResult[]): AiMarkSnapshot {
+export function marksToSnapshot(
+  results: readonly HorseScoreResult[],
+  logicVersion?: number,
+): AiMarkSnapshot {
   const marksByHorseId: Record<string, string> = {};
   for (const r of results) {
     if (r.mark) marksByHorseId[r.horseId] = r.mark;
@@ -71,6 +74,7 @@ export function marksToSnapshot(results: readonly HorseScoreResult[]): AiMarkSna
   return {
     frozenAt: new Date().toISOString(),
     marksByHorseId,
+    ...(logicVersion != null ? { logicVersion } : {}),
   };
 }
 

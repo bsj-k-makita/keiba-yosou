@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "../../domain/race-evaluation/abilityTypes";
+import { AI_MARK_LOGIC_VERSION } from "./aiMarkAssignment";
 import { applyAiMarksWithFreeze } from "./applyAiMarksWithFreeze";
 
 const condition: RaceCondition = {
@@ -70,7 +71,11 @@ describe("applyAiMarksWithFreeze", () => {
     const frozenAt = new Date("2099-01-01T10:00:00+09:00");
     const applied = applyAiMarksWithFreeze(ts, horses, condition, {
       raceInfo,
-      storedSnapshot: { frozenAt: frozenAt.toISOString(), marksByHorseId: { a: "◎", b: "○" } },
+      storedSnapshot: {
+        frozenAt: frozenAt.toISOString(),
+        marksByHorseId: { a: "◎", b: "○" },
+        logicVersion: AI_MARK_LOGIC_VERSION,
+      },
       now: new Date("2099-01-01T11:45:00+09:00"),
     });
     expect(applied.marksFrozen).toBe(true);
@@ -89,5 +94,20 @@ describe("applyAiMarksWithFreeze", () => {
     expect(applied.marksFrozen).toBe(false);
     expect(applied.results.find((r) => r.mark === "◎")?.horseId).toBe("b");
     expect(applied.createdSnapshot).toBeNull();
+  });
+
+  it("ignores stale snapshot without logicVersion when frozen", () => {
+    const ts = [row("a", 50), row("b", 60)];
+    const horses = [horse("a", 0.5, 0.1), horse("b", 2.0, 0.4)];
+    const applied = applyAiMarksWithFreeze(ts, horses, condition, {
+      raceInfo,
+      storedSnapshot: {
+        frozenAt: new Date("2099-01-01T10:00:00+09:00").toISOString(),
+        marksByHorseId: { a: "◎", b: "○" },
+      },
+      now: new Date("2099-01-01T11:45:00+09:00"),
+    });
+    expect(applied.usedStoredSnapshot).toBe(false);
+    expect(applied.results.find((r) => r.mark === "◎")?.horseId).toBe("b");
   });
 });

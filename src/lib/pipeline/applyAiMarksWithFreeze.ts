@@ -5,7 +5,8 @@ import {
   marksToSnapshot,
 } from "../../domain/race-evaluation/markFreeze";
 import type { AiMarkSnapshot, RaceInfo } from "../race-data/raceEvaluationTypes";
-import { applyAiMarksByEffectiveEv } from "./aiMarkAssignment";
+import { isValidMarkSnapshot } from "../race-data/markSnapshotStorage";
+import { AI_MARK_LOGIC_VERSION, applyAiMarksByEffectiveEv } from "./aiMarkAssignment";
 
 export type ApplyAiMarksWithFreezeResult = {
   results: HorseScoreResult[];
@@ -47,7 +48,11 @@ export function applyAiMarksWithFreeze(
   }
 
   const snap = options.storedSnapshot;
-  if (snap != null && Object.keys(snap.marksByHorseId).length > 0) {
+  if (
+    snap != null &&
+    isValidMarkSnapshot(snap) &&
+    Object.keys(snap.marksByHorseId).length > 0
+  ) {
     return {
       results: applyMarkSnapshot(tsMarked, snap),
       marksFrozen: true,
@@ -57,7 +62,7 @@ export function applyAiMarksWithFreeze(
   }
 
   const results = applyAiMarksByEffectiveEv(tsMarked, horses, condition);
-  const createdSnapshot = marksToSnapshot(results);
+  const createdSnapshot = marksToSnapshot(results, AI_MARK_LOGIC_VERSION);
   return {
     results,
     marksFrozen: true,

@@ -147,13 +147,14 @@ export function findSameTypePeers(
   const profile = resolveRaceTypeProfile(condition);
   const emphasis = abilityEmphasisWeights(condition);
 
+  const topMark = results.find((r) => r.mark === "◎");
   const byAdj = [...results].sort(
     (a, b) => (a.finalRank ?? a.adjustedRank ?? 99) - (b.finalRank ?? b.adjustedRank ?? 99),
   );
   const leader = byAdj[0];
-  const anchor = leader ? horses.find((h) => h.horseId === leader.horseId) : undefined;
-
-  const topMark = results.find((r) => r.mark === "◎");
+  /** 相手探しの基準は ◎（AI/TS 印）。無いときだけ補正後1位 */
+  const anchorId = topMark?.horseId ?? leader?.horseId;
+  const anchor = anchorId ? horses.find((h) => h.horseId === anchorId) : undefined;
 
   if (!anchor) {
     return {

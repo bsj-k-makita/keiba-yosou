@@ -7,6 +7,9 @@ import { ANCHOR_MIN_PREDICTED_WIN_RATE } from "../../domain/race-evaluation/inve
 import { sortResultsForPredictionTable } from "../../domain/race-evaluation/markHitAnalysis";
 import { resolveEffectiveRaceClass } from "../../domain/race-evaluation/resolveEffectiveRaceClass";
 
+/** 印ロジック改定時に increment（localStorage スナップショットの無効化用） */
+export const AI_MARK_LOGIC_VERSION = 2;
+
 /** 方針B: ai_effective_ev 降順で付与する印（7頭固定） */
 export const AI_MARK_SLOTS: readonly HorseScoreResult["mark"][] = [
   "◎",

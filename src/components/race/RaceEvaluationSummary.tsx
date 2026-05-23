@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
-import { evaluateRace, type HorseAbility, type HorseScoreResult, type RaceCondition } from "../../domain/race-evaluation";
+import {
+  evaluateRace,
+  type HorseAbility,
+  type HorseScoreResult,
+  type RaceCondition,
+} from "../../domain/race-evaluation";
 import { analyzeMarkHits } from "../../domain/race-evaluation/markHitAnalysis";
+import { describeTargetingPlaceholder } from "../../domain/race-evaluation/raceTargeting";
 import { ensureFrontendDisplayMarks } from "../../lib/race-display/ensureFrontendDisplayMarks";
 import { getDismissContextLine } from "../../domain/race-evaluation/reasonGenerator";
-import { describeTargetingPlaceholder } from "../../domain/race-evaluation/raceTargeting";
 import type { SameTypePeerResult } from "../../domain/race-evaluation/typeMatcher";
 import {
   getHorsesFromRaceData,
@@ -11,6 +16,11 @@ import {
   getRaceIndex,
   getRaceResultById,
 } from "../../lib/race-data/raceDataRepository";
+import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
+import {
+  raceHasAiEngineReady,
+  type ProbabilityEngine,
+} from "../../lib/pipeline/probabilityEngine";
 
 type Props = {
   raceId: string;
@@ -18,6 +28,7 @@ type Props = {
   horses: HorseAbility[];
   results: HorseScoreResult[];
   peers: SameTypePeerResult;
+  probabilityEngine: ProbabilityEngine;
 };
 
 function formatGateName(entry: { gate?: number; horseName: string }): string {
@@ -29,6 +40,13 @@ function gateOf(h: HorseAbility): number | undefined {
     return (h as { gate?: number }).gate;
   }
   return undefined;
+}
+
+function pickMark(
+  results: readonly HorseScoreResult[],
+  mark: "◎" | "○" | "▲",
+): HorseScoreResult | undefined {
+  return results.find((r) => r.mark === mark);
 }
 
 type MarkRate = {
@@ -53,7 +71,29 @@ function pooledHitPercent(markRates: MarkRate[]): number {
   return (hit / total) * 100;
 }
 
-async function computeHitStats(limit: number, currentRaceId: string): Promise<HitStats> {
+function scoreRaceForHitStats(
+  evalData: NonNullable<Awaited<ReturnType<typeof getRaceEvaluationById>>>,
+  engine: ProbabilityEngine,
+): HorseScoreResult[] {
+  const raceHorses = getHorsesFromRaceData(evalData);
+  if (engine === "ai" && raceHasAiEngineReady(raceHorses)) {
+    return runRaceEvaluationPipeline(raceHorses, evalData.condition, {
+      probabilityEngine: "ai",
+      raceInfo: evalData.raceInfo,
+    }).results;
+  }
+  return ensureFrontendDisplayMarks(
+    evaluateRace(raceHorses, evalData.condition),
+    raceHorses,
+    evalData.condition,
+  );
+}
+
+async function computeHitStats(
+  limit: number,
+  currentRaceId: string,
+  engine: ProbabilityEngine,
+): Promise<HitStats> {
   const index = await getRaceIndex();
   const markRates: MarkRate[] = [
     { mark: "◎", hit: 0, total: 0 },
@@ -68,20 +108,16 @@ async function computeHitStats(limit: number, currentRaceId: string): Promise<Hi
     if (result == null || result.places.length < 3) continue;
     const evalData = await getRaceEvaluationById(row.raceId);
     if (evalData == null) continue;
-    const horses = getHorsesFromRaceData(evalData);
-    const scored = ensureFrontendDisplayMarks(
-      evaluateRace(horses, evalData.condition),
-      horses,
-      evalData.condition,
-    );
-    const { winners, rows } = analyzeMarkHits(result.places, scored, horses);
+    const raceHorses = getHorsesFromRaceData(evalData);
+    const scored = scoreRaceForHitStats(evalData, engine);
+    const { winners, rows } = analyzeMarkHits(result.places, scored, raceHorses);
     if (winners.size === 0) continue;
 
     for (const rate of markRates) {
-      const row = rows.find((r) => r.mark === rate.mark);
-      if (!row) continue;
+      const hitRow = rows.find((r) => r.mark === rate.mark);
+      if (!hitRow) continue;
       rate.total += 1;
-      if (row.hit) {
+      if (hitRow.hit) {
         rate.hit += 1;
       }
     }
@@ -92,24 +128,31 @@ async function computeHitStats(limit: number, currentRaceId: string): Promise<Hi
   return { sampleSize, markRates };
 }
 
-export function RaceEvaluationSummary({ raceId, condition, horses, results, peers }: Props) {
-  const byRank = [...results].sort(
-    (a, b) => (a.finalRank ?? a.adjustedRank ?? 99) - (b.finalRank ?? b.adjustedRank ?? 99),
-  );
-  const first = byRank[0];
-  const second = byRank[1];
+export function RaceEvaluationSummary({
+  raceId,
+  condition,
+  horses,
+  results,
+  peers,
+  probabilityEngine,
+}: Props) {
+  const hon = pickMark(results, "◎");
+  const ta = pickMark(results, "○");
 
-  const firstHorse = first ? horses.find((h) => h.horseId === first.horseId) : undefined;
-  const secondHorse = second ? horses.find((h) => h.horseId === second.horseId) : undefined;
+  const honHorse = hon ? horses.find((h) => h.horseId === hon.horseId) : undefined;
+  const taHorse = ta ? horses.find((h) => h.horseId === ta.horseId) : undefined;
 
   const dismissReason = getDismissContextLine(condition);
   const [stats, setStats] = useState<HitStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
 
+  const engineLabel =
+    probabilityEngine === "ai" ? "Python AI（ai_effective_ev 印）" : "TS評価（能力スコア印）";
+
   useEffect(() => {
     let cancelled = false;
     setLoadingStats(true);
-    void computeHitStats(30, raceId)
+    void computeHitStats(30, raceId, probabilityEngine)
       .then((next) => {
         if (cancelled) return;
         setStats(next);
@@ -121,11 +164,14 @@ export function RaceEvaluationSummary({ raceId, condition, horses, results, peer
     return () => {
       cancelled = true;
     };
-  }, [raceId]);
+  }, [raceId, probabilityEngine]);
 
   return (
     <aside className="race-summary">
       <h3>レース視点サマリー</h3>
+      <p className="race-summary__profile">
+        <strong>評価:</strong> {engineLabel}
+      </p>
 
       <p className="race-summary__profile">
         <strong>今回の展開：</strong>
@@ -133,21 +179,16 @@ export function RaceEvaluationSummary({ raceId, condition, horses, results, peer
       </p>
 
       <section className="race-summary__block race-summary__block--primary">
-        <h4>本命候補</h4>
+        <h4>本命候補（◎）</h4>
         <p className="race-summary__horse-line">
-          {firstHorse && first ? formatGateName({ gate: gateOf(firstHorse), horseName: first.horseName }) : "—"}
+          {honHorse && hon ? formatGateName({ gate: gateOf(honHorse), horseName: hon.horseName }) : "—"}
         </p>
       </section>
 
       <section className="race-summary__block">
-        <h4>対抗候補</h4>
+        <h4>対抗候補（○）</h4>
         <p className="race-summary__horse-line">
-          {secondHorse && second
-            ? formatGateName({
-                gate: gateOf(secondHorse),
-                horseName: second.horseName,
-              })
-            : "—"}
+          {taHorse && ta ? formatGateName({ gate: gateOf(taHorse), horseName: ta.horseName }) : "—"}
         </p>
       </section>
 
@@ -183,7 +224,7 @@ export function RaceEvaluationSummary({ raceId, condition, horses, results, peer
             <p className="race-summary__dismiss-why">
               全体（◎〜▲複勝圏）: <strong>{pooledHitPercent(stats.markRates).toFixed(0)}%</strong>
               {" · "}
-              集計 {stats.sampleSize}レース（全日程・全競馬場混在・時系列順）
+              集計 {stats.sampleSize}レース（{engineLabel}・全日程混在）
             </p>
             <div className="race-summary__hit-bars" aria-label="印別内訳">
               {stats.markRates.map((r) => {
@@ -192,7 +233,10 @@ export function RaceEvaluationSummary({ raceId, condition, horses, results, peer
                   <div className="race-summary__hit-row" key={r.mark}>
                     <span className="race-summary__hit-mark">{r.mark}</span>
                     <div className="race-summary__hit-track">
-                      <div className="race-summary__hit-fill" style={{ width: `${Math.max(0, Math.min(100, rate))}%` }} />
+                      <div
+                        className="race-summary__hit-fill"
+                        style={{ width: `${Math.max(0, Math.min(100, rate))}%` }}
+                      />
                     </div>
                     <span className="race-summary__hit-value">{rate.toFixed(0)}%</span>
                   </div>

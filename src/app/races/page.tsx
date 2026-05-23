@@ -16,6 +16,7 @@ import {
   applyAiMarksByEffectiveEv,
   raceHasFullAiBackfill,
 } from "../../lib/pipeline/aiMarkAssignment";
+import { clearStaleMarkSnapshotsFromLocalStorage } from "../../lib/race-data/markSnapshotStorage";
 import { RaceListCard } from "../../components/race/RaceListCard";
 import {
   mergeListBettingRecoveryStats,
@@ -278,6 +279,10 @@ export function RacesListPage() {
   const [bulkMessage, setBulkMessage] = useState<string | null>(null);
   const [weeklyTopEv, setWeeklyTopEv] = useState<WeeklyTopEvRaceItem[] | null>(null);
   const [weeklyTopEvLoading, setWeeklyTopEvLoading] = useState(false);
+
+  useEffect(() => {
+    clearStaleMarkSnapshotsFromLocalStorage();
+  }, []);
 
   useEffect(() => {
     let live = true;
