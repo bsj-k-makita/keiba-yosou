@@ -1,4 +1,5 @@
-import type { RaceEvaluationData, RaceIndexItem } from "../../lib/race-data/raceEvaluationTypes";
+import type { RaceEvaluationData, RaceIndexItem, RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
+import { isUsableRaceResult } from "../../lib/race-data/raceResultLoad";
 import {
   pickEntryAiWinRate,
   pickEntryStoredAiEffectiveEv,
@@ -93,20 +94,43 @@ export function filterUpcomingRacesInCalendarWeek(
   return rows.filter((r) => r.date >= todayIso && r.date >= start && r.date <= end);
 }
 
+/** 開催日一覧から TOP5 見出し用ラベルを生成 */
+export function formatWeekScopeLabelFromRows(
+  rows: readonly Pick<RaceIndexItem, "date">[],
+): string {
+  const dates = [...new Set(rows.map((r) => r.date))].sort();
+  if (dates.length === 0) return "";
+  const fmt = (iso: string) => iso.slice(5).replace("-", "/");
+  if (dates.length === 1) return fmt(dates[0]!);
+  return `${fmt(dates[0]!)}〜${fmt(dates[dates.length - 1]!)}`;
+}
+
 /** 当週TOP5の対象レース日付ラベル（実際に含まれる開催日の min〜max） */
 export function formatUpcomingWeekScopeLabel(
   rows: readonly RaceIndexItem[],
   todayIso: string,
 ): string {
   const scoped = filterUpcomingRacesInCalendarWeek(rows, todayIso);
-  const dates = [...new Set(scoped.map((r) => r.date))].sort();
-  if (dates.length === 0) {
-    const { start, end } = getWeekDateRange(todayIso);
-    return `${start.slice(5).replace("-", "/")}〜${end.slice(5).replace("-", "/")}`;
-  }
-  const fmt = (iso: string) => iso.slice(5).replace("-", "/");
-  if (dates.length === 1) return fmt(dates[0]!);
-  return `${fmt(dates[0]!)}〜${fmt(dates[dates.length - 1]!)}`;
+  const label = formatWeekScopeLabelFromRows(scoped);
+  if (label) return label;
+  const { start, end } = getWeekDateRange(todayIso);
+  return `${start.slice(5).replace("-", "/")}〜${end.slice(5).replace("-", "/")}`;
+}
+
+/** 結果確定済み（着順3頭以上）のレースを除外 */
+export async function filterUnconfirmedUpcomingRaces(
+  rows: readonly RaceIndexItem[],
+  todayIso: string,
+  loadResult: (raceId: string) => Promise<RaceResultData | null>,
+): Promise<RaceIndexItem[]> {
+  const upcoming = filterUpcomingRacesInCalendarWeek(rows, todayIso);
+  const checks = await Promise.all(
+    upcoming.map(async (row) => {
+      const result = await loadResult(row.raceId);
+      return { row, confirmed: isUsableRaceResult(result) };
+    }),
+  );
+  return checks.filter((c) => !c.confirmed).map((c) => c.row);
 }
 
 export function computeRaceMaxEvFromEvaluation(
@@ -132,8 +156,12 @@ export async function fetchWeeklyTopEvRaces(
   todayIso: string,
   loadEvaluation: (raceId: string) => Promise<RaceEvaluationData | null>,
   topN = 5,
+  loadResult?: (raceId: string) => Promise<RaceResultData | null>,
 ): Promise<WeeklyTopEvRaceItem[]> {
-  const weekRows = filterUpcomingRacesInCalendarWeek(rows, todayIso);
+  const weekRows =
+    loadResult != null
+      ? await filterUnconfirmedUpcomingRaces(rows, todayIso, loadResult)
+      : filterUpcomingRacesInCalendarWeek(rows, todayIso);
   const items: WeeklyTopEvRaceItem[] = [];
 
   await Promise.all(

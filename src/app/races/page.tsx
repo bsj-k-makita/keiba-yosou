@@ -4,8 +4,8 @@ import {
   getHorsesFromRaceData,
   getRaceEvaluationById,
   getRaceIndex,
-  ensureRaceResultFetched,
   getRaceResultById,
+  ensureRaceResultFetched,
   type RaceIndexItem,
   type RaceGradeLabel,
 } from "../../lib/race-data";
@@ -26,6 +26,7 @@ import { computeRaceBettingOutcomeById } from "../../lib/race-data/computeRaceBe
 import {
   fetchWeeklyTopEvRaces,
   formatUpcomingWeekScopeLabel,
+  formatWeekScopeLabelFromRows,
   type WeeklyTopEvRaceItem,
 } from "../../domain/race-evaluation/weeklyTopEvRaces";
 
@@ -323,15 +324,18 @@ export function RacesListPage() {
 
   const todayIso = useMemo(() => formatLocalTodayIso(), []);
   const weekRangeLabel = useMemo(() => {
+    if (weeklyTopEv != null && weeklyTopEv.length > 0) {
+      return formatWeekScopeLabelFromRows(weeklyTopEv);
+    }
     if (rows == null) return "";
     return formatUpcomingWeekScopeLabel(rows, todayIso);
-  }, [rows, todayIso]);
+  }, [weeklyTopEv, rows, todayIso]);
 
   useEffect(() => {
     if (rows == null) return;
     let live = true;
     setWeeklyTopEvLoading(true);
-    void fetchWeeklyTopEvRaces(rows, todayIso, getRaceEvaluationById, 5).then((top) => {
+    void fetchWeeklyTopEvRaces(rows, todayIso, getRaceEvaluationById, 5, getRaceResultById).then((top) => {
       if (!live) return;
       setWeeklyTopEv(top);
       setWeeklyTopEvLoading(false);
@@ -572,7 +576,7 @@ export function RacesListPage() {
                 ))}
               </ol>
             )}
-            <p className="rl-hit-summary__sub">※表示馬は Python AI の◎。今日以降・当週開催の全Rから上位5件</p>
+            <p className="rl-hit-summary__sub">※表示馬は Python AI の◎。結果未確定・当週開催の全Rから上位5件</p>
           </section>
           <section className="rl-hit-summary rl-hit-summary--hero" aria-label="直近30レース的中率サマリー">
             <div className="rl-hit-summary__head">
