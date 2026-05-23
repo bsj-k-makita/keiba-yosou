@@ -152,9 +152,16 @@ export type RaceResultPlace = {
   place: number;
   horseId: string;
   horseName: string;
-  time: string;
-  /** 1着との着差（秒換算）。1着は 0。 */
-  margin: number | null;
+  /** 馬番（netkeiba 結果表） */
+  horseNumber?: number;
+  waku?: number;
+  time?: string;
+  /** 1着との着差（秒換算）。1着は 0。旧スキーマ */
+  margin?: number | null;
+  final3fSec?: number | null;
+  cornerPassing?: string | null;
+  /** 1着との着差（秒）。netkeiba 結果 JSON */
+  marginToWinnerSec?: number | null;
 };
 
 /** netkeiba 確定払戻（100円あたりの配当金） */
