@@ -5729,6 +5729,147 @@ img[loading="lazy"] {
   border-color: #4b5563;
 }
 
+/* バックテスト: 競馬場×距離傾向 */
+.bt-venue-stats__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.bt-zone-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.bt-zone-badge--strong {
+  background: rgba(22, 163, 74, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(22, 163, 74, 0.35);
+}
+
+.bt-zone-badge--neutral {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+  border: 1px solid rgba(100, 116, 139, 0.25);
+}
+
+.bt-zone-badge--caution {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.bt-zone-badge--weak {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+  border: 1px solid rgba(220, 38, 38, 0.28);
+}
+
+.bt-venue-stats__highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.bt-venue-stats__highlight {
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-cards, 10px);
+  font-size: 0.88rem;
+}
+
+.bt-venue-stats__highlight--strong {
+  background: rgba(22, 163, 74, 0.08);
+  border: 1px solid rgba(22, 163, 74, 0.22);
+}
+
+.bt-venue-stats__highlight--weak {
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.18);
+}
+
+.bt-venue-stats__highlight-title {
+  margin: 0 0 0.45rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.bt-venue-stats__highlight ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.bt-venue-stats__highlight li {
+  margin: 0.2rem 0;
+}
+
+.bt-venue-stats__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.bt-venue-stats__min-races {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+}
+
+.bt-venue-stats__min-races select {
+  padding: 0.25rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--c-border, #ddd);
+}
+
+.bt-venue-stats__table tbody tr.bt-venue-stats__row--strong {
+  background: rgba(22, 163, 74, 0.04);
+}
+
+.bt-venue-stats__table tbody tr.bt-venue-stats__row--weak {
+  background: rgba(220, 38, 38, 0.04);
+}
+
+.bt-venue-stats__table tbody tr.bt-venue-stats__row--caution {
+  background: rgba(217, 119, 6, 0.04);
+}
+
+.bt-venue-stats__skip {
+  font-size: 0.78rem;
+  opacity: 0.65;
+}
+
+.bt-venue-stats__empty {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  margin: 0.5rem 0;
+}
+
+:root[data-theme="dark"] .bt-zone-badge--strong {
+  color: #86efac;
+}
+
+:root[data-theme="dark"] .bt-zone-badge--weak {
+  color: #fca5a5;
+}
+
+:root[data-theme="dark"] .bt-venue-stats__highlight--strong {
+  background: rgba(22, 163, 74, 0.12);
+}
+
+:root[data-theme="dark"] .bt-venue-stats__highlight--weak {
+  background: rgba(220, 38, 38, 0.1);
+}
+
 /* AI見送りレジーム（EV横並び） */
 .ai-no-ev-banner {
   max-width: var(--page-max-width);

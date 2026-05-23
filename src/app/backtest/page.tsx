@@ -7,6 +7,9 @@ import {
   type BacktestSummary,
 } from "../../domain/betting/types";
 import { BacktestHitRacesSection } from "../../components/backtest/BacktestHitRacesSection";
+import { BacktestVenueDistanceSection } from "../../components/backtest/BacktestVenueDistanceSection";
+import indexJson from "../../data/index.json";
+import type { RaceIndexItem } from "../../lib/race-data/raceEvaluationTypes";
 import {
   classTierLabelJa,
   type ClassTier,
@@ -41,6 +44,8 @@ function ticketLabel(t: (typeof BET_TICKET_TYPES)[number]): string {
   if (t === "WIDE") return "ワイド◎-印";
   return "3連複フォーメ";
 }
+
+const raceIndexRows = indexJson as RaceIndexItem[];
 
 export default function BacktestDashboardPage() {
   const summary = loadSummary();
@@ -333,6 +338,13 @@ export default function BacktestDashboardPage() {
                 </tbody>
               </table>
             </section>
+          )}
+
+          {hitListDetails.length > 0 && (
+            <BacktestVenueDistanceSection
+              raceDetails={hitListDetails}
+              indexRows={raceIndexRows}
+            />
           )}
 
           {hitListDetails.length > 0 && (
