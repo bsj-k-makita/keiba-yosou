@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 """
-直前オッズ取得 → AI 予測バックフィルを土日の指定時間帯に自動実行するパイプライン。
+印の安定のため、オッズ自動取得は既定で無効。
+必要なときだけ手動で refresh / backfill を実行してください。
 
 使い方:
   cd 競馬最強予想ファイルの改善版
-  pip install schedule   # 初回のみ（python/requirements.txt にも記載）
-  python3 scripts/auto_run_pipeline.py
 
-  # 1回だけ手動実行（当日分）
-  python3 scripts/auto_run_pipeline.py --once
+  # 手動（推奨）— オッズ更新が必要なときだけ
+  node scripts/refresh-latest-odds.mjs --date=YYYY-MM-DD --live-fallback --retries=3 --retry-wait=30000
+  python3 scripts/backfill-ai-predictions.py --start-date YYYY-MM-DD --end-date YYYY-MM-DD --ts-only
 
-  # 間隔・時間帯の変更
-  python3 scripts/auto_run_pipeline.py --interval-minutes 30 --window-start 09:00 --window-end 16:30
+  # 1回だけオッズ取得→AI再計算（明示的に --fetch-odds）
+  python3 scripts/auto_run_pipeline.py --once --fetch-odds
+
+  # 週末スケジュール実行（オッズ自動取得を有効にする場合のみ --fetch-odds）
+  pip install schedule   # 初回のみ
+  python3 scripts/auto_run_pipeline.py --fetch-odds --interval-minutes 30
 """
 
 from __future__ import annotations
@@ -27,13 +31,7 @@ from pathlib import Path
 try:
     import schedule
 except ImportError:
-    print(
-        "Error: schedule パッケージが必要です。\n"
-        "  pip install schedule\n"
-        "または: pip install -r python/requirements.txt",
-        file=sys.stderr,
-    )
-    raise SystemExit(1) from None
+    schedule = None  # type: ignore[assignment,misc]
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -86,6 +84,8 @@ def should_run_scheduled(
 
 
 def log_next_run() -> None:
+    if schedule is None:
+        return
     nxt = schedule.next_run()
     if nxt is None:
         logging.info("次回実行予定: （未スケジュール）")
@@ -128,13 +128,13 @@ def run_refresh_odds(date: str, retries: int, retry_wait_ms: int) -> bool:
 
 
 def run_snapshot_ai_marks(date: str) -> bool:
-    """コマンド3: 印スナップショット（発走30分前を過ぎたレースはスキップ）。"""
+    """印スナップショット（発走30分前を過ぎたレースはスキップ）。"""
     cmd = ["npx", "tsx", "scripts/snapshot-ai-marks.ts", f"--date={date}"]
     return run_subprocess_step(cmd, "印スナップショット")
 
 
 def run_backfill_ai(date: str, ts_only: bool) -> bool:
-    """コマンド2: AI 予測バックフィル。"""
+    """AI 予測バックフィル。"""
     cmd = [
         sys.executable,
         "scripts/backfill-ai-predictions.py",
@@ -148,62 +148,75 @@ def run_backfill_ai(date: str, ts_only: bool) -> bool:
 
 def run_pipeline(
     *,
+    fetch_odds: bool,
+    snapshot_marks: bool,
     retries: int = 3,
     retry_wait_ms: int = 30000,
     ts_only: bool = True,
 ) -> bool:
     """
-    オッズ取得 → AI バックフィルを順に実行。
-    オッズ取得失敗時はバックフィルをスキップし False を返す（スケジューラは継続）。
-    """
+    既定: 何もしない（印のコロコロ変動を防ぐ）。
+    --fetch-odds: オッズ取得 → AI バックフィル → （任意）印スナップショット
+  """
     global _pipeline_run_count
     _pipeline_run_count += 1
     date = today_iso()
 
     logging.info("=" * 60)
     logging.info(
-        "パイプライン実行 #%d 開始（対象日: %s）",
+        "パイプライン実行 #%d 開始（対象日: %s / fetch_odds=%s snapshot=%s）",
         _pipeline_run_count,
         date,
+        fetch_odds,
+        snapshot_marks,
     )
     logging.info("=" * 60)
 
-    try:
-        odds_ok = run_refresh_odds(date, retries, retry_wait_ms)
-    except Exception:
-        logging.exception("オッズ取得で予期しないエラー — 今回はスキップします")
-        log_next_run()
-        return False
-
-    if not odds_ok:
-        logging.warning(
-            "オッズ取得に失敗したため、今回の AI バックフィルはスキップします。"
-            "次回スケジュールまで待機します。"
+    if not fetch_odds and not snapshot_marks:
+        logging.info(
+            "自動実行はスキップしました（オッズ自動取得は既定で無効）。"
+            "必要なら手動で refresh / backfill を実行してください。"
         )
         log_next_run()
-        return False
+        return True
 
-    try:
-        ai_ok = run_backfill_ai(date, ts_only)
-    except Exception:
-        logging.exception("AI バックフィルで予期しないエラー")
-        log_next_run()
-        return False
+    if fetch_odds:
+        try:
+            odds_ok = run_refresh_odds(date, retries, retry_wait_ms)
+        except Exception:
+            logging.exception("オッズ取得で予期しないエラー — 今回はスキップします")
+            log_next_run()
+            return False
 
-    if not ai_ok:
-        logging.warning("AI バックフィルは失敗または更新 0 件でした")
-        log_next_run()
-        return ai_ok
+        if not odds_ok:
+            logging.warning(
+                "オッズ取得に失敗したため、今回の AI バックフィルはスキップします。"
+            )
+            log_next_run()
+            return False
 
-    try:
-        snapshot_ok = run_snapshot_ai_marks(date)
-    except Exception:
-        logging.exception("印スナップショットで予期しないエラー（続行）")
-        snapshot_ok = False
-    if not snapshot_ok:
-        logging.warning(
-            "印スナップショットは一部スキップまたは失敗（発走30分前超過レースは更新しません）"
-        )
+        try:
+            ai_ok = run_backfill_ai(date, ts_only)
+        except Exception:
+            logging.exception("AI バックフィルで予期しないエラー")
+            log_next_run()
+            return False
+
+        if not ai_ok:
+            logging.warning("AI バックフィルは失敗または更新 0 件でした")
+            log_next_run()
+            return ai_ok
+
+    if snapshot_marks:
+        try:
+            snapshot_ok = run_snapshot_ai_marks(date)
+        except Exception:
+            logging.exception("印スナップショットで予期しないエラー（続行）")
+            snapshot_ok = False
+        if not snapshot_ok:
+            logging.warning(
+                "印スナップショットは一部スキップまたは失敗（発走30分前超過レースは更新しません）"
+            )
 
     logging.info("パイプライン実行 #%d 完了", _pipeline_run_count)
     log_next_run()
@@ -214,6 +227,8 @@ def _make_scheduled_job(
     window_start: time,
     window_end: time,
     weekends_only: bool,
+    fetch_odds: bool,
+    snapshot_marks: bool,
     retries: int,
     retry_wait_ms: int,
     ts_only: bool,
@@ -229,14 +244,31 @@ def _make_scheduled_job(
             )
             log_next_run()
             return
-        run_pipeline(retries=retries, retry_wait_ms=retry_wait_ms, ts_only=ts_only)
+        run_pipeline(
+            fetch_odds=fetch_odds,
+            snapshot_marks=snapshot_marks,
+            retries=retries,
+            retry_wait_ms=retry_wait_ms,
+            ts_only=ts_only,
+        )
 
     return job
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="直前オッズ取得 → AI バックフィルの週末自動パイプライン",
+        description="オッズ取得→AIバックフィル（既定: 自動オッズ取得オフ）",
+    )
+    parser.add_argument(
+        "--fetch-odds",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="オッズ自動取得＋AIバックフィルを実行（既定: 無効）",
+    )
+    parser.add_argument(
+        "--snapshot-marks",
+        action="store_true",
+        help="印スナップショットのみ実行（--fetch-odds なしでも可）",
     )
     parser.add_argument(
         "--interval-minutes",
@@ -310,21 +342,48 @@ def main() -> int:
     ts_only = not args.no_ts_only
     window_start: time = args.window_start
     window_end: time = args.window_end
+    fetch_odds: bool = args.fetch_odds
+    snapshot_marks: bool = args.snapshot_marks
 
     if args.once:
         logging.info("単発実行モード（--once）")
         ok = run_pipeline(
+            fetch_odds=fetch_odds,
+            snapshot_marks=snapshot_marks,
             retries=args.retries,
             retry_wait_ms=args.retry_wait,
             ts_only=ts_only,
         )
         return 0 if ok else 1
 
+    if not fetch_odds and not snapshot_marks:
+        logging.info("自動オッズ取得は無効です（既定）。印の安定のためスケジューラは起動しません。")
+        logging.info("手動更新例:")
+        logging.info(
+            "  node scripts/refresh-latest-odds.mjs --date=YYYY-MM-DD --live-fallback"
+        )
+        logging.info(
+            "  python3 scripts/backfill-ai-predictions.py --start-date YYYY-MM-DD --end-date YYYY-MM-DD --ts-only"
+        )
+        logging.info("自動取得を有効にする場合: python3 scripts/auto_run_pipeline.py --fetch-odds")
+        return 0
+
+    if schedule is None:
+        print(
+            "Error: schedule パッケージが必要です。\n"
+            "  pip install schedule\n"
+            "または: pip install -r python/requirements.txt",
+            file=sys.stderr,
+        )
+        return 1
+
     interval = max(1, args.interval_minutes)
     job = _make_scheduled_job(
         window_start,
         window_end,
         args.weekends_only,
+        fetch_odds,
+        snapshot_marks,
         args.retries,
         args.retry_wait,
         ts_only,
@@ -334,11 +393,13 @@ def main() -> int:
     logging.info("自動パイプラインを開始しました")
     logging.info("リポジトリ: %s", REPO_ROOT)
     logging.info(
-        "スケジュール: %d分間隔 / 実行帯 %s〜%s / 土日のみ=%s",
+        "スケジュール: %d分間隔 / 実行帯 %s〜%s / 土日のみ=%s / fetch_odds=%s / snapshot=%s",
         interval,
         window_start.strftime("%H:%M"),
         window_end.strftime("%H:%M"),
         args.weekends_only,
+        fetch_odds,
+        snapshot_marks,
     )
     log_next_run()
 
