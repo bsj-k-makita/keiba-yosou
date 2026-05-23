@@ -13,7 +13,10 @@ import { resolvePlaceToHorseId } from "../race-evaluation/markHitAnalysis";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
 import { raceHasFullAiBackfill } from "../../lib/pipeline/aiMarkAssignment";
 import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
-import { type ProbabilityEngine } from "../../lib/pipeline/probabilityEngine";
+import {
+  type AnchorHonmeiWinRateRule,
+  type ProbabilityEngine,
+} from "../../lib/pipeline/probabilityEngine";
 import { buildRaceBettingContextFromPipeline } from "./buildRaceBettingContext";
 import {
   computeFavoriteMarkHit,
@@ -65,6 +68,8 @@ export type BacktestRaceInput = {
 
 export type RunBacktestOnRaceOptions = {
   probabilityEngine?: ProbabilityEngine;
+  /** AIモード時の◎勝率8%ルール（相印はAI EV順） */
+  anchorHonmeiWinRateRule?: AnchorHonmeiWinRateRule;
 };
 
 function horseNumberMap(horses: readonly HorseAbility[]): Map<string, number> {
@@ -194,6 +199,9 @@ export function runBacktestOnRace(
     input.horses,
     input.condition,
     100,
+    options?.anchorHonmeiWinRateRule != null
+      ? { anchorHonmeiWinRateRule: options.anchorHonmeiWinRateRule }
+      : undefined,
   );
   const marks = ctx?.marks ?? [];
   const evTickets = ctx?.evTickets ?? [];

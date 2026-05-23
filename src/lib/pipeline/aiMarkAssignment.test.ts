@@ -106,4 +106,24 @@ describe("aiMarkAssignment", () => {
     expect(results.find((r) => r.horseId === "ev_top")?.mark).toBe("◎");
     expect(results.filter((r) => r.mark === "◎")).toHaveLength(1);
   });
+
+  it("TS勝率8%ルールでは TS期待値トップかつTS勝率8%以上が◎になる", () => {
+    const horses = [
+      {
+        ...horse("ai_ev_top", 2.2, 0.12),
+        investment: { predictedWinRate: 0.05, finalExpectedValue: 1.0 },
+      },
+      {
+        ...horse("ts_anchor", 1.0, 0.09),
+        investment: { predictedWinRate: 0.11, finalExpectedValue: 1.6 },
+      },
+    ];
+    const results = applyAiMarksByEffectiveEv(
+      [row("ai_ev_top", 95), row("ts_anchor", 80)],
+      horses,
+      undefined,
+      "ts",
+    );
+    expect(results.find((r) => r.horseId === "ts_anchor")?.mark).toBe("◎");
+  });
 });

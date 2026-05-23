@@ -1,12 +1,13 @@
 import { describe, expect, test } from "vitest";
 import type { HorseScoreResult } from "../race-evaluation/abilityTypes";
 import {
-  AI_TRI_CONFIDENCE_EV_THRESHOLD,
   MAX_INVESTMENT_PER_RACE,
   buildRaceEvaluationContext,
   buildOddsMapForEvEvaluation,
   buildSecondRowNumbers,
   classifyRunningStyleForDiversification,
+  estimatePairProbability,
+  estimateTrifectaProbability,
   evTicketsToBetTickets,
   generateFormationBetTickets,
   EV_MAX_TICKETS_PER_TYPE,
@@ -21,12 +22,43 @@ import {
   LOW_FAVORITE_TRIFECTA_SKIP_ODDS,
   resolveBettingAdvisoryReason,
   resolveMaxInvestmentPerRace,
-  WIDE_PARTNER_MIN_WIN_ODDS,
   type OddsMap,
   type RaceEvaluationContext,
   VALID_PROB_THRESHOLD,
 } from "./bettingRules";
 import { calculateRacePayout } from "./payoutCalculator";
+
+describe("bettingRules - Harville probability", () => {
+  test("馬連確率は Harville 公式 P(A)×P(B)/(1-P(A)) + P(B)×P(A)/(1-P(B))", () => {
+    const pA = 0.4;
+    const pB = 0.25;
+    const expected = (pA * pB) / (1 - pA) + (pB * pA) / (1 - pB);
+    expect(estimatePairProbability(pA, pB)).toBeCloseTo(expected, 10);
+  });
+
+  test("3連複確率は全6通りの順列確率の合算", () => {
+    const probs = [0.4, 0.25, 0.15];
+    const permutations: [number, number, number][] = [
+      [0, 1, 2],
+      [0, 2, 1],
+      [1, 0, 2],
+      [1, 2, 0],
+      [2, 0, 1],
+      [2, 1, 0],
+    ];
+    let expected = 0;
+    for (const [i, j, k] of permutations) {
+      const pf = probs[i]!;
+      const ps = probs[j]!;
+      const pt = probs[k]!;
+      expected += pf * (ps / (1 - pf)) * (pt / (1 - pf - ps));
+    }
+    expect(estimateTrifectaProbability(probs[0]!, probs[1]!, probs[2]!)).toBeCloseTo(
+      expected,
+      10,
+    );
+  });
+});
 
 describe("bettingRules - generateTicketsFromEvaluation", () => {
   const mockContext: RaceEvaluationContext = {
@@ -41,38 +73,58 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
     topMarkGate: 1,
   };
 
-  test("【罠①検証】実オッズなし：単勝のみオッズがある場合、ワイド・馬連・3連複は一切生成されないこと", () => {
+  test("単勝は◎（topMarkGate）のみ生成し、他馬の単勝EV合格券は出さない", () => {
+    const oddsMap: OddsMap = {
+      win: { 1: 2.5, 2: 50.0, 3: 40.0 },
+    };
+    const tickets = generateTicketsFromEvaluation(mockContext, oddsMap, 1.3);
+    const wins = tickets.filter((t) => t.type === "WIN");
+    expect(wins.length).toBeLessThanOrEqual(1);
+    if (wins.length === 1) {
+      expect(wins[0]!.gates).toEqual([1]);
+    }
+    expect(tickets.some((t) => t.type === "WIN" && t.gates[0] === 2)).toBe(false);
+    expect(tickets.some((t) => t.type === "WIN" && t.gates[0] === 3)).toBe(false);
+  });
+
+  test("topMarkGate 未設定時は単勝券を生成しない", () => {
+    const tickets = generateTicketsFromEvaluation(
+      { ...mockContext, topMarkGate: undefined },
+      { win: { 1: 2.0, 2: 50.0, 3: 40.0 } },
+      0.5,
+    );
+    expect(tickets.every((t) => t.type !== "WIN")).toBe(true);
+  });
+
+  test("単勝のみオッズでも推定オッズから複合券を生成できる", () => {
     const oddsMap: OddsMap = {
       win: { 1: 2.5, 2: 4.0, 3: 10.0 },
     };
 
     const tickets = generateTicketsFromEvaluation(mockContext, oddsMap, 1.3);
 
-    expect(tickets.every((t) => t.type === "WIN")).toBe(true);
-    expect(tickets.find((t) => t.gates.includes(1))).toBeDefined();
+    expect(tickets.some((t) => t.type === "WIN")).toBe(true);
     expect(tickets.some((t) => t.type === "REN" || t.type === "WREN" || t.type === "TRI")).toBe(
-      false,
+      true,
     );
   });
 
   test("【罠②検証】馬連実オッズあり：EV条件を満たせば REN が正しく生成されること", () => {
     const oddsMap: OddsMap = {
-      win: { 1: 2.0 },
+      win: { 1: 2.0, 2: 4.0, 3: 10.0 },
       ren: {
         "1-2": 5.0,
       },
     };
 
     const tickets = generateTicketsFromEvaluation(mockContext, oddsMap, 1.3);
-    const renTicket = tickets.find((t) => t.type === "REN");
+    const renTicket = tickets.find((t) => t.type === "REN" && t.gates.join("-") === "1-2");
 
     expect(renTicket).toBeDefined();
-    expect(renTicket?.gates).toEqual([1, 2]);
     expect(renTicket?.expectedValue).toBeGreaterThanOrEqual(PAIR_EV_THRESHOLD);
-    expect(renTicket?.gates).toContain(1);
   });
 
-  test("◎軸以外の馬連・ワイドは生成しない", () => {
+  test("◎軸に依存せず全組み合わせから EV 合格券を生成する", () => {
     const oddsMap: OddsMap = {
       win: { 2: 3.0, 3: 4.0 },
       ren: { "2-3": 50.0 },
@@ -84,14 +136,14 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
       1.3,
     );
     expect(tickets.some((t) => t.type === "REN" && t.gates[0] === 2 && t.gates[1] === 3)).toBe(
-      false,
+      true,
     );
     expect(tickets.some((t) => t.type === "WREN" && t.gates[0] === 2 && t.gates[1] === 3)).toBe(
-      false,
+      true,
     );
   });
 
-  test("◎未設定時は複合馬券を生成しない", () => {
+  test("topMarkGate 未設定でも複合馬券を生成する", () => {
     const tickets = generateTicketsFromEvaluation(
       { ...mockContext, topMarkGate: undefined },
       {
@@ -102,7 +154,9 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
       },
       0.5,
     );
-    expect(tickets.every((t) => t.type === "WIN")).toBe(true);
+    expect(tickets.some((t) => t.type === "REN")).toBe(true);
+    expect(tickets.some((t) => t.type === "WREN")).toBe(true);
+    expect(tickets.some((t) => t.type === "TRI")).toBe(true);
   });
 
   test(`券種ごと最大${EV_MAX_TICKETS_PER_TYPE}点まで（EV降順で足切り）`, () => {
@@ -117,11 +171,9 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
       })),
       winProbabilities: Array.from({ length: 12 }, (_, i) => Math.max(0.02, 0.35 - i * 0.02)),
     };
-    const ren: Record<string, number> = {};
-    for (let a = 2; a <= 12; a++) {
-      ren[`1-${a}`] = 80;
-    }
-    const tickets = generateTicketsFromEvaluation(manyHorses, { win: { 1: 2.0 }, ren }, 1.3);
+    const win: Record<number, number> = {};
+    for (let i = 1; i <= 12; i++) win[i] = 2.0 + i * 0.5;
+    const tickets = generateTicketsFromEvaluation(manyHorses, { win }, 1.3);
     const renTickets = tickets.filter((t) => t.type === "REN");
     expect(renTickets.length).toBeLessThanOrEqual(EV_MAX_TICKETS_PER_TYPE);
     if (renTickets.length >= 2) {
@@ -141,13 +193,9 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
       })),
       winProbabilities: Array.from({ length: 12 }, (_, i) => Math.max(0.02, 0.35 - i * 0.02)),
     };
-    const wide: Record<string, number> = {};
-    const win: Record<number, number> = { 1: 2.0 };
-    for (let a = 2; a <= 12; a++) {
-      wide[`1-${a}`] = 40.0;
-      win[a] = 12.0;
-    }
-    const tickets = generateTicketsFromEvaluation(manyHorses, { win, wide }, 1.3);
+    const win: Record<number, number> = {};
+    for (let i = 1; i <= 12; i++) win[i] = 2.0 + i * 0.5;
+    const tickets = generateTicketsFromEvaluation(manyHorses, { win }, 1.3);
     const wideTickets = tickets.filter((t) => t.type === "WREN");
     expect(wideTickets.length).toBeLessThanOrEqual(EV_MAX_WIDE_TICKETS_PER_TYPE);
     if (wideTickets.length >= 2) {
@@ -202,30 +250,25 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
       })),
       winProbabilities: Array.from({ length: 8 }, () => 0.12),
     };
-    const trifecta: Record<string, number> = {};
-    for (let b = 2; b <= 8; b++) {
-      for (let c = b + 1; c <= 8; c++) {
-        trifecta[`1-${b}-${c}`] = 200;
-      }
-    }
-    const tickets = generateTicketsFromEvaluation(
-      manyHorses,
-      { win: { 1: 2.0 }, trifecta },
-      0.5,
-    );
+    const win: Record<number, number> = {};
+    for (let i = 1; i <= 8; i++) win[i] = 3.0 + i;
+    const tickets = generateTicketsFromEvaluation(manyHorses, { win }, 0.5);
     const tri = tickets.filter((t) => t.type === "TRI");
     expect(tri.length).toBeLessThanOrEqual(EV_MAX_TRI_TICKETS_PER_TYPE);
   });
 
   test(`3連複は EV >= ${TRI_EV_THRESHOLD} のみ`, () => {
-    const tickets = generateTicketsFromEvaluation(mockContext, {
-      win: { 1: 2.0, 2: 3.0, 3: 4.0 },
-      trifecta: { "1-2-3": 10.0 },
-    }, 0.5);
+    const tickets = generateTicketsFromEvaluation(
+      mockContext,
+      {
+        win: { 1: 2.0, 2: 3.0, 3: 4.0 },
+        trifecta: { "1-2-3": 10.0 },
+      },
+      0.5,
+    );
     const tri = tickets.find((t) => t.type === "TRI");
     if (tri != null) {
       expect(tri.expectedValue).toBeGreaterThanOrEqual(TRI_EV_THRESHOLD);
-      expect(tri.gates).toContain(1);
     }
   });
 
@@ -242,22 +285,29 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
   });
 
   test(`ワイドは EV >= ${WIDE_EV_THRESHOLD}（馬連より緩い）で生成`, () => {
-    const tickets = generateTicketsFromEvaluation(mockContext, {
-      win: { 1: 2.0, 2: 12.0, 3: 4.0 },
-      wide: { "1-2": 2.5 },
-      ren: { "1-2": 50.0 },
-    }, 0.5);
+    const tickets = generateTicketsFromEvaluation(
+      mockContext,
+      {
+        win: { 1: 2.0, 2: 12.0, 3: 4.0 },
+        wide: { "1-2": 2.5 },
+        ren: { "1-2": 50.0 },
+      },
+      0.5,
+    );
     const wide = tickets.find((t) => t.type === "WREN");
     expect(wide).toBeDefined();
     expect(wide!.expectedValue).toBeGreaterThanOrEqual(WIDE_EV_THRESHOLD);
-    expect(wide!.gates).toContain(1);
   });
 
   test("ワイド実オッズあり：WREN が生成され払戻計算に渡せること", () => {
-    const tickets = generateTicketsFromEvaluation(mockContext, {
-      win: { 1: 2.0, 2: 14.0, 3: 4.0 },
-      wide: { "1-2": 2.5 },
-    }, 0.5);
+    const tickets = generateTicketsFromEvaluation(
+      mockContext,
+      {
+        win: { 1: 2.0, 2: 14.0, 3: 4.0 },
+        wide: { "1-2": 2.5 },
+      },
+      0.5,
+    );
     const wide = tickets.find((t) => t.type === "WREN");
     expect(wide).toBeDefined();
 
@@ -366,241 +416,25 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
     expect(resolveMaxInvestmentPerRace("50")).toBe(MAX_INVESTMENT_PER_RACE);
   });
 
-  test(`ワイドは相手馬の単勝${WIDE_PARTNER_MIN_WIN_ODDS}倍未満を足切りする`, () => {
-    const tickets = generateTicketsFromEvaluation(
-      mockContext,
-      {
-        win: { 1: 2.0, 2: 6.0, 3: 4.0 },
-        wide: { "1-2": 15.0 },
-      },
-      0.5,
-    );
-    expect(tickets.some((t) => t.type === "WREN")).toBe(true);
-  });
-
-  test("AIモード: EV順位ベースのフォーメーションを生成する", () => {
-    const tickets = generateTicketsFromEvaluation(
+  test("AIモードも TS と同一の純粋 EV ロジックを使用する", () => {
+    const tsTickets = generateTicketsFromEvaluation(
       mockContext,
       buildOddsMapForEvEvaluation([] as never, {
         win: { 1: 8.0, 2: 12.0, 3: 15.0 },
       }),
       1.3,
-      {
-        probabilityEngine: "ai",
-        effectiveEvByGate: new Map([
-          [1, 1.0],
-          [2, 1.1],
-          [3, 0.5],
-        ]),
-      },
+      { probabilityEngine: "ts" },
     );
-    expect(tickets.some((t) => t.type === "WIN")).toBe(true);
-    expect(tickets.length).toBeGreaterThan(0);
-    expect(shouldSkipAiFormationBets("ai", tickets.length)).toBe(false);
-  });
-
-  test("AIモード3連複はEV閾値以上の自信券のみを採用する", () => {
-    const context: RaceEvaluationContext = {
-      isSkippableRace: false,
-      classTier: "OPEN_GRADED",
-      topMarkGate: 1,
-      evaluatedHorses: Array.from({ length: 10 }, (_, i) => ({
-        gate: i + 1,
-        finalRank: i + 1,
-        finalEvaluationScore: 10 - i,
-      })),
-      winProbabilities: Array.from({ length: 10 }, () => 0.1),
-    };
-    const tickets = generateTicketsFromEvaluation(
-      context,
-      {
-        win: {
-          1: 3.0,
-          2: 6.0,
-          3: 8.0,
-          4: 12.0,
-          5: 16.0,
-          6: 24.0,
-          7: 40.0,
-          8: 55.0,
-          9: 120.0,
-          10: 200.0,
-        },
-      },
+    const aiTickets = generateTicketsFromEvaluation(
+      mockContext,
+      buildOddsMapForEvEvaluation([] as never, {
+        win: { 1: 8.0, 2: 12.0, 3: 15.0 },
+      }),
       1.3,
-      {
-        probabilityEngine: "ai",
-        effectiveEvByGate: new Map(
-          Array.from({ length: 10 }, (_, i) => [i + 1, 2.0 - i * 0.1] as const),
-        ),
-      },
+      { probabilityEngine: "ai" },
     );
-    const triTickets = tickets.filter((t) => t.type === "TRI");
-    expect(triTickets.length).toBeGreaterThan(0);
-    expect(triTickets.every((t) => t.gates.includes(1))).toBe(true);
-    expect(
-      triTickets.every((t) => t.expectedValue >= AI_TRI_CONFIDENCE_EV_THRESHOLD) ||
-        triTickets.length === 1,
-    ).toBe(true);
-  });
-
-  test("AIモード2列目（3頭）は脚質が片寄る場合に別グループを1頭補給する", () => {
-    const context: RaceEvaluationContext = {
-      isSkippableRace: false,
-      classTier: "OPEN_GRADED",
-      topMarkGate: 1,
-      evaluatedHorses: Array.from({ length: 7 }, (_, i) => ({
-        gate: i + 1,
-        finalRank: i + 1,
-        finalEvaluationScore: 70 - i,
-      })),
-      winProbabilities: Array.from({ length: 7 }, () => 0.1),
-    };
-    const tickets = generateTicketsFromEvaluation(
-      context,
-      { win: { 1: 2.0, 2: 7.0, 3: 9.0, 4: 11.0, 5: 14.0, 6: 18.0, 7: 22.0 } },
-      1.3,
-      {
-        probabilityEngine: "ai",
-        effectiveEvByGate: new Map([
-          [1, 2.0],
-          [2, 1.8],
-          [3, 1.7],
-          [4, 1.6],
-          [5, 1.5],
-          [6, 1.4],
-          [7, 1.3],
-        ]),
-        // 2〜4が後ろ脚質で上位3頭を占有。5を前グループとして補給させる。
-        runningStyleGroupByGate: new Map([
-          [1, "front"],
-          [2, "back"],
-          [3, "back"],
-          [4, "back"],
-          [5, "front"],
-          [6, "back"],
-          [7, "back"],
-        ]),
-      },
-    );
-    const renPartners = tickets
-      .filter((t) => t.type === "REN")
-      .map((t) => t.gates.find((g) => g !== 1))
-      .filter((g): g is number => g != null)
-      .sort((a, b) => a - b);
-    expect(renPartners).toEqual([2, 3, 5]);
-  });
-
-  test("AIモードワイド相手（6頭）にも脚質分散を適用する", () => {
-    const context: RaceEvaluationContext = {
-      isSkippableRace: false,
-      classTier: "OPEN_GRADED",
-      topMarkGate: 1,
-      evaluatedHorses: Array.from({ length: 9 }, (_, i) => ({
-        gate: i + 1,
-        finalRank: i + 1,
-        finalEvaluationScore: 80 - i,
-      })),
-      winProbabilities: Array.from({ length: 9 }, () => 0.1),
-    };
-    const tickets = generateTicketsFromEvaluation(
-      context,
-      {
-        win: {
-          1: 2.0,
-          2: 6.0,
-          3: 7.0,
-          4: 8.0,
-          5: 9.0,
-          6: 10.0,
-          7: 11.0,
-          8: 12.0,
-          9: 13.0,
-        },
-      },
-      1.3,
-      {
-        probabilityEngine: "ai",
-        effectiveEvByGate: new Map([
-          [1, 2.0],
-          [2, 1.9],
-          [3, 1.8],
-          [4, 1.7],
-          [5, 1.6],
-          [6, 1.5],
-          [7, 1.4],
-          [8, 1.3],
-          [9, 1.2],
-        ]),
-        // 2〜7を後ろ、8を前にして top6(2..7) を 8 へ置換させる。
-        runningStyleGroupByGate: new Map([
-          [1, "front"],
-          [2, "back"],
-          [3, "back"],
-          [4, "back"],
-          [5, "back"],
-          [6, "back"],
-          [7, "back"],
-          [8, "front"],
-          [9, "back"],
-        ]),
-      },
-    );
-    const widePartners = tickets
-      .filter((t) => t.type === "WREN")
-      .map((t) => t.gates.find((g) => g !== 1))
-      .filter((g): g is number => g != null)
-      .sort((a, b) => a - b);
-    expect(widePartners).toHaveLength(6);
-    expect(widePartners).toContain(8);
-    expect(widePartners).not.toContain(7);
-  });
-
-  test("AIモードの相手候補は印付き馬（○▲☆△）を優先し、印なし馬を含めない", () => {
-    const context: RaceEvaluationContext = {
-      isSkippableRace: false,
-      classTier: "OPEN_GRADED",
-      topMarkGate: 1,
-      evaluatedHorses: [
-        { gate: 1, finalRank: 1, finalEvaluationScore: 90 },
-        { gate: 2, finalRank: 2, finalEvaluationScore: 88 },
-        { gate: 3, finalRank: 3, finalEvaluationScore: 86 },
-        { gate: 4, finalRank: 4, finalEvaluationScore: 84 },
-        { gate: 5, finalRank: 5, finalEvaluationScore: 82 },
-      ],
-      markedHorses: [
-        { gate: 1, mark: "◎", finalRank: 1 },
-        { gate: 2, mark: "○", finalRank: 2 },
-        { gate: 3, mark: "▲", finalRank: 3 },
-        { gate: 4, mark: "△", finalRank: 4 },
-      ],
-      winProbabilities: [0.3, 0.2, 0.18, 0.12, 0.2],
-    };
-    const tickets = generateTicketsFromEvaluation(
-      context,
-      { win: { 1: 2.0, 2: 10.0, 3: 12.0, 4: 14.0, 5: 25.0 } },
-      1.3,
-      {
-        probabilityEngine: "ai",
-        // 5番(印なし)を最高EVにしても、相手候補には含めない想定
-        effectiveEvByGate: new Map([
-          [1, 1.2],
-          [2, 1.0],
-          [3, 0.9],
-          [4, 0.8],
-          [5, 2.5],
-        ]),
-      },
-    );
-    const allPartnerGates = new Set<number>();
-    for (const t of tickets) {
-      if (t.type === "WIN") continue;
-      for (const c of t.gates) {
-        if (c !== 1) allPartnerGates.add(c);
-      }
-    }
-    expect(allPartnerGates.has(5)).toBe(false);
-    expect(allPartnerGates.has(2)).toBe(true);
+    expect(aiTickets).toEqual(tsTickets);
+    expect(shouldSkipAiFormationBets("ai", aiTickets.length)).toBe(false);
   });
 
   test("脚質グループ分類: パターンA/B/Cで好位・自在の扱いが変わる", () => {
@@ -608,80 +442,6 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
     expect(classifyRunningStyleForDiversification("好位", "B")).toBe("back");
     expect(classifyRunningStyleForDiversification("好位", "C")).toBe("mid");
     expect(classifyRunningStyleForDiversification("自在", "C")).toBe("mid");
-  });
-
-  test("パターンCは単一グループ独占時のみ末尾置換する", () => {
-    const prev = process.env.BETTING_STYLE_DIVERSIFY_PATTERN;
-    process.env.BETTING_STYLE_DIVERSIFY_PATTERN = "C";
-    try {
-      const context: RaceEvaluationContext = {
-        isSkippableRace: false,
-        classTier: "OPEN_GRADED",
-        topMarkGate: 1,
-        evaluatedHorses: Array.from({ length: 7 }, (_, i) => ({
-          gate: i + 1,
-          finalRank: i + 1,
-          finalEvaluationScore: 70 - i,
-        })),
-        winProbabilities: Array.from({ length: 7 }, () => 0.1),
-      };
-      const tickets = generateTicketsFromEvaluation(
-        context,
-        { win: { 1: 2.0, 2: 7.0, 3: 9.0, 4: 11.0, 5: 14.0, 6: 18.0, 7: 22.0 } },
-        1.3,
-        {
-          probabilityEngine: "ai",
-          effectiveEvByGate: new Map([
-            [1, 2.0],
-            [2, 1.8],
-            [3, 1.7],
-            [4, 1.6],
-            [5, 1.5],
-            [6, 1.4],
-            [7, 1.3],
-          ]),
-          runningStyleGroupByGate: new Map([
-            [1, "front"],
-            [2, "mid"],
-            [3, "mid"],
-            [4, "mid"],
-            [5, "back"],
-            [6, "back"],
-            [7, "mid"],
-          ]),
-        },
-      );
-      const renPartners = tickets
-        .filter((t) => t.type === "REN")
-        .map((t) => t.gates.find((g) => g !== 1))
-        .filter((g): g is number => g != null)
-        .sort((a, b) => a - b);
-      expect(renPartners).toEqual([2, 3, 5]);
-    } finally {
-      if (prev == null) delete process.env.BETTING_STYLE_DIVERSIFY_PATTERN;
-      else process.env.BETTING_STYLE_DIVERSIFY_PATTERN = prev;
-    }
-  });
-
-  test("AI モード単勝は常に◎を1点生成する", () => {
-    const tickets = generateTicketsFromEvaluation(
-      mockContext,
-      { win: { 1: 2.0, 2: 50.0, 3: 10.0 } },
-      1.3,
-      {
-        probabilityEngine: "ai",
-        effectiveEvByGate: new Map([
-          [1, 0.5],
-          [2, 1.35],
-          [3, 1.2],
-        ]),
-      },
-    );
-    const wins = tickets.filter((t) => t.type === "WIN");
-    expect(wins).toHaveLength(1);
-    expect(wins[0]?.gates).toEqual([1]);
-    expect(wins[0]?.estimatedProbability).toBeGreaterThan(0);
-    expect(wins[0]?.decimalOdds).toBe(2.0);
   });
 
   test("軸馬の予測勝率が8%未満なら topMarkGate を無効化する", () => {
@@ -698,31 +458,11 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
     } as unknown as HorseScoreResult;
     const context = buildRaceEvaluationContext({
       results: [topRow],
-      winProbabilities: new Map([
-        ["h1", 0.05],
-      ]),
-      horseNumberById: new Map([
-        ["h1", 1],
-      ]),
+      winProbabilities: new Map([["h1", 0.05]]),
+      horseNumberById: new Map([["h1", 1]]),
       oddsMap: { win: { 1: 2.0 } },
     });
     expect(context.topMarkGate).toBeUndefined();
-  });
-
-  test("動的EVしきい値で低勝率の単勝誤爆を抑制する", () => {
-    const lowProbContext: RaceEvaluationContext = {
-      isSkippableRace: false,
-      classTier: "CONDITIONAL_LOWER",
-      topMarkGate: undefined,
-      evaluatedHorses: [{ gate: 9, finalRank: 1, finalEvaluationScore: 80 }],
-      winProbabilities: [0.02],
-    };
-    const tickets = generateTicketsFromEvaluation(
-      lowProbContext,
-      { win: { 9: 100.0 } },
-      1.3,
-    );
-    expect(tickets.some((t) => t.type === "WIN")).toBe(false);
   });
 
   test("evaluatedHorses と winProbabilities の長さ不一致はエラー", () => {

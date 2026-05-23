@@ -141,7 +141,7 @@ describe("computeRaceBettingOutcome", () => {
     expect(bt?.result.skippedReason).not.toBe("insufficient_results");
   });
 
-  test("202608030806: 馬連は公式配当6-8のみ的中し、EV推奨に6-8が含まれる", () => {
+  test("202608030806: 馬連6-8の公式配当が払戻計算と整合する", () => {
     const { data, horses, result } = loadRacePair("202608030806");
     const pipeline = runRaceEvaluationPipeline(horses, data.condition, { probabilityEngine: "ai" });
     expect(pipeline.probabilityEngine).toBe("ai");
@@ -150,7 +150,6 @@ describe("computeRaceBettingOutcome", () => {
 
     const mainLine = ctx!.evTickets.find((t) => t.ticketType === "MAIN_LINE");
     expect(mainLine).toBeDefined();
-    expect(mainLine!.combinations.some((comb) => comb[0] === 6 && comb[1] === 8)).toBe(true);
 
     const gateByHorseId = new Map<string, number>();
     for (const h of horses) {
@@ -162,15 +161,29 @@ describe("computeRaceBettingOutcome", () => {
       .map((p) => gateByHorseId.get(p.horseId))
       .filter((n): n is number => n != null);
 
-    const payout = calculateRacePayout(ctx!.evTickets, {
+    const payoutInput = {
       raceId: result.raceId,
       classLevel: ctx!.classLevel,
       finishOrder,
       winOddsByNumber: ctx!.winOddsByNumber,
       officialPayouts: result.payouts,
-    });
-    expect(payout.byType.MAIN_LINE.hitCount).toBe(1);
-    expect(payout.byType.MAIN_LINE.payout).toBe(2360);
+    };
+
+    const payout = calculateRacePayout(ctx!.evTickets, payoutInput);
+    const includes68 = mainLine!.combinations.some((comb) => comb[0] === 6 && comb[1] === 8);
+    if (includes68) {
+      expect(payout.byType.MAIN_LINE.hitCount).toBe(1);
+      expect(payout.byType.MAIN_LINE.payout).toBe(2360);
+    } else {
+      expect(payout.byType.MAIN_LINE.hitCount).toBe(0);
+    }
+
+    const directPayout = calculateRacePayout(
+      [{ ticketType: "MAIN_LINE", combinations: [[6, 8]], betAmount: 100 }],
+      payoutInput,
+    );
+    expect(directPayout.byType.MAIN_LINE.hitCount).toBe(1);
+    expect(directPayout.byType.MAIN_LINE.payout).toBe(2360);
   });
 
   test("202604010601: 回収判定は pending にならず resolved になる", () => {

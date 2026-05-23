@@ -13,7 +13,13 @@ import {
   type BacktestRaceInput,
   type BacktestRaceOutput,
 } from "./runBacktest";
-import type { BacktestEngineComparison, BacktestSummary, RaceDetailLog } from "./types";
+import type {
+  AnchorHonmeiBacktestComparison,
+  BacktestEngineComparison,
+  BacktestSummary,
+  RaceDetailLog,
+} from "./types";
+import type { AnchorHonmeiWinRateRule } from "../../lib/pipeline/probabilityEngine";
 import { BET_TICKET_TYPES } from "./types";
 
 const raceJsonLoaders = import.meta.glob<{ default: unknown }>("../../data/races/*.json", {
@@ -176,4 +182,78 @@ function runFullBettingBacktestOnInputs(
 ): BacktestSummary {
   const summary = aggregateBacktest(collectBacktestOutputs(engine, inputs));
   return { ...summary, probabilityEngine: engine };
+}
+
+function collectBacktestOutputsWithAnchorRule(
+  inputs: readonly BacktestRaceInput[],
+  anchorHonmeiWinRateRule: AnchorHonmeiWinRateRule,
+): BacktestRaceOutput[] {
+  const outputs: BacktestRaceOutput[] = [];
+  for (const input of inputs) {
+    const out = runBacktestOnRace(input, {
+      probabilityEngine: "ai",
+      anchorHonmeiWinRateRule,
+    });
+    if (out) outputs.push(out);
+  }
+  return outputs;
+}
+
+/**
+ * AIモード（方針B・EV馬券）のまま、◎の勝率8%ルールだけ AI勝率 vs TS勝率×TS期待値で比較する。
+ */
+export function runAnchorHonmeiBacktestComparison(): AnchorHonmeiBacktestComparison {
+  const allInputs = collectBacktestRaceInputs();
+  const aiReadyInputs = allInputs.filter((inp) => raceHasFullAiBackfill(inp.horses));
+
+  const aiOutputs = collectBacktestOutputsWithAnchorRule(aiReadyInputs, "ai");
+  const tsOutputs = collectBacktestOutputsWithAnchorRule(aiReadyInputs, "ts");
+
+  const aiAnchor = aggregateBacktest(aiOutputs);
+  const tsAnchor = aggregateBacktest(tsOutputs);
+
+  const recoveryRateDeltaByTicket = Object.fromEntries(
+    BET_TICKET_TYPES.map((t) => [t, tsAnchor.byTicketType[t].rate - aiAnchor.byTicketType[t].rate]),
+  ) as AnchorHonmeiBacktestComparison["recoveryRateDeltaByTicket"];
+
+  let honmeiDisagreementRaces = 0;
+  let aiAnchorHonmeiWinHits = 0;
+  let tsAnchorHonmeiWinHits = 0;
+  let aiAnchorHonmeiShowHits = 0;
+  let tsAnchorHonmeiShowHits = 0;
+
+  function honmeiGate(aiMarks: Record<string, string>): number | undefined {
+    const entry = Object.entries(aiMarks).find(([, mark]) => mark === "◎");
+    if (entry == null) return undefined;
+    const gate = Number(entry[0]);
+    return Number.isFinite(gate) ? gate : undefined;
+  }
+
+  for (let i = 0; i < aiOutputs.length; i++) {
+    const aiOut = aiOutputs[i]!;
+    const tsOut = tsOutputs[i]!;
+    const aiHonmei = honmeiGate(aiOut.detail.aiMarks);
+    const tsHonmei = honmeiGate(tsOut.detail.aiMarks);
+    if (aiHonmei != null && tsHonmei != null && aiHonmei !== tsHonmei) {
+      honmeiDisagreementRaces += 1;
+    }
+    if (aiOut.result.favoriteWinHit === true) aiAnchorHonmeiWinHits += 1;
+    if (tsOut.result.favoriteWinHit === true) tsAnchorHonmeiWinHits += 1;
+    if (aiOut.result.favoriteShowHit === true) aiAnchorHonmeiShowHits += 1;
+    if (tsOut.result.favoriteShowHit === true) tsAnchorHonmeiShowHits += 1;
+  }
+
+  return {
+    generatedAt: new Date().toISOString(),
+    comparableRaceCount: aiReadyInputs.length,
+    totalResultRaceCount: allInputs.length,
+    aiAnchor: { ...aiAnchor, probabilityEngine: "ai" },
+    tsAnchor: { ...tsAnchor, probabilityEngine: "ai" },
+    recoveryRateDeltaByTicket,
+    honmeiDisagreementRaces,
+    aiAnchorHonmeiWinHits,
+    tsAnchorHonmeiWinHits,
+    aiAnchorHonmeiShowHits,
+    tsAnchorHonmeiShowHits,
+  };
 }

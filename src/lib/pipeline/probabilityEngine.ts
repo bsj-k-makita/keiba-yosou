@@ -8,6 +8,8 @@ export {
   sortResultsByAiEffectiveEv,
   AI_MARK_SLOTS,
   probabilityWinRateSuffix,
+  tsWinRateOf,
+  type AnchorHonmeiWinRateRule,
 } from "./aiMarkAssignment";
 
 export {

@@ -75,6 +75,26 @@ export type RaceDetailLog = {
   skippedReason?: string;
 };
 
+/** ◎軸の勝率8%ルール比較（AIモード・相印はAI EV順で共通） */
+export type AnchorHonmeiBacktestComparison = {
+  generatedAt: string;
+  comparableRaceCount: number;
+  totalResultRaceCount: number;
+  aiAnchor: BacktestSummary;
+  tsAnchor: BacktestSummary;
+  recoveryRateDeltaByTicket: Record<BetTicketType, number>;
+  /** ◎が異なるレース数 */
+  honmeiDisagreementRaces: number;
+  /** ◎単勝的中（aiAnchor ルール） */
+  aiAnchorHonmeiWinHits: number;
+  /** ◎単勝的中（tsAnchor ルール） */
+  tsAnchorHonmeiWinHits: number;
+  /** ◎3着内（aiAnchor） */
+  aiAnchorHonmeiShowHits: number;
+  /** ◎3着内（tsAnchor） */
+  tsAnchorHonmeiShowHits: number;
+};
+
 /** TS印 vs Python AI印（同一レース集合）の回収率比較 */
 export type BacktestEngineComparison = {
   generatedAt: string;

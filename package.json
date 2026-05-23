@@ -32,6 +32,7 @@
     "python:quality-gate": "python3 python/main.py quality-gate --head=20 --max-flat-ratio=0.10",
     "backtest:bets": "vitest run src/domain/betting/runFullBacktest.test.ts",
     "backtest:compare": "vitest run src/domain/betting/runBacktestCompare.test.ts",
+    "backtest:anchor": "vitest run src/domain/betting/runAnchorHonmeiBacktestCompare.test.ts",
     "backtest:ts": "vitest run src/domain/betting/runFullBacktestTs.test.ts",
     "report:venue-hits": "vitest run src/domain/betting/generateVenueHitReport.test.ts"
   },

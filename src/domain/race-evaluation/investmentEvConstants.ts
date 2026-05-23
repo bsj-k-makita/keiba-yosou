@@ -22,8 +22,8 @@ export const WIDE_EV_THRESHOLD = 1.2;
 /** ワイド（WREN）相手馬の単勝オッズ下限（大穴限定トリミング） */
 export const WIDE_PARTNER_MIN_WIN_ODDS = 10.0;
 
-/** 3連複（TRI）EV 推奨閾値（◎軸・万馬券ハント） */
-export const TRI_EV_THRESHOLD = 1.4;
+/** 3連複（TRI）EV 推奨閾値 */
+export const TRI_EV_THRESHOLD = 1.5;
 
 /** EV推奨券 券種ごと上限（単勝・馬連・ワイド） */
 export const EV_MAX_TICKETS_PER_TYPE = 10;

@@ -1,10 +1,11 @@
 import type { HorseAbility, HorseScoreResult } from "../race-evaluation/abilityTypes";
 import {
   ANCHOR_MIN_PREDICTED_WIN_RATE,
-  DYNAMIC_EV_THRESHOLD_PENALTY_COEFFICIENT,
   EV_MAX_TICKETS_PER_TYPE,
+  EV_MAX_TRI_TICKETS_PER_TYPE,
   EV_MAX_WIDE_TICKETS_PER_TYPE,
   REN_EV_THRESHOLD,
+  TRI_EV_THRESHOLD,
   WIDE_EV_THRESHOLD,
 } from "../race-evaluation/investmentEvConstants";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
@@ -40,7 +41,7 @@ export type RaceEvaluationContext = {
   }[];
   /** evaluatedHorses と同じ順序の Softmax 勝率 */
   winProbabilities: number[];
-  /** 方針Bの◎（results.mark === "◎"）の枠番。複合馬券は◎軸に限定 */
+  /** 方針Bの◎（results.mark === "◎"）の枠番。UI表示・診断用 */
   topMarkGate?: number;
 };
 
@@ -67,12 +68,6 @@ export type EvTicket = {
 export const VALID_PROB_THRESHOLD = 0.01;
 
 const DEFAULT_EV_THRESHOLD = 1.3;
-export const WIDE_PARTNER_MIN_WIN_ODDS = 4.5;
-export const TRI_EV_THRESHOLD = 1.5;
-export const EV_MAX_TRI_TICKETS_PER_TYPE = 5;
-export const AI_TRI_CONFIDENCE_EV_THRESHOLD = TRI_EV_THRESHOLD;
-export type AiTriSelectionMode = "all" | "ev";
-export const AI_TRI_SELECTION_MODE: AiTriSelectionMode = "ev";
 export const KELLY_BASE_BUDGET_PER_RACE = 10_000;
 export const KELLY_FRACTION_BY_TICKET_TYPE: Readonly<Record<EvTicketType, number>> = {
   WIN: 0.25,
@@ -90,9 +85,11 @@ export const MAX_INVESTMENT_PER_RACE_ENV_KEY = "BETTING_MAX_INVESTMENT_PER_RACE"
 export const PAIR_EV_THRESHOLD = REN_EV_THRESHOLD;
 export {
   EV_MAX_TICKETS_PER_TYPE,
+  EV_MAX_TRI_TICKETS_PER_TYPE,
   EV_MAX_WIDE_TICKETS_PER_TYPE,
   REN_EV_THRESHOLD,
-  WIDE_EV_THRESHOLD
+  TRI_EV_THRESHOLD,
+  WIDE_EV_THRESHOLD,
 } from "../race-evaluation/investmentEvConstants";
 
 /** 理論確率→オッズ変換時の市場乖離係数（EV見送り判定用・単勝オッズ積より安定） */
@@ -101,22 +98,11 @@ const ESTIMATED_EXOTIC_MARKET_FACTOR_WIDE = 1.65;
 const ESTIMATED_EXOTIC_MARKET_FACTOR_TRI = 2.0;
 
 export type GenerateTicketsEvOptions = {
-  /** TS: prob×odds。AI: ai_effective_ev（単勝） */
   probabilityEngine?: ProbabilityEngine;
-  /** gate → ai_effective_ev（AI モード単勝用） */
-  effectiveEvByGate?: ReadonlyMap<number, number>;
-  /** gate → 脚質グループ。AIフォーメ2列目・相手選定の分散に使用 */
-  runningStyleGroupByGate?: ReadonlyMap<number, RunningStyleGroup>;
   thresholdEV?: number;
 };
 
 type ValidHorse = HorseEvaluation & { prob: number };
-type AiScoredHorse = {
-  gate: number;
-  finalRank: number;
-  effectiveEv: number;
-  winOdds?: number;
-};
 export type RunningStyleGroup = "front" | "mid" | "back" | "other";
 export type RunningStyleDiversifyPattern = "A" | "B" | "C";
 
@@ -179,19 +165,28 @@ export const estimateWideProbability = estimatePairProbability;
 /** @deprecated estimatePairProbability を使用 */
 export const estimateQuinellaProbability = estimatePairProbability;
 
-/** 3連複的中確率の近似 */
+/** 3連複的中確率（Harville: 全6通りの順列確率を合算） */
 export function estimateTrifectaProbability(probA: number, probB: number, probC: number): number {
-  const d1 = (1 - probA) * (1 - probA - probB);
-  const d2 = (1 - probB) * (1 - probB - probA);
-  if (d1 <= 1e-9 || d2 <= 1e-9) {
-    return probA * probB * probC * 6;
+  const probs = [probA, probB, probC];
+  const permutations: [number, number, number][] = [
+    [0, 1, 2],
+    [0, 2, 1],
+    [1, 0, 2],
+    [1, 2, 0],
+    [2, 0, 1],
+    [2, 1, 0],
+  ];
+  let sum = 0;
+  for (const [i, j, k] of permutations) {
+    const pFirst = probs[i]!;
+    const pSecond = probs[j]!;
+    const pThird = probs[k]!;
+    const denomSecond = 1 - pFirst;
+    const denomThird = 1 - pFirst - pSecond;
+    if (denomSecond <= 1e-9 || denomThird <= 1e-9) continue;
+    sum += pFirst * (pSecond / denomSecond) * (pThird / denomThird);
   }
-  return (
-    probA *
-    probB *
-    probC *
-    (1 / d1 + 1 / d2)
-  );
+  return sum;
 }
 
 const EV_MAX_TICKETS_BY_TYPE: Record<EvTicketType, number> = {
@@ -213,25 +208,6 @@ function capEvTicketsByType(tickets: readonly EvTicket[]): EvTicket[] {
     out.push(...slice);
   }
   return out;
-}
-
-function oddsForPair(
-  pool: Record<string, number> | undefined,
-  a: number,
-  b: number,
-): number | undefined {
-  if (pool == null) return undefined;
-  return positiveOdds(pool[pairKey(a, b)]);
-}
-
-function oddsForTriplet(
-  pool: Record<string, number> | undefined,
-  a: number,
-  b: number,
-  c: number,
-): number | undefined {
-  if (pool == null) return undefined;
-  return positiveOdds(pool[triKey(a, b, c)]);
 }
 
 function normalizeToBetUnit(
@@ -314,17 +290,6 @@ function applyRaceInvestmentCap(amounts: readonly number[]): number[] {
   return capped;
 }
 
-function pairIncludesTopMark(gates: readonly number[], topMarkGate: number | undefined): boolean {
-  return topMarkGate != null && gates.includes(topMarkGate);
-}
-
-function resolveDynamicEvThreshold(baseThreshold: number, predictedProbability: number): number {
-  if (!Number.isFinite(predictedProbability) || predictedProbability <= 0) {
-    return Number.POSITIVE_INFINITY;
-  }
-  return baseThreshold + DYNAMIC_EV_THRESHOLD_PENALTY_COEFFICIENT / predictedProbability;
-}
-
 export function classifyRunningStyleForDiversification(
   runningStyle: string | undefined,
   pattern: RunningStyleDiversifyPattern = resolveRunningStyleDiversifyPattern(),
@@ -349,205 +314,6 @@ export function classifyRunningStyleForDiversification(
   return "other";
 }
 
-function diversifyStrongByPolarGroups(
-  ranked: readonly AiScoredHorse[],
-  take: number,
-  runningStyleGroupByGate: ReadonlyMap<number, RunningStyleGroup>,
-): AiScoredHorse[] {
-  const selected: AiScoredHorse[] = [];
-  const seen = new Set<number>();
-  const add = (horse: AiScoredHorse | undefined) => {
-    if (horse == null || seen.has(horse.gate) || selected.length >= take) return;
-    selected.push(horse);
-    seen.add(horse.gate);
-  };
-  add(ranked.find((h) => runningStyleGroupByGate.get(h.gate) === "front"));
-  add(ranked.find((h) => runningStyleGroupByGate.get(h.gate) === "back"));
-  for (const horse of ranked) {
-    add(horse);
-    if (selected.length >= take) break;
-  }
-  return selected;
-}
-
-function diversifyWeakNoMonopoly(
-  ranked: readonly AiScoredHorse[],
-  take: number,
-  runningStyleGroupByGate: ReadonlyMap<number, RunningStyleGroup>,
-): AiScoredHorse[] {
-  const selected = ranked.slice(0, take);
-  if (selected.length < 2) return selected;
-  const groupOf = (gate: number): RunningStyleGroup =>
-    runningStyleGroupByGate.get(gate) ?? "other";
-  const firstGroup = groupOf(selected[0]!.gate);
-  const monopolized = selected.every((h) => groupOf(h.gate) === firstGroup);
-  if (!monopolized) return selected;
-  const replacement = ranked.find(
-    (h) =>
-      !selected.some((s) => s.gate === h.gate) &&
-      groupOf(h.gate) !== firstGroup,
-  );
-  if (replacement == null) return selected;
-  selected[selected.length - 1] = replacement;
-  return selected;
-}
-
-function diversifyPartnersByRunningStyle(
-  ranked: readonly AiScoredHorse[],
-  take: number,
-  runningStyleGroupByGate?: ReadonlyMap<number, RunningStyleGroup>,
-): AiScoredHorse[] {
-  if (take <= 0) return [];
-  if (runningStyleGroupByGate == null) return ranked.slice(0, take);
-  const pattern = resolveRunningStyleDiversifyPattern();
-  if (pattern === "C") {
-    return diversifyWeakNoMonopoly(ranked, take, runningStyleGroupByGate);
-  }
-  return diversifyStrongByPolarGroups(ranked, take, runningStyleGroupByGate);
-}
-
-function createFixedAiFormationTickets(
-  context: RaceEvaluationContext,
-  oddsMap: OddsMap,
-  effectiveEvByGate?: ReadonlyMap<number, number>,
-  runningStyleGroupByGate?: ReadonlyMap<number, RunningStyleGroup>,
-): EvTicket[] {
-  const probByGate = new Map<number, number>();
-  for (let i = 0; i < context.evaluatedHorses.length; i += 1) {
-    const horse = context.evaluatedHorses[i];
-    if (horse == null) continue;
-    const prob = context.winProbabilities[i] ?? 0;
-    probByGate.set(horse.gate, prob);
-  }
-  const scored = context.evaluatedHorses
-    .map((h) => ({
-      gate: h.gate,
-      finalRank: h.finalRank,
-      effectiveEv: effectiveEvByGate?.get(h.gate) ?? 0,
-      winOdds: positiveOdds(oddsMap.win[h.gate]),
-    }))
-    .sort((a, b) => {
-      const evDiff = b.effectiveEv - a.effectiveEv;
-      if (Math.abs(evDiff) > 1e-9) return evDiff;
-      return a.finalRank - b.finalRank;
-    });
-  if (scored.length === 0) return [];
-
-  const topMarkGate = context.topMarkGate;
-  if (topMarkGate == null) return [];
-  const orderedWithoutTop = scored.filter((h) => h.gate !== topMarkGate);
-  const markedPartnerGates = new Set(
-    (context.markedHorses ?? [])
-      .filter((m) => m.gate !== topMarkGate && m.mark !== "")
-      .map((m) => m.gate),
-  );
-  // AIフォーメは「印付き相手（○▲☆△）」を優先。印情報が無いケースのみ全頭EV順にフォールバック。
-  const partnerCandidates =
-    markedPartnerGates.size > 0
-      ? orderedWithoutTop.filter((h) => markedPartnerGates.has(h.gate))
-      : orderedWithoutTop;
-
-  const renPartners = diversifyPartnersByRunningStyle(
-    partnerCandidates,
-    3,
-    runningStyleGroupByGate,
-  ).map((h) => h.gate);
-  const widePartners = diversifyPartnersByRunningStyle(
-    partnerCandidates,
-    6,
-    runningStyleGroupByGate,
-  ).map((h) => h.gate);
-
-  const triSecondRow = diversifyPartnersByRunningStyle(
-    partnerCandidates,
-    3,
-    runningStyleGroupByGate,
-  );
-  let triThirdRow = partnerCandidates
-    .slice(0, 8)
-    .filter((h) => h.winOdds != null && h.winOdds >= 10 && h.winOdds <= 80);
-  if (triThirdRow.length === 0) triThirdRow = partnerCandidates.slice(0, 8);
-
-  const tickets: EvTicket[] = [
-    {
-      type: "WIN",
-      gates: [topMarkGate],
-      estimatedProbability: probByGate.get(topMarkGate) ?? 0,
-      expectedValue:
-        (probByGate.get(topMarkGate) ?? 0) *
-        (positiveOdds(oddsMap.win[topMarkGate]) ?? 0),
-      decimalOdds: positiveOdds(oddsMap.win[topMarkGate]),
-    },
-  ];
-
-  for (const gate of renPartners) {
-    const [g1, g2] = sortPair(topMarkGate, gate);
-    const p1 = probByGate.get(g1) ?? 0;
-    const p2 = probByGate.get(g2) ?? 0;
-    const pairProb = estimatePairProbability(p1, p2);
-    const renOdds = oddsForPair(oddsMap.ren, g1, g2);
-    tickets.push({
-      type: "REN",
-      gates: [g1, g2],
-      estimatedProbability: pairProb,
-      expectedValue: pairProb * (renOdds ?? 0),
-      decimalOdds: renOdds,
-    });
-  }
-
-  for (const gate of widePartners) {
-    const [g1, g2] = sortPair(topMarkGate, gate);
-    const p1 = probByGate.get(g1) ?? 0;
-    const p2 = probByGate.get(g2) ?? 0;
-    const pairProb = estimatePairProbability(p1, p2);
-    const wideOdds = oddsForPair(oddsMap.wide, g1, g2);
-    tickets.push({
-      type: "WREN",
-      gates: [g1, g2],
-      estimatedProbability: pairProb,
-      expectedValue: pairProb * (wideOdds ?? 0),
-      decimalOdds: wideOdds,
-    });
-  }
-
-  const triTickets: EvTicket[] = [];
-  const triSeen = new Set<string>();
-  for (const second of triSecondRow) {
-    for (const third of triThirdRow) {
-      if (second.gate === third.gate) continue;
-      const [g1, g2, g3] = sortTriplet(topMarkGate, second.gate, third.gate);
-      const key = `${g1}-${g2}-${g3}`;
-      if (triSeen.has(key)) continue;
-      triSeen.add(key);
-      const p1 = probByGate.get(g1) ?? 0;
-      const p2 = probByGate.get(g2) ?? 0;
-      const p3 = probByGate.get(g3) ?? 0;
-      const triProb = estimateTrifectaProbability(p1, p2, p3);
-      const triOdds = oddsForTriplet(oddsMap.trifecta, g1, g2, g3);
-      triTickets.push({
-        type: "TRI",
-        gates: [g1, g2, g3],
-        estimatedProbability: triProb,
-        expectedValue: triProb * (triOdds ?? 0),
-        decimalOdds: triOdds,
-      });
-    }
-  }
-
-  const rankedTriTickets = triTickets.sort((a, b) => b.expectedValue - a.expectedValue);
-  const selectedTriTickets =
-    AI_TRI_SELECTION_MODE === "all"
-      ? rankedTriTickets
-      : rankedTriTickets.filter((t) => t.expectedValue >= AI_TRI_CONFIDENCE_EV_THRESHOLD);
-  // EV閾値方式で0点になる場合は、機械的な全滅を避けるため最上位1点だけ残す。
-  if (AI_TRI_SELECTION_MODE === "ev" && selectedTriTickets.length === 0 && rankedTriTickets.length > 0) {
-    tickets.push(rankedTriTickets[0]!);
-    return tickets;
-  }
-  tickets.push(...selectedTriTickets);
-  return tickets;
-}
-
 function alignHorsesWithProbabilities(context: RaceEvaluationContext): ValidHorse[] {
   const { evaluatedHorses, winProbabilities } = context;
   if (evaluatedHorses.length !== winProbabilities.length) {
@@ -564,7 +330,9 @@ function alignHorsesWithProbabilities(context: RaceEvaluationContext): ValidHors
 }
 
 /**
- * 全組み合わせ期待値（EV）判定。実オッズのみ使用し、欠損時は推定しない。
+ * 全組み合わせ期待値（EV）判定。
+ * 勝率 >= VALID_PROB_THRESHOLD の全馬から組み合わせを生成し、Harville 合成確率 × オッズで EV を算出する。
+ * 単勝は ◎（topMarkGate）のみ。複勝券オッズ欠損時は単勝・勝率から推定したオッズを使用する。
  */
 export function generateTicketsFromEvaluation(
   context: RaceEvaluationContext,
@@ -574,116 +342,95 @@ export function generateTicketsFromEvaluation(
 ): EvTicket[] {
   if (context.isSkippableRace) return [];
 
-  const engine = evOptions?.probabilityEngine ?? "ts";
-  if (engine === "ai") {
-    return createFixedAiFormationTickets(
-      context,
-      oddsMap,
-      evOptions?.effectiveEvByGate,
-      evOptions?.runningStyleGroupByGate,
-    );
-  }
   const winThreshold = evOptions?.thresholdEV ?? thresholdEV;
   const renThreshold = REN_EV_THRESHOLD;
   const wideThreshold = WIDE_EV_THRESHOLD;
-  const margin = 0;
   const triThreshold = TRI_EV_THRESHOLD;
-  const topMarkGate = context.topMarkGate;
 
   const validHorses = alignHorsesWithProbabilities(context);
+  const probByGate = new Map(validHorses.map((h) => [h.gate, h.prob]));
+  const enrichedOdds = buildOddsMapForEvEvaluation([], oddsMap, probByGate);
   const tickets: EvTicket[] = [];
-
-  for (const horse of validHorses) {
-    const winOdds = positiveOdds(oddsMap.win[horse.gate]);
-    if (winOdds == null) continue;
-
-    const ev = horse.prob * winOdds;
-    const dynamicWinThreshold = resolveDynamicEvThreshold(winThreshold, horse.prob);
-    if (ev >= dynamicWinThreshold) {
-      tickets.push({
-        type: "WIN",
-        gates: [horse.gate],
-        estimatedProbability: horse.prob,
-        expectedValue: ev,
-        decimalOdds: winOdds,
-      });
-    }
-  }
+  const topMarkGate = context.topMarkGate;
 
   if (topMarkGate != null) {
-    for (let i = 0; i < validHorses.length; i++) {
-      for (let j = i + 1; j < validHorses.length; j++) {
-        const hA = validHorses[i]!;
-        const hB = validHorses[j]!;
-        if (!pairIncludesTopMark([hA.gate, hB.gate], topMarkGate)) continue;
-
-        const key = pairKey(hA.gate, hB.gate);
-        const estPairProb = estimatePairProbability(hA.prob, hB.prob);
-
-        const renOdds = positiveOdds(oddsMap.ren?.[key]);
-        if (renOdds != null) {
-          const renEv = estPairProb * renOdds - margin;
-          const dynamicRenThreshold = resolveDynamicEvThreshold(renThreshold, estPairProb);
-          if (renEv >= dynamicRenThreshold) {
-            const [g1, g2] = sortPair(hA.gate, hB.gate);
-            tickets.push({
-              type: "REN",
-              gates: [g1, g2],
-              estimatedProbability: estPairProb,
-              expectedValue: renEv,
-              decimalOdds: renOdds,
-            });
-          }
-        }
-
-        const wideOdds = positiveOdds(oddsMap.wide?.[key]);
-        if (wideOdds != null) {
-          const partnerGate = hA.gate === topMarkGate ? hB.gate : hA.gate;
-          const partnerWinOdds = positiveOdds(oddsMap.win[partnerGate]);
-          if (partnerWinOdds == null || partnerWinOdds < WIDE_PARTNER_MIN_WIN_ODDS) {
-            continue;
-          }
-          const wideEv = estPairProb * wideOdds - margin;
-          const dynamicWideThreshold = resolveDynamicEvThreshold(wideThreshold, estPairProb);
-          if (wideEv >= dynamicWideThreshold) {
-            const [g1, g2] = sortPair(hA.gate, hB.gate);
-            tickets.push({
-              type: "WREN",
-              gates: [g1, g2],
-              estimatedProbability: estPairProb,
-              expectedValue: wideEv,
-              decimalOdds: wideOdds,
-            });
-          }
+    const anchor = validHorses.find((h) => h.gate === topMarkGate);
+    if (anchor != null) {
+      const winOdds = positiveOdds(enrichedOdds.win[anchor.gate]);
+      if (winOdds != null) {
+        const ev = anchor.prob * winOdds;
+        if (ev >= winThreshold) {
+          tickets.push({
+            type: "WIN",
+            gates: [anchor.gate],
+            estimatedProbability: anchor.prob,
+            expectedValue: ev,
+            decimalOdds: winOdds,
+          });
         }
       }
     }
+  }
 
-    for (let i = 0; i < validHorses.length; i++) {
-      for (let j = i + 1; j < validHorses.length; j++) {
-        for (let k = j + 1; k < validHorses.length; k++) {
-          const hA = validHorses[i]!;
-          const hB = validHorses[j]!;
-          const hC = validHorses[k]!;
-          if (!pairIncludesTopMark([hA.gate, hB.gate, hC.gate], topMarkGate)) continue;
+  for (let i = 0; i < validHorses.length; i++) {
+    for (let j = i + 1; j < validHorses.length; j++) {
+      const hA = validHorses[i]!;
+      const hB = validHorses[j]!;
+      const [g1, g2] = sortPair(hA.gate, hB.gate);
+      const key = pairKey(g1, g2);
+      const estPairProb = estimatePairProbability(hA.prob, hB.prob);
 
-          const key = triKey(hA.gate, hB.gate, hC.gate);
-          const triOdds = positiveOdds(oddsMap.trifecta?.[key]);
-          if (triOdds == null) continue;
+      const renOdds = positiveOdds(enrichedOdds.ren?.[key]);
+      if (renOdds != null) {
+        const renEv = estPairProb * renOdds;
+        if (renEv >= renThreshold) {
+          tickets.push({
+            type: "REN",
+            gates: [g1, g2],
+            estimatedProbability: estPairProb,
+            expectedValue: renEv,
+            decimalOdds: renOdds,
+          });
+        }
+      }
 
-          const estTriProb = estimateTrifectaProbability(hA.prob, hB.prob, hC.prob);
-          const ev = estTriProb * triOdds - margin;
-          const dynamicTriThreshold = resolveDynamicEvThreshold(triThreshold, estTriProb);
-          if (ev >= dynamicTriThreshold) {
-            const [g1, g2, g3] = sortTriplet(hA.gate, hB.gate, hC.gate);
-            tickets.push({
-              type: "TRI",
-              gates: [g1, g2, g3],
-              estimatedProbability: estTriProb,
-              expectedValue: ev,
-              decimalOdds: triOdds,
-            });
-          }
+      const wideOdds = positiveOdds(enrichedOdds.wide?.[key]);
+      if (wideOdds != null) {
+        const wideEv = estPairProb * wideOdds;
+        if (wideEv >= wideThreshold) {
+          tickets.push({
+            type: "WREN",
+            gates: [g1, g2],
+            estimatedProbability: estPairProb,
+            expectedValue: wideEv,
+            decimalOdds: wideOdds,
+          });
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < validHorses.length; i++) {
+    for (let j = i + 1; j < validHorses.length; j++) {
+      for (let k = j + 1; k < validHorses.length; k++) {
+        const hA = validHorses[i]!;
+        const hB = validHorses[j]!;
+        const hC = validHorses[k]!;
+        const [g1, g2, g3] = sortTriplet(hA.gate, hB.gate, hC.gate);
+        const key = triKey(g1, g2, g3);
+        const triOdds = positiveOdds(enrichedOdds.trifecta?.[key]);
+        if (triOdds == null) continue;
+
+        const estTriProb = estimateTrifectaProbability(hA.prob, hB.prob, hC.prob);
+        const ev = estTriProb * triOdds;
+        if (ev >= triThreshold) {
+          tickets.push({
+            type: "TRI",
+            gates: [g1, g2, g3],
+            estimatedProbability: estTriProb,
+            expectedValue: ev,
+            decimalOdds: triOdds,
+          });
         }
       }
     }
@@ -744,14 +491,14 @@ export type GenerateTicketsInput = {
   oddsMap: OddsMap;
   isSkippableRace?: boolean;
   classTier?: ClassTier;
+  /** ◎軸の8%足切りに使う勝率（未指定時は winProbabilities と同じ） */
+  anchorGateWinRateProbabilities?: ReadonlyMap<string, number>;
 };
 
 export type GenerateTicketsOptions = {
   classTier?: ClassTier;
   thresholdEV?: number;
   probabilityEngine?: ProbabilityEngine;
-  effectiveEvByGate?: ReadonlyMap<number, number>;
-  runningStyleGroupByGate?: ReadonlyMap<number, RunningStyleGroup>;
 };
 
 export type FormationBetOptions = {
@@ -802,8 +549,14 @@ export function buildRaceEvaluationContext(input: GenerateTicketsInput): RaceEva
     }
   }
   const resolvedTopMarkGate = resolveTopMarkGate(input.results, input.horseNumberById);
+  const anchorGateProbs = input.anchorGateWinRateProbabilities ?? input.winProbabilities;
+  const topHorseId = input.results.find((r) => r.mark === "◎")?.horseId;
   const topProb =
-    resolvedTopMarkGate != null ? (winProbabilityByGate.get(resolvedTopMarkGate) ?? 0) : 0;
+    topHorseId != null
+      ? (anchorGateProbs.get(topHorseId) ?? 0)
+      : resolvedTopMarkGate != null
+        ? (winProbabilityByGate.get(resolvedTopMarkGate) ?? 0)
+        : 0;
   const topMarkGate =
     resolvedTopMarkGate != null && topProb >= ANCHOR_MIN_PREDICTED_WIN_RATE
       ? resolvedTopMarkGate
@@ -987,8 +740,6 @@ export function generateBetTicketsFromEvaluation(
   const threshold = options?.thresholdEV ?? DEFAULT_EV_THRESHOLD;
   const evTickets = generateTicketsFromEvaluation(context, input.oddsMap, threshold, {
     probabilityEngine: options?.probabilityEngine,
-    effectiveEvByGate: options?.effectiveEvByGate,
-    runningStyleGroupByGate: options?.runningStyleGroupByGate,
     thresholdEV: options?.thresholdEV,
   });
   return evTicketsToBetTickets(evTickets, betAmount);

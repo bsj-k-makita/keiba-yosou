@@ -5,6 +5,8 @@ import {
   applyAiMarksByEffectiveEv,
   buildAiProbabilityMap,
   raceHasFullAiBackfill,
+  tsWinRateOf,
+  type AnchorHonmeiWinRateRule,
   type ProbabilityEngine,
 } from "../../lib/pipeline/probabilityEngine";
 import { inferRaceClassBucket, resolveClassTier } from "../race-evaluation/raceClassLevel";
@@ -17,11 +19,9 @@ import {
   buildOddsMapForEvEvaluation,
   buildSecondRowNumbers,
   buildThirdRowNumbers,
-  classifyRunningStyleForDiversification,
   countEvRecommendationPoints,
   generateBetTicketsFromEvaluation,
   marksFromResults,
-  resolveRunningStyleDiversifyPattern,
   resolveBettingAdvisoryReason,
   resolvePostProcessFavoriteNumber,
   type MarkedHorseRef,
@@ -51,6 +51,8 @@ export type BuildRaceBettingContextOptions = {
   isSkippableRace?: boolean;
   probabilityEngine?: ProbabilityEngine;
   noAiEvRegime?: boolean;
+  /** ◎付与時の勝率8%ルール（相印はAI EV順のまま） */
+  anchorHonmeiWinRateRule?: AnchorHonmeiWinRateRule;
 };
 
 /** 評価パイプライン出力から馬券コンテキストを組み立てる（印・EVエンジンを揃える） */
@@ -62,41 +64,15 @@ export function buildRaceBettingContextFromPipeline(
   horses: readonly HorseAbility[],
   condition: RaceCondition,
   betAmount = 100,
+  pipelineOpts?: Pick<BuildRaceBettingContextOptions, "anchorHonmeiWinRateRule">,
 ): RaceBettingContext | null {
   return buildRaceBettingContext(pipeline.results, horses, condition, betAmount, {
     adjustedProbabilities: pipeline.adjustedProbabilities,
     isSkippableRace: pipeline.isSkippableRace,
     probabilityEngine: pipeline.probabilityEngine,
     noAiEvRegime: pipeline.aiRaceRegime === "NO_EV_REGIME",
+    ...pipelineOpts,
   });
-}
-
-function buildEffectiveEvByGate(horses: readonly HorseAbility[]): Map<number, number> {
-  const map = new Map<number, number>();
-  for (const h of horses) {
-    const gate = (h as HorseAbility & { gate?: number }).gate;
-    if (gate == null || !Number.isFinite(gate)) continue;
-    const ev = h.aiEffectiveEv;
-    if (ev != null && Number.isFinite(ev)) {
-      map.set(Math.round(gate), ev);
-    }
-  }
-  return map;
-}
-
-function buildRunningStyleGroupByGate(
-  horses: readonly HorseAbility[],
-): Map<number, "front" | "mid" | "back" | "other"> {
-  const map = new Map<number, "front" | "mid" | "back" | "other">();
-  const pattern = resolveRunningStyleDiversifyPattern();
-  for (const h of horses) {
-    const gate = (h as HorseAbility & { gate?: number }).gate;
-    if (gate == null || !Number.isFinite(gate)) continue;
-    const style = typeof h.runningStyle === "string" ? h.runningStyle : undefined;
-    const group = classifyRunningStyleForDiversification(style, pattern);
-    map.set(Math.round(gate), group);
-  }
-  return map;
 }
 
 function horseNumberMaps(horses: readonly HorseAbility[]): {
@@ -142,10 +118,19 @@ export function buildRaceBettingContext(
     pipelineOpts?.noAiEvRegime ??
     (probabilityEngine === "ai" && resolveAiRaceRegime(horses) === "NO_EV_REGIME");
 
+  const explicitAnchorRule = pipelineOpts?.anchorHonmeiWinRateRule;
+  const anchorHonmeiWinRateRule = explicitAnchorRule ?? "ai";
   let resultsForBetting: readonly HorseScoreResult[] = results;
   if (probabilityEngine === "ai" && raceHasFullAiBackfill(horses)) {
-    if (!results.some((r) => r.mark === "◎")) {
-      resultsForBetting = applyAiMarksByEffectiveEv(results, horses);
+    const needsAnchorReapply =
+      explicitAnchorRule != null || !results.some((r) => r.mark === "◎");
+    if (needsAnchorReapply) {
+      resultsForBetting = applyAiMarksByEffectiveEv(
+        results,
+        horses,
+        condition,
+        anchorHonmeiWinRateRule,
+      );
     }
   }
 
@@ -165,6 +150,12 @@ export function buildRaceBettingContext(
     const gate = horseNumberById.get(horseId);
     if (gate != null && Number.isFinite(prob)) probByGate.set(gate, prob);
   }
+  const anchorGateWinRateProbabilities =
+    anchorHonmeiWinRateRule === "ts"
+      ? new Map(
+          horses.map((h) => [h.horseId, tsWinRateOf(h)] as const),
+        )
+      : winProbabilities;
   const oddsMap = buildOddsMapForEvEvaluation(horses, undefined, probByGate);
   const evTickets = generateBetTicketsFromEvaluation(
     {
@@ -174,15 +165,12 @@ export function buildRaceBettingContext(
       oddsMap,
       isSkippableRace,
       classTier,
+      anchorGateWinRateProbabilities,
     },
     betAmount,
     {
       classTier,
       probabilityEngine,
-      effectiveEvByGate:
-        probabilityEngine === "ai" ? buildEffectiveEvByGate(horses) : undefined,
-      runningStyleGroupByGate:
-        probabilityEngine === "ai" ? buildRunningStyleGroupByGate(horses) : undefined,
     },
   );
   const evBetPointCount = countEvRecommendationPoints(evTickets);
