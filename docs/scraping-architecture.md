@@ -138,35 +138,51 @@
 
 オッズは **ソースが複数**あり、最終的に **レース JSON の各エントリ**（`market_win_odds`、`market_popularity` 等）へ書き込む。
 
-### 6.1 CSV 経路（バッチ・外部連携向け）
+**標準運用の入口は `scripts/refresh-latest-odds.mjs`（デフォルト `--source=jra`）**。  
+手順・AI 再計算は **[現状実装まとめ-2026-05.md](./現状実装まとめ-2026-05.md) §3** を参照。
 
-**`scripts/generate-latest-odds-csv.mjs`**
+### 6.1 `refresh-latest-odds.mjs`（推奨・一括）
 
-優先順（コメント準拠）:
+| 順序 | 処理 | 条件 |
+|------|------|------|
+| 1 | `generate-latest-odds-csv.mjs` | 常に実行（`--skip-generate` で省略可） |
+| 2 | `fetch-live-odds.mjs` | `--live-fallback` 指定時 |
+| 3 | `apply-external-odds.mjs` | CSV あり・`--skip-external` で省略可 |
 
-1. **環境変数 `JRA_ODDS_API_BASE_URL`** が設定されている場合  
-   `fetchFromJraLikeApi(raceId)` … `JRA_ODDS_API_ENDPOINT_TEMPLATE` や `JRA_ODDS_API_TOKEN` 等で柔軟に JSON を取得。
-2. **netkeiba SP の JRA オッズ API（JSONP + 圧縮 payload）**  
-   `parseSpApiJraOddsRows` …  
-   `https://race.sp.netkeiba.com/?pid=api_get_jra_odds&...&race_id=...&type=b1&compress=1`  
-   Base64 → zlib/inflate でデコードしたオブジェクトから馬番・単勝オッズ・人気を **`extractOddsRecords`** で抽出。
-3. **単勝オッズ一覧 HTML（`type=b1`）**  
-   `fetchUtf8('https://race.netkeiba.com/odds/index.html?type=b1&race_id=...')`  
-   **`tr` の `td` 列前提のパース**（レイアウト変更で **0 行になりやすい**）。
-4. **SP 単勝ビュー・SP 出馬表**  
-   `tr.HorseList` と `span[id^="odds-1_"]` / `ninki-1_`。
+完了時に `attempt=1 summary: ...` を出力。所要時間は **おおよそ 30〜60 分/日**（36R・live-fallback あり）。
 
-出力 CSV 列例:  
+**推奨コマンド例:**
+
+```bash
+node scripts/refresh-latest-odds.mjs --date=2026-05-23 --live-fallback --retries=3 --retry-wait=30000
+```
+
+`--source=netkeiba` **のみ**の運用は非推奨（未発売時 `rows=0` になりやすい）。
+
+### 6.2 CSV 生成（`generate-latest-odds-csv.mjs`）
+
+**`--source=jra`（既定）** のとき:
+
+1. **`JRA_ODDS_API_BASE_URL`** が設定されていれば外部 API
+2. なければ **`scripts/lib/jraDriver.mjs`** … Playwright で **sp.jra.jp** から単勝・人気取得（`raceIdResolver` で場・R・日付を解決）
+3. `--source=auto` のときのみ、JRA 失敗レースで netkeiba フォールバック
+4. `--source=netkeiba` のときは netkeiba のみ（下記 5〜8）
+
+**`--source=netkeiba` / `auto` フォールバック時の netkeiba 経路:**
+
+1. netkeiba SP JRA オッズ API（JSONP + 圧縮）
+2. 単勝オッズ HTML（`type=b1`）… **`tr` 列前提**（0 行になりやすい）
+3. SP 単勝ビュー・SP 出馬表（`tr.HorseList`, `span[id^="odds-1_"]`）
+
+出力 CSV 列:  
 `raceId,horseNumber,actualOdds,marketWinOdds,marketPopularity,observedAt,source`
 
 **`scripts/apply-external-odds.mjs`**  
-上記 CSV（または手元で用意した同形式）を読み、各 `src/data/races/{raceId}.json` のエントリへマージしたうえ、**`enrichInvestmentSignalsInRaceData`** で再計算。
+CSV を各 `src/data/races/{raceId}.json` にマージし、**`enrichInvestmentSignalsInRaceData`**（`final_expected_value` 等）を実行。
 
-**`scripts/refresh-latest-odds.mjs`**  
-`generate-latest-odds-csv` → `apply-external-odds` をまとめて実行。  
-オプション `--source=jra|auto|netkeiba`、`--date`、`--poll`（実オッズが付くまで待つ）など。
+**注意:** UI の **`ai_predicted_win_rate` / `ai_effective_ev`** は **`scripts/backfill-ai-predictions.py`** で別途更新する（enrich では上書きしない）。
 
-### 6.2 ライブ更新（レース JSON 直書き）
+### 6.3 ライブ更新（レース JSON 直書き）
 
 **`scripts/fetch-live-odds.mjs`**
 
@@ -182,7 +198,7 @@
 
 その後 **`applyOddsToRaceData`** で `entries[]` の **`horseId` / `horseNumber`** に一致する行へ `market_win_odds`・人気を設定し、**天候・馬場ラベル**が取れれば `meta` に反映、最後に **`enrichInvestmentSignalsInRaceData`**。
 
-### 6.3 オッズが取れない典型例
+### 6.4 オッズが取れない典型例
 
 - 出馬表・オッズ欄が **`---.-`**（未確定）→ 正規表現で **数値として採用しない**。
 - 人気が **`*` や `**`** → 数値化できず **`estimated`** のまま**。
@@ -227,9 +243,10 @@
 | 出馬表＋（既定では）過去走まで取得 | `node scripts/fetch-races-from-netkeiba.mjs --date=2026-05-10` |
 | 過去走のみ再取得 | `node scripts/fetch-past-runs.mjs --all` |
 | 結果のみ取得 | `node scripts/fetch-race-results.mjs --date=2026-05-10` |
-| オッズ CSV 生成（netkeiba 中心） | `node scripts/generate-latest-odds-csv.mjs --all --out=data/latest-odds.csv --source=netkeiba` |
+| オッズ一括リフレッシュ（**推奨**） | `node scripts/refresh-latest-odds.mjs --date=YYYY-MM-DD --live-fallback --retries=3 --retry-wait=30000` |
+| オッズ CSV 生成のみ（JRA） | `node scripts/generate-latest-odds-csv.mjs --date=YYYY-MM-DD --source=jra --out=data/latest-odds.csv` |
 | CSV → JSON 反映 | `node scripts/apply-external-odds.mjs --csv=data/latest-odds.csv` |
-| オッズ一括リフレッシュ | `node scripts/refresh-latest-odds.mjs --source=netkeiba --all` |
+| AI 再計算（オッズ後） | `python3 scripts/backfill-ai-predictions.py --start-date YYYY-MM-DD --end-date YYYY-MM-DD --ts-only` |
 | ライブオッズ（HTTP） | `node scripts/fetch-live-odds.mjs --date=2026-05-10 --source=http` |
 | 期待値フィールド再計算 | `node scripts/enrich-investment-signals.mjs --all` |
 

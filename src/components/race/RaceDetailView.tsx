@@ -29,6 +29,15 @@ import {
   getSortedRaceEntryGateRows,
   type RaceEvaluationData,
 } from "../../lib/race-data";
+import {
+  loadMarkSnapshotFromLocalStorage,
+  saveMarkSnapshotToLocalStorage,
+} from "../../lib/race-data/markSnapshotStorage";
+import {
+  formatPostTimeLabel,
+  MARK_FREEZE_MINUTES_BEFORE_POST,
+} from "../../domain/race-evaluation/markFreeze";
+import type { AiMarkSnapshot } from "../../lib/race-data/raceEvaluationTypes";
 import type { RaceIndexItem } from "../../lib/race-data";
 import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline";
 import { NO_EV_REGIME_BANNER_TEXT } from "../../lib/pipeline/aiEvRegime";
@@ -263,6 +272,9 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedEngine = parseProbabilityEngine(searchParams.get("engine"));
   const aiDataAvailable = useMemo(() => raceHasAiEngineReady(horses), [horses]);
+  const [markSnapshot, setMarkSnapshot] = useState<AiMarkSnapshot | null>(
+    () => race.raceInfo.aiMarkSnapshot ?? loadMarkSnapshotFromLocalStorage(race.raceId) ?? null,
+  );
 
   const setProbabilityEngine = useCallback(
     (engine: ProbabilityEngine) => {
@@ -279,6 +291,8 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       horses.length && evalCondition
         ? runRaceEvaluationPipeline(horses, evalCondition, {
             probabilityEngine: requestedEngine,
+            raceInfo: race.raceInfo,
+            markSnapshot,
           })
         : {
             results: [],
@@ -288,9 +302,18 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             aiRaceRegime: "NORMAL_AI_REGIME" as const,
             tsReferenceResults: [],
             isSkippableRace: false,
+            marksFrozen: false,
+            pendingMarkSnapshot: null,
           },
-    [horses, evalCondition, requestedEngine],
+    [horses, evalCondition, requestedEngine, race.raceInfo, markSnapshot],
   );
+
+  useEffect(() => {
+    const snap = pipeline.pendingMarkSnapshot;
+    if (snap == null) return;
+    saveMarkSnapshotToLocalStorage(race.raceId, snap);
+    setMarkSnapshot(snap);
+  }, [pipeline.pendingMarkSnapshot, race.raceId]);
   const evGateNumbers = useMemo(() => {
     if (evalCondition == null) return new Set<number>();
     const ctx = buildRaceBettingContextFromPipeline(pipeline, horses, evalCondition, 100);
@@ -516,6 +539,9 @@ export function RaceDetailView({ race, raceIndex }: Props) {
           ) : pipeline.probabilityEngine === "ai" ? (
             <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
               方針B: 印・買い目は ai_effective_ev 順（スコア表示はTS参考）
+              {pipeline.marksFrozen
+                ? ` ／ 印は発走${MARK_FREEZE_MINUTES_BEFORE_POST}分前（${formatPostTimeLabel(race.raceInfo)}）で固定`
+                : ""}
             </span>
           ) : null}
           <label

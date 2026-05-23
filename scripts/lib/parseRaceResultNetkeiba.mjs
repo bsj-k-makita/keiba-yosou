@@ -40,7 +40,7 @@ export function parseRaceResultNetkeiba(html, raceId = "") {
     return i >= 0 ? i : -1;
   };
 
-  const iPlace = idx("着順");
+  const iPlace = idx("着順") >= 0 ? idx("着順") : idx("入線");
   const iWaku = idx("枠");
   const iUmaban = idx("馬番");
   const iHorse = idx("馬名") >= 0 ? idx("馬名") : 3;
@@ -73,6 +73,8 @@ export function parseRaceResultNetkeiba(html, raceId = "") {
 
     const horseName = (horseLink.attr("title") || horseLink.text()).replace(/\s+/g, " ").trim()
       || tds.eq(iHorse).text().trim();
+
+    if (!horseName && !horseId) return;
 
     let final3fSec = null;
     if (iFinal3f >= 0) {
@@ -115,9 +117,17 @@ export function parseRaceResultNetkeiba(html, raceId = "") {
     });
   });
 
-  if (places.length === 0) {
+  const validPlaces = places.filter((p) => p.horseName || p.horseId);
+
+  if (validPlaces.length === 0) {
     throw new Error(`着順行を1件も解析できません (${raceId})`);
   }
 
-  return { places };
+  if (validPlaces.length < 3) {
+    throw new Error(
+      `結果未確定（有効な着順 ${validPlaces.length} 件のみ。未発走または暫定掲載の可能性） (${raceId})`,
+    );
+  }
+
+  return { places: validPlaces };
 }

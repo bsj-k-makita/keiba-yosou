@@ -39,6 +39,8 @@ export * from "./jockeyContext";
 export * from "./paceSeverity";
 export * from "./stabilityScore";
 export * from "./oddsDistortion";
+export * from "./resolveHorseEffectiveEv";
+export * from "./markFreeze";
 export * from "./lapShapeFit";
 export * from "./estimatedFourthCorner";
 export * from "./evaluationBlendWeights";

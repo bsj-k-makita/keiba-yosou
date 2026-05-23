@@ -262,6 +262,9 @@ function parseShutubaCore(html, { raceId, date }) {
   const gradeType = parseNetkeibaGradeType($);
   const raceGradeLabel = gradeType != null ? netkeibaGradeTypeToRaceGrade(gradeType) : undefined;
 
+  const postTimeM = (raceData01 || wholeText).match(/(\d{1,2}:\d{2})\s*発走/);
+  const postTime = postTimeM ? postTimeM[1] : undefined;
+
   const entries = [];
   const parseIdSuffixUmaban = (id) => {
     const m = String(id ?? "").match(/_(\d{1,2})$/);
@@ -569,6 +572,7 @@ function parseShutubaCore(html, { raceId, date }) {
       distance,
       groundLabel: trackMeta.groundLabel,
       weather: trackMeta.weather,
+      ...(postTime != null ? { postTime } : {}),
       ...(gradeType != null ? { netkeibaGradeType: gradeType } : {}),
       ...(raceGradeLabel != null ? { raceGrade: raceGradeLabel } : {}),
     },

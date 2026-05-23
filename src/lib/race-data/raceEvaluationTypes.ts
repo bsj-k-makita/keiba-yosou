@@ -30,6 +30,12 @@ export type RaceIndexItem = {
   netkeibaGradeType?: number;
 };
 
+/** 発走30分前以降に固定する AI 印（オッズ更新後も上書きしない） */
+export type AiMarkSnapshot = {
+  frozenAt: string;
+  marksByHorseId: Record<string, string>;
+};
+
 export type RaceInfo = {
   raceId: string;
   date: string;
@@ -40,6 +46,10 @@ export type RaceInfo = {
   distance: number;
   raceGrade?: RaceGradeLabel;
   netkeibaGradeType?: number;
+  /** 発走時刻 HH:MM（JST）。未設定時は raceNumber から推定 */
+  postTime?: string;
+  /** backfill / snapshot スクリプトが保存した印（JSON 永続） */
+  aiMarkSnapshot?: AiMarkSnapshot;
   /** 馬場状態（表示用。condition.ground とは別物もあり得る） */
   groundLabel?: string;
   weather?: string;

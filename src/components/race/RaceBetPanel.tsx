@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import {
   valueRankFromEffectiveEv,
+  resolveHorseEffectiveEv,
+  type EffectiveEvSource,
   type HorseAbility,
   type HorseScoreResult,
   type RaceCondition,
@@ -37,8 +39,8 @@ const VALUE_RANK_STYLE: Record<string, { bg: string; color: string; label: strin
 };
 
 /** オッズ補正スコア帯に応じた短文ラベル（value_rank より数値を優先）。 */
-function expectationJudgmentLabel(inv: InvestmentCommentInput): { text: string; color?: string } {
-  const evPrimary = inv.finalExpectedValue ?? inv.valueScore ?? 0;
+function expectationJudgmentLabel(effectiveEv: number): { text: string; color?: string } {
+  const evPrimary = effectiveEv;
   const vr = valueRankFromEffectiveEv(evPrimary);
   if (vr === "S" || vr === "A") {
     return { text: "【スコア高】", color: "#c0392b" };
@@ -126,6 +128,9 @@ type EvRow = {
   horseName: string;
   gate: number;
   investment: InvestmentCommentInput;
+  aiEffectiveEv?: number;
+  effectiveEv: number | null;
+  effectiveEvSource: EffectiveEvSource | null;
 };
 
 function buildEvRows(sorted: HorseScoreResult[], horses: HorseAbility[]): EvRow[] {
@@ -134,11 +139,15 @@ function buildEvRows(sorted: HorseScoreResult[], horses: HorseAbility[]): EvRow[
   for (const result of sorted) {
     const horse = horseMap.get(result.horseId);
     if (horse?.investment == null) continue;
+    const { effectiveEv, source: effectiveEvSource } = resolveHorseEffectiveEv(horse);
     rows.push({
       horseId: result.horseId,
       horseName: horse.horseName,
       gate: (horse as HorseAbility & { gate?: number }).gate ?? 0,
       investment: horse.investment,
+      aiEffectiveEv: horse.aiEffectiveEv,
+      effectiveEv,
+      effectiveEvSource,
     });
   }
   rows.sort((a, b) => a.gate - b.gate || a.horseId.localeCompare(b.horseId));
@@ -204,7 +213,7 @@ function EvSection({
         <strong>表示の「3着内率」</strong>は JSON の <strong>predicted_probability</strong> で、単勝確率から変換した参考値です。
         <strong>点数</strong>（補正後スコアの比例）は別系列のため、高得点でもこの％が低いことがあります。
         単勝シェア（期待値計算・ランキング）は <strong>finalEvaluationScore</strong> を softmax した確率のみを使用します。
-        <strong>補正スコア</strong>列は enrich が保存した <strong>final_expected_value</strong> です。オッズ歪みブーストは適用しません。
+        <strong>補正スコア</strong>列は <strong>ai_effective_ev</strong>（Python AI）を最優先し、無い馬のみ <strong>final_expected_value</strong>（Node 簡易）を表示します。オッズ歪みブーストは適用しません。
       </p>
 
       <div className="bet-panel__ev-table-wrap">
@@ -225,18 +234,24 @@ function EvSection({
         <tbody>
           {rows.map((row) => {
             const inv = row.investment;
+            const vmHorse = viewModel?.byHorseId.get(row.horseId);
             const winShareP = winShareProbabilityForEv(row, viewModel);
             const computedEv = Math.round((winShareP * inv.actualOdds - runtimeMargin) * 100) / 100;
+            const evSource =
+              vmHorse?.effectiveEvSource ?? row.effectiveEvSource;
             const ev =
-              inv.finalExpectedValue != null && Number.isFinite(inv.finalExpectedValue)
+              vmHorse?.effectiveEv ??
+              row.effectiveEv ??
+              (inv.finalExpectedValue != null && Number.isFinite(inv.finalExpectedValue)
                 ? inv.finalExpectedValue
-                : computedEv;
+                : computedEv);
             const adjustedRank = ev >= 1.40 ? "S" : ev >= 1.25 ? "S" : ev >= 1.10 ? "A" : ev >= 1.0 ? "B" : ev >= 0.90 ? "C" : "D";
             const displayRank = adjustedRank;
-            const runtimeKelly = viewModel?.byHorseId.get(row.horseId)?.kellyFraction ?? inv.kellyWeight ?? 0;
+            const runtimeKelly = vmHorse?.kellyFraction ?? inv.kellyWeight ?? 0;
             const kelly = runtimeKelly * kellyFraction;
             const recommendedAmount = Math.floor((budget * kelly) / 100) * 100;
-            const judgment = expectationJudgmentLabel({ ...inv, valueRank: displayRank });
+            const judgment = expectationJudgmentLabel(ev);
+            const evSourceTag = evSource === "ai" ? "AI" : evSource === "simple" ? "簡易" : "再計算";
 
             return (
               <tr key={row.horseId}>
@@ -248,9 +263,17 @@ function EvSection({
                 <td
                   className="bet-panel__ev-num"
                   style={{ color: ev >= 1.0 ? "var(--ev-pos)" : "var(--ev-neg)" }}
+                  data-ev-source={evSource ?? undefined}
+                  title={
+                    evSource === "ai"
+                      ? "ai_effective_ev（Python AI）"
+                      : evSource === "simple"
+                        ? "final_expected_value（Node 簡易）"
+                        : "ランタイム再計算"
+                  }
                 >
                   <strong>{ev.toFixed(2)}</strong>
-                  <span className="bet-panel__ev-adj">再計算</span>
+                  <span className="bet-panel__ev-adj">{evSourceTag}</span>
                 </td>
                 <td style={{ textAlign: "center" }}>
                   <EvRankBadge rank={displayRank} />
@@ -596,8 +619,8 @@ export function RaceBetPanel({ sorted, horses, condition, viewModel, onCondition
               horseId: row.horseId,
               horseName: row.horseName,
               effectiveEv:
-                row.investment.finalExpectedValue ??
                 viewModel?.byHorseId.get(row.horseId)?.effectiveEv ??
+                row.effectiveEv ??
                 row.investment.valueScore ??
                 null,
             }))}

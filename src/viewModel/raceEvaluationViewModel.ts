@@ -1,7 +1,9 @@
 import {
   ABILITY_KEYS,
   getFinalWeights,
+  resolveHorseEffectiveEv,
   type AbilityKey,
+  type EffectiveEvSource,
   type HorseAbility,
   type HorseScoreResult,
   type RaceCondition,
@@ -12,7 +14,7 @@ import type { ProbabilityEngine } from "../lib/pipeline/probabilityEngine";
 /**
  * 旧第4層（オッズ歪みブースト）は廃止。
  * 単勝確率は `finalEvaluationScore` 由来の softmax（adjustedProbabilities）のみ。
- * 期待値は JSON の final_expected_value を表示用とする（フロントで再計算しない）。
+ * 期待値は ai_effective_ev を最優先。無いときのみ JSON の final_expected_value（フロントで再計算しない）。
  */
 export type OddsDistortionViewModel = {
   flag: boolean;
@@ -35,10 +37,12 @@ export type RaceEvaluationHorseViewModel = {
   /** 単勝勝率 P（`finalEvaluationScore` → softmax のみ） */
   baseAdjustedWinProbability: number;
   adjustedWinProbability: number;
-  /** JSON final_expected_value のみ。未 enrich 時は null（歪みブースト・別マージンでは再計算しない） */
+  /** ai_effective_ev 優先、無いとき final_expected_value。未 enrich 時は null */
   effectiveEv: number | null;
+  /** 表示に使った期待値の由来（AI / Node 簡易） */
+  effectiveEvSource: EffectiveEvSource | null;
   kellyFraction: number;
-  /** final_expected_value が閾値超え */
+  /** effectiveEv が閾値超え */
   evHot: boolean;
   /** EV推奨券（evTickets）に実際に含まれる馬番 */
   isEvRecommended: boolean;
@@ -122,15 +126,8 @@ export function buildRaceEvaluationViewModel(
     const unifiedP = useAi ? horse.aiPredictedWinRate! : mapP;
 
     const odds = oddsOf(horse);
-    const jsonEv = horse.investment?.finalExpectedValue;
-    const aiEv = horse.aiEffectiveEv;
-    const effectiveEv = useAi
-      ? aiEv != null && Number.isFinite(aiEv)
-        ? round1(aiEv)
-        : null
-      : jsonEv != null && Number.isFinite(jsonEv)
-        ? round1(jsonEv)
-        : null;
+    const { effectiveEv: rawEv, source: effectiveEvSource } = resolveHorseEffectiveEv(horse);
+    const effectiveEv = rawEv != null ? round1(rawEv) : null;
 
     const kw = horse.investment?.kellyWeight;
     const kellyFraction =
@@ -150,6 +147,7 @@ export function buildRaceEvaluationViewModel(
       baseAdjustedWinProbability: unifiedP,
       adjustedWinProbability: unifiedP,
       effectiveEv,
+      effectiveEvSource,
       kellyFraction,
       evHot: effectiveEv != null && effectiveEv > FINAL_EXPECTED_RECOMMEND_THRESHOLD,
       isEvRecommended: false,

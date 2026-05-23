@@ -57,6 +57,16 @@ export type AnalysisRaceMeta = {
   raceGrade?: "G1" | "G2" | "G3" | "L" | "S";
   groundLabel?: string;
   weather?: string;
+  /** 発走時刻 HH:MM（JST） */
+  postTime?: string;
+  ai_mark_snapshot?: {
+    frozenAt: string;
+    marksByHorseId: Record<string, string>;
+  };
+  aiMarkSnapshot?: {
+    frozenAt: string;
+    marksByHorseId: Record<string, string>;
+  };
 };
 
 /**

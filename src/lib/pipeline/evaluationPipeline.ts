@@ -5,17 +5,22 @@ import {
   type RaceEvaluationViewModel,
 } from "../../viewModel/raceEvaluationViewModel";
 import { effectiveSoftmaxTemperature, softmaxDistribution } from "./normalization";
+import { applyAiMarksByEffectiveEv } from "./aiMarkAssignment";
 import {
-  applyAiMarksByEffectiveEv,
   DEFAULT_PROBABILITY_ENGINE,
   raceHasFullAiBackfill,
   type ProbabilityEngine,
   resolveAdjustedProbabilities,
 } from "./probabilityEngine";
 import { resolveAiRaceRegime, type AiRaceRegime } from "./aiEvRegime";
+import { applyAiMarksWithFreeze } from "./applyAiMarksWithFreeze";
+import type { AiMarkSnapshot, RaceInfo } from "../race-data/raceEvaluationTypes";
 
 export type EvaluationPipelineOptions = {
   probabilityEngine?: ProbabilityEngine;
+  raceInfo?: RaceInfo;
+  markSnapshot?: AiMarkSnapshot | null;
+  now?: Date;
 };
 
 export type EvaluationPipelineResult = {
@@ -32,6 +37,10 @@ export type EvaluationPipelineResult = {
   isSkippableRace: boolean;
   mathFirstHorseId?: string;
   displayFavoriteHorseId?: string;
+  /** 発走30分前以降で印を固定表示している */
+  marksFrozen: boolean;
+  /** 固定前に保存すべき最新印（localStorage / JSON 用） */
+  pendingMarkSnapshot: AiMarkSnapshot | null;
 };
 
 function mathFirstByFinalRank(results: readonly HorseScoreResult[]): HorseScoreResult | undefined {
@@ -66,17 +75,26 @@ export function runRaceEvaluationPipeline(
   const aiRaceRegime: AiRaceRegime =
     probabilityEngine === "ai" ? resolveAiRaceRegime(horses) : "NORMAL_AI_REGIME";
 
-  let results: HorseScoreResult[] =
-    probabilityEngine === "ai"
-      ? applyAiMarksByEffectiveEv(tsMarked, horses, condition)
-      : tsMarked;
+  let marksFrozen = false;
+  let pendingMarkSnapshot: AiMarkSnapshot | null = null;
+  let results: HorseScoreResult[] = tsMarked;
 
-  if (
-    probabilityEngine === "ai" &&
-    raceHasFullAiBackfill(horses) &&
-    !results.some((r) => r.mark === "◎")
-  ) {
+  if (probabilityEngine === "ai" && raceHasFullAiBackfill(horses) && options?.raceInfo != null) {
+    const applied = applyAiMarksWithFreeze(tsMarked, horses, condition, {
+      raceInfo: options.raceInfo,
+      storedSnapshot: options.markSnapshot ?? options.raceInfo.aiMarkSnapshot ?? null,
+      now: options.now,
+    });
+    results = applied.results;
+    marksFrozen = applied.marksFrozen;
+    if (applied.createdSnapshot != null) {
+      pendingMarkSnapshot = applied.createdSnapshot;
+    }
+  } else if (probabilityEngine === "ai" && raceHasFullAiBackfill(horses)) {
     results = applyAiMarksByEffectiveEv(tsMarked, horses, condition);
+    if (!results.some((r) => r.mark === "◎")) {
+      results = applyAiMarksByEffectiveEv(tsMarked, horses, condition);
+    }
   }
 
   const mathFirst = mathFirstByFinalRank(results);
@@ -105,5 +123,7 @@ export function runRaceEvaluationPipeline(
     isSkippableRace,
     mathFirstHorseId: mathFirst?.horseId,
     displayFavoriteHorseId: displayFavorite?.horseId,
+    marksFrozen,
+    pendingMarkSnapshot,
   };
 }

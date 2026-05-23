@@ -436,10 +436,30 @@ function mergeMeta(root: Record<string, unknown>, meta: AnalysisRaceMeta | undef
     weather: m.weather ?? (root.weather as string | undefined),
     raceGrade: rg,
     netkeibaGradeType: Number.isFinite(ngt) ? ngt : undefined,
+    postTime:
+      typeof m.postTime === "string" && m.postTime.length > 0
+        ? m.postTime
+        : typeof root.postTime === "string" && root.postTime.length > 0
+          ? (root.postTime as string)
+          : undefined,
   };
 }
 
-function toRaceInfo(raceId: string, pack: ReturnType<typeof mergeMeta>): RaceInfo {
+function readAiMarkSnapshot(
+  root: Record<string, unknown>,
+  meta: AnalysisRaceMeta | undefined | null,
+): RaceInfo["aiMarkSnapshot"] {
+  const m = (meta ?? {}) as Record<string, unknown>;
+  const snap = (m.ai_mark_snapshot ?? m.aiMarkSnapshot ?? root.ai_mark_snapshot ?? root.aiMarkSnapshot) as
+    | RaceInfo["aiMarkSnapshot"]
+    | undefined;
+  if (snap?.marksByHorseId == null || typeof snap.marksByHorseId !== "object") return undefined;
+  if (typeof snap.frozenAt !== "string") return undefined;
+  return snap;
+}
+
+function toRaceInfo(raceId: string, pack: ReturnType<typeof mergeMeta>, root: Record<string, unknown>, meta: AnalysisRaceMeta | undefined | null): RaceInfo {
+  const aiMarkSnapshot = readAiMarkSnapshot(root, meta);
   return {
     raceId,
     date: pack.date,
@@ -450,8 +470,10 @@ function toRaceInfo(raceId: string, pack: ReturnType<typeof mergeMeta>): RaceInf
     distance: pack.distance,
     groundLabel: pack.groundLabel,
     weather: pack.weather,
+    ...(pack.postTime != null ? { postTime: pack.postTime } : {}),
     ...(pack.raceGrade != null ? { raceGrade: pack.raceGrade } : {}),
     ...(pack.netkeibaGradeType != null ? { netkeibaGradeType: pack.netkeibaGradeType } : {}),
+    ...(aiMarkSnapshot != null ? { aiMarkSnapshot } : {}),
   };
 }
 
@@ -694,7 +716,7 @@ function fromAnalysisJsonRoot(doc: AnalysisJsonRoot, raw: Record<string, unknown
   const meta = (raw["meta"] as AnalysisRaceMeta | undefined) ?? doc.meta;
   const pack = mergeMeta(raw, meta);
   const condition = toCondition(raw, pack);
-  const raceInfo = toRaceInfo(raceId, pack);
+  const raceInfo = toRaceInfo(raceId, pack, raw, meta);
   const entries = (doc.entries ?? (raw["entries"] as AnalysisHorseEntry[])) as AnalysisHorseEntry[];
   const horses: EnrichedRaceHorse[] = entries.map((e) => toEnrichedHorse(e));
 

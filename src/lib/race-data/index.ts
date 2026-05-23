@@ -8,7 +8,9 @@ export {
   getRaceResultById,
   fetchRaceResultByApi,
   ensureRaceResultFetched,
+  invalidateRaceResultCache,
 } from "./raceDataRepository";
+export { isUsableRaceResult, hasQuinellaWideAndTrifectaPayouts } from "./raceResultLoad";
 export {
   raceDataToHorses,
   getSortedRaceEntryGateRows,

@@ -1,15 +1,21 @@
 import type { HorseAbility } from "../../domain/race-evaluation/abilityTypes";
 import { convertToRaceEvaluationData } from "./convertToRaceEvaluationData";
 import type { RaceEvaluationData, RaceIndexItem, RaceResultData } from "./raceEvaluationTypes";
+import {
+  hasQuinellaWideAndTrifectaPayouts,
+  isUsableRaceResult,
+} from "./raceResultLoad";
 import { raceDataToHorses } from "./raceDataToHorses";
 import { assertRaceDataQuality } from "./dataQualityGuards";
 import indexJson from "../../data/index.json";
+
+export { isUsableRaceResult, hasQuinellaWideAndTrifectaPayouts } from "./raceResultLoad";
 
 const raceJsonLoaders = import.meta.glob<{ default: unknown }>("../../data/races/*.json");
 const resultJsonLoaders = import.meta.glob<{ default: unknown }>("../../data/results/*.json");
 
 /** レース JSON 更新・HMR 後も古い表示が残らないよう、評価データはキャッシュしない */
-const resultCache = new Map<string, RaceResultData | null>();
+const resultCache = new Map<string, RaceResultData>();
 const resultFetchInFlight = new Map<string, Promise<RaceResultData | null>>();
 
 function resultStorageKey(raceId: string): string {
@@ -98,55 +104,88 @@ export async function getRaceEvaluationById(
 }
 
 /**
- * 結果 JSON を取得する。fetch-race-results.mjs で生成した
- * src/data/results/{raceId}.json が存在すれば返す。無ければ null。
+ * 開発時は fetch + cache bust で結果 JSON の更新を即反映（レース JSON と同様）。
  */
-export async function getRaceResultById(
-  raceId: string,
-): Promise<RaceResultData | null> {
-  if (resultCache.has(raceId)) {
-    return resultCache.get(raceId) ?? null;
+async function loadResultJsonRaw(raceId: string): Promise<unknown | null> {
+  if (import.meta.env.DEV) {
+    try {
+      const safeId = encodeURIComponent(raceId);
+      const base = new URL(`../../data/results/${safeId}.json`, import.meta.url);
+      const sep = base.href.includes("?") ? "&" : "?";
+      const res = await fetch(`${base.href}${sep}_=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) return null;
+      return (await res.json()) as unknown;
+    } catch {
+      // fall through
+    }
   }
 
   const rel = `../../data/results/${raceId}.json`;
   const load = resultJsonLoaders[rel];
-  if (load != null) {
-    const mod = (await load()) as { default: unknown };
-    const result = mod.default as RaceResultData;
-    resultCache.set(raceId, result);
-    return result;
+  if (load == null) return null;
+  const mod = (await load()) as { default: unknown };
+  return mod.default;
+}
+
+/** メモリキャッシュを捨てる（結果 JSON 追加後の再読込用） */
+export function invalidateRaceResultCache(raceId?: string): void {
+  if (raceId != null) {
+    resultCache.delete(raceId);
+    return;
+  }
+  resultCache.clear();
+}
+
+async function loadUsableRaceResult(raceId: string): Promise<RaceResultData | null> {
+  const raw = await loadResultJsonRaw(raceId);
+  if (isUsableRaceResult(raw)) {
+    resultCache.set(raceId, raw);
+    return raw;
   }
 
-  const cached = loadResultFromLocalStorage(raceId);
-  if (cached != null) {
-    resultCache.set(raceId, cached);
-    return cached;
+  const fromLs = loadResultFromLocalStorage(raceId);
+  if (isUsableRaceResult(fromLs)) {
+    resultCache.set(raceId, fromLs);
+    return fromLs;
   }
 
-  resultCache.set(raceId, null);
+  const mem = resultCache.get(raceId);
+  if (mem != null && isUsableRaceResult(mem)) return mem;
+
   return null;
 }
 
 /**
- * API 経由で結果を即時取得し、メモリ・localStorage に保存する。
+ * 結果 JSON を取得する。fetch-race-results.mjs で生成した
+ * src/data/results/{raceId}.json が存在すれば返す。無ければ null。
+ * 失敗時は null をキャッシュしない（後から JSON を足しても再読込できる）。
  */
-function hasQuinellaWideAndTrifectaPayouts(data: RaceResultData): boolean {
-  const p = data.payouts;
-  return (p?.REN?.length ?? 0) > 0 && (p?.WREN?.length ?? 0) > 0 && (p?.TRI?.length ?? 0) > 0;
+export async function getRaceResultById(
+  raceId: string,
+): Promise<RaceResultData | null> {
+  return loadUsableRaceResult(raceId);
 }
 
 /**
  * キャッシュ（JSON / localStorage）があれば返し、なければ API で自動取得する。
- * 着順のみで馬連・3連複払戻が無い古いキャッシュは API で再取得する。
+ * 毎回ディスクを先に見る（開発中に fetch した直後も反映）。
+ * 払戻3券種が揃っていないときだけ API で補完を試みる（着順表示は揃っていなくても可）。
  */
 export async function ensureRaceResultFetched(raceId: string): Promise<RaceResultData | null> {
-  const cached = await getRaceResultById(raceId);
-  if (cached != null && cached.places.length >= 3 && hasQuinellaWideAndTrifectaPayouts(cached)) {
-    return cached;
+  invalidateRaceResultCache(raceId);
+
+  const fromDisk = await loadUsableRaceResult(raceId);
+  if (fromDisk != null) {
+    if (!hasQuinellaWideAndTrifectaPayouts(fromDisk)) {
+      const upgraded = await fetchRaceResultByApi(raceId);
+      if (upgraded != null) return upgraded;
+    }
+    return fromDisk;
   }
+
   const fromApi = await fetchRaceResultByApi(raceId);
   if (fromApi != null) return fromApi;
-  if (cached != null && cached.places.length >= 3) return cached;
+
   return null;
 }
 
@@ -158,14 +197,13 @@ export async function fetchRaceResultByApi(raceId: string): Promise<RaceResultDa
     try {
       const res = await fetch(`/api/race-result?raceId=${encodeURIComponent(raceId)}`);
       if (res.status === 404) {
-        resultCache.set(raceId, null);
         return null;
       }
       if (!res.ok) {
         return null;
       }
       const data = (await res.json()) as RaceResultData;
-      if (!data || !Array.isArray(data.places)) {
+      if (!isUsableRaceResult(data)) {
         return null;
       }
       resultCache.set(raceId, data);
