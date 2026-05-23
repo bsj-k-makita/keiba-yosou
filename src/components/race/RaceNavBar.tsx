@@ -43,7 +43,8 @@ function pickRaceIdForTarget(
   return target[0]!.raceId;
 }
 
-export function RaceNavBar({ current, raceIndex }: Props) {
+/** 開催日・競馬場・レース番号（ヘッダ直上の固定ナビ） */
+export function RaceTopNav({ current, raceIndex }: Props) {
   const dates = uniqueInOrder(raceIndex.map((r) => r.date));
   const venues = uniqueInOrder(
     raceIndex.filter((r) => r.date === current.date).map((r) => r.venue),
@@ -56,8 +57,8 @@ export function RaceNavBar({ current, raceIndex }: Props) {
   const next = idx >= 0 && idx < sorted.length - 1 ? sorted[idx + 1] : null;
 
   return (
-    <nav className="race-nav" aria-label="レース番号ナビゲーション">
-      <div className="race-nav__inner">
+    <nav className="race-nav race-nav--top" aria-label="レース選択">
+      <div className="race-nav__inner race-nav__inner--top">
         <div className="race-nav__date-tabs" role="tablist" aria-label="開催日">
           {dates.map((date) => {
             const targetRaceId = pickRaceIdForTarget(
@@ -113,7 +114,7 @@ export function RaceNavBar({ current, raceIndex }: Props) {
             <span className="race-nav__arrow race-nav__arrow--disabled">◀</span>
           )}
 
-          <div className="race-nav__tabs" role="tablist">
+          <div className="race-nav__tabs" role="tablist" aria-label="レース番号">
             {sorted.map((r) => (
               <Link
                 key={r.raceId}

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import {
   BIAS_ADJUSTMENTS,
   GROUND_ADJUSTMENTS,
@@ -8,14 +7,12 @@ import {
   classifyLapStructure,
   LAP_STRUCTURE,
   computeAbilityLetterGrades,
-  findSameTypePeers,
   type QuickAdjustmentKey,
   type RaceCondition,
 } from "../../domain/race-evaluation";
 import { RaceAdjustmentPanel, loadGlobalProfile } from "./RaceAdjustmentPanel";
-import { RaceEvaluationSummary } from "./RaceEvaluationSummary";
 import { RaceConclusionPanel } from "./RaceConclusionPanel";
-import { RaceNavBar } from "./RaceNavBar";
+import { RaceTopNav } from "./RaceNavBar";
 import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
 import { RaceHorsesView } from "./RaceHorsesView";
 import { RaceBettingDashboard } from "./RaceBettingDashboard";
@@ -45,27 +42,13 @@ import { runRaceEvaluationPipeline } from "../../lib/pipeline/evaluationPipeline
 import { NO_EV_REGIME_BANNER_TEXT } from "../../lib/pipeline/aiEvRegime";
 import { buildRaceBettingContextFromPipeline } from "../../domain/betting/buildRaceBettingContext";
 import { applyEvRecommendedFlags } from "../../viewModel/raceEvaluationViewModel";
-import {
-  parseProbabilityEngine,
-  raceHasAiEngineReady,
-  type ProbabilityEngine,
-} from "../../lib/pipeline/probabilityEngine";
+import { DEFAULT_PROBABILITY_ENGINE } from "../../lib/pipeline/probabilityEngine";
 import { sortResultsForPredictionTable } from "../../domain/race-evaluation/markHitAnalysis";
 import { FIXED_SOFTMAX_TEMPERATURE } from "../../lib/pipeline/normalization";
 import {
   buildAbilityOnlyEvaluationCondition,
   buildDefaultNeutralCondition,
 } from "./neutralRaceCondition";
-
-const NEUTRAL_CONDITION: RaceCondition = {
-  venue: "東京",
-  surface: "芝",
-  ground: "good",
-  trackSpeed: "standard",
-  bias: "flat",
-  pace: "middle",
-  adjustmentStrength: "middle",
-};
 
 type ViewTab = "horses" | "bets" | "result";
 
@@ -271,9 +254,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     void ensureRaceResultFetched(race.raceId);
   }, [race.raceId]);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const requestedEngine = parseProbabilityEngine(searchParams.get("engine"));
-  const aiDataAvailable = useMemo(() => raceHasAiEngineReady(horses), [horses]);
+  const requestedEngine = DEFAULT_PROBABILITY_ENGINE;
   const [markSnapshot, setMarkSnapshot] = useState<AiMarkSnapshot | null>(() => {
     const fromRace = race.raceInfo.aiMarkSnapshot;
     const fromStorage = loadMarkSnapshotFromLocalStorage(race.raceId);
@@ -284,16 +265,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   useEffect(() => {
     clearStaleMarkSnapshotsFromLocalStorage();
   }, []);
-
-  const setProbabilityEngine = useCallback(
-    (engine: ProbabilityEngine) => {
-      const next = new URLSearchParams(searchParams);
-      if (engine === "ai") next.delete("engine");
-      else next.set("engine", "ts");
-      setSearchParams(next, { replace: true });
-    },
-    [searchParams, setSearchParams],
-  );
 
   const pipeline = useMemo(
     () =>
@@ -361,14 +332,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     pipeline.probabilityEngine === "ai" && pipeline.aiRaceRegime === "NO_EV_REGIME";
 
   const gradesMap = useMemo(() => computeAbilityLetterGrades(horses), [horses]);
-
-  const peers = useMemo(
-    () =>
-      evalCondition == null
-        ? findSameTypePeers([], [], NEUTRAL_CONDITION)
-        : findSameTypePeers(horses, results, evalCondition),
-    [horses, results, evalCondition],
-  );
 
   const [conditionOpen, setConditionOpen] = useState(false);
 
@@ -489,6 +452,10 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       }}
     >
     <div className="app">
+      {currentIndexItem && raceIndex && raceIndex.length > 0 ? (
+        <RaceTopNav current={currentIndexItem} raceIndex={raceIndex} />
+      ) : null}
+
       {/* ヘッダ */}
       <header className="app__hero app__hero--compact">
         <p className="app__breadcrumb">
@@ -502,11 +469,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         </p>
         <NetkeibaRaceLinks raceId={race.raceId} />
       </header>
-
-      {/* レースナビゲーション */}
-      {currentIndexItem && raceIndex && raceIndex.length > 0 && (
-        <RaceNavBar current={currentIndexItem} raceIndex={raceIndex} />
-      )}
 
       {/* 条件アコーディオン */}
       <div className="app__condition-sticky">
@@ -524,35 +486,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             border: "1px solid var(--c-border, rgba(0,0,0,0.08))",
           }}
         >
-          <div
-            role="group"
-            aria-label="勝率エンジン"
-            style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}
-          >
-            <span style={{ fontSize: "0.85em", color: "var(--c-muted, #6c757d)" }}>勝率:</span>
-            <button
-              type="button"
-              className={`view-density__btn${pipeline.probabilityEngine === "ts" ? " view-density__btn--active" : ""}`}
-              onClick={() => setProbabilityEngine("ts")}
-              aria-pressed={pipeline.probabilityEngine === "ts"}
-            >
-              TS評価
-            </button>
-            <button
-              type="button"
-              className={`view-density__btn${pipeline.probabilityEngine === "ai" ? " view-density__btn--active" : ""}`}
-              onClick={() => setProbabilityEngine("ai")}
-              disabled={!aiDataAvailable}
-              title={
-                aiDataAvailable
-                  ? "Python ML（ai_predicted_win_rate）"
-                  : "先に scripts/backfill-ai-predictions.py を実行してください"
-              }
-              aria-pressed={pipeline.probabilityEngine === "ai"}
-            >
-              Python AI
-            </button>
-          </div>
           {requestedEngine === "ai" && pipeline.probabilityEngine === "ts" ? (
             <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
               AIデータなし → TSにフォールバック
@@ -563,7 +496,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             </span>
           ) : pipeline.probabilityEngine === "ai" ? (
             <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
-              方針B: 印・買い目は ai_effective_ev 順（スコア表示はTS参考）
+              印・買い目は ai_effective_ev 順
               {pipeline.marksFrozen
                 ? ` ／ 印は発走${MARK_FREEZE_MINUTES_BEFORE_POST}分前（${formatPostTimeLabel(race.raceInfo)}）で固定`
                 : ""}
@@ -655,7 +588,7 @@ export function RaceDetailView({ race, raceIndex }: Props) {
       </div>
 
       {/* メイン */}
-      <div className={`detail-layout${tab === "bets" || tab === "result" ? " detail-layout--wide" : ""}`}>
+      <div className={`detail-layout${tab === "bets" ? " detail-layout--wide" : ""}`}>
         <div className="detail-main">
           {tab === "horses" && (
             <RaceConclusionPanel results={results} horses={horses} condition={evalCondition} />
@@ -663,16 +596,6 @@ export function RaceDetailView({ race, raceIndex }: Props) {
 
           {tab === "horses" && (
             <>
-              <div className="quick-adjust" role="group" aria-label="直前補正">
-                <button
-                  type="button"
-                  className={`view-density__btn${condition.quickAdjustments?.lastRunReset ? " view-density__btn--active" : ""}`}
-                  onClick={() => handleToggleQuickAdjustment("lastRunReset")}
-                  aria-pressed={condition.quickAdjustments?.lastRunReset ?? false}
-                >
-                  前走加点（不利時）
-                </button>
-              </div>
               <RaceHorsesView
                 sorted={sortedForTable}
                 horses={horses}
@@ -698,44 +621,19 @@ export function RaceDetailView({ race, raceIndex }: Props) {
           )}
 
           {tab === "result" && (
-            <>
-              <RaceBettingDashboard
-                raceId={race.raceId}
-                results={results}
-                horses={horses}
-                condition={evalCondition}
-                adjustedProbabilities={pipeline.adjustedProbabilities}
-                isSkippableRace={pipeline.isSkippableRace}
-                probabilityEngine={pipeline.probabilityEngine}
-                noAiEvRegime={isNoAiEvRegime}
-              />
-              <RaceResultAnalysis
-                raceId={race.raceId}
-                results={results}
-                horses={horses}
-                condition={evalCondition}
-                adjustedProbabilities={pipeline.adjustedProbabilities}
-                isSkippableRace={pipeline.isSkippableRace}
-                probabilityEngine={pipeline.probabilityEngine}
-                noAiEvRegime={isNoAiEvRegime}
-              />
-            </>
+            <RaceResultAnalysis
+              raceId={race.raceId}
+              results={results}
+              horses={horses}
+              condition={evalCondition}
+              adjustedProbabilities={pipeline.adjustedProbabilities}
+              isSkippableRace={pipeline.isSkippableRace}
+              probabilityEngine={pipeline.probabilityEngine}
+              noAiEvRegime={isNoAiEvRegime}
+            />
           )}
 
         </div>
-
-        {tab === "horses" && (
-          <aside className="detail-sidebar">
-            <RaceEvaluationSummary
-              raceId={race.raceId}
-              condition={evalCondition}
-              horses={horses}
-              results={results}
-              peers={peers}
-              probabilityEngine={pipeline.probabilityEngine}
-            />
-          </aside>
-        )}
       </div>
     </div>
     </RaceAdjustProvider>

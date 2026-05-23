@@ -3143,6 +3143,21 @@ samp {
   -webkit-overflow-scrolling: touch;
 }
 
+.race-nav--top {
+  position: sticky;
+  top: var(--app-nav-height);
+  z-index: 55;
+  margin: 0 -22px;
+  background: var(--c-sticky-bg);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+.race-nav__inner--top {
+  gap: 10px;
+  padding: 10px 22px 12px;
+}
+
 .race-nav__inner {
   display: flex;
   flex-direction: column;
