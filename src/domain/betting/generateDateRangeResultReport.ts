@@ -7,9 +7,8 @@ import { raceHasFullAiBackfill } from "../../lib/pipeline/aiMarkAssignment";
 import type { HorseScoreResult } from "../race-evaluation/abilityTypes";
 import {
   collectBacktestRaceInputs,
-  type BacktestRaceInput,
 } from "./runFullBacktest";
-import { runBacktestOnRace } from "./runBacktest";
+import { runBacktestOnRace, type BacktestRaceInput } from "./runBacktest";
 import { isEvSkipDetail } from "./raceDetailLog";
 import type { BacktestRaceOutput, BetTicketType, RaceDetailLog } from "./types";
 import { BET_TICKET_TYPES } from "./types";
@@ -61,9 +60,15 @@ function marksSummary(d: RaceDetailLog): string {
   return entries.map(([num, mark]) => `${num}(${mark})`).join(" ");
 }
 
+type MarkChar = Exclude<NonNullable<HorseScoreResult["mark"]>, "">;
+
+function hasDisplayMark(r: HorseScoreResult): r is HorseScoreResult & { mark: MarkChar } {
+  return r.mark != null && r.mark !== "";
+}
+
 function formatMarkedHorses(results: readonly HorseScoreResult[]): string[] {
   const marked = results
-    .filter((r) => r.mark && r.mark !== "")
+    .filter(hasDisplayMark)
     .sort((a, b) => {
       const ma = MARK_ORDER.indexOf(a.mark as (typeof MARK_ORDER)[number]);
       const mb = MARK_ORDER.indexOf(b.mark as (typeof MARK_ORDER)[number]);
@@ -94,7 +99,7 @@ function ticketBreakdown(d: RaceDetailLog): string {
 
 type DayAgg = {
   date: string;
-  races: DateRangeReportRace[];
+  races: readonly DateRangeReportRace[];
   invested: number;
   payout: number;
   hitRaces: number;
