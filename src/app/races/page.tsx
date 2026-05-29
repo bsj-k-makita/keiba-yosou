@@ -607,7 +607,7 @@ export function RacesListPage() {
                 </p>
                 {bettingStats != null && bettingStats.sampleSize > 0 && (
                   <p className="rl-hit-summary__favorite">
-                    馬券回収率（定型買い目）: <strong>{bettingStats.recoveryRate}%</strong>
+                    馬券回収率（全券種）: <strong>{bettingStats.recoveryRate}%</strong>
                     <span className="rl-hit-summary__sub" style={{ display: "block", marginTop: "0.25rem" }}>
                       的中 {bettingStats.hitRaces}/{bettingStats.sampleSize}R · 投資{" "}
                       {bettingStats.totalInvested.toLocaleString()}円 → 払戻{" "}

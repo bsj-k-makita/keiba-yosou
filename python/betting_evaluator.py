@@ -19,6 +19,8 @@ import pandas as pd
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 
+from config import CALIBRATION_MIN_PROB
+
 logger = logging.getLogger(__name__)
 
 
@@ -141,21 +143,22 @@ class BettingEvaluator:
             return self.calibrator.predict_proba(scores.reshape(-1, 1))[:, 1]
         return self.calibrator.predict(scores)
 
-    def calibrated_normalized_probs(self, raw_scores: np.ndarray) -> np.ndarray:
+    def calibrated_normalized_probs(
+        self,
+        raw_scores: np.ndarray,
+        min_prob: float | None = None,
+    ) -> np.ndarray:
         """
-        LightGBM 生スコア → キャリブレーション → レース内合計1正規化。
+        LightGBM 生スコア → キャリブレーション → フロア付きレース内正規化。
 
         JSON バックフィル用の単一レース確率（全頭分）を返す。
         """
+        from model import smooth_normalize_probabilities
+
         self.require_calibrator()
         calibrated = np.asarray(self._apply_calibration(raw_scores), dtype=float)
-        total = float(np.sum(calibrated))
-        if total < 1e-9:
-            n = len(calibrated)
-            if n == 0:
-                return calibrated
-            return np.ones(n, dtype=float) / n
-        return calibrated / total
+        floor = CALIBRATION_MIN_PROB if min_prob is None else float(min_prob)
+        return smooth_normalize_probabilities(calibrated, min_prob=floor)
 
     @classmethod
     def load(cls, path: str | "Path") -> "BettingEvaluator":
@@ -365,8 +368,17 @@ class BettingEvaluator:
         # 競馬では1レースに必ず1頭しか勝てないため、
         # レース内の各馬の確率の合計を1に正規化する。
         # ----------------------------------------------------------
+        from model import smooth_normalize_probabilities
+
+        def _smooth_norm_group(scores: pd.Series) -> pd.Series:
+            normed = smooth_normalize_probabilities(
+                scores.to_numpy(dtype=float),
+                min_prob=CALIBRATION_MIN_PROB,
+            )
+            return pd.Series(normed, index=scores.index)
+
         df["prob_normalized"] = df.groupby("race_id")["calibrated_prob"].transform(
-            lambda x: x / max(float(x.sum()), 1e-9)
+            _smooth_norm_group
         )
 
         # ----------------------------------------------------------

@@ -26,8 +26,8 @@ function cardTone(outcome: RaceBettingOutcome | null | undefined): "hit" | "skip
 }
 
 function hitStatusLabel(outcome: RaceBettingOutcome): string {
-  if (outcome.status === "resolved" && outcome.totalInvested === 0) return "見送り";
-  if (outcome.isHit && outcome.totalPayout > 0) return "🎯 的中";
+  if (outcome.status === "resolved" && outcome.totalInvested === 0) return "買い目なし";
+  if (outcome.isHit) return "🎯 的中";
   return missStatusLabel(outcome);
 }
 
@@ -122,9 +122,9 @@ export function RaceListCard({
               </span>
             ) : null}
           </div>
-          {tone === "hit" && outcome && outcome.totalPayout > 0 && (
+          {tone === "hit" && outcome && outcome.totalPayout > 0 ? (
             <span className="bt-hit-card__payout">{outcome.totalPayout.toLocaleString()}円</span>
-          )}
+          ) : null}
           {resolved && outcome && (
             <span
               className={`bt-hit-card__recovery${outcome.recoveryRate >= 100 ? " bt-hit-card__recovery--plus" : ""}`}

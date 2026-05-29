@@ -13,14 +13,12 @@ import { inferRaceClassBucket, resolveClassTier } from "../race-evaluation/raceC
 import type { ClassTier } from "../race-evaluation/resolveEffectiveRaceClass";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
 import {
-  AI_EFFECTIVE_EV_THRESHOLD,
-} from "../race-evaluation/investmentEvConstants";
-import {
   buildOddsMapForEvEvaluation,
   buildSecondRowNumbers,
   buildThirdRowNumbers,
   countEvRecommendationPoints,
   generateBetTicketsFromEvaluation,
+  generateFormationBetTickets,
   marksFromResults,
   resolveBettingAdvisoryReason,
   resolvePostProcessFavoriteNumber,
@@ -42,6 +40,8 @@ export type RaceBettingContext = {
   probabilityEngine: ProbabilityEngine;
   /** EV基準を満たす買い目（UI・集計の唯一のソース） */
   evTickets: BetTicket[];
+  /** 印フォーメーション（単勝・馬連・ワイド・3連複 全券種・各100円） */
+  formationTickets: BetTicket[];
   /** 見送り推奨理由（あれば UI 表示のみ） */
   advisoryReason?: string;
 };
@@ -173,6 +173,14 @@ export function buildRaceBettingContext(
       probabilityEngine,
     },
   );
+  const formationTickets =
+    marks.length > 0
+      ? generateFormationBetTickets(marks, classTier, betAmount, {
+          favoriteWinOdds:
+            favoriteNumber != null ? winOddsByNumber.get(favoriteNumber) : undefined,
+          probabilityEngine,
+        })
+      : [];
   const evBetPointCount = countEvRecommendationPoints(evTickets);
   const advisoryReason = resolveBettingAdvisoryReason({
     isSkippableRace,
@@ -187,6 +195,7 @@ export function buildRaceBettingContext(
     classTier,
     classLevel,
     evTickets,
+    formationTickets,
     advisoryReason,
     favoriteNumber,
     secondRow: buildSecondRowNumbers(marks, classTier, probabilityEngine),
@@ -210,7 +219,7 @@ export function formatHorseList(numbers: readonly number[], nameByNumber: Map<nu
 
 export function buildTicketsCopyText(ctx: RaceBettingContext): string {
   const lines: string[] = [];
-  for (const t of ctx.evTickets) {
+  for (const t of ctx.formationTickets) {
     if (t.ticketType === "WIN") {
       const combos = t.combinations.map((c) => `${c[0]}番`).join(", ");
       lines.push(`【単勝】${combos} 各${t.betAmount}円（${t.combinations.length}点）`);
@@ -218,12 +227,12 @@ export function buildTicketsCopyText(ctx: RaceBettingContext): string {
     }
     if (t.ticketType === "MAIN_LINE") {
       const combos = t.combinations.map((c) => c.join("-")).join(", ");
-      lines.push(`【馬連】${combos} 各${t.betAmount}円（${t.combinations.length}点・実オッズ・EV≥1.3）`);
+      lines.push(`【馬連】${combos} 各${t.betAmount}円（${t.combinations.length}点）`);
       continue;
     }
     if (t.ticketType === "WIDE") {
       const combos = t.combinations.map((c) => c.join("-")).join(", ");
-      lines.push(`【ワイド】${combos} 各${t.betAmount}円（${t.combinations.length}点・実オッズ・EV≥1.3）`);
+      lines.push(`【ワイド】${combos} 各${t.betAmount}円（${t.combinations.length}点）`);
       continue;
     }
     const preview = t.combinations
@@ -231,25 +240,10 @@ export function buildTicketsCopyText(ctx: RaceBettingContext): string {
       .map((c) => c.join("-"))
       .join(", ");
     const more = t.combinations.length > 8 ? ` …他${t.combinations.length - 8}点` : "";
-    lines.push(
-      `【3連複】${preview}${more} 各${t.betAmount}円（${t.combinations.length}点・EV≥1.5）`,
-    );
+    lines.push(`【3連複】${preview}${more} 各${t.betAmount}円（${t.combinations.length}点）`);
   }
-  if (ctx.evTickets.length === 0) {
-    if (ctx.advisoryReason === "no_ai_ev_regime") {
-      return "【投資判断：低期待値につき見送り推奨】EV推奨なし（買い目0点）";
-    }
-    if (ctx.advisoryReason === "contradictory_marks") {
-      return "【見送り推奨】評価1位と表示◎が不一致（買い目0点）";
-    }
-    if (ctx.advisoryReason === "no_ev_recommendation") {
-      const evLabel =
-        ctx.probabilityEngine === "ai"
-          ? `EV≥${AI_EFFECTIVE_EV_THRESHOLD}`
-          : "EV≥1.3";
-      return `【見送り推奨】${evLabel}の買い目なし（買い目0点）`;
-    }
-    return "【見送り】EV推奨なし（買い目0点）";
+  if (ctx.formationTickets.length === 0) {
+    return "【買い目なし】印が不足しています";
   }
   return lines.join("\n");
 }

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { HorseAbility, HorseScoreResult, RaceCondition } from "../../domain/race-evaluation";
 import { resolvePlaceToHorseId } from "../../domain/race-evaluation/markHitAnalysis";
-import { classTierLabelJa } from "../../domain/race-evaluation/resolveEffectiveRaceClass";
 import { getEffectiveEvaluationSignals } from "../../domain/race-evaluation/resolveEvaluationSignals";
 import {
   buildRaceBettingContext,
@@ -11,11 +10,7 @@ import { buildPayoutFallbackOddsMap } from "../../domain/betting/bettingRules";
 import { calculateRacePayout, checkOfficialHit } from "../../domain/betting/payoutCalculator";
 import { ticketResultText } from "../../domain/betting/ticketOutcomeDisplay";
 import { BET_TICKET_TYPES, type BetTicket, type BetTicketType } from "../../domain/betting/types";
-import {
-  probabilityEngineLabel,
-  type ProbabilityEngine,
-} from "../../lib/pipeline/probabilityEngine";
-import { NO_EV_REGIME_BANNER_TEXT } from "../../lib/pipeline/aiEvRegime";
+import type { ProbabilityEngine } from "../../lib/pipeline/probabilityEngine";
 import { ensureRaceResultFetched } from "../../lib/race-data";
 import type { RaceResultData } from "../../lib/race-data/raceEvaluationTypes";
 
@@ -33,9 +28,26 @@ type Props = {
 
 function ticketLabel(type: BetTicket["ticketType"]): string {
   if (type === "WIN") return "単勝◎";
-  if (type === "MAIN_LINE") return "馬連EV（◎軸）";
-  if (type === "WIDE") return "ワイドEV（◎軸）";
-  return "3連複EV（◎軸）";
+  if (type === "MAIN_LINE") return "馬連◎○";
+  if (type === "WIDE") return "ワイド◎-印";
+  return "3連複フォーメ";
+}
+
+function buildProbByGate(horses: HorseAbility[]): Map<number, number> {
+  const probByGate = new Map<number, number>();
+  for (const h of horses) {
+    const gate = (h as HorseAbility & { gate?: number }).gate;
+    if (gate == null || !Number.isFinite(gate)) continue;
+    const g = Math.round(gate);
+    const fromAi = h.aiPredictedWinRate;
+    if (fromAi != null && fromAi > 0) {
+      probByGate.set(g, fromAi);
+      continue;
+    }
+    const winOdds = getEffectiveEvaluationSignals(h)?.winOdds;
+    if (winOdds != null && winOdds > 0) probByGate.set(g, 1 / winOdds);
+  }
+  return probByGate;
 }
 
 function estimateWinReturn(odds: number | undefined, betAmount: number): string {
@@ -56,6 +68,100 @@ function isHitByFinishOrder(type: BetTicketType, comb: number[], finishOrder: nu
   }
   const top3 = new Set(finishOrder.slice(0, 3));
   return top3.has(comb[0]!) && top3.has(comb[1]!) && top3.has(comb[2]!);
+}
+
+type PayoutTableProps = {
+  payoutRow: NonNullable<ReturnType<typeof calculateRacePayout>>;
+  ticketGroups: Map<BetTicketType, BetTicket[]>;
+  finishOrder: number[];
+  officialPayouts: RaceResultData["payouts"] | undefined;
+};
+
+function PayoutSummaryTable({
+  payoutRow,
+  ticketGroups,
+  finishOrder,
+  officialPayouts,
+}: PayoutTableProps) {
+  return (
+    <table className="horse-list result-analysis-view__table" style={{ marginTop: "0.75rem" }}>
+      <thead>
+        <tr>
+          <th>券種</th>
+          <th>投資</th>
+          <th>払戻</th>
+          <th>回収率</th>
+          <th>結果</th>
+        </tr>
+      </thead>
+      <tbody>
+        {BET_TICKET_TYPES.filter((type) => payoutRow.byType[type].invested > 0).map((type) => {
+          const d = payoutRow.byType[type];
+          const isHit = d.hitCount > 0;
+          const groupedTickets = ticketGroups.get(type) ?? [];
+          const combinations = groupedTickets.flatMap((t) => t.combinations);
+          const hasOfficialPool =
+            type === "WIN"
+              ? (officialPayouts?.WIN.length ?? 0) > 0
+              : type === "MAIN_LINE"
+                ? (officialPayouts?.REN.length ?? 0) > 0
+                : type === "WIDE"
+                  ? (officialPayouts?.WREN.length ?? 0) > 0
+                  : (officialPayouts?.TRI.length ?? 0) > 0;
+          return (
+            <tr
+              key={type}
+              className={
+                isHit ? "result-analysis-view__row--hit" : "result-analysis-view__row--miss"
+              }
+            >
+              <td>
+                {ticketLabel(type)}
+                <div className="result-analysis-view__comb-list">
+                  {combinations.map((comb, idx) => (
+                    <span
+                      key={`${type}-${comb.join("-")}-${idx}`}
+                      className={`result-analysis-view__comb-chip${
+                        checkOfficialHit(type, comb, officialPayouts) ||
+                        (!hasOfficialPool && isHitByFinishOrder(type, comb, finishOrder))
+                          ? " result-analysis-view__comb-chip--hit"
+                          : ""
+                      }`}
+                    >
+                      {comb.join("-")}
+                    </span>
+                  ))}
+                </div>
+              </td>
+              <td>{d.invested.toLocaleString()}円</td>
+              <td>{d.payout.toLocaleString()}円</td>
+              <td className={d.rate >= 100 ? "result-analysis-view__rate--plus" : ""}>{d.rate}%</td>
+              <td>{ticketResultText(isHit, d.payout)}</td>
+            </tr>
+          );
+        })}
+        <tr className="result-analysis-view__row--total">
+          <td>合計</td>
+          <td>{payoutRow.totalInvested.toLocaleString()}円</td>
+          <td>{payoutRow.totalPayout.toLocaleString()}円</td>
+          <td
+            className={
+              payoutRow.totalInvested > 0 &&
+              payoutRow.totalPayout / payoutRow.totalInvested >= 1
+                ? "result-analysis-view__rate--plus"
+                : ""
+            }
+          >
+            {payoutRow.totalInvested > 0
+              ? Math.round((payoutRow.totalPayout / payoutRow.totalInvested) * 1000) / 10
+              : 0}
+            %
+          </td>
+          <td>{payoutRow.totalPayout > 0 ? "🎯" : "—"}</td>
+        </tr>
+      </tbody>
+    </table>
+  );
 }
 
 export function RaceBettingDashboard({
@@ -96,7 +202,7 @@ export function RaceBettingDashboard({
 
   const totalInvested = useMemo(() => {
     if (!ctx) return 0;
-    return ctx.evTickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0);
+    return ctx.formationTickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0);
   }, [ctx]);
 
   useEffect(() => {
@@ -126,21 +232,9 @@ export function RaceBettingDashboard({
   }, [ctx, autoResult, horses]);
 
   const payoutRow = useMemo(() => {
-    if (!ctx || finishOrder.length < 3) return null;
-    const probByGate = new Map<number, number>();
-    for (const h of horses) {
-      const gate = (h as HorseAbility & { gate?: number }).gate;
-      if (gate == null || !Number.isFinite(gate)) continue;
-      const g = Math.round(gate);
-      const fromAi = h.aiPredictedWinRate;
-      if (fromAi != null && fromAi > 0) {
-        probByGate.set(g, fromAi);
-        continue;
-      }
-      const winOdds = getEffectiveEvaluationSignals(h)?.winOdds;
-      if (winOdds != null && winOdds > 0) probByGate.set(g, 1 / winOdds);
-    }
-    return calculateRacePayout(ctx.evTickets, {
+    if (!ctx || finishOrder.length < 3 || ctx.formationTickets.length === 0) return null;
+    const probByGate = buildProbByGate(horses);
+    return calculateRacePayout(ctx.formationTickets, {
       raceId,
       classLevel: ctx.classLevel,
       finishOrder,
@@ -150,20 +244,20 @@ export function RaceBettingDashboard({
     });
   }, [ctx, finishOrder, raceId, autoResult?.payouts, horses]);
 
+  const ticketGroups = useMemo(() => {
+    const byType = new Map<BetTicketType, BetTicket[]>();
+    for (const type of BET_TICKET_TYPES) byType.set(type, []);
+    for (const ticket of ctx?.formationTickets ?? []) {
+      byType.get(ticket.ticketType)?.push(ticket);
+    }
+    return byType;
+  }, [ctx]);
+
   const markByNumber = useMemo(() => {
     const map = new Map<number, string>();
     if (!ctx) return map;
     for (const m of ctx.marks) map.set(m.horseNumber, m.mark);
     return map;
-  }, [ctx]);
-
-  const ticketGroups = useMemo(() => {
-    const byType = new Map<BetTicketType, BetTicket[]>();
-    for (const type of BET_TICKET_TYPES) byType.set(type, []);
-    for (const ticket of ctx?.evTickets ?? []) {
-      byType.get(ticket.ticketType)?.push(ticket);
-    }
-    return byType;
   }, [ctx]);
 
   const handleCopy = useCallback(async () => {
@@ -185,172 +279,80 @@ export function RaceBettingDashboard({
     );
   }
 
-  const evPointCount = ctx.evTickets.reduce((s, t) => s + t.combinations.length, 0);
-  const isEvSkip = evPointCount === 0;
+  if (ctx.formationTickets.length === 0) {
+    return (
+      <section className="betting-dashboard" aria-label="買い目ダッシュボード">
+        <p className="app__meta">◎印がないため、買い目を生成できません。</p>
+      </section>
+    );
+  }
 
+  const pointCount = ctx.formationTickets.reduce((s, t) => s + t.combinations.length, 0);
   const fav = ctx.favoriteNumber;
   const winOdds = fav != null ? ctx.winOddsByNumber.get(fav) : undefined;
 
   return (
     <section className="betting-dashboard" aria-label="買い目ダッシュボード">
-      {noAiEvRegime ? (
-        <div className="ai-no-ev-banner ai-no-ev-banner--inline" role="status">
-          <p className="ai-no-ev-banner__text">{NO_EV_REGIME_BANNER_TEXT}</p>
-        </div>
-      ) : null}
       <header className="betting-dashboard__head">
         <div>
           <h2 className="app__section-title app__section-title--pop">今回の買い目ダッシュボード</h2>
           <p className="app__meta">
-            EV推奨券のみ表示。クラス: {classTierLabelJa(ctx.classTier)}
-            {isEvSkip ? " / EV推奨なし（見送り）" : ` / EV推奨 ${evPointCount}点`}
-            {" / 勝率: "}
-            {probabilityEngineLabel(probabilityEngine)}
-            {probabilityEngine === "ai" ? "（ai_*）" : ""}
+            単勝・馬連・ワイド・3連複（各{betAmount}円） / {pointCount}点 / 合計投資{" "}
+            <strong>{totalInvested.toLocaleString()}円</strong>
           </p>
         </div>
-        {!isEvSkip ? (
-          <div className="betting-dashboard__actions">
-            <button type="button" className="betting-dashboard__copy" onClick={() => void handleCopy()}>
-              {copied ? "コピー済み" : "買い目をコピー"}
-            </button>
-            <span className="betting-dashboard__total">
-              合計 <strong>{totalInvested.toLocaleString()}円</strong>（ケリー配分・券ごと可変）
-            </span>
-          </div>
-        ) : null}
+        <div className="betting-dashboard__actions">
+          <button type="button" className="betting-dashboard__copy" onClick={() => void handleCopy()}>
+            {copied ? "コピー済み" : "買い目をコピー"}
+          </button>
+        </div>
       </header>
 
-      {isEvSkip ? (
-        <p className="result-analysis-view__ev-skip">
-          投資: 0円 / 払戻: 0円 / 回収率: 0%（見送り判定成功）
-        </p>
+      {ctx.formationTickets.map((ticket) => {
+        const invested = ticket.combinations.length * ticket.betAmount;
+        const comboPreview = ticket.combinations
+          .slice(0, 12)
+          .map((c) =>
+            c
+              .map((n) => {
+                const mark = markByNumber.get(n);
+                return mark ? `${n}(${mark})` : `${n}`;
+              })
+              .join("-"),
+          )
+          .join(" / ");
+        const comboMore =
+          ticket.combinations.length > 12 ? ` …他${ticket.combinations.length - 12}点` : "";
+
+        return (
+          <article key={ticket.ticketType} className="bet-card">
+            <h3 className="bet-card__title">【{ticketLabel(ticket.ticketType)}】</h3>
+            <p className="bet-card__combos">
+              {comboPreview}
+              {comboMore}
+            </p>
+            <div className="bet-card__stats">
+              <span>購入点数: {ticket.combinations.length}点</span>
+              <span>投資額: {invested.toLocaleString()}円</span>
+              {ticket.ticketType === "WIN" && (
+                <span className="bet-card__odds">{estimateWinReturn(winOdds, ticket.betAmount)}</span>
+              )}
+            </div>
+          </article>
+        );
+      })}
+
+      {resultLoading ? (
+        <p className="app__meta">結果を確認中…</p>
+      ) : payoutRow == null ? (
+        <p className="app__meta">結果未確定のため、的中判定はまだ表示できません。</p>
       ) : (
-        ctx.evTickets.map((ticket) => {
-          const invested = ticket.combinations.length * ticket.betAmount;
-          const comboPreview = ticket.combinations
-            .slice(0, 12)
-            .map((c) =>
-              c
-                .map((n) => {
-                  const mark = markByNumber.get(n);
-                  return mark ? `${n}(${mark})` : `${n}`;
-                })
-                .join("-"),
-            )
-            .join(" / ");
-          const comboMore =
-            ticket.combinations.length > 12
-              ? ` …他${ticket.combinations.length - 12}点`
-              : "";
-
-          return (
-            <article key={ticket.ticketType} className="bet-card">
-              <h3 className="bet-card__title">【{ticketLabel(ticket.ticketType)}】</h3>
-              <p className="bet-card__combos">
-                {comboPreview}
-                {comboMore}
-              </p>
-              <div className="bet-card__stats">
-                <span>購入点数: {ticket.combinations.length}点</span>
-                <span>投資額: {invested.toLocaleString()}円</span>
-                {ticket.ticketType === "WIN" && (
-                  <span className="bet-card__odds">{estimateWinReturn(winOdds, ticket.betAmount)}</span>
-                )}
-              </div>
-            </article>
-          );
-        })
-      )}
-
-      {!isEvSkip && (
-        <>
-          {resultLoading ? (
-            <p className="app__meta">結果を確認中…</p>
-          ) : payoutRow == null ? (
-            <p className="app__meta">結果未確定のため、的中判定はまだ表示できません。</p>
-          ) : (
-            <table className="horse-list result-analysis-view__table" style={{ marginTop: "0.75rem" }}>
-              <thead>
-                <tr>
-                  <th>券種</th>
-                  <th>投資</th>
-                  <th>払戻</th>
-                  <th>回収率</th>
-                  <th>結果</th>
-                </tr>
-              </thead>
-              <tbody>
-                {BET_TICKET_TYPES.filter((type) => payoutRow.byType[type].invested > 0).map((type) => {
-                  const d = payoutRow.byType[type];
-                  const isHit = d.hitCount > 0;
-                  const groupedTickets = ticketGroups.get(type) ?? [];
-                  const combinations = groupedTickets.flatMap((t) => t.combinations);
-                  const hasOfficialPool =
-                    type === "WIN"
-                      ? (autoResult?.payouts?.WIN.length ?? 0) > 0
-                      : type === "MAIN_LINE"
-                        ? (autoResult?.payouts?.REN.length ?? 0) > 0
-                        : type === "WIDE"
-                          ? (autoResult?.payouts?.WREN.length ?? 0) > 0
-                          : (autoResult?.payouts?.TRI.length ?? 0) > 0;
-                  return (
-                    <tr
-                      key={type}
-                      className={
-                        isHit
-                          ? "result-analysis-view__row--hit"
-                          : "result-analysis-view__row--miss"
-                      }
-                    >
-                      <td>
-                        {ticketLabel(type)}
-                        <div className="result-analysis-view__comb-list">
-                          {combinations.map((comb, idx) => (
-                            <span
-                              key={`${type}-${comb.join("-")}-${idx}`}
-                              className={`result-analysis-view__comb-chip${
-                                (checkOfficialHit(type, comb, autoResult?.payouts) ||
-                                  (!hasOfficialPool && isHitByFinishOrder(type, comb, finishOrder)))
-                                  ? " result-analysis-view__comb-chip--hit"
-                                  : ""
-                              }`}
-                            >
-                              {comb.join("-")}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td>{d.invested.toLocaleString()}円</td>
-                      <td>{d.payout.toLocaleString()}円</td>
-                      <td className={d.rate >= 100 ? "result-analysis-view__rate--plus" : ""}>{d.rate}%</td>
-                      <td>{ticketResultText(isHit, d.payout)}</td>
-                    </tr>
-                  );
-                })}
-                <tr className="result-analysis-view__row--total">
-                  <td>合計</td>
-                  <td>{payoutRow.totalInvested.toLocaleString()}円</td>
-                  <td>{payoutRow.totalPayout.toLocaleString()}円</td>
-                  <td
-                    className={
-                      payoutRow.totalInvested > 0 &&
-                      payoutRow.totalPayout / payoutRow.totalInvested >= 1
-                        ? "result-analysis-view__rate--plus"
-                        : ""
-                    }
-                  >
-                    {payoutRow.totalInvested > 0
-                      ? Math.round((payoutRow.totalPayout / payoutRow.totalInvested) * 1000) / 10
-                      : 0}
-                    %
-                  </td>
-                  <td>{payoutRow.totalPayout > 0 ? "🎯" : "—"}</td>
-                </tr>
-              </tbody>
-            </table>
-          )}
-        </>
+        <PayoutSummaryTable
+          payoutRow={payoutRow}
+          ticketGroups={ticketGroups}
+          finishOrder={finishOrder}
+          officialPayouts={autoResult?.payouts}
+        />
       )}
     </section>
   );

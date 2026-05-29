@@ -4,6 +4,7 @@ import {
   MAX_INVESTMENT_PER_RACE,
   buildRaceEvaluationContext,
   buildOddsMapForEvEvaluation,
+  buildAiTrifectaThirdColumnGates,
   buildSecondRowNumbers,
   classifyRunningStyleForDiversification,
   estimatePairProbability,
@@ -416,25 +417,66 @@ describe("bettingRules - generateTicketsFromEvaluation", () => {
     expect(resolveMaxInvestmentPerRace("50")).toBe(MAX_INVESTMENT_PER_RACE);
   });
 
-  test("AIモードも TS と同一の純粋 EV ロジックを使用する", () => {
-    const tsTickets = generateTicketsFromEvaluation(
-      mockContext,
-      buildOddsMapForEvEvaluation([] as never, {
-        win: { 1: 8.0, 2: 12.0, 3: 15.0 },
-      }),
-      1.3,
-      { probabilityEngine: "ts" },
+  test("AIモードは3連複のみ列ベース生成（TSは全組み合わせ）", () => {
+    const odds = buildOddsMapForEvEvaluation([] as never, {
+      win: { 1: 8.0, 2: 12.0, 3: 15.0 },
+    });
+    const tsTickets = generateTicketsFromEvaluation(mockContext, odds, 1.3, {
+      probabilityEngine: "ts",
+    });
+    const aiTickets = generateTicketsFromEvaluation(mockContext, odds, 1.3, {
+      probabilityEngine: "ai",
+    });
+    expect(tsTickets.filter((t) => t.type === "TRI").length).toBeGreaterThan(0);
+    expect(aiTickets.filter((t) => t.type !== "TRI")).toEqual(
+      tsTickets.filter((t) => t.type !== "TRI"),
     );
-    const aiTickets = generateTicketsFromEvaluation(
-      mockContext,
-      buildOddsMapForEvEvaluation([] as never, {
-        win: { 1: 8.0, 2: 12.0, 3: 15.0 },
-      }),
-      1.3,
-      { probabilityEngine: "ai" },
-    );
-    expect(aiTickets).toEqual(tsTickets);
     expect(shouldSkipAiFormationBets("ai", aiTickets.length)).toBe(false);
+  });
+
+  test("AI 3列目: 150倍以上の無印は除外し100倍以上は最大2頭", () => {
+    const context: RaceEvaluationContext = {
+      isSkippableRace: false,
+      classTier: "CONDITIONAL_LOWER",
+      topMarkGate: 1,
+      markedHorses: [
+        { gate: 1, mark: "◎", finalRank: 1 },
+        { gate: 2, mark: "○", finalRank: 2 },
+      ],
+      evaluatedHorses: Array.from({ length: 6 }, (_, i) => ({
+        gate: i + 1,
+        finalRank: i + 1,
+        finalEvaluationScore: 6 - i,
+      })),
+      winProbabilities: [0.25, 0.2, 0.15, 0.12, 0.1, 0.08],
+    };
+    const validHorses = [
+      { gate: 1, finalRank: 1, finalEvaluationScore: 6, prob: 0.25 },
+      { gate: 2, finalRank: 2, finalEvaluationScore: 5, prob: 0.2 },
+      { gate: 3, finalRank: 3, finalEvaluationScore: 4, prob: 0.15 },
+      { gate: 4, finalRank: 4, finalEvaluationScore: 3, prob: 0.12 },
+      { gate: 5, finalRank: 5, finalEvaluationScore: 2, prob: 0.1 },
+      { gate: 6, finalRank: 6, finalEvaluationScore: 1, prob: 0.08 },
+    ];
+    const winOdds = {
+      1: 3.0,
+      2: 12.0,
+      3: 120.0,
+      4: 180.0,
+      5: 200.0,
+      6: 250.0,
+    };
+    const thirdCol = buildAiTrifectaThirdColumnGates(
+      context,
+      validHorses,
+      winOdds,
+      "CONDITIONAL_LOWER",
+    );
+    expect(thirdCol).not.toContain(4);
+    expect(thirdCol).not.toContain(6);
+    const ultraCount = thirdCol.filter((g) => (winOdds[g as keyof typeof winOdds] ?? 0) >= 100)
+      .length;
+    expect(ultraCount).toBeLessThanOrEqual(2);
   });
 
   test("脚質グループ分類: パターンA/B/Cで好位・自在の扱いが変わる", () => {

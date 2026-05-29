@@ -28,9 +28,18 @@ from config import (
     EV_WEIGHT_TAU,
     EV_WEIGHT_CENTER_GRADED,
     EV_WEIGHT_TAU_GRADED,
+    EV_WEIGHT_GRADED_MIN_TIER,
     EV_WEIGHT_GRADED_CLASSES,
     EV_WEIGHT_ODDS_CAP,
+    CALIBRATION_MIN_PROB,
+    ADV_WEIGHT_GRADED_BUFF_WIN,
+    ADV_WEIGHT_GRADED_BUFF_CLOSE,
+    ADV_WEIGHT_FLOCK_DEBUFF,
+    ADV_WEIGHT_FLOCK_DEBUFF_SLOW,
+    ADV_WEIGHT_FLOCK_ODDS_MIN,
+    ADV_WEIGHT_CLASS_TIER_MAX,
 )
+from feature_engineer import FeatureEngineer
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +78,8 @@ FEATURE_COLS = [
     # G1専用 interaction
     "is_g1", "g1_last_final3f_z", "g1_final3f_rank",
     "avg_first_corner",
+    # クラス×パフォーマンス交差
+    "inter_class_margin", "inter_graded_top3",
 ]
 
 
@@ -81,11 +92,36 @@ def calculate_ev_weight(
     事前期待値からシグモイド学習重みを算出する。
 
     weight = 1.0 + (1.0 / (1.0 + exp(-(ev - center) / tau)))  → 範囲 [1.0, 2.0]
-    center=0.9, tau=0.02 で EV≈0.9 付近から立ち上がり最大2倍。
+    デフォルト center=0.95, tau=0.05 で EV≈0.95 付近からなだらかに立ち上がり最大2倍。
     """
     ev = np.asarray(ev, dtype=float)
     sig = 1.0 / (1.0 + np.exp(-(ev - center) / tau))
     return 1.0 + sig
+
+
+def calculate_dynamic_ev_weight(
+    ev: float,
+    class_tier: float,
+    *,
+    center: float = EV_WEIGHT_CENTER,
+    tau: float = EV_WEIGHT_TAU,
+    center_graded: float = EV_WEIGHT_CENTER_GRADED,
+    tau_graded: float = EV_WEIGHT_TAU_GRADED,
+    graded_min_tier: float = EV_WEIGHT_GRADED_MIN_TIER,
+) -> float:
+    """
+    レースクラス階級に応じてシグモイドパラメータを切り替え、raw_weight を返す。
+
+    重賞（graded_race_tier >= 6: G3/G2/G1）は center を高く・tau を広く取り、
+    境界付近の大穴への過剰な学習重み付け（過学習）を抑制する。
+    """
+    if pd.isna(ev) or ev <= 0:
+        return 1.0
+    if class_tier >= graded_min_tier:
+        c, t = center_graded, tau_graded
+    else:
+        c, t = center, tau
+    return float(calculate_ev_weight(np.array([ev], dtype=float), center=c, tau=t)[0])
 
 
 def _resolve_win_odds_series(df: pd.DataFrame) -> pd.Series:
@@ -101,6 +137,49 @@ def _resolve_race_class_series(df: pd.DataFrame) -> pd.Series:
     if "race_class" not in df.columns:
         return pd.Series("", index=df.index, dtype=object)
     return df["race_class"].astype(str)
+
+
+def smooth_normalize_probabilities(
+    calibrated: np.ndarray,
+    min_prob: float = CALIBRATION_MIN_PROB,
+) -> np.ndarray:
+    """
+    キャリブレーション後スコアにフロアを加えてレース内合計1に正規化する。
+    最下位馬の 0% 張り付きを緩和し、EV 床 -0.15 への過剰クラスタを防ぐ。
+    """
+    calibrated = np.asarray(calibrated, dtype=float)
+    n = len(calibrated)
+    if n == 0:
+        return calibrated
+    smoothed = calibrated + float(min_prob)
+    total = float(smoothed.sum())
+    if total < _EPS:
+        return np.ones(n, dtype=float) / n
+    return smoothed / total
+
+
+def calibrate_and_normalize_race_df(
+    race_df: pd.DataFrame,
+    raw_preds: np.ndarray,
+    evaluator,
+    *,
+    min_prob: float = CALIBRATION_MIN_PROB,
+    odds_cap: float = EV_WEIGHT_ODDS_CAP,
+) -> pd.DataFrame:
+    """1レース分: キャリブレーション → フロア付き正規化 → ai_effective_ev。"""
+    race_df = race_df.copy()
+    calibrated = np.asarray(evaluator._apply_calibration(raw_preds), dtype=float)
+    race_df["calibrated_raw"] = calibrated
+    normed = smooth_normalize_probabilities(calibrated, min_prob=min_prob)
+    race_df["ai_predicted_win_rate"] = normed
+
+    odds_col = "win_odds" if "win_odds" in race_df.columns else "odds"
+    if odds_col in race_df.columns:
+        odds = pd.to_numeric(race_df[odds_col], errors="coerce").clip(upper=odds_cap)
+    else:
+        odds = pd.Series(0.0, index=race_df.index)
+    race_df["ai_effective_ev"] = (race_df["ai_predicted_win_rate"] * odds) - evaluator.margin
+    return race_df
 
 
 def _normalize_raw_weights_per_race(
@@ -155,46 +234,54 @@ def compute_train_sample_weights(
     valid_odds = odds.notna() & (odds > 0)
 
     raw_weight = np.ones(len(df_train), dtype=float)
-    fallback_proxy_rows = 0
     if valid_odds.any():
         valid_idx = valid_odds.to_numpy()
         valid_ev = ev[valid_odds].to_numpy()
         valid_graded_tier = graded_tier[valid_odds].to_numpy()
         # race_class は LabelEncoding 後に整数化されるため、重み判定は graded_race_tier を主軸にする。
-        graded_mask = valid_graded_tier >= 7.0
+        graded_mask = valid_graded_tier >= EV_WEIGHT_GRADED_MIN_TIER
         if not graded_mask.any():
             # 旧データ互換: graded_race_tier が未計算なら race_class の文字列一致を試す。
             race_class = _resolve_race_class_series(df_train).reset_index(drop=True)
             valid_race_class = race_class[valid_odds].to_numpy()
-            graded_mask = np.isin(valid_race_class, np.asarray(EV_WEIGHT_GRADED_CLASSES, dtype=object))
-        if not graded_mask.any():
-            # 学習分割にG1/G2が無い場合、G3を proxy として graded パラメータを有効化。
-            proxy_mask = valid_graded_tier >= 6.0
-            if proxy_mask.any():
-                graded_mask = proxy_mask
-                fallback_proxy_rows = int(proxy_mask.sum())
+            graded_mask = np.isin(
+                valid_race_class, np.asarray(EV_WEIGHT_GRADED_CLASSES, dtype=object)
+            )
         centers = np.where(graded_mask, EV_WEIGHT_CENTER_GRADED, center)
         taus = np.where(graded_mask, EV_WEIGHT_TAU_GRADED, tau)
-        raw_weight[valid_idx] = 1.0 + (1.0 / (1.0 + np.exp(-(valid_ev - centers) / taus)))
+        raw_weight[valid_idx] = calculate_ev_weight(valid_ev, center=centers, tau=taus)
+
+    raw_weight = FeatureEngineer.calculate_advanced_weights(
+        df_train,
+        raw_weight,
+        graded_buff_win=ADV_WEIGHT_GRADED_BUFF_WIN,
+        graded_buff_close=ADV_WEIGHT_GRADED_BUFF_CLOSE,
+        flock_debuff=ADV_WEIGHT_FLOCK_DEBUFF,
+        flock_debuff_slow=ADV_WEIGHT_FLOCK_DEBUFF_SLOW,
+        flock_odds_min=ADV_WEIGHT_FLOCK_ODDS_MIN,
+        class_tier_max=ADV_WEIGHT_CLASS_TIER_MAX,
+        graded_min_tier=EV_WEIGHT_GRADED_MIN_TIER,
+    )
 
     weights = _normalize_raw_weights_per_race(raw_weight, race_id)
 
     n_ev_gt_1 = int((ev[valid_odds] > 1.0).sum()) if valid_odds.any() else 0
+    graded_rows = int((graded_tier >= EV_WEIGHT_GRADED_MIN_TIER).sum())
     logger.info(
-        "EV sample weights (base center=%.2f tau=%.3f, graded center=%.2f tau=%.3f): "
-        "min=%.4f max=%.4f mean=%.4f | EV>1 rows=%d/%d (%.1f%%) | graded_rows=%d | proxy_graded_rows=%d | invalid_odds=%d",
+        "EV sample weights (base center=%.2f tau=%.3f, graded center=%.2f tau=%.3f, min_tier=%.0f): "
+        "min=%.4f max=%.4f mean=%.4f | EV>1 rows=%d/%d (%.1f%%) | graded_rows=%d | invalid_odds=%d",
         center,
         tau,
         EV_WEIGHT_CENTER_GRADED,
         EV_WEIGHT_TAU_GRADED,
+        EV_WEIGHT_GRADED_MIN_TIER,
         weights.min(),
         weights.max(),
         weights.mean(),
         n_ev_gt_1,
         len(df_train),
         100.0 * n_ev_gt_1 / max(len(df_train), 1),
-        int((graded_tier >= 7.0).sum()),
-        fallback_proxy_rows,
+        graded_rows,
         int((~valid_odds).sum()),
     )
     return weights
@@ -305,6 +392,9 @@ class Model:
                 "enable_ev_sample_weight": True,
                 "ev_weight_center": EV_WEIGHT_CENTER,
                 "ev_weight_tau": EV_WEIGHT_TAU,
+                "ev_weight_center_graded": EV_WEIGHT_CENTER_GRADED,
+                "ev_weight_tau_graded": EV_WEIGHT_TAU_GRADED,
+                "ev_weight_graded_min_tier": EV_WEIGHT_GRADED_MIN_TIER,
                 "oof_auc_pass1": self.oof_auc_pass1_,
             }
 

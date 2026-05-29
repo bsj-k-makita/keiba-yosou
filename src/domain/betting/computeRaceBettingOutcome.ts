@@ -9,13 +9,14 @@ import { buildPayoutFallbackOddsMap } from "./bettingRules";
 import { getEffectiveEvaluationSignals } from "../race-evaluation/resolveEvaluationSignals";
 import { calculateRacePayout } from "./payoutCalculator";
 import { analyzeSecondRowStatus } from "./secondRowAnalysis";
+import { BET_TICKET_TYPES } from "./types";
 
 export type RaceBettingOutcome = {
   status: "pending" | "resolved";
   recoveryRate: number;
   totalInvested: number;
   totalPayout: number;
-  /** EV推奨券の払戻あり */
+  /** 全券種（印フォーメ）のいずれかが的中 */
   isHit: boolean;
   isSecondRowDead: boolean;
 };
@@ -50,7 +51,7 @@ export function computeRaceBettingOutcome(
   if (ctx == null) return null;
 
   if (result == null || result.places.length < 3) {
-    const invested = ctx.evTickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0);
+    const invested = ctx.formationTickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0);
     return {
       status: "pending",
       recoveryRate: 0,
@@ -63,7 +64,7 @@ export function computeRaceBettingOutcome(
 
   const finishOrder = buildFinishOrder(result.places, horses, ctx.horseNumberById);
   if (finishOrder.length < 3) {
-    const invested = ctx.evTickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0);
+    const invested = ctx.formationTickets.reduce((s, t) => s + t.combinations.length * t.betAmount, 0);
     return {
       status: "pending",
       recoveryRate: 0,
@@ -88,7 +89,7 @@ export function computeRaceBettingOutcome(
     if (winOdds != null && winOdds > 0) probByGate.set(g, 1 / winOdds);
   }
 
-  const payout = calculateRacePayout(ctx.evTickets, {
+  const payout = calculateRacePayout(ctx.formationTickets, {
     raceId: result.raceId,
     classLevel: ctx.classLevel,
     finishOrder,
@@ -108,13 +109,14 @@ export function computeRaceBettingOutcome(
     payout.totalInvested > 0
       ? Math.round((payout.totalPayout / payout.totalInvested) * 1000) / 10
       : 0;
+  const isHit = BET_TICKET_TYPES.some((t) => payout.byType[t].hitCount > 0);
 
   return {
     status: "resolved",
     recoveryRate,
     totalInvested: payout.totalInvested,
     totalPayout: payout.totalPayout,
-    isHit: payout.totalPayout > 0,
+    isHit,
     isSecondRowDead: second.isSecondRowDead,
   };
 }

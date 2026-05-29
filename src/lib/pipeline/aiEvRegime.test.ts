@@ -1,15 +1,18 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { HorseAbility } from "../../domain/race-evaluation/abilityTypes";
-import { convertToRaceEvaluationData } from "../race-data/convertToRaceEvaluationData";
-import { raceDataToHorses } from "../race-data/raceDataToHorses";
 import {
+  ANOMALY_WIN_RATE_FLOOR,
+  FAVORITE_ANOMALY_MAX_WIN_ODDS,
   WIN_RATE_STDEV_THRESHOLD,
   resolveAiRaceRegime,
 } from "./aiEvRegime";
 
-function horse(id: string, ev: number, winRate: number = 0.05): HorseAbility {
+function horse(
+  id: string,
+  ev: number,
+  winRate: number = 0.05,
+  winOdds?: number,
+): HorseAbility {
   return {
     horseId: id,
     horseName: id,
@@ -21,6 +24,7 @@ function horse(id: string, ev: number, winRate: number = 0.05): HorseAbility {
     power: 70,
     aiPredictedWinRate: winRate,
     aiEffectiveEv: ev,
+    signals: winOdds != null ? { winOdds } : undefined,
   };
 }
 
@@ -47,18 +51,28 @@ describe("resolveAiRaceRegime", () => {
     expect(resolveAiRaceRegime(horses)).toBe("NORMAL_AI_REGIME");
   });
 
-  it("オークス 202605021011 は NO_EV_REGIME", () => {
-    const raw = JSON.parse(
-      readFileSync(join(process.cwd(), "src/data/races/202605021011.json"), "utf8"),
-    );
-    const data = convertToRaceEvaluationData(raw);
-    const horses = raceDataToHorses(data);
+  it("1番人気相当が低オッズなのに勝率1%以下なら NO_EV", () => {
+    const horses = [
+      horse("fav", 0.1, ANOMALY_WIN_RATE_FLOOR, FAVORITE_ANOMALY_MAX_WIN_ODDS),
+      horse("b", -0.05, 0.08, 30),
+      horse("c", -0.08, 0.06, 50),
+    ];
     expect(resolveAiRaceRegime(horses)).toBe("NO_EV_REGIME");
-    const top7ByEv = [...horses]
-      .filter((h) => h.aiEffectiveEv != null && h.aiPredictedWinRate != null)
-      .sort((a, b) => (b.aiEffectiveEv ?? -Infinity) - (a.aiEffectiveEv ?? -Infinity))
-      .slice(0, 7);
-    const ps = top7ByEv.map((h) => h.aiPredictedWinRate as number);
+  });
+
+  it("勝率がわずかにフラットでも maxEv が低ければ NO_EV（すり抜け対策）", () => {
+    const horses = Array.from({ length: 8 }, (_, i) =>
+      horse(String(i), -0.12, 0.06 + i * 0.0015, 10 + i),
+    );
+    expect(resolveAiRaceRegime(horses)).toBe("NO_EV_REGIME");
+  });
+
+  it("勝率stdevが閾値未満なら NO_EV（オークス型の横並び）", () => {
+    const horses = Array.from({ length: 8 }, (_, i) =>
+      horse(`h${i}`, -0.12, 0.05 + (i % 2) * 0.0001),
+    );
+    expect(resolveAiRaceRegime(horses)).toBe("NO_EV_REGIME");
+    const ps = horses.map((h) => h.aiPredictedWinRate as number);
     const avgP = ps.reduce((s, v) => s + v, 0) / ps.length;
     const stdevP = Math.sqrt(ps.reduce((s, v) => s + (v - avgP) ** 2, 0) / ps.length);
     expect(stdevP).toBeLessThan(WIN_RATE_STDEV_THRESHOLD);

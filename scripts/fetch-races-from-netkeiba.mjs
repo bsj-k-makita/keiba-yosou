@@ -120,6 +120,10 @@ function makeJobs(targetDate = null) {
       placeCodes: ["040108", "050210", "080310"], // 新潟 / 東京 / 京都（1回新潟8日・2回東京10日・3回京都10日）
     }),
     ...makeDayJobs({
+      date: "2026-05-30",
+      placeCodes: ["050211", "080311"], // 東京 / 京都（2回東京11日・3回京都11日・葵S前日）
+    }),
+    ...makeDayJobs({
       date: "2026-05-31",
       placeCodes: ["040109", "050212", "080311"], // 新潟 / 東京 / 京都（ダービー週・東京11R=日本ダービー）
     }),
@@ -699,9 +703,14 @@ function parseOptions() {
   let skipPastRuns = false;
   let fromIndex = false;
   let refetchPastRuns = false;
+  const raceIds = new Set();
   for (const arg of args) {
     if (arg.startsWith("--date=")) {
       targetDate = arg.slice("--date=".length).trim();
+      continue;
+    }
+    if (arg.startsWith("--raceId=")) {
+      raceIds.add(arg.slice("--raceId=".length).trim());
       continue;
     }
     if (arg === "--skip-past-runs") skipPastRuns = true;
@@ -712,7 +721,7 @@ function parseOptions() {
     throw new Error(`invalid --date format: ${targetDate}`);
   }
   const mergePastRunsFromDisk = fromIndex && !refetchPastRuns;
-  return { targetDate, skipPastRuns, fromIndex, refetchPastRuns, mergePastRunsFromDisk };
+  return { targetDate, skipPastRuns, fromIndex, refetchPastRuns, mergePastRunsFromDisk, raceIds };
 }
 
 const venueOrder = (v) => {
@@ -721,9 +730,12 @@ const venueOrder = (v) => {
 };
 
 async function main() {
-  const { targetDate, skipPastRuns, fromIndex, mergePastRunsFromDisk, refetchPastRuns } =
+  const { targetDate, skipPastRuns, fromIndex, mergePastRunsFromDisk, refetchPastRuns, raceIds } =
     parseOptions();
-  const jobs = fromIndex ? makeJobsFromIndex(targetDate) : makeJobs(targetDate);
+  let jobs = fromIndex ? makeJobsFromIndex(targetDate) : makeJobs(targetDate);
+  if (raceIds.size > 0) {
+    jobs = jobs.filter((job) => raceIds.has(job.raceId));
+  }
   if (jobs.length === 0) {
     throw new Error(targetDate ? `no jobs for --date=${targetDate}` : "no jobs");
   }

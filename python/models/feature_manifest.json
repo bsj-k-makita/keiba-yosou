@@ -56,7 +56,9 @@
     "is_g1",
     "g1_last_final3f_z",
     "g1_final3f_rank",
-    "avg_first_corner"
+    "avg_first_corner",
+    "inter_class_margin",
+    "inter_graded_top3"
   ],
   "feature_cols_full": [
     "frame_number",
@@ -114,15 +116,17 @@
     "is_g1",
     "g1_last_final3f_z",
     "g1_final3f_rank",
-    "avg_first_corner"
+    "avg_first_corner",
+    "inter_class_margin",
+    "inter_graded_top3"
   ],
   "dtypes": {
     "frame_number": "int64",
     "horse_number": "int64",
     "age": "int64",
     "weight_carried": "float64",
-    "body_weight": "int64",
-    "body_weight_diff": "int64",
+    "body_weight": "float64",
+    "body_weight_diff": "float64",
     "distance": "int64",
     "horse_count": "int64",
     "log_odds": "float64",
@@ -172,9 +176,11 @@
     "is_g1": "float64",
     "g1_last_final3f_z": "float64",
     "g1_final3f_rank": "float64",
-    "avg_first_corner": "float64"
+    "avg_first_corner": "float64",
+    "inter_class_margin": "float64",
+    "inter_graded_top3": "float64"
   },
   "target_col": "target_win",
-  "row_count_train": 2168,
+  "row_count_train": 7741,
   "categorical_unknown_token": "不明"
 }

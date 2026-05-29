@@ -10,15 +10,69 @@ DB 内 race_class を最新ロジックで一括更新するバッチ。
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import sqlite3
 from pathlib import Path
 from typing import Any
 
 from config import DB_PATH
-from race_class import infer_race_class
+from race_class import infer_race_class, normalize_grade_token
 
 logger = logging.getLogger(__name__)
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+TS_RACES_DIR = REPO_ROOT / "src" / "data" / "races"
+
+_GRADED_CLASSES = frozenset({"G1", "G2", "G3"})
+
+
+def _load_ts_race_grade(race_id: str) -> str | None:
+    """src/data/races/<race_id>.json の meta.raceGrade を race_class ラベルへ。"""
+    path = TS_RACES_DIR / f"{race_id}.json"
+    if not path.is_file():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    meta = data.get("meta") or {}
+    grade = meta.get("raceGrade")
+    if grade is None:
+        return None
+    return normalize_grade_token(str(grade))
+
+
+def _apply_ts_json_grades_to_race_info(
+    conn: sqlite3.Connection,
+    *,
+    dry_run: bool,
+) -> int:
+    """
+    race_info.race_class を TS JSON の raceGrade で補完（仕様書 §13.2）。
+    G1/G2/G3/L/OP 等、JSON 側に明示グレードがある場合は infer 結果より優先する。
+    """
+    rows = conn.execute("SELECT race_id, race_class FROM race_info").fetchall()
+    updates: list[tuple[str, str]] = []
+    for race_id, current in rows:
+        ts_class = _load_ts_race_grade(str(race_id))
+        if ts_class is None or ts_class == current:
+            continue
+        # 重賞は常に上書き。それ以外も JSON 明示があれば infer より信頼。
+        if ts_class in _GRADED_CLASSES or current in ("不明", "", None):
+            updates.append((ts_class, str(race_id)))
+
+    if dry_run:
+        logger.info("race_info ts-json dry-run rows=%d", len(updates))
+        return len(updates)
+
+    if updates:
+        conn.executemany(
+            "UPDATE race_info SET race_class = ? WHERE race_id = ?",
+            updates,
+        )
+    logger.info("race_info ts-json grade overlay rows=%d", len(updates))
+    return len(updates)
 
 
 def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
@@ -104,6 +158,11 @@ def reclassify_database(
                 n = _update_race_like_table(conn, table, dry_run=bool(dry_run))
                 per_table[table] = n
                 total += n
+
+        if "race_info" in table_names:
+            n_ts = _apply_ts_json_grades_to_race_info(conn, dry_run=bool(dry_run))
+            per_table["race_info_ts_json"] = n_ts
+            total += n_ts
 
         if not dry_run:
             conn.commit()

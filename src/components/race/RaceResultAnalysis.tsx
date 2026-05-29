@@ -166,7 +166,7 @@ export function RaceResultAnalysis({
   }, [ctx, activePlaces, horses]);
 
   const payoutRow = useMemo(() => {
-    if (!ctx || finishOrder.length < 3) return null;
+    if (!ctx || finishOrder.length < 3 || ctx.formationTickets.length === 0) return null;
     const probByGate = new Map<number, number>();
     for (const h of horses) {
       const gate = (h as HorseAbility & { gate?: number }).gate;
@@ -180,7 +180,7 @@ export function RaceResultAnalysis({
       const winOdds = getEffectiveEvaluationSignals(h)?.winOdds;
       if (winOdds != null && winOdds > 0) probByGate.set(g, 1 / winOdds);
     }
-    return calculateRacePayout(ctx.evTickets, {
+    return calculateRacePayout(ctx.formationTickets, {
       raceId,
       classLevel: ctx.classLevel,
       finishOrder,
@@ -189,8 +189,6 @@ export function RaceResultAnalysis({
       fallbackExoticOdds: buildPayoutFallbackOddsMap(horses, autoResult?.payouts, probByGate),
     });
   }, [ctx, finishOrder, raceId, autoResult?.payouts, horses]);
-
-  const isEvSkip = payoutRow != null && payoutRow.totalInvested === 0;
 
   const sortedPlaces = useMemo(
     () => [...activePlaces].sort((a, b) => a.place - b.place),
@@ -228,7 +226,7 @@ export function RaceResultAnalysis({
       <h2 className="app__section-title app__section-title--pop">確定結果・回収率</h2>
       <NetkeibaRaceLinks raceId={raceId} />
       <p className="app__meta">
-        EV推奨券（閾値通過した買い目のみ）の投資・払戻を集計します。見送りは買い目0点のレースです。
+        単勝・馬連・ワイド・3連複（印フォーメ）の投資・払戻を集計します。
       </p>
 
       {autoResult ? (
@@ -356,16 +354,42 @@ export function RaceResultAnalysis({
               </div>
             )}
 
-          {payoutRow && isEvSkip && (
-            <p className="result-analysis-view__ev-skip">
-              投資: 0円 / 払戻: 0円 / 回収率: 0%（見送り判定成功）
-            </p>
-          )}
-
-          {payoutRow && !isEvSkip && (
-            <p className="app__meta">
-              券種ごとの投資・払戻・的中判定は上部の「買い目ダッシュボード」で表示しています。
-            </p>
+          {payoutRow && (
+            <div className="result-analysis-view__formation-summary">
+              <h3>全券種 払戻</h3>
+              <p className="app__meta">
+                投資 {payoutRow.totalInvested.toLocaleString()}円 / 払戻{" "}
+                <strong>{payoutRow.totalPayout.toLocaleString()}円</strong> / 回収率{" "}
+                <strong>
+                  {payoutRow.totalInvested > 0
+                    ? Math.round((payoutRow.totalPayout / payoutRow.totalInvested) * 1000) / 10
+                    : 0}
+                  %
+                </strong>
+                {payoutRow.totalPayout > 0 ? " 🎯" : ""}
+              </p>
+              <ul className="result-analysis-view__formation-by-type">
+                {(["WIN", "MAIN_LINE", "WIDE", "TRIFECTA_FORM"] as const).map((type) => {
+                  const d = payoutRow.byType[type];
+                  if (d.invested <= 0) return null;
+                  const label =
+                    type === "WIN"
+                      ? "単勝◎"
+                      : type === "MAIN_LINE"
+                        ? "馬連◎○"
+                        : type === "WIDE"
+                          ? "ワイド◎-印"
+                          : "3連複フォーメ";
+                  return (
+                    <li key={type}>
+                      {label}: 投資 {d.invested.toLocaleString()}円 / 払戻 {d.payout.toLocaleString()}円
+                      {d.hitCount > 0 ? " 🎯" : ""}
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="app__meta">券種別の詳細は上部の「買い目ダッシュボード」を参照してください。</p>
+            </div>
           )}
 
           {secondStatus && (

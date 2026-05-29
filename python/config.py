@@ -87,13 +87,27 @@ CV_FOLDS = 5
 TEST_YEARS = [2024, 2025]   # テスト（評価）に使う年
 
 # OOF期待値に基づく学習サンプル重み（シグモイド）
+# 通常: center=0.95, tau=0.05 — 境界付近の大穴ノイズ急昇を抑制
+# 重賞(G3+): center=1.05, tau=0.10 — 市場が効いているレースで大穴過学習を抑制
 ENABLE_EV_SAMPLE_WEIGHT = True
-EV_WEIGHT_CENTER = 0.9
-EV_WEIGHT_TAU = 0.02
-EV_WEIGHT_CENTER_GRADED = 0.75
-EV_WEIGHT_TAU_GRADED = 0.04
-EV_WEIGHT_GRADED_CLASSES = ("G1", "G2")
+EV_WEIGHT_CENTER = 0.95
+EV_WEIGHT_TAU = 0.05
+EV_WEIGHT_CENTER_GRADED = 1.05
+EV_WEIGHT_TAU_GRADED = 0.10
+EV_WEIGHT_GRADED_MIN_TIER = 6.0  # G3=6, G2=7, G1=8（graded_race_tier）
+EV_WEIGHT_GRADED_CLASSES = ("G1", "G2", "G3")
 EV_WEIGHT_ODDS_CAP = 100.0
+
+# キャリブレーション後のレース内正規化: 最下位馬の勝率床（0%張り付き防止）
+CALIBRATION_MIN_PROB = 0.004
+
+# Pass2 高度重み: 重賞実力馬バフ / 下位クラス大穴フロックデバフ
+ADV_WEIGHT_GRADED_BUFF_WIN = 1.5
+ADV_WEIGHT_GRADED_BUFF_CLOSE = 1.3
+ADV_WEIGHT_FLOCK_DEBUFF = 0.7
+ADV_WEIGHT_FLOCK_DEBUFF_SLOW = 0.6
+ADV_WEIGHT_FLOCK_ODDS_MIN = 50.0
+ADV_WEIGHT_CLASS_TIER_MAX = 3.0
 
 
 def resolve_test_years(df, date_col: str = "race_date") -> list[int]:

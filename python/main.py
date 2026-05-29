@@ -276,7 +276,25 @@ def cmd_quality_gate(args: argparse.Namespace) -> None:
             args.max_flat_ratio * 100,
         )
         raise SystemExit(1)
-    logger.info("quality-gate PASS")
+    logger.info("quality-gate PASS (calibration flat ratio)")
+
+
+def cmd_calibration_gate(args: argparse.Namespace) -> None:
+    from diagnose_calibration_gate import main as gate_main
+
+    argv_backup = sys.argv[:]
+    sys.argv = [argv_backup[0]]
+    if args.race_id:
+        for rid in args.race_id:
+            sys.argv.append(f"--race-id={rid}")
+    if args.min_oof_auc is not None:
+        sys.argv.append(f"--min-oof-auc={args.min_oof_auc}")
+    try:
+        rc = int(gate_main())
+    finally:
+        sys.argv = argv_backup
+    if rc != 0:
+        raise SystemExit(rc)
 
 
 def cmd_train(args: argparse.Namespace) -> None:
@@ -750,6 +768,22 @@ def main() -> None:
         help="許容する flat 比率の上限（0.10 = 10%）",
     )
 
+    p_cal_gate = subparsers.add_parser(
+        "calibration-gate",
+        help="OOF AUC・勝率床・重賞レース分布の品質ゲート（exit 1 on failure）",
+    )
+    p_cal_gate.add_argument(
+        "--race-id",
+        action="append",
+        help="監査 race_id（複数可。最後の1件を監査）",
+    )
+    p_cal_gate.add_argument(
+        "--min-oof-auc",
+        type=float,
+        default=None,
+        help="Pass1 OOF AUC 下限（デフォルト 0.82）",
+    )
+
     p_reclass = subparsers.add_parser(
         "reclassify-race-classes",
         help="race_info / horse_results の race_class を一括再分類",
@@ -784,6 +818,8 @@ def main() -> None:
         cmd_diagnose_calibration(args)
     elif args.command == "quality-gate":
         cmd_quality_gate(args)
+    elif args.command == "calibration-gate":
+        cmd_calibration_gate(args)
     elif args.command == "reclassify-race-classes":
         cmd_reclassify_race_classes(args)
     elif args.command == "predict":

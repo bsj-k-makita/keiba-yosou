@@ -84,9 +84,178 @@ class FeatureEngineer:
         df = self._add_running_style(df)
         df = self._add_speed_index(df)
         df = self._add_basic_features(df)
+        df = self._add_outcome_context(df)
+        df = self.add_interactions(df)
 
         logger.info("特徴量生成完了: %d cols", df.shape[1])
         return df
+
+    # ----------------------------------------------------------
+    # 交差特徴量・Pass2高度重み
+    # ----------------------------------------------------------
+    @staticmethod
+    def compute_margin_sec_series(df: pd.DataFrame) -> pd.Series:
+        """
+        レース内1着タイムとの差（秒）。1着は 0、欠損は NaN。
+        学習サンプル重み用（当該レースの結果）。推論特徴量には使わない。
+        """
+        if "race_id" not in df.columns:
+            return pd.Series(np.nan, index=df.index, dtype=float)
+
+        time_sec = None
+        if "finish_time_sec" in df.columns:
+            time_sec = pd.to_numeric(df["finish_time_sec"], errors="coerce")
+        elif "time_sec" in df.columns:
+            time_sec = pd.to_numeric(df["time_sec"], errors="coerce")
+
+        finish_pos = pd.to_numeric(
+            df.get("finish_pos", pd.Series(np.nan, index=df.index)),
+            errors="coerce",
+        )
+
+        if time_sec is not None and time_sec.notna().any():
+            winner_time = time_sec.groupby(df["race_id"]).transform("min")
+            margin = (time_sec - winner_time).clip(lower=0.0)
+            margin = margin.where(finish_pos != 1, 0.0)
+            return margin
+
+        if finish_pos is not None:
+            return finish_pos.where(finish_pos == 1, 1.0).astype(float)
+
+        return pd.Series(np.nan, index=df.index, dtype=float)
+
+    @staticmethod
+    def _parse_margin_to_sec(margin: object) -> float | None:
+        """netkeiba 着差文字列をおおよそ秒に変換（解析不能は None）。"""
+        if pd.isna(margin):
+            return None
+        text = str(margin).strip()
+        if not text or text in ("-", "同", "同着"):
+            return 0.0
+        try:
+            return float(text)
+        except ValueError:
+            pass
+        import re
+
+        m = re.match(r"^(\d+(?:\.\d+)?)", text)
+        if m:
+            return float(m.group(1)) * 0.2
+        return None
+
+    def _add_outcome_context(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Pass2 高度重み用の文脈列（margin_sec / class_tier）。
+        margin_sec は学習時の結果由来。推論時は欠損のまま重み補正に影響しない。
+        """
+        df = df.copy()
+        race_class = df.get("race_class", pd.Series("", index=df.index)).astype(str)
+        if "graded_race_tier" in df.columns:
+            df["class_tier"] = pd.to_numeric(df["graded_race_tier"], errors="coerce").fillna(0.0)
+        else:
+            df["class_tier"] = race_class.map(_RACE_CLASS_TIER_MAP).fillna(0.0)
+        df["margin_sec"] = self.compute_margin_sec_series(df)
+        return df
+
+    def add_interactions(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        クラス格×パフォーマンス安定度の交差特徴量（リーク回避: 前走着差のみ使用）。
+        """
+        df = df.copy()
+        class_tier = pd.to_numeric(
+            df.get("class_tier", df.get("graded_race_tier", 0.0)),
+            errors="coerce",
+        ).fillna(0.0)
+
+        if "horse_last_margin" in df.columns:
+            hist_margin = df["horse_last_margin"].map(self._parse_margin_to_sec)
+            margin_hist = hist_margin.fillna(1.0)
+        else:
+            margin_hist = pd.Series(1.0, index=df.index)
+
+        top3_col = "horse_top3_rate" if "horse_top3_rate" in df.columns else "top3_rate"
+        if top3_col in df.columns:
+            top3_rate = pd.to_numeric(df[top3_col], errors="coerce").fillna(0.0)
+        elif "horse_win_rate" in df.columns:
+            top3_rate = pd.to_numeric(df["horse_win_rate"], errors="coerce").fillna(0.0) * 1.5
+        else:
+            top3_rate = pd.Series(0.0, index=df.index)
+
+        graded = pd.to_numeric(df.get("graded_race_tier", 0.0), errors="coerce").fillna(0.0)
+        df["inter_class_margin"] = class_tier * margin_hist
+        df["inter_graded_top3"] = graded * top3_rate
+        return df
+
+    @staticmethod
+    def calculate_advanced_weights(
+        df: pd.DataFrame,
+        base_weights: np.ndarray,
+        *,
+        graded_buff_win: float = 1.5,
+        graded_buff_close: float = 1.3,
+        flock_debuff: float = 0.7,
+        flock_debuff_slow: float = 0.6,
+        flock_odds_min: float = 50.0,
+        class_tier_max: float = 3.0,
+        graded_min_tier: float = 6.0,
+        close_margin_sec: float = 0.2,
+    ) -> np.ndarray:
+        """
+        Pass2 シグモイド重みに実力馬バフ / フロックデバフのマルチプライヤーを適用する。
+        """
+        adjusted = np.asarray(base_weights, dtype=float).copy()
+        n = len(df)
+        if n == 0:
+            return adjusted
+        if len(adjusted) != n:
+            raise ValueError(
+                f"base_weights length {len(adjusted)} != df rows {n}"
+            )
+
+        if "margin_sec" in df.columns:
+            margin_sec = pd.to_numeric(df["margin_sec"], errors="coerce").fillna(99.0).to_numpy()
+        else:
+            margin_sec = np.full(n, 99.0, dtype=float)
+
+        win_odds = np.ones(n, dtype=float)
+        for col in ("win_odds", "odds"):
+            if col in df.columns:
+                win_odds = pd.to_numeric(df[col], errors="coerce").fillna(1.0).to_numpy()
+                break
+
+        if "graded_race_tier" in df.columns:
+            graded_src = df["graded_race_tier"]
+        elif "class_tier" in df.columns:
+            graded_src = df["class_tier"]
+        else:
+            graded_src = pd.Series(0.0, index=df.index)
+        graded_tier = pd.to_numeric(graded_src, errors="coerce").fillna(0.0).to_numpy()
+
+        if "class_tier" in df.columns:
+            class_tier = pd.to_numeric(df["class_tier"], errors="coerce").fillna(0.0).to_numpy()
+        else:
+            class_tier = graded_tier.copy()
+        pace_is_slow = (
+            df["pace_is_slow"].to_numpy()
+            if "pace_is_slow" in df.columns
+            else np.zeros(n, dtype=int)
+        )
+
+        for idx in range(n):
+            multiplier = 1.0
+            if graded_tier[idx] >= graded_min_tier:
+                if margin_sec[idx] <= 0.0:
+                    multiplier = graded_buff_win
+                elif margin_sec[idx] <= close_margin_sec:
+                    multiplier = graded_buff_close
+            elif class_tier[idx] <= class_tier_max:
+                if margin_sec[idx] <= 0.0 and win_odds[idx] >= flock_odds_min:
+                    multiplier = flock_debuff
+                    if pace_is_slow[idx] == 1:
+                        multiplier = flock_debuff_slow
+            adjusted[idx] *= multiplier
+
+        return adjusted
 
     # ----------------------------------------------------------
     # 1. 馬の過去成績集計

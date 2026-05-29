@@ -1,5 +1,12 @@
 import type { HorseAbility, HorseScoreResult } from "../race-evaluation/abilityTypes";
 import {
+  AI_TRI_NOISE_EXCLUSION_ODDS,
+  AI_TRI_PREFERRED_ODDS_MAX,
+  AI_TRI_PREFERRED_ODDS_MIN,
+  AI_TRI_SECOND_COLUMN_SIZE,
+  AI_TRI_THIRD_COLUMN_SIZE,
+  AI_TRI_ULTRA_LONGSHOT_MAX_COUNT,
+  AI_TRI_ULTRA_LONGSHOT_ODDS_CAP,
   ANCHOR_MIN_PREDICTED_WIN_RATE,
   EV_MAX_TICKETS_PER_TYPE,
   EV_MAX_TRI_TICKETS_PER_TYPE,
@@ -410,33 +417,222 @@ export function generateTicketsFromEvaluation(
     }
   }
 
+  const triTickets =
+    evOptions?.probabilityEngine === "ai"
+      ? generateAiTrifectaEvTickets(context, validHorses, enrichedOdds, triThreshold)
+      : generateAllCombinationsTrifectaEvTickets(validHorses, enrichedOdds, triThreshold);
+  tickets.push(...triTickets);
+
+  return capEvTicketsByType(tickets);
+}
+
+const AI_TRI_SECOND_ROW_MARKS = new Set(["○", "▲", "☆"]);
+
+function isAiTriNoiseExclusionProtected(
+  gate: number,
+  context: RaceEvaluationContext,
+  secondRowGates: ReadonlySet<number>,
+): boolean {
+  if (context.topMarkGate === gate) return true;
+  if (secondRowGates.has(gate)) return true;
+  const mark = context.markedHorses?.find((m) => m.gate === gate)?.mark;
+  return mark != null && AI_TRI_SECOND_ROW_MARKS.has(mark);
+}
+
+function markedRefsFromContext(
+  context: RaceEvaluationContext,
+  winOdds: Record<number, number>,
+): MarkedHorseRef[] {
+  return (context.markedHorses ?? []).map((m) => ({
+    horseNumber: m.gate,
+    mark: m.mark,
+    finalRank: m.finalRank,
+    winOdds: positiveOdds(winOdds[m.gate]),
+  }));
+}
+
+function compareAiTriThirdColumnCandidate(
+  a: { gate: number; prob: number; winOdds?: number },
+  b: { gate: number; prob: number; winOdds?: number },
+): number {
+  const aPreferred =
+    a.winOdds != null &&
+    a.winOdds >= AI_TRI_PREFERRED_ODDS_MIN &&
+    a.winOdds <= AI_TRI_PREFERRED_ODDS_MAX;
+  const bPreferred =
+    b.winOdds != null &&
+    b.winOdds >= AI_TRI_PREFERRED_ODDS_MIN &&
+    b.winOdds <= AI_TRI_PREFERRED_ODDS_MAX;
+  if (aPreferred !== bPreferred) return aPreferred ? -1 : 1;
+  const evA = a.prob * (a.winOdds ?? 0);
+  const evB = b.prob * (b.winOdds ?? 0);
+  return evB - evA;
+}
+
+/**
+ * AI 3連複の3列目候補（上位8頭）。
+ * 10〜80倍を優先し、100倍以上は最大2頭、150倍以上の無印は除外。
+ */
+export function buildAiTrifectaThirdColumnGates(
+  context: RaceEvaluationContext,
+  validHorses: readonly ValidHorse[],
+  winOdds: Record<number, number>,
+  classTier: ClassTier,
+): number[] {
+  const marks = markedRefsFromContext(context, winOdds);
+  const secondRowGates = new Set(
+    buildSecondRowNumbers(marks, classTier, "ai").slice(0, AI_TRI_SECOND_COLUMN_SIZE),
+  );
+  const markByGate = new Map(marks.map((m) => [m.horseNumber, m.mark]));
+
+  const ranked = [...validHorses]
+    .map((h) => ({
+      gate: h.gate,
+      prob: h.prob,
+      winOdds: positiveOdds(winOdds[h.gate]),
+      mark: markByGate.get(h.gate) ?? "",
+    }))
+    .filter((h) => {
+      if (isAiTriNoiseExclusionProtected(h.gate, context, secondRowGates)) return true;
+      if (
+        h.winOdds != null &&
+        h.winOdds >= AI_TRI_NOISE_EXCLUSION_ODDS &&
+        h.mark === ""
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .sort(compareAiTriThirdColumnCandidate);
+
+  const selected: number[] = [];
+  let ultraLongshotCount = 0;
+  for (const h of ranked) {
+    if (selected.length >= AI_TRI_THIRD_COLUMN_SIZE) break;
+    const isUltra =
+      h.winOdds != null && h.winOdds >= AI_TRI_ULTRA_LONGSHOT_ODDS_CAP;
+    if (isUltra && ultraLongshotCount >= AI_TRI_ULTRA_LONGSHOT_MAX_COUNT) continue;
+    selected.push(h.gate);
+    if (isUltra) ultraLongshotCount += 1;
+  }
+  return selected;
+}
+
+function buildAiTrifectaSecondColumnGates(
+  context: RaceEvaluationContext,
+  validHorses: readonly ValidHorse[],
+  winOdds: Record<number, number>,
+  classTier: ClassTier,
+): number[] {
+  const marks = markedRefsFromContext(context, winOdds);
+  const secondRow = buildSecondRowNumbers(marks, classTier, "ai");
+  const probByGate = new Map(validHorses.map((h) => [h.gate, h.prob]));
+  return [...secondRow]
+    .sort((a, b) => {
+      const evA = (probByGate.get(a) ?? 0) * (positiveOdds(winOdds[a]) ?? 0);
+      const evB = (probByGate.get(b) ?? 0) * (positiveOdds(winOdds[b]) ?? 0);
+      return evB - evA;
+    })
+    .slice(0, AI_TRI_SECOND_COLUMN_SIZE);
+}
+
+function pushTrifectaTicketIfQualified(
+  tickets: EvTicket[],
+  horses: [ValidHorse, ValidHorse, ValidHorse],
+  enrichedOdds: OddsMap,
+  triThreshold: number,
+): void {
+  const [hA, hB, hC] = horses;
+  const [g1, g2, g3] = sortTriplet(hA.gate, hB.gate, hC.gate);
+  const key = triKey(g1, g2, g3);
+  const triOdds = positiveOdds(enrichedOdds.trifecta?.[key]);
+  if (triOdds == null) return;
+
+  const estTriProb = estimateTrifectaProbability(hA.prob, hB.prob, hC.prob);
+  const ev = estTriProb * triOdds;
+  if (ev >= triThreshold) {
+    tickets.push({
+      type: "TRI",
+      gates: [g1, g2, g3],
+      estimatedProbability: estTriProb,
+      expectedValue: ev,
+      decimalOdds: triOdds,
+    });
+  }
+}
+
+function generateAllCombinationsTrifectaEvTickets(
+  validHorses: readonly ValidHorse[],
+  enrichedOdds: OddsMap,
+  triThreshold: number,
+): EvTicket[] {
+  const tickets: EvTicket[] = [];
   for (let i = 0; i < validHorses.length; i++) {
     for (let j = i + 1; j < validHorses.length; j++) {
       for (let k = j + 1; k < validHorses.length; k++) {
-        const hA = validHorses[i]!;
-        const hB = validHorses[j]!;
-        const hC = validHorses[k]!;
-        const [g1, g2, g3] = sortTriplet(hA.gate, hB.gate, hC.gate);
-        const key = triKey(g1, g2, g3);
-        const triOdds = positiveOdds(enrichedOdds.trifecta?.[key]);
-        if (triOdds == null) continue;
-
-        const estTriProb = estimateTrifectaProbability(hA.prob, hB.prob, hC.prob);
-        const ev = estTriProb * triOdds;
-        if (ev >= triThreshold) {
-          tickets.push({
-            type: "TRI",
-            gates: [g1, g2, g3],
-            estimatedProbability: estTriProb,
-            expectedValue: ev,
-            decimalOdds: triOdds,
-          });
-        }
+        pushTrifectaTicketIfQualified(
+          tickets,
+          [validHorses[i]!, validHorses[j]!, validHorses[k]!],
+          enrichedOdds,
+          triThreshold,
+        );
       }
     }
   }
+  return tickets;
+}
 
-  return capEvTicketsByType(tickets);
+/** AI: 2列目上位3 × 3列目上位8（オッズ帯・超大穴制限付き）で3連複EV券を生成 */
+function generateAiTrifectaEvTickets(
+  context: RaceEvaluationContext,
+  validHorses: readonly ValidHorse[],
+  enrichedOdds: OddsMap,
+  triThreshold: number,
+): EvTicket[] {
+  const classTier = (context.classTier as ClassTier) ?? "CONDITIONAL_LOWER";
+  const horseByGate = new Map(validHorses.map((h) => [h.gate, h]));
+  const secondGates = buildAiTrifectaSecondColumnGates(
+    context,
+    validHorses,
+    enrichedOdds.win,
+    classTier,
+  );
+  const thirdGates = buildAiTrifectaThirdColumnGates(
+    context,
+    validHorses,
+    enrichedOdds.win,
+    classTier,
+  );
+  if (secondGates.length === 0 || thirdGates.length === 0) {
+    return generateAllCombinationsTrifectaEvTickets(validHorses, enrichedOdds, triThreshold);
+  }
+
+  const anchorGate =
+    context.topMarkGate ??
+    [...validHorses].sort((a, b) => b.prob - a.prob)[0]?.gate;
+  if (anchorGate == null) {
+    return generateAllCombinationsTrifectaEvTickets(validHorses, enrichedOdds, triThreshold);
+  }
+  const anchor = horseByGate.get(anchorGate);
+  if (anchor == null) {
+    return generateAllCombinationsTrifectaEvTickets(validHorses, enrichedOdds, triThreshold);
+  }
+
+  const tickets: EvTicket[] = [];
+  const seen = new Set<string>();
+  for (const secondGate of secondGates) {
+    const second = horseByGate.get(secondGate);
+    if (second == null || second.gate === anchor.gate) continue;
+    for (const thirdGate of thirdGates) {
+      const third = horseByGate.get(thirdGate);
+      if (third == null || third.gate === anchor.gate || third.gate === second.gate) continue;
+      const combKey = triKey(anchor.gate, second.gate, third.gate);
+      if (seen.has(combKey)) continue;
+      seen.add(combKey);
+      pushTrifectaTicketIfQualified(tickets, [anchor, second, third], enrichedOdds, triThreshold);
+    }
+  }
+  return tickets;
 }
 
 /** EvTicket を既存の BetTicket 形式に変換（UI・バックテスト・払戻計算用） */

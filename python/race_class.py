@@ -131,6 +131,15 @@ def normalize_grade_token(grade: str | None) -> str | None:
     return None
 
 
+def _clean_race_title(title: str) -> str:
+    """netkeiba ページタイトル等のノイズ（｜以降・パイプ以降）を除去する。"""
+    t = str(title or "").strip()
+    for sep in ("｜", "|"):
+        if sep in t:
+            t = t.split(sep, 1)[0].strip()
+    return t
+
+
 def infer_race_class(title: str = "", info2: str = "") -> str:
     """
     レース名 (title) とレース情報 (info2) から race_class を推定する。
@@ -145,6 +154,7 @@ def infer_race_class(title: str = "", info2: str = "") -> str:
     Returns:
         G1, G2, G3, L, OP, 3勝クラス, 2勝クラス, 1勝クラス, 新馬, 未勝利, 不明
     """
+    title = _clean_race_title(title)
     compact = _normalize_text(title, info2)
     if not compact:
         return RACE_CLASS_UNKNOWN
