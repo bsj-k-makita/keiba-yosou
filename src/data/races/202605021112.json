@@ -22,6 +22,7 @@
       "jockey": "小林美",
       "trainer": "辻",
       "weight": 53,
+      "bodyWeightKg": 448,
       "runningStyle": "好位",
       "abilities": {
         "speed": 59.8,
@@ -210,6 +211,7 @@
       "jockey": "ゴンサルベ",
       "trainer": "田島",
       "weight": 58,
+      "bodyWeightKg": 484,
       "runningStyle": "好位",
       "abilities": {
         "speed": 46,
@@ -406,6 +408,7 @@
       "jockey": "菊沢",
       "trainer": "鈴木慎",
       "weight": 58,
+      "bodyWeightKg": 476,
       "runningStyle": "先行",
       "abilities": {
         "speed": 59.5,
@@ -596,9 +599,10 @@
       "horseNumber": 4,
       "sex": "牡",
       "age": 4,
-      "jockey": "津村",
+      "jockey": "松岡正海",
       "trainer": "小笠",
       "weight": 58,
+      "bodyWeightKg": 508,
       "runningStyle": "好位",
       "abilities": {
         "speed": 59.6,
@@ -789,6 +793,7 @@
       "jockey": "佐々木",
       "trainer": "池上",
       "weight": 58,
+      "bodyWeightKg": 524,
       "runningStyle": "好位",
       "abilities": {
         "speed": 54.8,
@@ -979,6 +984,7 @@
       "jockey": "石川",
       "trainer": "高橋一",
       "weight": 58,
+      "bodyWeightKg": 448,
       "runningStyle": "先行",
       "abilities": {
         "speed": 46.9,
@@ -1173,6 +1179,7 @@
       "jockey": "杉原",
       "trainer": "松尾",
       "weight": 56,
+      "bodyWeightKg": 550,
       "runningStyle": "差し",
       "abilities": {
         "speed": 52.8,
@@ -1358,6 +1365,7 @@
       "jockey": "田辺",
       "trainer": "中舘",
       "weight": 58,
+      "bodyWeightKg": 486,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 61.8,
@@ -1544,6 +1552,7 @@
       "jockey": "小崎",
       "trainer": "嘉藤",
       "weight": 56,
+      "bodyWeightKg": 482,
       "runningStyle": "先行",
       "abilities": {
         "speed": 54.8,
@@ -1729,6 +1738,7 @@
       "jockey": "☆長浜",
       "trainer": "菊川",
       "weight": 57,
+      "bodyWeightKg": 484,
       "runningStyle": "好位",
       "abilities": {
         "speed": 52.4,
@@ -1915,6 +1925,7 @@
       "jockey": "吉田豊",
       "trainer": "松永康",
       "weight": 58,
+      "bodyWeightKg": 464,
       "runningStyle": "好位",
       "abilities": {
         "speed": 42.6,
@@ -2114,6 +2125,7 @@
       "jockey": "大野",
       "trainer": "松山",
       "weight": 58,
+      "bodyWeightKg": 518,
       "runningStyle": "先行",
       "abilities": {
         "speed": 55.1,
@@ -2306,6 +2318,7 @@
       "jockey": "ルメール",
       "trainer": "奥村豊",
       "weight": 58,
+      "bodyWeightKg": 498,
       "runningStyle": "好位",
       "abilities": {
         "speed": 55.8,
@@ -2495,6 +2508,7 @@
       "jockey": "舟山",
       "trainer": "庄野",
       "weight": 56,
+      "bodyWeightKg": 460,
       "runningStyle": "好位",
       "abilities": {
         "speed": 46.9,
@@ -2591,18 +2605,6 @@
           "raceClass": "2勝",
           "place": 5,
           "marginToWinnerSec": 1.2,
-          "section200mSec": [
-            7.1,
-            11.4,
-            11.4,
-            12.7,
-            12.5,
-            12.4,
-            12.5,
-            12.6,
-            12.7,
-            12.7
-          ],
           "venue": "京都",
           "surface": "ダート",
           "fieldSize": 16,
@@ -2684,6 +2686,7 @@
       "jockey": "遠藤",
       "trainer": "小島",
       "weight": 55,
+      "bodyWeightKg": 494,
       "runningStyle": "好位",
       "abilities": {
         "speed": 48.3,
@@ -2878,6 +2881,7 @@
       "jockey": "北村宏",
       "trainer": "勢司",
       "weight": 58,
+      "bodyWeightKg": 508,
       "runningStyle": "好位",
       "abilities": {
         "speed": 48.4,
@@ -3053,5 +3057,57 @@
       "ev_margin_applied": 0.2
     }
   ],
-  "ev_margin_dynamic": 0.2
+  "ev_margin_dynamic": 0.2,
+  "analysis": {
+    "bias": {
+      "innerOuter": -2,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 39.45,
+    "meanMarginFieldSec": 0.85,
+    "lapStructure": "中間",
+    "peerBaseline": {
+      "peerRaceCount": 0,
+      "avgMedianFinal3fPeer": 36.55,
+      "avgMeanMarginPeer": 0.425,
+      "fallbackFromFile": true,
+      "savedDayRaceCount": 1,
+      "savedAvgPaceBalance": null
+    },
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-30T12:36:38.196Z"
+  },
+  "condition": {
+    "venue": "東京",
+    "raceName": "4歳以上2勝クラス",
+    "surface": "ダート",
+    "distance": 2100,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -2,
+        "frontCloser": 0,
+        "innerShare": 0,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 39.45,
+      "meanMarginFieldSec": 0.85,
+      "lapStructureLabel": "中間",
+      "peerBaseline": {
+        "peerRaceCount": 0,
+        "avgMedianFinal3fPeer": 36.55,
+        "avgMeanMarginPeer": 0.425,
+        "fallbackFromFile": true,
+        "savedDayRaceCount": 1,
+        "savedAvgPaceBalance": null
+      },
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-30T12:36:38.196Z"
+    }
+  }
 }

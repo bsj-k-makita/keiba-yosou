@@ -125,7 +125,7 @@ function makeJobs(targetDate = null) {
     }),
     ...makeDayJobs({
       date: "2026-05-31",
-      placeCodes: ["040109", "050212", "080311"], // 新潟 / 東京 / 京都（ダービー週・東京11R=日本ダービー）
+      placeCodes: ["040109", "050212", "080312"], // 新潟 / 東京 / 京都（1回新潟9日・2回東京12日・3回京都12日・ダービー週）
     }),
   ];
   if (!targetDate) return out;
@@ -210,6 +210,42 @@ function venueFromKnownPlaceNames(rawVenue, titleText) {
   return t.length ? t : "—";
 }
 
+/** PC / SP 出馬表から芝・ダ距離を解釈（SP は `.Turf` + 隣接 `2400m` 形式） */
+function parseSurfaceDistance($, html, raceData01, wholeText) {
+  const mObstacle = (raceData01 || wholeText).match(/障[・\s]*(\d{3,4})m/);
+  if (mObstacle) {
+    return { surface: "ダート", distance: parseInt(mObstacle[1], 10) };
+  }
+  const mTurfDirt = (raceData01 || wholeText).match(/(芝|ダ)(?:ート)?[・\s]*(\d{3,4})m/);
+  if (mTurfDirt) {
+    return {
+      surface: mTurfDirt[1] === "ダ" ? "ダート" : "芝",
+      distance: parseInt(mTurfDirt[2], 10),
+    };
+  }
+  for (const [cls, surface] of [
+    ["Turf", "芝"],
+    ["Dirt", "ダート"],
+  ]) {
+    const $el = $(`.${cls}`).first();
+    if (!$el.length) continue;
+    const distText = $el.next("span").text().trim() || $el.parent().text();
+    const dm = distText.match(/(\d{3,4})m/);
+    if (dm) return { surface, distance: parseInt(dm[1], 10) };
+  }
+  const mSpTurf = html.match(/class="Turf"[^>]*>[^<]*<\/span><span>(\d{3,4})m<\/span>/i);
+  if (mSpTurf) return { surface: "芝", distance: parseInt(mSpTurf[1], 10) };
+  const mSpDirt = html.match(/class="Dirt"[^>]*>[^<]*<\/span><span>(\d{3,4})m<\/span>/i);
+  if (mSpDirt) return { surface: "ダート", distance: parseInt(mSpDirt[1], 10) };
+  const raceDataBlock = $('[class*="Race_Data"]').text().replace(/\s+/g, " ");
+  const dmOnly = raceDataBlock.match(/(\d{3,4})m/);
+  if (dmOnly) {
+    const surface = $(".Turf").length ? "芝" : $(".Dirt").length ? "ダート" : /ダ/.test(wholeText) ? "ダート" : "芝";
+    return { surface, distance: parseInt(dmOnly[1], 10) };
+  }
+  throw new Error(`距離を解析できません: ${raceData01.slice(0, 120)}`);
+}
+
 /**
  * 出馬表 HTML を解析（投資シグナル・脚質推定は含めない。後段で enrichInvestmentSignalsInRaceData を呼ぶ）
  */
@@ -229,20 +265,7 @@ function parseShutubaCore(html, { raceId, date }) {
   }
   const raceData01 = $(".RaceData01").text().replace(/\s+/g, " ");
   const wholeText = $("body").text().replace(/\s+/g, " ");
-  // 例: 芝1600m / ダ1700m / 障3170m (芝 ダート) — 障害は `RaceEvaluation` の surface が芝|ダのため ダート に寄せる
-  const mObstacle = (raceData01 || wholeText).match(/障[・\s]*(\d{3,4})m/);
-  const mTurfDirt = (raceData01 || wholeText).match(/(芝|ダ)(?:ート)?[・\s]*(\d{3,4})m/);
-  let surface;
-  let distance;
-  if (mObstacle) {
-    distance = parseInt(mObstacle[1], 10);
-    surface = "ダート";
-  } else if (mTurfDirt) {
-    surface = mTurfDirt[1] === "ダ" ? "ダート" : "芝";
-    distance = parseInt(mTurfDirt[2], 10);
-  } else {
-    throw new Error(`距離を解析できません: ${raceData01.slice(0, 120)}`);
-  }
+  const { surface, distance } = parseSurfaceDistance($, html, raceData01, wholeText);
   const rm = $(".RaceList_Item01 .RaceNum").text().match(/(\d+)R/);
   const raceNumber =
     rm != null

@@ -23,6 +23,7 @@
       "jockey": "ゴンサルベ",
       "trainer": "大和田",
       "weight": 58,
+      "bodyWeightKg": 496,
       "runningStyle": "先行",
       "abilities": {
         "speed": 65.5,
@@ -197,6 +198,7 @@
       "jockey": "松岡",
       "trainer": "奥平",
       "weight": 58,
+      "bodyWeightKg": 500,
       "runningStyle": "先行",
       "abilities": {
         "speed": 54.5,
@@ -381,6 +383,7 @@
       "jockey": "菅原明",
       "trainer": "高木",
       "weight": 58,
+      "bodyWeightKg": 468,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 67.4,
@@ -553,6 +556,7 @@
       "jockey": "岩田康",
       "trainer": "尾関",
       "weight": 56,
+      "bodyWeightKg": 472,
       "runningStyle": "好位",
       "abilities": {
         "speed": 61.4,
@@ -725,6 +729,7 @@
       "jockey": "ディー",
       "trainer": "大竹",
       "weight": 58,
+      "bodyWeightKg": 476,
       "runningStyle": "好位",
       "abilities": {
         "speed": 64.7,
@@ -903,6 +908,7 @@
       "jockey": "菊沢",
       "trainer": "鈴木慎",
       "weight": 58,
+      "bodyWeightKg": 502,
       "runningStyle": "先行",
       "abilities": {
         "speed": 62.8,
@@ -1081,6 +1087,7 @@
       "jockey": "横山和",
       "trainer": "四位",
       "weight": 58,
+      "bodyWeightKg": 494,
       "runningStyle": "好位",
       "abilities": {
         "speed": 64.4,
@@ -1255,6 +1262,7 @@
       "jockey": "長浜",
       "trainer": "萱野",
       "weight": 58,
+      "bodyWeightKg": 452,
       "runningStyle": "好位",
       "abilities": {
         "speed": 64.3,
@@ -1427,6 +1435,7 @@
       "jockey": "ルメール",
       "trainer": "加藤征",
       "weight": 58,
+      "bodyWeightKg": 462,
       "runningStyle": "好位",
       "abilities": {
         "speed": 64.7,
@@ -1601,6 +1610,7 @@
       "jockey": "戸崎圭",
       "trainer": "矢作",
       "weight": 56,
+      "bodyWeightKg": 474,
       "runningStyle": "先行",
       "abilities": {
         "speed": 67,
@@ -1773,6 +1783,7 @@
       "jockey": "松山",
       "trainer": "伊坂",
       "weight": 56,
+      "bodyWeightKg": 478,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 68.1,
@@ -1946,6 +1957,7 @@
       "jockey": "横山武",
       "trainer": "小手川",
       "weight": 58,
+      "bodyWeightKg": 510,
       "runningStyle": "先行",
       "abilities": {
         "speed": 65.8,
@@ -2115,6 +2127,7 @@
       "jockey": "杉原",
       "trainer": "高柳瑞",
       "weight": 58,
+      "bodyWeightKg": 466,
       "runningStyle": "好位",
       "abilities": {
         "speed": 61.8,
@@ -2285,6 +2298,7 @@
       "jockey": "木幡巧",
       "trainer": "田中剛",
       "weight": 58,
+      "bodyWeightKg": 480,
       "runningStyle": "先行",
       "abilities": {
         "speed": 68.2,
@@ -2457,6 +2471,7 @@
       "jockey": "石田",
       "trainer": "新開",
       "weight": 58,
+      "bodyWeightKg": 494,
       "runningStyle": "好位",
       "abilities": {
         "speed": 68,
@@ -2626,6 +2641,7 @@
       "jockey": "北村宏",
       "trainer": "森秀",
       "weight": 58,
+      "bodyWeightKg": 452,
       "runningStyle": "好位",
       "abilities": {
         "speed": 65.3,
@@ -2791,5 +2807,41 @@
       "ev_margin_applied": 0.2
     }
   ],
-  "ev_margin_dynamic": 0.2
+  "ev_margin_dynamic": 0.2,
+  "analysis": {
+    "bias": {
+      "innerOuter": -0.6,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 36.35,
+    "meanMarginFieldSec": 0.41,
+    "lapStructure": "中間",
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-30T12:21:25.503Z"
+  },
+  "condition": {
+    "venue": "東京",
+    "raceName": "富嶽賞",
+    "surface": "ダート",
+    "distance": 1400,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -0.6,
+        "frontCloser": 0,
+        "innerShare": 0.33,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 36.35,
+      "meanMarginFieldSec": 0.41,
+      "lapStructureLabel": "中間",
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-30T12:21:25.503Z"
+    }
+  }
 }

@@ -1,23 +1,49 @@
 import { execSync } from "child_process";
 import iconv from "iconv-lite";
 
+const looksLikeHtml = (s) => /<(?:!doctype|html|head|body)\b/i.test(s) || /<title>/i.test(s);
+
+/** 日本語文字数と文字化け（U+FFFD）からデコード候補を選ぶ */
+function pickDecodedHtml(bin) {
+  const headSample = bin.slice(0, 8192).toString("ascii");
+  const charsetMatch = headSample.match(/charset\s*=\s*["']?([\w-]+)/i);
+  const declared = charsetMatch?.[1]?.toLowerCase() ?? "";
+  if (declared === "utf-8" || declared === "utf8") {
+    return bin.toString("utf8");
+  }
+  if (declared === "euc-jp" || declared === "eucjp") {
+    return iconv.decode(bin, "EUC-JP");
+  }
+
+  const asUtf8 = bin.toString("utf8");
+  const asEuc = iconv.decode(bin, "EUC-JP");
+  const score = (s) => {
+    const jp = (s.match(/[ぁ-んァ-ン一-龥]/g) ?? []).length;
+    const bad = (s.match(/\uFFFD/g) ?? []).length;
+    return (
+      jp * 2 -
+      bad * 20 +
+      (looksLikeHtml(s) ? 10 : 0) +
+      (s.includes("netkeiba") ? 3 : 0) +
+      (/charset\s*=\s*["']?utf-8/i.test(s) ? 5 : 0)
+    );
+  };
+  return score(asUtf8) >= score(asEuc) ? asUtf8 : asEuc;
+}
+
 /**
- * netkeiba HTML を UTF-8 で取得（日本語ページは EUC-JP 想定）
+ * netkeiba HTML を UTF-8 で取得（PC ページは EUC-JP / UTF-8 混在）
  */
 export function fetchUtf8(url) {
   const bin = execSync(`curl -sL -A 'Mozilla/5.0 (compatible; keiba-yosou/1.0)' ${JSON.stringify(url)}`, {
     maxBuffer: 8 * 1024 * 1024,
     encoding: "buffer",
   });
-  const asUtf8 = bin.toString("utf8");
-  const asEuc = iconv.decode(bin, "EUC-JP");
-  const looksLikeHtml = (s) => /<(?:!doctype|html|head|body)\b/i.test(s) || /<title>/i.test(s);
-  const score = (s) => (looksLikeHtml(s) ? 10 : 0) + (s.length > 1000 ? 5 : 0) + (s.includes("netkeiba") ? 3 : 0);
-  return score(asEuc) >= score(asUtf8) ? asEuc : asUtf8;
+  return pickDecodedHtml(bin);
 }
 
 /**
- * race.sp.netkeiba.com 向け（モバイルUA + EUC-JP優先）
+ * race.sp.netkeiba.com 向け（モバイル UA。2026-05 以降 UTF-8 が主流）
  */
 export function fetchSpUtf8(url) {
   const ua =
@@ -26,11 +52,7 @@ export function fetchSpUtf8(url) {
     maxBuffer: 8 * 1024 * 1024,
     encoding: "buffer",
   });
-  const asEuc = iconv.decode(bin, "EUC-JP");
-  const asUtf8 = bin.toString("utf8");
-  const looksLikeHtml = (s) => /<(?:!doctype|html|head|body)\b/i.test(s) || /<title>/i.test(s);
-  const score = (s) => (looksLikeHtml(s) ? 10 : 0) + (s.length > 1000 ? 5 : 0) + (s.includes("netkeiba") ? 3 : 0);
-  return score(asEuc) >= score(asUtf8) ? asEuc : asUtf8;
+  return pickDecodedHtml(bin);
 }
 
 export function sleep(ms) {

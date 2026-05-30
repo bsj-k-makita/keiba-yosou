@@ -1,7 +1,7 @@
 {
   "raceId": "202608031106",
   "meta": {
-    "date": "2026-05-31",
+    "date": "2026-05-30",
     "venue": "京都",
     "raceNumber": 6,
     "raceName": "4歳以上1勝クラス",
@@ -22,6 +22,7 @@
       "jockey": "幸",
       "trainer": "野中",
       "weight": 58,
+      "bodyWeightKg": 498,
       "runningStyle": "差し",
       "abilities": {
         "speed": 59.9,
@@ -152,6 +153,13 @@
           "final3fSec": 38.3
         }
       ],
+      "pedigree": {
+        "sireId": "000a016e93",
+        "sireName": "Tiz the Law (米)",
+        "damSireId": "000a011248",
+        "damSireName": "Tapit (米)",
+        "sireLineName": "Slew系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.1784,
@@ -179,9 +187,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.0283,
-      "ai_effective_ev": 0.3254
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2022104314",
@@ -193,6 +199,7 @@
       "jockey": "斎藤",
       "trainer": "長谷川",
       "weight": 58,
+      "bodyWeightKg": 520,
       "runningStyle": "先行",
       "abilities": {
         "speed": 55.6,
@@ -333,6 +340,13 @@
           "final3fSec": 40.1
         }
       ],
+      "pedigree": {
+        "sireId": "000a012602",
+        "sireName": "カリフォルニアクローム California Chrome(米)",
+        "damSireId": "000a002133",
+        "damSireName": "Pulpit",
+        "sireLineName": "Slew系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.0664,
@@ -360,9 +374,7 @@
       "risk_factors": [
         "末脚のキレ負け"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.0778,
-      "ai_effective_ev": 0.4718
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2021106180",
@@ -374,6 +386,7 @@
       "jockey": "菱田",
       "trainer": "岡田",
       "weight": 58,
+      "bodyWeightKg": 504,
       "runningStyle": "差し",
       "abilities": {
         "speed": 38.5,
@@ -523,6 +536,13 @@
           "final3fSec": 39.6
         }
       ],
+      "pedigree": {
+        "sireId": "2009100921",
+        "sireName": "ホッコータルマエ",
+        "damSireId": "000a001d7e",
+        "damSireName": "Kingmambo (米)",
+        "sireLineName": "Prospector系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": true,
       "l2_top_speed": 0.1784,
@@ -550,9 +570,7 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.0283,
-      "ai_effective_ev": 0.2816
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2022102639",
@@ -564,6 +582,7 @@
       "jockey": "中井",
       "trainer": "森田",
       "weight": 58,
+      "bodyWeightKg": 502,
       "runningStyle": "好位",
       "abilities": {
         "speed": 48.8,
@@ -705,6 +724,13 @@
           "final3fSec": 38.4
         }
       ],
+      "pedigree": {
+        "sireId": "2012104759",
+        "sireName": "シュヴァルグラン",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_sustain_ratio": 0.9688,
@@ -731,9 +757,7 @@
       "risk_factors": [
         "末脚のキレ負け"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.0778,
-      "ai_effective_ev": 0.3683
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2022104413",
@@ -745,6 +769,7 @@
       "jockey": "吉村",
       "trainer": "西村",
       "weight": 58,
+      "bodyWeightKg": 464,
       "runningStyle": "先行",
       "abilities": {
         "speed": 42.1,
@@ -891,6 +916,13 @@
           "final3fSec": 35.4
         }
       ],
+      "pedigree": {
+        "sireId": "000a014377",
+        "sireName": "ブリックスアンドモルタル Bricks and Mortar(米)",
+        "damSireId": "000a001a98",
+        "damSireName": "Storm Cat (米)",
+        "sireLineName": "Bird系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.7314,
@@ -918,9 +950,7 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.144,
-      "ai_effective_ev": 0.285
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2022105695",
@@ -932,6 +962,7 @@
       "jockey": "国分優",
       "trainer": "辻野",
       "weight": 58,
+      "bodyWeightKg": 512,
       "runningStyle": "好位",
       "abilities": {
         "speed": 53.7,
@@ -1073,6 +1104,13 @@
           "final3fSec": 37.9
         }
       ],
+      "pedigree": {
+        "sireId": "2010104155",
+        "sireName": "エピファネイア",
+        "damSireId": "000a0016f2",
+        "damSireName": "Kris S.",
+        "sireLineName": "Roberto系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.122,
@@ -1100,9 +1138,7 @@
       "risk_factors": [
         "末脚のキレ負け"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.0778,
-      "ai_effective_ev": 0.2679
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2022105567",
@@ -1114,6 +1150,7 @@
       "jockey": "小沢",
       "trainer": "緒方",
       "weight": 56,
+      "bodyWeightKg": 488,
       "runningStyle": "先行",
       "abilities": {
         "speed": 50.5,
@@ -1202,6 +1239,13 @@
           "final3fSec": 38.2
         }
       ],
+      "pedigree": {
+        "sireId": "000a016e99",
+        "sireName": "ナダル Nadal(米)",
+        "damSireId": "000a0021b7",
+        "damSireName": "Arch (米)",
+        "sireLineName": "Roberto系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.1784,
@@ -1229,9 +1273,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.0778,
-      "ai_effective_ev": 0.6897
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2022100158",
@@ -1243,6 +1285,7 @@
       "jockey": "高杉",
       "trainer": "藤岡健",
       "weight": 58,
+      "bodyWeightKg": 460,
       "runningStyle": "先行",
       "abilities": {
         "speed": 43.9,
@@ -1381,6 +1424,13 @@
           "final3fSec": 35.7
         }
       ],
+      "pedigree": {
+        "sireId": "000a012aad",
+        "sireName": "American Pharoah (米)",
+        "damSireId": "000a010542",
+        "damSireName": "エンパイアメーカー Empire Maker(米)",
+        "sireLineName": "Prospector系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.6656,
@@ -1408,9 +1458,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.0283,
-      "ai_effective_ev": 0.1967
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2022106185",
@@ -1422,6 +1470,7 @@
       "jockey": "柴田裕",
       "trainer": "角田",
       "weight": 54,
+      "bodyWeightKg": 462,
       "runningStyle": "先行",
       "abilities": {
         "speed": 58.6,
@@ -1546,6 +1595,13 @@
           "final3fSec": 39.2
         }
       ],
+      "pedigree": {
+        "sireId": "2008102636",
+        "sireName": "オルフェーヴル",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.0664,
@@ -1573,9 +1629,7 @@
       "risk_factors": [
         "末脚のキレ負け"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.1589,
-      "ai_effective_ev": 0.511
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2021105526",
@@ -1587,6 +1641,7 @@
       "jockey": "国分恭",
       "trainer": "中村",
       "weight": 58,
+      "bodyWeightKg": 550,
       "runningStyle": "好位",
       "abilities": {
         "speed": 46.1,
@@ -1727,6 +1782,13 @@
           "final3fSec": 39
         }
       ],
+      "pedigree": {
+        "sireId": "000a01239b",
+        "sireName": "Frankel",
+        "damSireId": "000a00185d",
+        "damSireName": "Sadler's Wells (米)",
+        "sireLineName": "Wells系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.1784,
@@ -1754,9 +1816,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.0641,
-      "ai_effective_ev": 0.7308
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2021102294",
@@ -1768,6 +1828,7 @@
       "jockey": "坂井",
       "trainer": "加藤公",
       "weight": 58,
+      "bodyWeightKg": 462,
       "runningStyle": "好位",
       "abilities": {
         "speed": 53.4,
@@ -1894,6 +1955,13 @@
           "final3fSec": 35
         }
       ],
+      "pedigree": {
+        "sireId": "2007103143",
+        "sireName": "ルーラーシップ",
+        "damSireId": "000a001d7e",
+        "damSireName": "Kingmambo (米)",
+        "sireLineName": "Prospector系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.9358,
@@ -1921,9 +1989,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.1589,
-      "ai_effective_ev": 0.1662
+      "ev_margin_applied": 0.15
     },
     {
       "horseId": "2022106631",
@@ -1935,6 +2001,7 @@
       "jockey": "◇今村",
       "trainer": "寺島",
       "weight": 54,
+      "bodyWeightKg": 474,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 51,
@@ -2070,6 +2137,13 @@
           "final3fSec": 38.1
         }
       ],
+      "pedigree": {
+        "sireId": "000a011099",
+        "sireName": "シニスターミニスター Sinister Minister(米)",
+        "damSireId": "000a001d37",
+        "damSireName": "A.P. Indy",
+        "sireLineName": "Slew系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.3534,
@@ -2097,10 +2171,60 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.15,
-      "ai_predicted_win_rate": 0.0778,
-      "ai_effective_ev": 0.5792
+      "ev_margin_applied": 0.15
     }
   ],
-  "ev_margin_dynamic": 0.15
+  "ev_margin_dynamic": 0.15,
+  "analysis": {
+    "bias": {
+      "innerOuter": -0.6,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 37.3,
+    "meanMarginFieldSec": 0.27,
+    "lapStructure": "中間",
+    "peerBaseline": {
+      "peerRaceCount": 0,
+      "avgMedianFinal3fPeer": 37.32,
+      "avgMeanMarginPeer": 1.0160000000000002,
+      "fallbackFromFile": true,
+      "savedDayRaceCount": 6,
+      "savedAvgPaceBalance": null
+    },
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-30T12:45:04.111Z"
+  },
+  "condition": {
+    "venue": "京都",
+    "raceName": "4歳以上1勝クラス",
+    "surface": "ダート",
+    "distance": 1800,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -0.6,
+        "frontCloser": 0,
+        "innerShare": 0.33,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 37.3,
+      "meanMarginFieldSec": 0.27,
+      "lapStructureLabel": "中間",
+      "peerBaseline": {
+        "peerRaceCount": 0,
+        "avgMedianFinal3fPeer": 37.32,
+        "avgMeanMarginPeer": 1.0160000000000002,
+        "fallbackFromFile": true,
+        "savedDayRaceCount": 6,
+        "savedAvgPaceBalance": null
+      },
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-30T12:45:04.111Z"
+    }
+  }
 }

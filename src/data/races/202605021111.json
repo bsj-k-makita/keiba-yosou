@@ -23,6 +23,7 @@
       "jockey": "横山琉",
       "trainer": "杉山晴",
       "weight": 57,
+      "bodyWeightKg": 472,
       "runningStyle": "先行",
       "abilities": {
         "speed": 70,
@@ -201,6 +202,7 @@
       "jockey": "小崎",
       "trainer": "野中",
       "weight": 57,
+      "bodyWeightKg": 478,
       "runningStyle": "先行",
       "abilities": {
         "speed": 68.9,
@@ -386,6 +388,7 @@
       "jockey": "ゴンサルベ",
       "trainer": "大竹",
       "weight": 58,
+      "bodyWeightKg": 502,
       "runningStyle": "好位",
       "abilities": {
         "speed": 75.2,
@@ -569,6 +572,7 @@
       "jockey": "舟山",
       "trainer": "庄野",
       "weight": 57,
+      "bodyWeightKg": 522,
       "runningStyle": "先行",
       "abilities": {
         "speed": 79.5,
@@ -755,6 +759,7 @@
       "jockey": "石川",
       "trainer": "友道",
       "weight": 55,
+      "bodyWeightKg": 518,
       "runningStyle": "先行",
       "abilities": {
         "speed": 70,
@@ -930,6 +935,7 @@
       "jockey": "ルメール",
       "trainer": "宮田",
       "weight": 58,
+      "bodyWeightKg": 546,
       "runningStyle": "好位",
       "abilities": {
         "speed": 71.3,
@@ -1110,6 +1116,7 @@
       "jockey": "吉田豊",
       "trainer": "茶木",
       "weight": 58,
+      "bodyWeightKg": 518,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 70.7,
@@ -1295,6 +1302,7 @@
       "jockey": "長岡",
       "trainer": "杉山佳",
       "weight": 57,
+      "bodyWeightKg": 494,
       "runningStyle": "好位",
       "abilities": {
         "speed": 69.4,
@@ -1471,6 +1479,7 @@
       "jockey": "三浦",
       "trainer": "田中勝",
       "weight": 57,
+      "bodyWeightKg": 518,
       "runningStyle": "好位",
       "abilities": {
         "speed": 70.2,
@@ -1646,6 +1655,7 @@
       "jockey": "小林美",
       "trainer": "平田",
       "weight": 57,
+      "bodyWeightKg": 474,
       "runningStyle": "好位",
       "abilities": {
         "speed": 72.3,
@@ -1806,9 +1816,10 @@
       "horseNumber": 11,
       "sex": "牡",
       "age": 5,
-      "jockey": "津村",
+      "jockey": "戸崎圭太",
       "trainer": "稲垣",
       "weight": 57,
+      "bodyWeightKg": 502,
       "runningStyle": "先行",
       "abilities": {
         "speed": 74.4,
@@ -1985,6 +1996,7 @@
       "jockey": "レーン",
       "trainer": "堀",
       "weight": 58,
+      "bodyWeightKg": 516,
       "runningStyle": "好位",
       "abilities": {
         "speed": 82.6,
@@ -2169,6 +2181,7 @@
       "jockey": "菅原明",
       "trainer": "武井",
       "weight": 57,
+      "bodyWeightKg": 520,
       "runningStyle": "好位",
       "abilities": {
         "speed": 67.4,
@@ -2352,6 +2365,7 @@
       "jockey": "古川吉",
       "trainer": "畑端",
       "weight": 59,
+      "bodyWeightKg": 546,
       "runningStyle": "好位",
       "abilities": {
         "speed": 81.7,
@@ -2524,6 +2538,7 @@
       "jockey": "ディー",
       "trainer": "新谷",
       "weight": 57,
+      "bodyWeightKg": 486,
       "runningStyle": "好位",
       "abilities": {
         "speed": 90.8,
@@ -2673,6 +2688,7 @@
       "jockey": "松山",
       "trainer": "高柳大",
       "weight": 58,
+      "bodyWeightKg": 492,
       "runningStyle": "先行",
       "abilities": {
         "speed": 79.1,
@@ -2848,5 +2864,57 @@
       "ev_margin_applied": 0.2
     }
   ],
-  "ev_margin_dynamic": 0.2
+  "ev_margin_dynamic": 0.2,
+  "analysis": {
+    "bias": {
+      "innerOuter": -0.6,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 36.75,
+    "meanMarginFieldSec": 0.44,
+    "lapStructure": "中間",
+    "peerBaseline": {
+      "peerRaceCount": 0,
+      "avgMedianFinal3fPeer": 36.35,
+      "avgMeanMarginPeer": 0.41,
+      "fallbackFromFile": true,
+      "savedDayRaceCount": 1,
+      "savedAvgPaceBalance": null
+    },
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-30T12:26:58.098Z"
+  },
+  "condition": {
+    "venue": "東京",
+    "raceName": "アハルテケS",
+    "surface": "ダート",
+    "distance": 1600,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -0.6,
+        "frontCloser": 0,
+        "innerShare": 0.33,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 36.75,
+      "meanMarginFieldSec": 0.44,
+      "lapStructureLabel": "中間",
+      "peerBaseline": {
+        "peerRaceCount": 0,
+        "avgMedianFinal3fPeer": 36.35,
+        "avgMeanMarginPeer": 0.41,
+        "fallbackFromFile": true,
+        "savedDayRaceCount": 1,
+        "savedAvgPaceBalance": null
+      },
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-30T12:26:58.098Z"
+    }
+  }
 }

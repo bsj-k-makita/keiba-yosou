@@ -1,7 +1,7 @@
 {
   "raceId": "202608031111",
   "meta": {
-    "date": "2026-05-31",
+    "date": "2026-05-30",
     "venue": "京都",
     "raceNumber": 11,
     "raceName": "葵S",
@@ -24,6 +24,7 @@
       "jockey": "小沢",
       "trainer": "小椋",
       "weight": 57,
+      "bodyWeightKg": 468,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 66.1,
@@ -147,6 +148,13 @@
           "final3fSec": 35
         }
       ],
+      "pedigree": {
+        "sireId": "2013106101",
+        "sireName": "サトノダイヤモンド",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 1,
@@ -174,9 +182,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0717,
-      "ai_effective_ev": 0.8088
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023107264",
@@ -188,6 +194,7 @@
       "jockey": "北村友",
       "trainer": "上村",
       "weight": 55,
+      "bodyWeightKg": 458,
       "runningStyle": "好位",
       "abilities": {
         "speed": 90.6,
@@ -316,6 +323,13 @@
           "final3fSec": 34.3
         }
       ],
+      "pedigree": {
+        "sireId": "2014110060",
+        "sireName": "マテラスカイ",
+        "damSireId": "000a001be1",
+        "damSireName": "Gone West",
+        "sireLineName": "Prospector系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": true,
       "l2_top_speed": 0.6656,
@@ -343,9 +357,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0261,
-      "ai_effective_ev": 0.0765
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023107279",
@@ -357,6 +369,7 @@
       "jockey": "丸山",
       "trainer": "加藤士",
       "weight": 55,
+      "bodyWeightKg": 434,
       "runningStyle": "好位",
       "abilities": {
         "speed": 65.1,
@@ -481,6 +494,13 @@
           "final3fSec": 35.5
         }
       ],
+      "pedigree": {
+        "sireId": "2014106046",
+        "sireName": "アルアイン",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.8665,
@@ -508,9 +528,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0261,
-      "ai_effective_ev": 0.2308
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023105273",
@@ -522,6 +540,7 @@
       "jockey": "坂井",
       "trainer": "斉藤崇",
       "weight": 57,
+      "bodyWeightKg": 528,
       "runningStyle": "先行",
       "abilities": {
         "speed": 90.7,
@@ -647,6 +666,13 @@
           "final3fSec": 33.7
         }
       ],
+      "pedigree": {
+        "sireId": "2014106046",
+        "sireName": "アルアイン",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 1,
@@ -674,9 +700,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0717,
-      "ai_effective_ev": 0.1696
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023105505",
@@ -688,6 +712,7 @@
       "jockey": "川又",
       "trainer": "大久保",
       "weight": 57,
+      "bodyWeightKg": 450,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 96.3,
@@ -796,6 +821,13 @@
           "final3fSec": 39.8
         }
       ],
+      "pedigree": {
+        "sireId": "2013100612",
+        "sireName": "ファインニードル",
+        "damSireId": "000a00010f",
+        "damSireName": "エンドスウィープ End Sweep(米)",
+        "sireLineName": "Prospector系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.7983,
@@ -823,9 +855,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.1326,
-      "ai_effective_ev": 0.0914
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023103717",
@@ -837,6 +867,7 @@
       "jockey": "浜中",
       "trainer": "鹿戸",
       "weight": 57,
+      "bodyWeightKg": 484,
       "runningStyle": "先行",
       "abilities": {
         "speed": 62.2,
@@ -941,6 +972,13 @@
           "final3fSec": 37.9
         }
       ],
+      "pedigree": {
+        "sireId": "000a013b82",
+        "sireName": "ドレフォン Drefong(米)",
+        "damSireId": "000a002276",
+        "damSireName": "Tale of the Cat (米)",
+        "sireLineName": "Bird系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.2941,
@@ -968,9 +1006,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0591,
-      "ai_effective_ev": 0.9369
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023105210",
@@ -982,6 +1018,7 @@
       "jockey": "団野",
       "trainer": "吉村",
       "weight": 55,
+      "bodyWeightKg": 450,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 65,
@@ -1111,6 +1148,13 @@
           "final3fSec": 36.1
         }
       ],
+      "pedigree": {
+        "sireId": "2011103916",
+        "sireName": "ミッキーアイル",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.8665,
@@ -1138,9 +1182,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0717,
-      "ai_effective_ev": 0.9859
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023106665",
@@ -1152,6 +1194,7 @@
       "jockey": "原",
       "trainer": "青木",
       "weight": 57,
+      "bodyWeightKg": 500,
       "runningStyle": "先行",
       "abilities": {
         "speed": 74.2,
@@ -1255,6 +1298,13 @@
           "final3fSec": 35.5
         }
       ],
+      "pedigree": {
+        "sireId": "2015101621",
+        "sireName": "タワーオブロンドン",
+        "damSireId": "000a00231f",
+        "damSireName": "Elusive Quality",
+        "sireLineName": "Prospector系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.7314,
@@ -1282,9 +1332,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0717,
-      "ai_effective_ev": 0.6376
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023102577",
@@ -1296,6 +1344,7 @@
       "jockey": "古川奈",
       "trainer": "矢作",
       "weight": 55,
+      "bodyWeightKg": 448,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 65,
@@ -1421,6 +1470,13 @@
           "final3fSec": 35.5
         }
       ],
+      "pedigree": {
+        "sireId": "000a013b82",
+        "sireName": "ドレフォン Drefong(米)",
+        "damSireId": "000a002276",
+        "damSireName": "Tale of the Cat (米)",
+        "sireLineName": "Bird系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.601,
@@ -1448,9 +1504,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0261,
-      "ai_effective_ev": 0.2962
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023105668",
@@ -1462,6 +1516,7 @@
       "jockey": "吉村",
       "trainer": "高橋亮",
       "weight": 55,
+      "bodyWeightKg": 448,
       "runningStyle": "先行",
       "abilities": {
         "speed": 81.9,
@@ -1564,6 +1619,13 @@
           "final3fSec": 35.2
         }
       ],
+      "pedigree": {
+        "sireId": "000a01be02",
+        "sireName": "フィレンツェファイア",
+        "damSireId": "000a011200",
+        "damSireName": "Speightstown (米)",
+        "sireLineName": "Prospector系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.8665,
@@ -1591,9 +1653,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0717,
-      "ai_effective_ev": 0.2413
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023104313",
@@ -1605,6 +1665,7 @@
       "jockey": "鮫島駿",
       "trainer": "西園翔",
       "weight": 57,
+      "bodyWeightKg": 452,
       "runningStyle": "先行",
       "abilities": {
         "speed": 93.9,
@@ -1734,6 +1795,13 @@
           "final3fSec": 33.3
         }
       ],
+      "pedigree": {
+        "sireId": "2015110096",
+        "sireName": "ミスターメロディ",
+        "damSireId": "000a0103b9",
+        "damSireName": "ヨハネスブルグ Johannesburg(米)",
+        "sireLineName": "Bird系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 1,
@@ -1761,9 +1829,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0717,
-      "ai_effective_ev": 0.1015
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023100545",
@@ -1775,6 +1841,7 @@
       "jockey": "荻野極",
       "trainer": "池江",
       "weight": 57,
+      "bodyWeightKg": 466,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 74.4,
@@ -1880,6 +1947,13 @@
           "final3fSec": 34.4
         }
       ],
+      "pedigree": {
+        "sireId": "2011100655",
+        "sireName": "モーリス",
+        "damSireId": "1995108676",
+        "damSireName": "グラスワンダー",
+        "sireLineName": "Roberto系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.8665,
@@ -1907,9 +1981,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0261,
-      "ai_effective_ev": 0.1672
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023103162",
@@ -1921,6 +1993,7 @@
       "jockey": "高杉",
       "trainer": "藤岡健",
       "weight": 57,
+      "bodyWeightKg": 524,
       "runningStyle": "好位",
       "abilities": {
         "speed": 92.5,
@@ -2046,6 +2119,13 @@
           "final3fSec": 35.8
         }
       ],
+      "pedigree": {
+        "sireId": "000a0136f6",
+        "sireName": "デクラレーションオブウォー",
+        "damSireId": "000a0000d3",
+        "damSireName": "Danzig",
+        "sireLineName": "Danzig系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.7314,
@@ -2073,9 +2153,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0717,
-      "ai_effective_ev": 0.3158
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023103355",
@@ -2087,6 +2165,7 @@
       "jockey": "幸",
       "trainer": "牧",
       "weight": 55,
+      "bodyWeightKg": 434,
       "runningStyle": "先行",
       "abilities": {
         "speed": 88,
@@ -2211,6 +2290,13 @@
           "final3fSec": 35.4
         }
       ],
+      "pedigree": {
+        "sireId": "2011103916",
+        "sireName": "ミッキーアイル",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 0.9358,
@@ -2238,9 +2324,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0717,
-      "ai_effective_ev": 0.3932
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023103721",
@@ -2252,6 +2336,7 @@
       "jockey": "斎藤",
       "trainer": "松永幹",
       "weight": 55,
+      "bodyWeightKg": 470,
       "runningStyle": "好位",
       "abilities": {
         "speed": 83.6,
@@ -2377,6 +2462,13 @@
           "final3fSec": 35.4
         }
       ],
+      "pedigree": {
+        "sireId": "000a01be02",
+        "sireName": "フィレンツェファイア",
+        "damSireId": "000a011200",
+        "damSireName": "Speightstown (米)",
+        "sireLineName": "Prospector系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": false,
       "l2_top_speed": 1,
@@ -2404,9 +2496,7 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0591,
-      "ai_effective_ev": 0.4301
+      "ev_margin_applied": 0.2
     },
     {
       "horseId": "2023105347",
@@ -2418,6 +2508,7 @@
       "jockey": "池添",
       "trainer": "加藤士",
       "weight": 55,
+      "bodyWeightKg": 420,
       "runningStyle": "好位",
       "abilities": {
         "speed": 95,
@@ -2547,6 +2638,13 @@
           "final3fSec": 35.6
         }
       ],
+      "pedigree": {
+        "sireId": "2012104889",
+        "sireName": "リアルスティール",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
       "abilities_source": "past_runs_estimated",
       "was_bias_disadvantaged": true,
       "l2_top_speed": 0.901,
@@ -2574,10 +2672,60 @@
       "risk_factors": [
         "持続力不足"
       ],
-      "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0717,
-      "ai_effective_ev": 0.0378
+      "ev_margin_applied": 0.2
     }
   ],
-  "ev_margin_dynamic": 0.2
+  "ev_margin_dynamic": 0.2,
+  "analysis": {
+    "bias": {
+      "innerOuter": -0.6,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 33.75,
+    "meanMarginFieldSec": 0.65,
+    "lapStructure": "中間",
+    "peerBaseline": {
+      "peerRaceCount": 0,
+      "avgMedianFinal3fPeer": 35.010000000000005,
+      "avgMeanMarginPeer": 0.554,
+      "fallbackFromFile": true,
+      "savedDayRaceCount": 6,
+      "savedAvgPaceBalance": null
+    },
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-30T12:50:12.669Z"
+  },
+  "condition": {
+    "venue": "京都",
+    "raceName": "葵S",
+    "surface": "芝",
+    "distance": 1200,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -0.6,
+        "frontCloser": 0,
+        "innerShare": 0.33,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 33.75,
+      "meanMarginFieldSec": 0.65,
+      "lapStructureLabel": "中間",
+      "peerBaseline": {
+        "peerRaceCount": 0,
+        "avgMedianFinal3fPeer": 35.010000000000005,
+        "avgMeanMarginPeer": 0.554,
+        "fallbackFromFile": true,
+        "savedDayRaceCount": 6,
+        "savedAvgPaceBalance": null
+      },
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-30T12:50:12.669Z"
+    }
+  }
 }

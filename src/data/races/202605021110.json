@@ -23,6 +23,7 @@
       "jockey": "ルメール",
       "trainer": "木村",
       "weight": 56,
+      "bodyWeightKg": 470,
       "runningStyle": "先行",
       "abilities": {
         "speed": 61.9,
@@ -205,6 +206,7 @@
       "jockey": "戸崎圭",
       "trainer": "柴田",
       "weight": 58,
+      "bodyWeightKg": 550,
       "runningStyle": "先行",
       "abilities": {
         "speed": 65.3,
@@ -377,6 +379,7 @@
       "jockey": "柴田大",
       "trainer": "和田雄",
       "weight": 56,
+      "bodyWeightKg": 432,
       "runningStyle": "好位",
       "abilities": {
         "speed": 47.6,
@@ -563,6 +566,7 @@
       "jockey": "長浜",
       "trainer": "手塚徳",
       "weight": 58,
+      "bodyWeightKg": 490,
       "runningStyle": "先行",
       "abilities": {
         "speed": 61.3,
@@ -739,6 +743,7 @@
       "jockey": "ゴンサルベ",
       "trainer": "伊坂",
       "weight": 58,
+      "bodyWeightKg": 478,
       "runningStyle": "好位",
       "abilities": {
         "speed": 58.1,
@@ -922,6 +927,7 @@
       "jockey": "嶋田",
       "trainer": "手塚久",
       "weight": 58,
+      "bodyWeightKg": 472,
       "runningStyle": "差し",
       "abilities": {
         "speed": 57.4,
@@ -1107,6 +1113,7 @@
       "jockey": "横山和",
       "trainer": "稲垣",
       "weight": 58,
+      "bodyWeightKg": 476,
       "runningStyle": "逃げ",
       "abilities": {
         "speed": 82.4,
@@ -1291,6 +1298,7 @@
       "jockey": "松山",
       "trainer": "高橋一",
       "weight": 58,
+      "bodyWeightKg": 478,
       "runningStyle": "好位",
       "abilities": {
         "speed": 61.3,
@@ -1472,6 +1480,7 @@
       "jockey": "木幡巧",
       "trainer": "杉浦",
       "weight": 58,
+      "bodyWeightKg": 478,
       "runningStyle": "好位",
       "abilities": {
         "speed": 56.3,
@@ -1651,6 +1660,7 @@
       "jockey": "菊沢",
       "trainer": "菊沢",
       "weight": 58,
+      "bodyWeightKg": 506,
       "runningStyle": "好位",
       "abilities": {
         "speed": 56.9,
@@ -1784,6 +1794,7 @@
       "jockey": "横山武",
       "trainer": "小栗",
       "weight": 58,
+      "bodyWeightKg": 500,
       "runningStyle": "差し",
       "abilities": {
         "speed": 60.5,
@@ -1962,5 +1973,41 @@
       "ev_margin_applied": 0.15
     }
   ],
-  "ev_margin_dynamic": 0.15
+  "ev_margin_dynamic": 0.15,
+  "analysis": {
+    "bias": {
+      "innerOuter": -0.6,
+      "frontCloser": 0
+    },
+    "lapType": "neutral",
+    "medianFinal3fSec": 33.7,
+    "meanMarginFieldSec": 0.93,
+    "lapStructure": "中間",
+    "source": "netkeiba_result",
+    "computedAt": "2026-05-30T12:22:19.960Z"
+  },
+  "condition": {
+    "venue": "東京",
+    "raceName": "葉山特別",
+    "surface": "芝",
+    "distance": 1600,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -0.6,
+        "frontCloser": 0,
+        "innerShare": 0.33,
+        "outerSashiShare": 0
+      },
+      "lapType": "neutral",
+      "medianFinal3fSec": 33.7,
+      "meanMarginFieldSec": 0.93,
+      "lapStructureLabel": "中間",
+      "source": "netkeiba_result",
+      "computedAt": "2026-05-30T12:22:19.960Z"
+    }
+  }
 }
