@@ -23,12 +23,16 @@ import {
   type RaceBettingOutcome,
 } from "../../domain/betting/computeRaceBettingOutcome";
 import { computeRaceBettingOutcomeById } from "../../lib/race-data/computeRaceBettingOutcomeById";
+import { aggregateVenueDistanceStats } from "../../domain/betting/aggregateVenueDistanceStats";
+import type { RaceDetailLog } from "../../domain/betting/types";
 import {
   fetchWeeklyTopEvRaces,
   formatUpcomingWeekScopeLabel,
   formatWeekScopeLabelFromRows,
+  isDateInWeek,
   type WeeklyTopEvRaceItem,
 } from "../../domain/race-evaluation/weeklyTopEvRaces";
+import { RaceDateTabs } from "../../components/race/RaceDateTabs";
 
 function surfaceBadgeClass(surface: string): string {
   return surface === "芝" ? "race-badge race-badge--turf" : "race-badge race-badge--dirt";
@@ -115,6 +119,7 @@ type RaceCardPreview = {
   badgeLabel: string;
   badgeTone: "high" | "mid" | "warning" | "success";
   previewText: string;
+  honmeiHorseName?: string;
 };
 
 type MarkSummary = {
@@ -135,6 +140,18 @@ type ListBettingStats = {
   totalInvested: number;
   totalPayout: number;
 };
+
+type FavoriteConditionMatch = {
+  venue: string;
+  distance: number;
+  surface: "芝" | "ダート";
+  recoveryRate: number;
+  raceNumbers: number[];
+};
+
+type ResultFilter = "all" | "pending" | "resolved";
+type SurfaceFilter = "all" | "芝" | "ダート";
+type RaceSortMode = "mission" | "number" | "ev";
 
 function previewBadgeTone(type: RacePreviewBadgeType): RaceCardPreview["badgeTone"] {
   if (type === "warning") return "warning";
@@ -266,6 +283,34 @@ function formatDateTab(dateStr: string): string {
   return `${m}/${day}(${dow})`;
 }
 
+function buildSyntheticRaceDetailLog(item: RaceIndexItem, outcome: RaceBettingOutcome): RaceDetailLog {
+  const emptyTicket = { invested: 0, payout: 0, isHit: false };
+  return {
+    raceId: item.raceId,
+    raceName: item.raceName ?? `${item.raceNumber}R`,
+    classTier: "CONDITIONAL_LOWER",
+    classTierLabel: "集計",
+    venue: item.venue,
+    raceNumber: item.raceNumber,
+    date: item.date,
+    actualResults: [],
+    finishLabel: "",
+    aiMarks: {},
+    tickets: {
+      WIN: { ...emptyTicket },
+      MAIN_LINE: { ...emptyTicket },
+      WIDE: { ...emptyTicket },
+      TRIFECTA_FORM: { ...emptyTicket },
+    },
+    totalInvested: outcome.totalInvested,
+    totalPayout: outcome.totalPayout,
+    dominantComment: "",
+    isAnchorHit: outcome.isHit,
+    isSecondRowDead: outcome.isSecondRowDead,
+    diagnosisLabel: "",
+  };
+}
+
 export function RacesListPage() {
   const [rows, setRows] = useState<RaceIndexItem[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -280,6 +325,11 @@ export function RacesListPage() {
   const [bulkMessage, setBulkMessage] = useState<string | null>(null);
   const [weeklyTopEv, setWeeklyTopEv] = useState<WeeklyTopEvRaceItem[] | null>(null);
   const [weeklyTopEvLoading, setWeeklyTopEvLoading] = useState(false);
+  const [historicalOutcomeMap, setHistoricalOutcomeMap] = useState<Record<string, RaceBettingOutcome>>({});
+  const [resultFilter, setResultFilter] = useState<ResultFilter>("all");
+  const [surfaceFilter, setSurfaceFilter] = useState<SurfaceFilter>("all");
+  const [sortMode, setSortMode] = useState<RaceSortMode>("mission");
+  const [focusMissionOnly, setFocusMissionOnly] = useState(false);
 
   useEffect(() => {
     clearStaleMarkSnapshotsFromLocalStorage();
@@ -293,9 +343,6 @@ export function RacesListPage() {
         const list = await getRaceIndex();
         if (!live) return;
         setRows(list);
-        if (activeDate == null && list.length > 0) {
-          setActiveDate(list[0]!.date);
-        }
       } catch {
         if (live) { setErr("一覧の読み込みに失敗しました。"); setRows(null); }
       }
@@ -323,6 +370,20 @@ export function RacesListPage() {
   const dates = useMemo(() => (rows ? extractDates(rows) : []), [rows]);
 
   const todayIso = useMemo(() => formatLocalTodayIso(), []);
+
+  useEffect(() => {
+    if (rows == null || rows.length === 0) return;
+    const allDates = extractDates(rows);
+    if (activeDate != null && allDates.includes(activeDate)) return;
+    const weekDates = allDates.filter((d) => isDateInWeek(d, todayIso));
+    const next =
+      (weekDates.includes(todayIso) ? todayIso : undefined) ??
+      weekDates.find((d) => d >= todayIso) ??
+      weekDates[0] ??
+      allDates[0] ??
+      null;
+    if (next != null) setActiveDate(next);
+  }, [rows, activeDate, todayIso]);
   const weekRangeLabel = useMemo(() => {
     if (weeklyTopEv != null && weeklyTopEv.length > 0) {
       return formatWeekScopeLabelFromRows(weeklyTopEv);
@@ -344,6 +405,19 @@ export function RacesListPage() {
       live = false;
     };
   }, [rows, todayIso]);
+
+  useEffect(() => {
+    if (rows == null || rows.length === 0) return;
+    let live = true;
+    const historyRows = rows.slice(0, 180);
+    void computeOutcomeMapForRaceIds(historyRows.map((r) => r.raceId)).then((map) => {
+      if (!live) return;
+      setHistoricalOutcomeMap(map);
+    });
+    return () => {
+      live = false;
+    };
+  }, [rows]);
 
   const venueGroups = useMemo(() => {
     if (!rows || !activeDate) return [];
@@ -393,9 +467,114 @@ export function RacesListPage() {
   function handleDateChange(d: string) {
     setActiveDate(d);
     setActiveVenue(null);
+    setFocusMissionOnly(false);
   }
 
   const activeRaces = venueGroups.find((g) => g.venue === effectiveVenue)?.races ?? [];
+  const priorityScoreByRaceId = useMemo(() => {
+    const scoreByRaceId = new Map<string, number>();
+    for (const race of activeRaces) {
+      const preview = previewMap[race.raceId];
+      const outcome = outcomeMap[race.raceId];
+      const previewScore =
+        preview == null
+          ? 0
+          : preview.badgeTone === "high"
+            ? 5
+            : preview.badgeTone === "warning"
+              ? 4
+              : preview.badgeTone === "success"
+                ? 3
+                : 2;
+      const unresolvedScore = outcome?.status === "resolved" ? 0 : 2;
+      const gradeScore = race.raceGrade != null ? 2 : raceGradeFromName(race.raceName) != null ? 1 : 0;
+      scoreByRaceId.set(race.raceId, previewScore + unresolvedScore + gradeScore);
+    }
+    return scoreByRaceId;
+  }, [activeRaces, outcomeMap, previewMap]);
+  const missionRaces = useMemo(() => {
+    return [...activeRaces]
+      .sort((a, b) => {
+        const sa = priorityScoreByRaceId.get(a.raceId) ?? 0;
+        const sb = priorityScoreByRaceId.get(b.raceId) ?? 0;
+        if (sa !== sb) return sb - sa;
+        return a.raceNumber - b.raceNumber;
+      })
+      .slice(0, 3);
+  }, [activeRaces, priorityScoreByRaceId]);
+  const missionRaceIdSet = useMemo(
+    () => new Set(missionRaces.map((race) => race.raceId)),
+    [missionRaces],
+  );
+  const filteredActiveRaces = useMemo(() => {
+    return activeRaces.filter((race) => {
+      if (surfaceFilter !== "all" && race.surface !== surfaceFilter) return false;
+      const outcome = outcomeMap[race.raceId];
+      const resolved = outcome?.status === "resolved";
+      if (resultFilter === "pending" && resolved) return false;
+      if (resultFilter === "resolved" && !resolved) return false;
+      if (focusMissionOnly && missionRaceIdSet.size > 0 && !missionRaceIdSet.has(race.raceId)) return false;
+      return true;
+    });
+  }, [activeRaces, focusMissionOnly, missionRaceIdSet, outcomeMap, resultFilter, surfaceFilter]);
+  const orderedActiveRaces = useMemo(() => {
+    return [...filteredActiveRaces].sort((a, b) => {
+      if (sortMode === "number") return a.raceNumber - b.raceNumber;
+      if (sortMode === "ev") {
+        const sa = priorityScoreByRaceId.get(a.raceId) ?? 0;
+        const sb = priorityScoreByRaceId.get(b.raceId) ?? 0;
+        if (sa !== sb) return sb - sa;
+        return a.raceNumber - b.raceNumber;
+      }
+      const aMission = missionRaceIdSet.has(a.raceId) ? 1 : 0;
+      const bMission = missionRaceIdSet.has(b.raceId) ? 1 : 0;
+      if (aMission !== bMission) return bMission - aMission;
+      return a.raceNumber - b.raceNumber;
+    });
+  }, [filteredActiveRaces, missionRaceIdSet, priorityScoreByRaceId, sortMode]);
+  const pendingRaceCount = useMemo(
+    () => activeRaces.filter((race) => outcomeMap[race.raceId]?.status !== "resolved").length,
+    [activeRaces, outcomeMap],
+  );
+  const favoriteConditionMatch = useMemo<FavoriteConditionMatch | null>(() => {
+    if (rows == null || activeDate == null || activeRaces.length === 0) return null;
+    const detailLogs: RaceDetailLog[] = [];
+    for (const row of rows) {
+      if (row.date >= activeDate) continue;
+      const outcome = historicalOutcomeMap[row.raceId];
+      if (outcome == null || outcome.status !== "resolved" || outcome.totalInvested <= 0) continue;
+      detailLogs.push(buildSyntheticRaceDetailLog(row, outcome));
+    }
+    if (detailLogs.length === 0) return null;
+    const aggregation = aggregateVenueDistanceStats(detailLogs, rows);
+    const favoriteConditions = aggregation.byVenueDistanceSurface
+      .filter((bucket) =>
+        bucket.betRaces >= 3 &&
+        bucket.recoveryRate > 100 &&
+        bucket.distance != null &&
+        (bucket.surface === "芝" || bucket.surface === "ダート"),
+      )
+      .sort((a, b) => b.recoveryRate - a.recoveryRate || b.betRaces - a.betRaces);
+    if (favoriteConditions.length === 0) return null;
+    for (const condition of favoriteConditions) {
+      const matched = activeRaces.filter(
+        (race) =>
+          race.venue === condition.venue &&
+          race.distance === condition.distance &&
+          race.surface === condition.surface,
+      );
+      if (matched.length > 0) {
+        return {
+          venue: condition.venue,
+          distance: condition.distance ?? 0,
+          surface: condition.surface as "芝" | "ダート",
+          recoveryRate: condition.recoveryRate,
+          raceNumbers: matched.map((race) => race.raceNumber).sort((a, b) => a - b),
+        };
+      }
+    }
+    return null;
+  }, [activeDate, activeRaces, historicalOutcomeMap, rows]);
 
   async function handleBulkFetchResults() {
     if (racesOnActiveDate.length === 0 || bulkLoading) return;
@@ -451,14 +630,18 @@ export function RacesListPage() {
               ? applyAiMarksByEffectiveEv(evaluated, horses)
               : ensureFrontendDisplayMarks(evaluated, horses, race.condition);
             const preview = buildRacePreviewDataFromRace(horses, results);
-            if (!useAiMarks && !preview.hasGapSignals) return null;
-            if (useAiMarks && !preview.previewText) return null;
+            const honmei = results.find((r) => r.mark === "◎");
+            const previewText =
+              preview.previewText ||
+              (honmei?.horseName ? `◎ ${honmei.horseName}` : "");
+            if (honmei == null && !preview.hasGapSignals) return null;
             return [
               raceId,
               {
                 badgeLabel: preview.badgeLabel,
                 badgeTone: previewBadgeTone(preview.badgeType),
-                previewText: preview.previewText,
+                previewText,
+                honmeiHorseName: honmei?.horseName,
               },
             ];
           } catch {
@@ -506,7 +689,7 @@ export function RacesListPage() {
 
   if (err != null) {
     return (
-      <div className="rl-page rl-page--loading" role="alert">
+      <div className="rl-page rl-page--loading min-h-screen bg-zinc-950 text-zinc-200" role="alert">
         <p className="rl-error">{err}</p>
       </div>
     );
@@ -514,7 +697,7 @@ export function RacesListPage() {
 
   if (rows == null) {
     return (
-      <div className="rl-page rl-page--loading" aria-busy="true">
+      <div className="rl-page rl-page--loading min-h-screen bg-zinc-950 text-zinc-200" aria-busy="true">
         <div className="rl-spinner" aria-hidden="true">
           <span>🏇</span>
         </div>
@@ -524,18 +707,29 @@ export function RacesListPage() {
   }
 
   return (
-    <div className="rl-page">
+    <div className="rl-page rl-page--game min-h-screen bg-zinc-950 text-zinc-200">
       {/* ヒーローバナー */}
-      <div className="rl-hero rl-hero--has-image" role="banner">
+      <div className="rl-hero rl-hero--game border-b border-zinc-800 bg-zinc-950" role="banner">
         <div className="rl-hero__inner">
           <div className="rl-hero__content">
             <p className="rl-hero__eyebrow">AI競馬予想</p>
             <h1 className="rl-hero__title">今週のレースを<br />AIが分析</h1>
             <p className="rl-hero__sub">データサイエンスで勝利をつかもう</p>
+            {favoriteConditionMatch ? (
+              <p className="rl-hero__favorite-banner border border-amber-700/40 bg-amber-500/10 text-amber-200" role="status">
+                🔥 あなたの得意条件：{favoriteConditionMatch.venue}
+                {favoriteConditionMatch.surface}
+                {favoriteConditionMatch.distance}m
+                {" / "}
+                本日{favoriteConditionMatch.raceNumbers.map((n) => `${n}R`).join("・")}が該当
+                {" / "}
+                過去回収率 {favoriteConditionMatch.recoveryRate}%
+              </p>
+            ) : null}
           </div>
           <div className="rl-hero__aside">
           <section
-            className="rl-hit-summary rl-ev-week-top rl-hit-summary--hero"
+            className="rl-hit-summary rl-ev-week-top rl-hit-summary--hero rl-panel--game border border-zinc-800 bg-zinc-900/80 text-zinc-200"
             aria-label="当週の期待値レースTOP5"
           >
             <p className="rl-hit-summary__title">
@@ -578,7 +772,7 @@ export function RacesListPage() {
             )}
             <p className="rl-hit-summary__sub">※表示馬は Python AI の◎。結果未確定・当週開催の全Rから上位5件</p>
           </section>
-          <section className="rl-hit-summary rl-hit-summary--hero" aria-label="直近30レース的中率サマリー">
+          <section className="rl-hit-summary rl-hit-summary--hero rl-panel--game border border-zinc-800 bg-zinc-900/80 text-zinc-200" aria-label="直近30レース的中率サマリー">
             <div className="rl-hit-summary__head">
               <p className="rl-hit-summary__title">
                 {hitStats != null && hitStats.sampleSize > 0
@@ -587,7 +781,7 @@ export function RacesListPage() {
               </p>
               <button
                 type="button"
-                className="rl-hit-summary__fetch-btn"
+                className="rl-hit-summary__fetch-btn border border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700 disabled:opacity-50"
                 onClick={() => void handleBulkFetchResults()}
                 disabled={bulkLoading || racesOnActiveDate.length === 0}
                 title="選択中の開催日について、全競馬場のレース結果をまとめて取得します"
@@ -637,31 +831,23 @@ export function RacesListPage() {
         </div>
       </div>
 
-      {/* 日付タブ */}
-      <div className="rl-date-tabs" role="tablist" aria-label="開催日">
-        {dates.map((d) => (
-          <button
-            key={d}
-            role="tab"
-            aria-selected={d === activeDate}
-            className={`rl-date-tab${d === activeDate ? " rl-date-tab--active" : ""}`}
-            onClick={() => handleDateChange(d)}
-            type="button"
-          >
-            {formatDateTab(d)}
-          </button>
-        ))}
-      </div>
+      <RaceDateTabs
+        dates={dates}
+        activeDate={activeDate}
+        todayIso={todayIso}
+        formatDateTab={formatDateTab}
+        onDateChange={handleDateChange}
+      />
 
       {/* 競馬場タブ */}
       {venues.length > 0 && (
-        <div className="rl-venue-tabs" role="tablist" aria-label="競馬場">
+        <div className="rl-venue-tabs border-b border-zinc-800 bg-zinc-950/80 px-2 py-2" role="tablist" aria-label="競馬場">
           {venues.map((v) => (
             <button
               key={v}
               role="tab"
               aria-selected={v === effectiveVenue}
-              className={`rl-venue-tab${v === effectiveVenue ? " rl-venue-tab--active" : ""}`}
+              className={`rl-venue-tab border border-zinc-800 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100${v === effectiveVenue ? " rl-venue-tab--active border-cyan-500/70 bg-zinc-800 text-cyan-300" : ""}`}
               onClick={() => setActiveVenue(v)}
               type="button"
             >
@@ -671,7 +857,7 @@ export function RacesListPage() {
         </div>
       )}
 
-      <div className="backtest-hit-races__legend rl-page__legend" aria-label="カード色の凡例">
+      <div className="backtest-hit-races__legend rl-page__legend rounded-xl border border-zinc-800 bg-zinc-900/70 text-zinc-300" aria-label="カード色の凡例">
         <span className="backtest-hit-races__legend-item">
           <span className="backtest-hit-races__legend-swatch backtest-hit-races__legend-swatch--hit" />
           的中（払戻あり）
@@ -685,16 +871,92 @@ export function RacesListPage() {
           結果未確定
         </span>
       </div>
+      <section className="rl-mission-board rounded-xl border border-zinc-800 bg-zinc-900/70 text-zinc-100" aria-label="本日の出撃候補">
+        <div className="rl-mission-board__head">
+          <h2>本日の出撃候補</h2>
+          <p>先に見るべきレースを優先表示</p>
+        </div>
+        {missionRaces.length === 0 ? (
+          <p className="rl-mission-board__empty">候補レースを集計中です。</p>
+        ) : (
+          <ul className="rl-mission-board__list">
+            {missionRaces.map((race, idx) => {
+              const preview = previewMap[race.raceId];
+              return (
+                <li key={race.raceId}>
+                  <Link to={`/race/${race.raceId}`} className="rl-mission-board__link">
+                    <span className="rl-mission-board__rank">{idx + 1}</span>
+                    <span className="rl-mission-board__meta">
+                      {race.raceNumber}R {race.raceName ?? ""}
+                    </span>
+                    <span className="rl-mission-board__note">
+                      {preview?.badgeLabel ?? "注目シグナル集計中"}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+      <section className="rl-view-toolbar rounded-xl border border-zinc-800 bg-zinc-900/70 text-zinc-100" aria-label="表示フィルタ">
+        <div className="rl-view-toolbar__head">
+          <h2>表示コントロール</h2>
+          <p>
+            表示 {orderedActiveRaces.length}/{activeRaces.length}R ・ 未確定 {pendingRaceCount}R
+          </p>
+        </div>
+        <div className="rl-view-toolbar__controls">
+          <label>
+            券種状態
+            <select value={resultFilter} onChange={(e) => setResultFilter(e.target.value as ResultFilter)}>
+              <option value="all">すべて</option>
+              <option value="pending">結果未確定のみ</option>
+              <option value="resolved">結果確定のみ</option>
+            </select>
+          </label>
+          <label>
+            馬場
+            <select value={surfaceFilter} onChange={(e) => setSurfaceFilter(e.target.value as SurfaceFilter)}>
+              <option value="all">芝・ダート</option>
+              <option value="芝">芝のみ</option>
+              <option value="ダート">ダートのみ</option>
+            </select>
+          </label>
+          <label>
+            並び順
+            <select value={sortMode} onChange={(e) => setSortMode(e.target.value as RaceSortMode)}>
+              <option value="mission">出撃候補優先</option>
+              <option value="ev">期待値シグナル順</option>
+              <option value="number">R番号順</option>
+            </select>
+          </label>
+          <label className="rl-view-toolbar__check">
+            <input
+              type="checkbox"
+              checked={focusMissionOnly}
+              onChange={(e) => setFocusMissionOnly(e.target.checked)}
+            />
+            出撃候補のみ表示
+          </label>
+        </div>
+      </section>
 
       {/* レースカードグリッド */}
-      <div className="rl-venues">
+      <div className="rl-venues bg-zinc-950">
         {activeRaces.length === 0 ? (
           <ul className="rl-race-list">
-            <li className="rl-empty">この日の開催はありません。</li>
+            <li className="rl-empty rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400">この日の開催はありません。</li>
+          </ul>
+        ) : orderedActiveRaces.length === 0 ? (
+          <ul className="rl-race-list">
+            <li className="rl-empty rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400">
+              フィルタ条件に一致するレースがありません。
+            </li>
           </ul>
         ) : (
           <ul className="rl-race-list" aria-label={`${effectiveVenue ?? ""}のレース`}>
-            {activeRaces.map((item) => {
+            {orderedActiveRaces.map((item) => {
               const dynamicPreview = previewMap[item.raceId];
               const fallbackBadge = confidenceBadge(item.raceName);
               const badge = dynamicPreview
@@ -712,7 +974,8 @@ export function RacesListPage() {
                     previewBadge={badge}
                     gradeBadge={gradeBadge}
                     previewText={dynamicPreview?.previewText}
-                    featured={isFeaturedRow(item) && cardToneForFeatured(outcome)}
+                    honmeiHorseName={dynamicPreview?.honmeiHorseName}
+                    featured={(isFeaturedRow(item) || missionRaceIdSet.has(item.raceId)) && cardToneForFeatured(outcome)}
                     surfaceBadgeClass={surfaceBadgeClass}
                     surfaceShort={surfaceShort}
                     raceIcon={raceIcon}

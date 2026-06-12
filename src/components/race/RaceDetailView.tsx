@@ -45,12 +45,14 @@ import { applyEvRecommendedFlags } from "../../viewModel/raceEvaluationViewModel
 import { DEFAULT_PROBABILITY_ENGINE } from "../../lib/pipeline/probabilityEngine";
 import { sortResultsForPredictionTable } from "../../domain/race-evaluation/markHitAnalysis";
 import { FIXED_SOFTMAX_TEMPERATURE } from "../../lib/pipeline/normalization";
+import { getEffectiveEvaluationSignals } from "../../domain/race-evaluation/resolveEvaluationSignals";
 import {
   buildAbilityOnlyEvaluationCondition,
   buildDefaultNeutralCondition,
 } from "./neutralRaceCondition";
 
 type ViewTab = "horses" | "bets" | "result";
+type DensityMode = "simple" | "analysis";
 
 type Props = {
   race: RaceEvaluationData;
@@ -174,6 +176,8 @@ function loadManualTop3HorseIds(raceId: string): string[] {
 
 export function RaceDetailView({ race, raceIndex }: Props) {
   const [tab, setTab] = useState<ViewTab>("horses");
+  const [densityMode, setDensityMode] = useState<DensityMode>("simple");
+  const [supplementOpen, setSupplementOpen] = useState(false);
 
   const horses = useMemo(() => getHorsesFromRaceData(race), [race]);
   const entryGateRows = useMemo(() => getSortedRaceEntryGateRows(race), [race]);
@@ -363,13 +367,24 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     const favN = c.favoredHorseNumbers?.length ?? 0;
     const disN = c.disfavoredHorseNumbers?.length ?? 0;
     const gatePickText =
-      favN + disN > 0 ? `ゲート指定: 有利${favN}・不利${disN}` : "ゲート指定なし";
+      favN + disN > 0 ? `ゲート有利${favN}/不利${disN}` : "ゲート指定なし";
     const prefix = abilityOnlyPreview ? "【能力のみ】" : "";
     return {
-      conditionOneLine: `${prefix}${c.venue} · ${g} · ${clock} · ${b} · ${p} · 強度${s} · 勝率T${FIXED_SOFTMAX_TEMPERATURE}固定 · ${gatePickText} · ${lapText}`,
+      conditionOneLine: `${prefix}${g} / ${clock} / ${b} / ${p} / 強度${s}`,
       conditionMetaLine: `${prefix}${c.venue} / ${g} / ${clock} / ${b} / ${p} / 強度${s} / 勝率正規化T=${FIXED_SOFTMAX_TEMPERATURE}固定 / ${gatePickText} / ${lapText}`,
     };
   }, [evalCondition, abilityOnlyPreview]);
+  const macroConditionTags = useMemo(() => {
+    if (evalCondition == null) return [];
+    const c = evalCondition;
+    return [
+      `馬場 ${c.ground}`,
+      `時計 ${c.trackSpeed ?? "standard"}`,
+      `バイアス ${c.bias}`,
+      `ペース ${c.pace}`,
+      `補正 ${c.adjustmentStrength}`,
+    ];
+  }, [evalCondition]);
 
   const gateOrderHorseIds = useMemo(
     () => entryGateRows.map((r) => r.horseId),
@@ -384,6 +399,35 @@ export function RaceDetailView({ race, raceIndex }: Props) {
     () => results.reduce((m, row) => Math.max(m, row.adjustedScore), 0),
     [results],
   );
+  const decisionSignals = useMemo(() => {
+    const ordered = sortedForTable
+      .map((row) => {
+        const horse = horses.find((h) => h.horseId === row.horseId);
+        if (horse == null) return null;
+        const vmHorse = horsesViewModel.byHorseId.get(row.horseId);
+        const ev = vmHorse?.effectiveEv ?? horse.aiEffectiveEv ?? null;
+        const odds = getEffectiveEvaluationSignals(horse)?.winOdds ?? null;
+        return { row, horse, ev, odds };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry != null);
+    const topPick =
+      ordered.find((entry) => entry.row.buyLabel !== "消し" && entry.row.mark === "◎") ??
+      ordered.find((entry) => entry.row.buyLabel !== "消し") ??
+      ordered[0] ??
+      null;
+    const hotCount = ordered.filter((entry) => entry.ev != null && entry.ev >= 1.2).length;
+    const dangerCount = ordered.filter((entry) => {
+      if (entry.odds == null || entry.ev == null) return false;
+      return entry.odds <= 5 && entry.ev < 1.0;
+    }).length;
+    const recommendation =
+      isNoAiEvRegime || pipeline.isSkippableRace
+        ? "見送り寄り"
+        : topPick?.ev != null && topPick.ev >= 1.2
+          ? "勝負候補"
+          : "様子見";
+    return { topPick, hotCount, dangerCount, recommendation };
+  }, [horses, horsesViewModel.byHorseId, isNoAiEvRegime, pipeline.isSkippableRace, results, sortedForTable]);
 
   const { raceInfo } = race;
 
@@ -435,9 +479,9 @@ export function RaceDetailView({ race, raceIndex }: Props) {
   }, [race, inferredSection200mSec]);
 
   const TABS: { key: ViewTab; label: string }[] = [
-    { key: "horses", label: "出馬表" },
-    { key: "bets", label: "買い目" },
-    { key: "result", label: "結果・回収率" },
+    { key: "horses", label: "1. 出馬表" },
+    { key: "bets", label: "2. 買い目" },
+    { key: "result", label: "3. 結果・回収率" },
   ];
 
   return (
@@ -451,13 +495,14 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         onQuickAdjustmentToggle: handleToggleQuickAdjustment,
       }}
     >
-    <div className="app">
+    <div className="app app--race-detail">
       {currentIndexItem && raceIndex && raceIndex.length > 0 ? (
         <RaceTopNav current={currentIndexItem} raceIndex={raceIndex} />
       ) : null}
 
       {/* ヘッダ */}
       <header className="app__hero app__hero--compact">
+        <p className="app__hero-pop-tag">RACE DAY EXCITEMENT</p>
         <p className="app__breadcrumb">
           {raceInfo.venue} · {raceInfo.raceNumber}R · {dateFmt}
         </p>
@@ -469,23 +514,102 @@ export function RaceDetailView({ race, raceIndex }: Props) {
         </p>
         <NetkeibaRaceLinks raceId={race.raceId} />
       </header>
+      <section className="race-decision-bar" aria-label="意思決定サマリー">
+        <div className="race-decision-bar__main">
+          <p className="race-decision-bar__label">結論</p>
+          <strong
+            className={`race-decision-bar__recommendation${
+              decisionSignals.recommendation === "勝負候補"
+                ? " race-decision-bar__recommendation--go"
+                : decisionSignals.recommendation === "見送り寄り"
+                  ? " race-decision-bar__recommendation--skip"
+                  : ""
+            }`}
+          >
+            {decisionSignals.recommendation}
+          </strong>
+          <span className="race-decision-bar__sep" aria-hidden>
+            /
+          </span>
+          <span className="race-decision-bar__top">
+            本命:{" "}
+            {decisionSignals.topPick
+              ? `${decisionSignals.topPick.row.mark ?? "・"} ${
+                  (decisionSignals.topPick.horse as { gate?: number }).gate ?? "?"
+                }番 ${decisionSignals.topPick.row.horseName}`
+              : "未選定"}
+          </span>
+        </div>
+        <div className="race-decision-bar__signals">
+          <span className="race-decision-bar__chip">高EV {decisionSignals.hotCount}頭</span>
+          <span className="race-decision-bar__chip race-decision-bar__chip--warn">
+            危険人気 {decisionSignals.dangerCount}頭
+          </span>
+          {isNoAiEvRegime || pipeline.isSkippableRace ? (
+            <span className="race-decision-bar__chip race-decision-bar__chip--alert">見送り推奨</span>
+          ) : null}
+        </div>
+      </section>
+      <section className="race-focus-strip" aria-label="先にやること">
+        <div className="race-focus-strip__text">
+          <p className="race-focus-strip__kicker">先にやること</p>
+          <p className="race-focus-strip__main">
+            まず出馬表で本命と危険人気を確認し、次に買い目でEVを確認してください。
+          </p>
+        </div>
+        <div className="race-focus-strip__actions">
+          <button
+            type="button"
+            className={`race-focus-strip__btn${tab === "horses" ? " is-active" : ""}`}
+            onClick={() => setTab("horses")}
+          >
+            出馬表を見る
+          </button>
+          <button
+            type="button"
+            className={`race-focus-strip__btn${tab === "bets" ? " is-active" : ""}`}
+            onClick={() => setTab("bets")}
+          >
+            買い目を確認
+          </button>
+          <button
+            type="button"
+            className={`race-focus-strip__btn${tab === "result" ? " is-active" : ""}`}
+            onClick={() => setTab("result")}
+          >
+            結果を確認
+          </button>
+        </div>
+      </section>
+      <div className="app-detail-macro">
+        <div className="app-detail-macro__inner app-detail-macro__inner--stack">
+          <div className="app-detail-macro__head">
+            <span className="app-detail-macro__label">補助情報</span>
+            <button
+              type="button"
+              className="view-density__btn"
+              onClick={() => setSupplementOpen((prev) => !prev)}
+            >
+              {supplementOpen ? "補助情報を閉じる" : "補助情報を開く"}
+            </button>
+          </div>
+          {supplementOpen ? (
+            <div className="app-detail-macro__chips">
+              {macroConditionTags.map((tag) => (
+                <span key={tag} className="app-detail-macro__chip">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="app-detail-macro__collapsed">補助指標は折りたたみ中。必要時のみ展開してください。</p>
+          )}
+        </div>
+      </div>
 
       {/* 条件アコーディオン */}
       <div className="app__condition-sticky">
-        <div
-          className="condition-quick-actions"
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "10px",
-            alignItems: "center",
-            marginBottom: "8px",
-            padding: "8px 12px",
-            borderRadius: "8px",
-            background: "var(--c-surface-2, rgba(0,0,0,0.04))",
-            border: "1px solid var(--c-border, rgba(0,0,0,0.08))",
-          }}
-        >
+        <div className="condition-quick-actions">
           {requestedEngine === "ai" && pipeline.probabilityEngine === "ts" ? (
             <span style={{ fontSize: "0.82em", color: "var(--c-muted, #6c757d)" }}>
               AIデータなし → TSにフォールバック
@@ -518,6 +642,22 @@ export function RaceDetailView({ race, raceIndex }: Props) {
             />
             能力のみ確認
           </label>
+          <div className="view-density" role="group" aria-label="表示密度">
+            <button
+              type="button"
+              className={`view-density__btn${densityMode === "simple" ? " view-density__btn--active" : ""}`}
+              onClick={() => setDensityMode("simple")}
+            >
+              シンプル
+            </button>
+            <button
+              type="button"
+              className={`view-density__btn${densityMode === "analysis" ? " view-density__btn--active" : ""}`}
+              onClick={() => setDensityMode("analysis")}
+            >
+              分析
+            </button>
+          </div>
           <button type="button" className="view-density__btn" onClick={handleResetCondition}>
             条件リセット
           </button>
@@ -603,6 +743,8 @@ export function RaceDetailView({ race, raceIndex }: Props) {
                 condition={evalCondition}
                 viewModel={horsesViewModel}
                 maxAdjustedScoreInRace={maxAdjustedScoreInRace}
+                adjustedProbabilities={pipeline.adjustedProbabilities}
+                densityMode={densityMode}
               />
             </>
           )}

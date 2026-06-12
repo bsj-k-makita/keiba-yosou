@@ -47,6 +47,13 @@ type Props = {
   scorePoints100?: number | null;
 };
 
+type ScoreWaterfallStep = {
+  key: string;
+  label: string;
+  delta: number;
+  cumulative: number;
+};
+
 function horseToRadarMap(horse: HorseAbility): Record<AbilityKey, number> {
   return {
     speed: horse.speed,
@@ -152,7 +159,7 @@ export function HorseEvaluationCard({
     (result.lapSustainBonus ?? 0) +
     (result.lapQualityBonus ?? 0);
   const marketAlert = useMemo(
-    () => computeMarketAlertLabel(horse, result, allHorses),
+    () => (result.buyLabel === BUY_LABELS.DISMISS ? null : computeMarketAlertLabel(horse, result, allHorses)),
     [allHorses, horse, result],
   );
   const connectionBadges = useMemo(
@@ -187,6 +194,53 @@ export function HorseEvaluationCard({
     if (v < 8) return null;
     return `[鞍上強化 +${v.toFixed(1)}]`;
   }, [result.jockeyRiderBonus]);
+  const scoreWaterfallSteps = useMemo<ScoreWaterfallStep[]>(() => {
+    const classAndStep = (result.classLevelBonus ?? 0) + (result.stepPatternBonus ?? 0);
+    const lapAndResilience = lapTotal + (result.staminaResilienceBonus ?? 0);
+    const steps: Omit<ScoreWaterfallStep, "cumulative">[] = [
+      { key: "pace", label: "ペース適合", delta: result.paceFitBonus ?? 0 },
+      { key: "distance", label: "距離適性", delta: result.distanceFitBonus ?? 0 },
+      { key: "class", label: "クラス/ステップ", delta: classAndStep },
+      { key: "context", label: "文脈ボーナス", delta: contextualTotal },
+      { key: "lap", label: "ラップ適合", delta: lapAndResilience },
+      { key: "lastminute", label: "直前補正", delta: result.lastMinuteAdjustmentBonus ?? 0 },
+    ].filter((step) => Math.abs(step.delta) >= 0.05);
+
+    let cumulative = result.intrinsicAbilityScore;
+    const withCumulative: ScoreWaterfallStep[] = [];
+    for (const step of steps) {
+      cumulative += step.delta;
+      withCumulative.push({
+        ...step,
+        cumulative,
+      });
+    }
+    const residual = result.finalEvaluationScore - cumulative;
+    if (Math.abs(residual) >= 0.05) {
+      withCumulative.push({
+        key: "residual",
+        label: "相対正規化/安全補正",
+        delta: residual,
+        cumulative: cumulative + residual,
+      });
+    }
+    return withCumulative;
+  }, [
+    result.classLevelBonus,
+    result.distanceFitBonus,
+    result.finalEvaluationScore,
+    result.intrinsicAbilityScore,
+    result.lastMinuteAdjustmentBonus,
+    result.paceFitBonus,
+    result.stepPatternBonus,
+    result.staminaResilienceBonus,
+    contextualTotal,
+    lapTotal,
+  ]);
+  const scoreWaterfallMaxAbs = useMemo(() => {
+    const maxStep = scoreWaterfallSteps.reduce((max, step) => Math.max(max, Math.abs(step.delta)), 0);
+    return Math.max(maxStep, Math.abs(result.intrinsicAbilityScore), 1);
+  }, [scoreWaterfallSteps, result.intrinsicAbilityScore]);
   const ambitionBadge = useMemo(() => {
     if (!result.jockeyAmbitionFlag) return null;
     return { text: "[勝負気配]", title: "前走より鞍上が大きく強化（賞金志向の乗り替わり）" };
@@ -409,6 +463,50 @@ export function HorseEvaluationCard({
             <span className="horse-card__score-amplify-delta--flat"> （±0.0）</span>
           )}
         </p>
+        <section className="horse-card__waterfall" aria-label="評価スコア加減点内訳">
+          <h4 className="horse-card__detail-h">評価スコア内訳</h4>
+          <ul className="horse-card__waterfall-list">
+            <li className="horse-card__waterfall-row horse-card__waterfall-row--base">
+              <span className="horse-card__waterfall-label">素点（intrinsic）</span>
+              <div className="horse-card__waterfall-bar-wrap">
+                <div
+                  className="horse-card__waterfall-bar horse-card__waterfall-bar--base"
+                  style={{
+                    width: `${Math.max(16, (Math.abs(result.intrinsicAbilityScore) / scoreWaterfallMaxAbs) * 100)}%`,
+                  }}
+                />
+              </div>
+              <span className="horse-card__waterfall-score">{result.intrinsicAbilityScore.toFixed(1)}</span>
+            </li>
+            {scoreWaterfallSteps.map((step) => {
+              const positive = step.delta >= 0;
+              return (
+                <li key={step.key} className="horse-card__waterfall-row">
+                  <span className="horse-card__waterfall-label">{step.label}</span>
+                  <div className="horse-card__waterfall-bar-wrap">
+                    <div
+                      className={`horse-card__waterfall-bar ${
+                        positive ? "horse-card__waterfall-bar--pos" : "horse-card__waterfall-bar--neg"
+                      }`}
+                      style={{
+                        width: `${Math.max(10, (Math.abs(step.delta) / scoreWaterfallMaxAbs) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <span
+                    className={`horse-card__waterfall-delta ${
+                      positive ? "horse-card__waterfall-delta--pos" : "horse-card__waterfall-delta--neg"
+                    }`}
+                  >
+                    {positive ? "+" : ""}
+                    {step.delta.toFixed(1)}
+                    <span className="horse-card__waterfall-cumulative"> → {step.cumulative.toFixed(1)}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
 
         {result.buyLabel === BUY_LABELS.DISMISS ? (
           <p className="horse-card__verdict horse-card__verdict--dismiss">

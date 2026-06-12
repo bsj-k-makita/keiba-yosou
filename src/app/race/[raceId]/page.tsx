@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getRaceEvaluationById, getRaceIndex, type RaceEvaluationData, type RaceIndexItem } from "../../../lib/race-data";
+import { getRaceEvaluationById, type RaceEvaluationData } from "../../../lib/race-data";
 import { RaceDetailView } from "../../../components/race/RaceDetailView";
 
 /** 開発時: JSON を書き換えたあとも画面が追従するよう間隔（ms）。本番ではポーリングしない。 */
@@ -9,19 +9,8 @@ const DEV_RACE_POLL_MS = 4000;
 export function RaceDetailPage() {
   const { raceId = "" } = useParams();
   const [race, setRace] = useState<RaceEvaluationData | null>(null);
-  const [raceIndex, setRaceIndex] = useState<RaceIndexItem[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const initialLoadDone = useRef(false);
-
-  useEffect(() => {
-    let live = true;
-    void getRaceIndex().then((idx) => {
-      if (live) setRaceIndex(idx);
-    });
-    return () => {
-      live = false;
-    };
-  }, []);
 
   useEffect(() => {
     let live = true;
@@ -118,7 +107,7 @@ export function RaceDetailPage() {
           開発モード: レースJSONの変更は約 {DEV_RACE_POLL_MS / 1000} 秒ごとに自動反映されます（別タブから戻ったときも再読込）。
         </p>
       ) : null}
-      <RaceDetailView key={race.raceId} race={race} raceIndex={raceIndex} />
+      <RaceDetailView key={race.raceId} race={race} />
     </div>
   );
 }

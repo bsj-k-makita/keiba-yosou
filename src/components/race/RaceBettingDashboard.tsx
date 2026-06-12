@@ -6,7 +6,12 @@ import {
   buildRaceBettingContext,
   buildTicketsCopyText,
 } from "../../domain/betting/buildRaceBettingContext";
-import { buildPayoutFallbackOddsMap } from "../../domain/betting/bettingRules";
+import {
+  buildOddsMapForEvEvaluation,
+  buildPayoutFallbackOddsMap,
+  estimatePairProbability,
+  estimateTrifectaProbability,
+} from "../../domain/betting/bettingRules";
 import { calculateRacePayout, checkOfficialHit } from "../../domain/betting/payoutCalculator";
 import { ticketResultText } from "../../domain/betting/ticketOutcomeDisplay";
 import { BET_TICKET_TYPES, type BetTicket, type BetTicketType } from "../../domain/betting/types";
@@ -54,6 +59,44 @@ function estimateWinReturn(odds: number | undefined, betAmount: number): string 
   if (odds == null || !Number.isFinite(odds) || odds <= 0) return "オッズ未取得";
   const yen = Math.round((betAmount / 100) * odds * 100);
   return `想定払戻 ${yen.toLocaleString()}円（単勝 ${odds.toFixed(1)}倍）`;
+}
+
+type MyBetType = "WIN" | "REN" | "WREN" | "TRI";
+
+function pairKey(a: number, b: number): string {
+  const sorted = [a, b].sort((x, y) => x - y);
+  return `${sorted[0]}-${sorted[1]}`;
+}
+
+function triKey(a: number, b: number, c: number): string {
+  return [a, b, c].sort((x, y) => x - y).join("-");
+}
+
+function buildNormalizedProbabilityByGate(
+  horses: readonly HorseAbility[],
+  adjustedProbabilities?: ReadonlyMap<string, number>,
+): Map<number, number> {
+  const raw = new Map<number, number>();
+  for (const h of horses) {
+    const gate = (h as { gate?: number }).gate;
+    if (gate == null || !Number.isFinite(gate)) continue;
+    const num = Math.round(gate);
+    const pAi = h.aiPredictedWinRate;
+    const pPipeline = adjustedProbabilities?.get(h.horseId);
+    const pTs = getEffectiveEvaluationSignals(h)?.winOdds;
+    const p =
+      pAi != null && Number.isFinite(pAi) && pAi > 0
+        ? pAi
+        : pPipeline != null && Number.isFinite(pPipeline) && pPipeline > 0
+          ? pPipeline
+          : pTs != null && Number.isFinite(pTs) && pTs > 0
+            ? 1 / pTs
+            : 0;
+    if (p > 0) raw.set(num, p);
+  }
+  const sum = [...raw.values()].reduce((acc, cur) => acc + cur, 0);
+  if (!Number.isFinite(sum) || sum <= 0) return raw;
+  return new Map([...raw.entries()].map(([gate, p]) => [gate, p / sum]));
 }
 
 function isHitByFinishOrder(type: BetTicketType, comb: number[], finishOrder: number[]): boolean {
@@ -178,6 +221,8 @@ export function RaceBettingDashboard({
   const [copied, setCopied] = useState(false);
   const [autoResult, setAutoResult] = useState<RaceResultData | null>(null);
   const [resultLoading, setResultLoading] = useState(true);
+  const [myBetType, setMyBetType] = useState<MyBetType>("REN");
+  const [selectedHorseNumbers, setSelectedHorseNumbers] = useState<number[]>([]);
   const ctx = useMemo(
     () =>
       buildRaceBettingContext(results, horses, condition, betAmount, {
@@ -243,6 +288,59 @@ export function RaceBettingDashboard({
       fallbackExoticOdds: buildPayoutFallbackOddsMap(horses, autoResult?.payouts, probByGate),
     });
   }, [ctx, finishOrder, raceId, autoResult?.payouts, horses]);
+  const normalizedProbByGate = useMemo(
+    () => buildNormalizedProbabilityByGate(horses, adjustedProbabilities),
+    [horses, adjustedProbabilities],
+  );
+  const evOddsMap = useMemo(
+    () => buildOddsMapForEvEvaluation(horses, undefined, normalizedProbByGate),
+    [horses, normalizedProbByGate],
+  );
+  const horseNumbers = useMemo(
+    () => (ctx ? [...ctx.horseNameByNumber.keys()].sort((a, b) => a - b) : []),
+    [ctx],
+  );
+  const requiredHorseCount = myBetType === "TRI" ? 3 : myBetType === "WIN" ? 1 : 2;
+  const selectedForCalc = selectedHorseNumbers.slice(0, requiredHorseCount).sort((a, b) => a - b);
+  const myBetProbability = useMemo(() => {
+    if (selectedForCalc.length !== requiredHorseCount) return null;
+    if (myBetType === "WIN") {
+      return normalizedProbByGate.get(selectedForCalc[0]!) ?? null;
+    }
+    if (myBetType === "REN" || myBetType === "WREN") {
+      const p1 = normalizedProbByGate.get(selectedForCalc[0]!) ?? 0;
+      const p2 = normalizedProbByGate.get(selectedForCalc[1]!) ?? 0;
+      if (p1 <= 0 || p2 <= 0) return null;
+      return estimatePairProbability(p1, p2);
+    }
+    const p1 = normalizedProbByGate.get(selectedForCalc[0]!) ?? 0;
+    const p2 = normalizedProbByGate.get(selectedForCalc[1]!) ?? 0;
+    const p3 = normalizedProbByGate.get(selectedForCalc[2]!) ?? 0;
+    if (p1 <= 0 || p2 <= 0 || p3 <= 0) return null;
+    return estimateTrifectaProbability(p1, p2, p3);
+  }, [myBetType, normalizedProbByGate, requiredHorseCount, selectedForCalc]);
+  const myBetOdds = useMemo(() => {
+    if (selectedForCalc.length !== requiredHorseCount) return null;
+    if (myBetType === "WIN") {
+      return evOddsMap.win[selectedForCalc[0]!];
+    }
+    if (myBetType === "REN") {
+      return evOddsMap.ren?.[pairKey(selectedForCalc[0]!, selectedForCalc[1]!)];
+    }
+    if (myBetType === "WREN") {
+      return evOddsMap.wide?.[pairKey(selectedForCalc[0]!, selectedForCalc[1]!)];
+    }
+    return evOddsMap.trifecta?.[triKey(selectedForCalc[0]!, selectedForCalc[1]!, selectedForCalc[2]!)];
+  }, [evOddsMap, myBetType, requiredHorseCount, selectedForCalc]);
+  const myBetEv =
+    myBetProbability != null &&
+    myBetOdds != null &&
+    Number.isFinite(myBetProbability) &&
+    Number.isFinite(myBetOdds) &&
+    myBetOdds > 0
+      ? myBetProbability * myBetOdds
+      : null;
+  const myBetHot = myBetEv != null && myBetEv >= 1.2;
 
   const ticketGroups = useMemo(() => {
     const byType = new Map<BetTicketType, BetTicket[]>();
@@ -341,6 +439,78 @@ export function RaceBettingDashboard({
           </article>
         );
       })}
+      <article className="bet-card my-bet-builder" aria-label="マイ買い目ビルダー">
+        <h3 className="bet-card__title">マイ買い目ビルダー（EVシミュレーター）</h3>
+        <p className="app__meta">
+          馬番と券種を手動選択すると、Harville合成確率 × 実オッズでEVを即時計算します（勝率は
+          `ai_predicted_win_rate` 優先）。
+        </p>
+        <div className="my-bet-builder__toolbar">
+          <label className="bet-panel__control">
+            券種
+            <select value={myBetType} onChange={(e) => {
+              const nextType = e.target.value as MyBetType;
+              setMyBetType(nextType);
+              setSelectedHorseNumbers([]);
+            }}>
+              <option value="WIN">単勝</option>
+              <option value="REN">馬連</option>
+              <option value="WREN">ワイド</option>
+              <option value="TRI">3連複</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            className="betting-dashboard__copy"
+            onClick={() => setSelectedHorseNumbers([])}
+          >
+            選択クリア
+          </button>
+        </div>
+        <div className="my-bet-builder__tray" role="list" aria-label="馬番選択トレイ">
+          {horseNumbers.map((num) => {
+            const active = selectedHorseNumbers.includes(num);
+            const mark = ctx.marks.find((m) => m.horseNumber === num)?.mark;
+            return (
+              <button
+                key={num}
+                type="button"
+                className={`my-bet-builder__chip${active ? " my-bet-builder__chip--active" : ""}`}
+                onClick={() => {
+                  setSelectedHorseNumbers((prev) => {
+                    if (prev.includes(num)) return prev.filter((v) => v !== num);
+                    const next = [...prev, num];
+                    return next.length > requiredHorseCount ? next.slice(1) : next;
+                  });
+                }}
+                title={ctx.horseNameByNumber.get(num)}
+              >
+                <span>{num}</span>
+                {mark ? <span className="my-bet-builder__chip-mark">{mark}</span> : null}
+              </button>
+            );
+          })}
+        </div>
+        <div className="my-bet-builder__result">
+          <p className="app__meta">
+            選択:{" "}
+            {selectedForCalc.length > 0
+              ? selectedForCalc.map((n) => `${n}番`).join(" - ")
+              : `馬番を${requiredHorseCount}頭選択してください`}
+          </p>
+          <p className="my-bet-builder__metrics">
+            合成適中確率:{" "}
+            <strong>{myBetProbability != null ? `${(myBetProbability * 100).toFixed(2)}%` : "—"}</strong>
+            {" / "}
+            オッズ: <strong>{myBetOdds != null ? `${myBetOdds.toFixed(1)}倍` : "—"}</strong>
+            {" / "}
+            EV: <strong>{myBetEv != null ? myBetEv.toFixed(2) : "—"}</strong>
+          </p>
+          {myBetHot ? (
+            <p className="my-bet-builder__hot">🔥 期待値アリ（EV 1.20超）</p>
+          ) : null}
+        </div>
+      </article>
 
       {resultLoading ? (
         <p className="app__meta">結果を確認中…</p>

@@ -444,6 +444,8 @@ export function enrichInvestmentSignalsInRaceData(data) {
           ? "actual"
           : "estimated"
         : marketWinSourceBase;
+    const shutubaWinOdds = parseNumeric(entry.actual_odds ?? entry.actualOdds);
+    const shutubaWinSource = normalizeSource(entry.odds_source ?? entry.oddsSource);
     const marketWinOddsRaw = parseNumeric(
       entry.marketWinOdds ??
         entry.market_win_odds ??
@@ -451,14 +453,19 @@ export function enrichInvestmentSignalsInRaceData(data) {
         entry?.evaluationSignals?.winOdds ??
         entry?.signals?.winOdds,
     );
-    const marketWinOdds =
-      marketWinSourceRaw === "actual" && marketWinOddsRaw != null && marketWinOddsRaw > 0
+    const useShutubaWin =
+      shutubaWinOdds != null &&
+      shutubaWinOdds > 0 &&
+      shutubaWinSource === "actual" &&
+      hasObservedTimestamp(entry.odds_observed_at);
+    const useMarketWin =
+      marketWinSourceRaw === "actual" && marketWinOddsRaw != null && marketWinOddsRaw > 0;
+    const marketWinOdds = useShutubaWin
+      ? round2(shutubaWinOdds)
+      : useMarketWin
         ? round2(marketWinOddsRaw)
         : estimateOddsByPopularity(popularity, fieldSize) ?? round2(clamp(expectedOdds * 2.4, 1.2, 99));
-    const marketWinOddsSource =
-      marketWinSourceRaw === "actual" && marketWinOddsRaw != null && marketWinOddsRaw > 0
-        ? "actual"
-        : "estimated";
+    const marketWinOddsSource = useShutubaWin || useMarketWin ? "actual" : "estimated";
     const pStoredWin = Number(entry.predicted_win_rate);
     /** 単勝のみ: P（predicted_win_rate）× 単勝オッズ − 動的マージン。UI・サーバで共通の期待値。 */
     const finalExpectedValue =

@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-30T12:51:24.730Z",
-  "sourceRaceFiles": 601,
+  "updatedAt": "2026-06-12T14:47:38.906Z",
+  "sourceRaceFiles": 721,
   "entries": {
     "2026-04-11|福島|ダート": {
       "raceCount": 5,
@@ -306,6 +306,15 @@
       "stdPaceBalance": null,
       "avgMedianFinal3fSec": 33.7,
       "avgMeanMarginFieldSec": 0.93,
+      "avgBiasInnerOuter": -0.6,
+      "avgBiasFrontCloser": 0
+    },
+    "2026-06-07|東京|ダート": {
+      "raceCount": 1,
+      "avgPaceBalance": null,
+      "stdPaceBalance": null,
+      "avgMedianFinal3fSec": 38.5,
+      "avgMeanMarginFieldSec": 1.1,
       "avgBiasInnerOuter": -0.6,
       "avgBiasFrontCloser": 0
     },
@@ -650,6 +659,24 @@
       "avgMeanMarginFieldSec": 0.8520000000000001,
       "avgBiasInnerOuter": -0.07999999999999999,
       "avgBiasFrontCloser": -0.5780000000000001
+    },
+    "2026-06-07|阪神|ダート": {
+      "raceCount": 1,
+      "avgPaceBalance": null,
+      "stdPaceBalance": null,
+      "avgMedianFinal3fSec": 13.9,
+      "avgMeanMarginFieldSec": 1.68,
+      "avgBiasInnerOuter": -0.6,
+      "avgBiasFrontCloser": 0
+    },
+    "2026-06-07|阪神|芝": {
+      "raceCount": 1,
+      "avgPaceBalance": null,
+      "stdPaceBalance": null,
+      "avgMedianFinal3fSec": 34.1,
+      "avgMeanMarginFieldSec": 0.31,
+      "avgBiasInnerOuter": 2,
+      "avgBiasFrontCloser": 0
     }
   }
 }

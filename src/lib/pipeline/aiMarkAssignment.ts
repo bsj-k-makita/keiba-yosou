@@ -4,6 +4,7 @@ import type {
   RaceCondition,
 } from "../../domain/race-evaluation/abilityTypes";
 import { ANCHOR_MIN_PREDICTED_WIN_RATE } from "../../domain/race-evaluation/investmentEvConstants";
+import { BUY_LABELS } from "../../domain/race-evaluation/lingoConstants";
 import { sortResultsForPredictionTable } from "../../domain/race-evaluation/markHitAnalysis";
 import { resolveEffectiveRaceClass } from "../../domain/race-evaluation/resolveEffectiveRaceClass";
 
@@ -146,12 +147,17 @@ export function applyAiMarksByEffectiveEv(
     }) === "G1_CLASS";
 
   const ranked = rankByAiEffectiveEv(copy, horseById, isG1Race);
-  const anchor = pickAnchorHonmei(ranked, horseById, anchorWinRateRule);
+  const markCandidates = ranked.filter((row) => {
+    const horse = horseById.get(row.horseId) as (HorseAbility & { score?: { isDismissal?: boolean } }) | undefined;
+    const isDismissalByScore = horse?.score?.isDismissal === true;
+    return !isDismissalByScore && row.buyLabel !== BUY_LABELS.DISMISS;
+  });
+  const anchor = pickAnchorHonmei(markCandidates, horseById, anchorWinRateRule);
   if (anchor != null) {
     anchor.mark = "◎";
   }
   let slotIndex = 1;
-  for (const row of ranked) {
+  for (const row of markCandidates) {
     if (anchor != null && row.horseId === anchor.horseId) continue;
     row.mark = slotIndex < AI_MARK_SLOTS.length ? AI_MARK_SLOTS[slotIndex]! : "";
     slotIndex += 1;

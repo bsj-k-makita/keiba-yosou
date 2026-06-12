@@ -26,6 +26,7 @@ import {
   parseShutubaPastHorseRunningStyles,
   applyShutubaPastRunningStylesToEntries,
 } from "./lib/parseNetkeibaShutubaPast.mjs";
+import { shouldFailByPastRunQuality } from "./lib/dataQualityGuards.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -127,6 +128,22 @@ function makeJobs(targetDate = null) {
       date: "2026-05-31",
       placeCodes: ["040109", "050212", "080312"], // 新潟 / 東京 / 京都（1回新潟9日・2回東京12日・3回京都12日・ダービー週）
     }),
+    ...makeDayJobs({
+      date: "2026-06-06",
+      placeCodes: ["050301", "090301"], // 東京 / 阪神（3回東京1日・3回阪神1日）
+    }),
+    ...makeDayJobs({
+      date: "2026-06-07",
+      placeCodes: ["050302", "090302"], // 東京 / 阪神（3回東京2日・3回阪神2日）
+    }),
+    ...makeDayJobs({
+      date: "2026-06-13",
+      placeCodes: ["050303", "090303", "020101"], // 東京 / 阪神 / 函館（3回東京3日・3回阪神3日・1回函館1日）
+    }),
+    ...makeDayJobs({
+      date: "2026-06-14",
+      placeCodes: ["050304", "090304", "020102"], // 東京 / 阪神 / 函館（3回東京4日・3回阪神4日・1回函館2日）
+    }),
   ];
   if (!targetDate) return out;
   return out.filter((j) => j.date === targetDate);
@@ -191,10 +208,12 @@ function venueFromNetkeibaRaceId(raceId) {
   if (!/^\d{12}$/.test(id)) return null;
   const head = id.slice(4, 6);
   const PREFIX_TO_VENUE = {
+    "02": "函館",
     "03": "福島",
     "04": "新潟",
     "05": "東京",
     "08": "京都",
+    "09": "阪神",
   };
   return PREFIX_TO_VENUE[head] ?? null;
 }
@@ -383,8 +402,10 @@ function parseShutubaCore(html, { raceId, date }) {
         actual_odds: oddsById,
         odds_source: "actual",
         odds_observed_at: observedAt,
-        marketWinOdds: undefined,
-        market_win_odds_source: "estimated",
+        marketWinOdds: oddsById,
+        market_win_odds: oddsById,
+        market_win_odds_source: "actual",
+        market_observed_at: observedAt,
         marketPopularity: popularityById,
         market_popularity_source: popularityById != null ? "actual" : "estimated",
         ...(popularityById != null ? { market_observed_at: observedAt } : {}),
@@ -700,26 +721,6 @@ async function enrichEntriesWithPastRuns(entries, raceLapCache) {
   return { successCount, failedCount };
 }
 
-function shouldFailByPastRunQuality(data, stats) {
-  const total = data.entries?.length ?? 0;
-  if (total < 8) return false;
-  const successRate = total > 0 ? stats.successCount / total : 0;
-  const raceName = String(data?.meta?.raceName ?? "");
-  const isGradedOrOpen = /(G1|G2|G3|OP|L|\([Gg][123]\)|ステークス|天皇賞|桜花賞|皐月賞|菊花賞|大阪杯)/.test(
-    raceName,
-  );
-  const ageKnown = data.entries.filter((e) => Number.isFinite(e.age));
-  const avgAge =
-    ageKnown.length > 0
-      ? ageKnown.reduce((s, e) => s + Number(e.age), 0) / ageKnown.length
-      : 3;
-
-  // successCount = 直近5走が1件でも取れた頭数。完全に0は常にNG。重賞/古馬は取得率も要求。
-  if (stats.successCount === 0) return true;
-  if ((isGradedOrOpen || avgAge >= 4.5) && successRate < 0.6) return true;
-  return false;
-}
-
 function parseOptions() {
   const args = process.argv.slice(2);
   let targetDate = null;
@@ -748,7 +749,7 @@ function parseOptions() {
 }
 
 const venueOrder = (v) => {
-  const m = { 福島: 0, 新潟: 1, 東京: 2, 京都: 3 };
+  const m = { 函館: 0, 福島: 1, 新潟: 2, 東京: 3, 京都: 4, 阪神: 5 };
   return m[v] ?? 9;
 };
 

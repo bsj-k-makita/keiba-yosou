@@ -9,6 +9,11 @@ function isHighClassRaceName(name: string | undefined): boolean {
   return /(G1|G2|G3|OP|L|\([Gg][123]\)|ステークス|天皇賞|桜花賞|皐月賞|菊花賞|大阪杯)/.test(name);
 }
 
+function isDebutRaceName(name: string | undefined): boolean {
+  if (!name) return false;
+  return /(新馬|メイクデビュー)/.test(name);
+}
+
 export function assertRaceDataQuality(data: RaceEvaluationData): void {
   const total = data.entries.length;
   if (total === 0) {
@@ -24,8 +29,9 @@ export function assertRaceDataQuality(data: RaceEvaluationData): void {
       ? ageKnown.reduce((s, e) => s + Number(e.age), 0) / ageKnown.length
       : 3;
   const highClass = isHighClassRaceName(raceName) || avgAge >= 4.5;
+  const isDebutRace = isDebutRaceName(raceName ?? data.condition.raceName);
 
-  if (total >= 8 && withPastRuns === 0) {
+  if (total >= 8 && withPastRuns === 0 && !isDebutRace) {
     throw new Error(
       [
         "このレースの JSON 内で、どの馬も pastRuns が空です（画面の評価処理は netkeiba へ再取得しません）。",

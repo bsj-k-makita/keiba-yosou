@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { HomePage } from "./app/home/page";
 import { RacesListPage } from "./app/races/page";
 import { RaceDetailPage } from "./app/race/[raceId]/page";
 import BacktestDashboardPage from "./app/backtest/page";
@@ -26,9 +27,15 @@ function AppNav({
   theme: ThemeMode;
   onToggleTheme: () => void;
 }) {
+  const navItems = [
+    { to: "/", title: "TOP", subtitle: "Mission", icon: "◆" },
+    { to: "/races", title: "レース探索", subtitle: "Explore", icon: "◉" },
+    { to: "/backtest", title: "回収率BT", subtitle: "Lab", icon: "▲" },
+  ];
+
   return (
     <nav className="app-nav" aria-label="サイトナビ">
-      <Link to="/races" className="app-nav__logo">
+      <Link to="/" className="app-nav__logo">
         <img
           className="app-nav__logo-img"
           src="/logo.png"
@@ -39,9 +46,21 @@ function AppNav({
         <span className="app-nav__logo-text">競馬AI分析</span>
       </Link>
       <div className="app-nav__right">
-        <Link to="/backtest" className="app-nav__link" style={{ marginRight: "0.75rem" }}>
-          回収率BT
-        </Link>
+        <div className="app-nav__menu" aria-label="主要メニュー">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => `app-nav__pill${isActive ? " app-nav__pill--active" : ""}`}
+            >
+              <span className="app-nav__pill-icon" aria-hidden>{item.icon}</span>
+              <span className="app-nav__pill-text">
+                <strong>{item.title}</strong>
+                <small>{item.subtitle}</small>
+              </span>
+            </NavLink>
+          ))}
+        </div>
         <button
           type="button"
           className="app-nav__theme-btn"
@@ -49,7 +68,7 @@ function AppNav({
           aria-label={`テーマ切替（現在: ${theme === "dark" ? "ダーク" : "ライト"}）`}
           title={`現在: ${theme === "dark" ? "ダーク" : "ライト"}`}
         >
-          {theme === "dark" ? "☀️ ライト" : "🌙 ダーク"}
+          {theme === "dark" ? "☀" : "◐"}
         </button>
       </div>
     </nav>
@@ -106,10 +125,11 @@ export default function App() {
       onToggleTheme={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
     >
       <Routes>
-        <Route path="/" element={<Navigate to="/races" replace />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/races" element={<RacesListPage />} />
         <Route path="/race/:raceId" element={<RaceDetailPage />} />
         <Route path="/backtest" element={<BacktestDashboardPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>
   );

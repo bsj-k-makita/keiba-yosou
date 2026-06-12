@@ -12,6 +12,7 @@ type Props = {
   previewBadge?: PreviewBadge;
   gradeBadge?: GradeBadge;
   previewText?: string;
+  honmeiHorseName?: string;
   featured?: boolean;
   surfaceBadgeClass: (surface: string) => string;
   surfaceShort: (surface: string) => string;
@@ -35,12 +36,24 @@ function missStatusLabel(outcome: RaceBettingOutcome): string {
   return outcome.isSecondRowDead ? "2列目全滅" : "不的中";
 }
 
+function HonmeiBadge({ horseName }: { horseName: string }) {
+  return (
+    <span className="rl-race-row__honmei" title={`◎ ${horseName}`}>
+      <span className="rl-race-row__honmei-mark" aria-hidden>
+        ◎
+      </span>
+      <span className="rl-race-row__honmei-name">{horseName}</span>
+    </span>
+  );
+}
+
 export function RaceListCard({
   item,
   outcome,
   previewBadge,
   gradeBadge,
   previewText,
+  honmeiHorseName,
   featured = false,
   surfaceBadgeClass,
   surfaceShort,
@@ -51,8 +64,8 @@ export function RaceListCard({
 
   if (tone === "neutral") {
     return (
-      <div className={`rl-race-card-wrap${featured ? " rl-race-card-wrap--featured" : ""}`}>
-        <Link to={`/race/${item.raceId}`} className="rl-race-row" title={item.raceName ?? item.raceId}>
+      <div className={`rl-race-card-wrap rl-race-card-wrap--game rounded-xl shadow-sm${featured ? " rl-race-card-wrap--featured ring-1 ring-cyan-500/40" : ""}`}>
+        <Link to={`/race/${item.raceId}`} className="rl-race-row rl-race-row--game" title={item.raceName ?? item.raceId}>
           <div className="rl-race-row__top">
             <div className="rl-race-row__left">
               <div className="rl-race-row__r-badge" aria-label={`${item.raceNumber}レース`}>
@@ -76,6 +89,7 @@ export function RaceListCard({
               ) : null}
             </div>
             <div className="rl-race-row__name-row">
+              {honmeiHorseName ? <HonmeiBadge horseName={honmeiHorseName} /> : null}
               <span className="rl-race-row__name" title={item.raceName}>
                 {item.raceName ?? `${item.raceNumber}R`}
               </span>
@@ -100,8 +114,8 @@ export function RaceListCard({
   }
 
   return (
-    <div className={`bt-hit-card bt-hit-card--${tone}`}>
-      <Link to={`/race/${item.raceId}`} className="bt-hit-card__link" title={item.raceName ?? item.raceId}>
+    <div className={`bt-hit-card bt-hit-card--${tone} bt-hit-card--game rounded-xl`}>
+      <Link to={`/race/${item.raceId}`} className="bt-hit-card__link bt-hit-card__link--game" title={item.raceName ?? item.raceId}>
         <div className="bt-hit-card__top">
           <div className="bt-hit-card__left">
             <div className="bt-hit-card__r-badge" aria-label={`${item.raceNumber}レース`}>
@@ -138,6 +152,7 @@ export function RaceListCard({
         </div>
         <div className="bt-hit-card__body">
           <div className="bt-hit-card__name-row">
+            {honmeiHorseName ? <HonmeiBadge horseName={honmeiHorseName} /> : null}
             <span className="bt-hit-card__name">{item.raceName ?? `${item.raceNumber}R`}</span>
             {gradeBadge ? <span className="bt-hit-card__tier">{gradeBadge.label}</span> : null}
           </div>
