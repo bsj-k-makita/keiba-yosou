@@ -201,3 +201,56 @@ export async function updateBiasMasterFromNetwork(opts = {}) {
   saveBiasMaster(next, opts.outPath ?? BIAS_MASTER_PATH);
   return next;
 }
+
+const RESULTS_DIR = join(ROOT, "src/data/results");
+
+/**
+ * 保存済み results/{raceId}.json から指定日の bias_master エントリだけ差し替える。
+ * 全 index の netkeiba 再取得を避ける（レートリミット対策）。
+ */
+export function updateBiasMasterForDate(date, opts = {}) {
+  const indexPath = opts.indexPath ?? join(ROOT, "src/data/index.json");
+  const resultsDir = opts.resultsDir ?? RESULTS_DIR;
+  const index = JSON.parse(readFileSync(indexPath, "utf8"));
+  if (!Array.isArray(index)) throw new Error("index.json must be an array");
+
+  const bucket = new Map();
+  let fetched = 0;
+
+  for (const row of index) {
+    if (row.date !== date || !row.raceId || !row.venue) continue;
+    const resultPath = join(resultsDir, `${row.raceId}.json`);
+    if (!existsSync(resultPath)) continue;
+    const result = JSON.parse(readFileSync(resultPath, "utf8"));
+    const places = result.places ?? [];
+    if (places.length < 3) continue;
+    const surface = row.surface === "ダート" ? "ダート" : "芝";
+    const top = places
+      .filter((p) => p.place <= 3)
+      .map((p) => ({
+        place: p.place,
+        waku: p.waku,
+        cornerPassing: p.cornerPassing ?? null,
+      }));
+    accumulateRaceIntoBiasMaster(bucket, date, row.venue, surface, top, places.length);
+    fetched += 1;
+  }
+
+  const newEntries = bucketToSerializable(bucket);
+  const master = loadBiasMaster(opts.outPath ?? BIAS_MASTER_PATH);
+  const entries = { ...(master.entries ?? {}) };
+  const prefix = `${date}|`;
+  for (const key of Object.keys(entries)) {
+    if (key.startsWith(prefix)) delete entries[key];
+  }
+  Object.assign(entries, newEntries);
+
+  const next = {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    fetchedRaces: fetched,
+    entries,
+  };
+  saveBiasMaster(next, opts.outPath ?? BIAS_MASTER_PATH);
+  return next;
+}

@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { enrichInvestmentSignalsInRaceData } from "./lib/investmentSignals.mjs";
-import { updateBiasMasterFromNetwork } from "./lib/biasMaster.mjs";
+import { updateBiasMasterForDate, updateBiasMasterFromNetwork } from "./lib/biasMaster.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -59,13 +59,27 @@ function processRace(raceId) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  const biasOnly = args.biasUpdate && args.date && !args.all && args.raceIds.length === 0;
 
   if (args.biasUpdate) {
-    process.stderr.write("Updating bias_master.json from index.json (netkeiba result pages)…\n");
-    const res = await updateBiasMasterFromNetwork({});
-    process.stdout.write(
-      `bias_master: updatedAt=${res.updatedAt}, mergedEntries=${Object.keys(res.entries ?? {}).length}, fetchedRaces=${res.fetchedRaces}\n`,
-    );
+    if (args.date) {
+      process.stderr.write(`Updating bias_master.json from local results for ${args.date}…\n`);
+      const res = updateBiasMasterForDate(args.date);
+      process.stdout.write(
+        `bias_master: updatedAt=${res.updatedAt}, date=${args.date}, mergedEntries=${Object.keys(res.entries ?? {}).length}, fetchedRaces=${res.fetchedRaces}\n`,
+      );
+    } else {
+      process.stderr.write("Updating bias_master.json from index.json (netkeiba result pages)…\n");
+      const res = await updateBiasMasterFromNetwork({});
+      process.stdout.write(
+        `bias_master: updatedAt=${res.updatedAt}, mergedEntries=${Object.keys(res.entries ?? {}).length}, fetchedRaces=${res.fetchedRaces}\n`,
+      );
+    }
+  }
+
+  if (biasOnly) {
+    process.stdout.write("done (bias-only).\n");
+    return;
   }
 
   let raceIds = args.all ? listRaceIds() : args.raceIds;

@@ -96,15 +96,15 @@ export function RaceDetailPage() {
   }
 
   return (
-    <div>
-      <nav className="app__nav" aria-label="パンくず">
-        <Link to="/races" className="app__back-link">
-          ← レース一覧に戻る
+    <div className="rl-page rl-page--simple rl-page--full-width">
+      <nav className="rl-simple-head rl-simple-head--back" aria-label="パンくず">
+        <Link to="/races" className="rl-simple-back">
+          ← レース一覧
         </Link>
       </nav>
       {import.meta.env.DEV ? (
-        <p className="app__meta app__meta--devhint" aria-live="polite">
-          開発モード: レースJSONの変更は約 {DEV_RACE_POLL_MS / 1000} 秒ごとに自動反映されます（別タブから戻ったときも再読込）。
+        <p className="rl-simple-message" aria-live="polite">
+          開発モード: レースJSONの変更は約 {DEV_RACE_POLL_MS / 1000} 秒ごとに自動反映されます。
         </p>
       ) : null}
       <RaceDetailView key={race.raceId} race={race} />

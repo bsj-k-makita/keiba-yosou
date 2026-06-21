@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
-import { HomePage } from "./app/home/page";
 import { RacesListPage } from "./app/races/page";
 import { RaceDetailPage } from "./app/race/[raceId]/page";
 import BacktestDashboardPage from "./app/backtest/page";
@@ -13,7 +12,7 @@ function resolveInitialTheme(): ThemeMode {
   if (typeof window === "undefined") return "light";
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
   if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "light";
 }
 
 function applyThemeToDocument(theme: ThemeMode) {
@@ -28,14 +27,13 @@ function AppNav({
   onToggleTheme: () => void;
 }) {
   const navItems = [
-    { to: "/", title: "TOP", subtitle: "Mission", icon: "◆" },
-    { to: "/races", title: "レース探索", subtitle: "Explore", icon: "◉" },
-    { to: "/backtest", title: "回収率BT", subtitle: "Lab", icon: "▲" },
+    { to: "/races", title: "レース" },
+    { to: "/backtest", title: "回収率" },
   ];
 
   return (
     <nav className="app-nav" aria-label="サイトナビ">
-      <Link to="/" className="app-nav__logo">
+      <Link to="/races" className="app-nav__logo">
         <img
           className="app-nav__logo-img"
           src="/logo.png"
@@ -51,13 +49,9 @@ function AppNav({
             <NavLink
               key={item.to}
               to={item.to}
-              className={({ isActive }) => `app-nav__pill${isActive ? " app-nav__pill--active" : ""}`}
+              className={({ isActive }) => `app-nav__link${isActive ? " app-nav__link--active" : ""}`}
             >
-              <span className="app-nav__pill-icon" aria-hidden>{item.icon}</span>
-              <span className="app-nav__pill-text">
-                <strong>{item.title}</strong>
-                <small>{item.subtitle}</small>
-              </span>
+              {item.title}
             </NavLink>
           ))}
         </div>
@@ -125,11 +119,11 @@ export default function App() {
       onToggleTheme={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
     >
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Navigate to="/races" replace />} />
         <Route path="/races" element={<RacesListPage />} />
         <Route path="/race/:raceId" element={<RaceDetailPage />} />
         <Route path="/backtest" element={<BacktestDashboardPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/races" replace />} />
       </Routes>
     </AppShell>
   );

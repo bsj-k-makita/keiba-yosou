@@ -2,8 +2,23 @@
  * レース結果ページ＋ db ラップから `analysis`（バイアス・ラップ質）を組み立てる。
  * 未確定レースでは例外になり呼び出し側で握りつぶす。
  */
+import { existsSync, readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { fetchUtf8 } from "./netkeibaFetch.mjs";
 import { parseRaceResultNetkeiba } from "./parseRaceResultNetkeiba.mjs";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, "../..");
+const RESULTS_DIR = join(ROOT, "src/data/results");
+
+function loadLocalRacePlaces(raceId) {
+  const path = join(RESULTS_DIR, `${raceId}.json`);
+  if (!existsSync(path)) return null;
+  const raw = JSON.parse(readFileSync(path, "utf8"));
+  const places = raw?.places;
+  return Array.isArray(places) && places.length >= 3 ? places : null;
+}
 import { parseRaceLedgerLap200m } from "./parseNetkeibaPastRuns.mjs";
 import { paceFrontBackSkewEarlyMinusLate } from "./raceFeatureEngineering.mjs";
 import {
@@ -152,9 +167,12 @@ export function buildRaceAnalysisSnapshot(data) {
   const surfaceRaw = meta.surface === "ダート" ? "ダート" : "芝";
   if (!raceId || !date || !venue) return null;
 
-  const resultUrl = `https://race.netkeiba.com/race/result.html?race_id=${raceId}`;
-  const html = fetchUtf8(resultUrl);
-  const { places } = parseRaceResultNetkeiba(html, raceId);
+  let places = loadLocalRacePlaces(raceId);
+  if (places == null) {
+    const resultUrl = `https://race.netkeiba.com/race/result.html?race_id=${raceId}`;
+    const html = fetchUtf8(resultUrl);
+    ({ places } = parseRaceResultNetkeiba(html, raceId));
+  }
   const fieldSize = places.length;
   if (fieldSize < 4) return null;
 

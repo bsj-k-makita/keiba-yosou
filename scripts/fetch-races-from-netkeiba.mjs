@@ -144,6 +144,14 @@ function makeJobs(targetDate = null) {
       date: "2026-06-14",
       placeCodes: ["050304", "090304", "020102"], // 東京 / 阪神 / 函館（3回東京4日・3回阪神4日・1回函館2日）
     }),
+    ...makeDayJobs({
+      date: "2026-06-20",
+      placeCodes: ["050305", "090305", "020103"], // 東京 / 阪神 / 函館（3回東京5日・3回阪神5日・1回函館3日）
+    }),
+    ...makeDayJobs({
+      date: "2026-06-21",
+      placeCodes: ["050306", "090306", "020104"], // 東京 / 阪神 / 函館（3回東京6日・3回阪神6日・1回函館4日）
+    }),
   ];
   if (!targetDate) return out;
   return out.filter((j) => j.date === targetDate);

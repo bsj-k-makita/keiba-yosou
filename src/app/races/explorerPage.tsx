@@ -81,10 +81,6 @@ function surfaceShort(surface: string): string {
   return surface === "芝" ? "芝" : "ダ";
 }
 
-function raceIcon(surface: "芝" | "ダート"): string {
-  return surface === "芝" ? "🌿" : "🏇";
-}
-
 export function RacesExplorerPage() {
   const [rows, setRows] = useState<RaceIndexItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -268,7 +264,6 @@ export function RacesExplorerPage() {
                 gradeBadge={raceGradeBadgeFromIndex(item.raceGrade) ?? raceGradeFromName(item.raceName)}
                 surfaceBadgeClass={surfaceBadgeClass}
                 surfaceShort={surfaceShort}
-                raceIcon={raceIcon}
               />
             </li>
           ))

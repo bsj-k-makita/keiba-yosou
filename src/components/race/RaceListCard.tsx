@@ -1,22 +1,16 @@
 import { Link } from "react-router-dom";
 import type { RaceBettingOutcome } from "../../domain/betting/computeRaceBettingOutcome";
 import type { RaceIndexItem } from "../../lib/race-data/raceEvaluationTypes";
-import { NetkeibaRaceLinks } from "./NetkeibaRaceLinks";
 
-type PreviewBadge = { label: string; tone: string } | null;
 type GradeBadge = { label: string; variant: string } | null;
 
 type Props = {
   item: RaceIndexItem;
   outcome?: RaceBettingOutcome | null;
-  previewBadge?: PreviewBadge;
   gradeBadge?: GradeBadge;
-  previewText?: string;
   honmeiHorseName?: string;
-  featured?: boolean;
   surfaceBadgeClass: (surface: string) => string;
   surfaceShort: (surface: string) => string;
-  raceIcon: (surface: "芝" | "ダート") => string;
 };
 
 function cardTone(outcome: RaceBettingOutcome | null | undefined): "hit" | "skip" | "miss" | "neutral" {
@@ -26,147 +20,88 @@ function cardTone(outcome: RaceBettingOutcome | null | undefined): "hit" | "skip
   return "miss";
 }
 
-function hitStatusLabel(outcome: RaceBettingOutcome): string {
-  if (outcome.status === "resolved" && outcome.totalInvested === 0) return "買い目なし";
-  if (outcome.isHit) return "🎯 的中";
-  return missStatusLabel(outcome);
+function statusLabel(tone: ReturnType<typeof cardTone>, outcome: RaceBettingOutcome): string {
+  if (tone === "skip") return "買い目なし";
+  if (tone === "hit") return "的中";
+  if (tone === "miss") return outcome.isSecondRowDead ? "2列目全滅" : "不的中";
+  return "未確定";
 }
 
-function missStatusLabel(outcome: RaceBettingOutcome): string {
-  return outcome.isSecondRowDead ? "2列目全滅" : "不的中";
+function formatRecoveryRate(rate: number): string {
+  return Number.isInteger(rate) ? String(rate) : rate.toFixed(1);
 }
 
-function HonmeiBadge({ horseName }: { horseName: string }) {
-  return (
-    <span className="rl-race-row__honmei" title={`◎ ${horseName}`}>
-      <span className="rl-race-row__honmei-mark" aria-hidden>
-        ◎
-      </span>
-      <span className="rl-race-row__honmei-name">{horseName}</span>
-    </span>
-  );
+function recoveryLabel(outcome: RaceBettingOutcome | null | undefined): {
+  text: string;
+  tone: "pending" | "skip" | "plus" | "minus";
+} {
+  if (outcome == null || outcome.status !== "resolved") {
+    return { text: "—", tone: "pending" };
+  }
+  if (outcome.totalInvested <= 0) {
+    return { text: "—", tone: "skip" };
+  }
+  return {
+    text: `${formatRecoveryRate(outcome.recoveryRate)}%`,
+    tone: outcome.recoveryRate >= 100 ? "plus" : "minus",
+  };
 }
 
 export function RaceListCard({
   item,
   outcome,
-  previewBadge,
   gradeBadge,
-  previewText,
   honmeiHorseName,
-  featured = false,
   surfaceBadgeClass,
   surfaceShort,
-  raceIcon,
 }: Props) {
   const tone = cardTone(outcome);
   const resolved = outcome?.status === "resolved";
-
-  if (tone === "neutral") {
-    return (
-      <div className={`rl-race-card-wrap rl-race-card-wrap--game rounded-xl shadow-sm${featured ? " rl-race-card-wrap--featured ring-1 ring-cyan-500/40" : ""}`}>
-        <Link to={`/race/${item.raceId}`} className="rl-race-row rl-race-row--game" title={item.raceName ?? item.raceId}>
-          <div className="rl-race-row__top">
-            <div className="rl-race-row__left">
-              <div className="rl-race-row__r-badge" aria-label={`${item.raceNumber}レース`}>
-                <span className="rl-race-row__r-label">R</span>
-                <span className="rl-race-row__r-num">{item.raceNumber}</span>
-              </div>
-            </div>
-            <span className="rl-race-row__arrow" aria-hidden>
-              ›
-            </span>
-          </div>
-          <div className="rl-race-row__info">
-            <div className="rl-race-row__badge-row" aria-hidden={!previewBadge}>
-              {previewBadge ? (
-                <span
-                  className={`rl-race-row__feature rl-race-row__feature--${previewBadge.tone}`}
-                  title={previewBadge.label}
-                >
-                  {previewBadge.label}
-                </span>
-              ) : null}
-            </div>
-            <div className="rl-race-row__name-row">
-              {honmeiHorseName ? <HonmeiBadge horseName={honmeiHorseName} /> : null}
-              <span className="rl-race-row__name" title={item.raceName}>
-                {item.raceName ?? `${item.raceNumber}R`}
-              </span>
-              {gradeBadge ? (
-                <span className={`rl-race-grade rl-race-grade--${gradeBadge.variant}`}>{gradeBadge.label}</span>
-              ) : null}
-            </div>
-            <p className="rl-race-row__preview" aria-hidden={!previewText}>
-              {previewText ?? "\u00A0"}
-            </p>
-            <div className="rl-race-row__meta">
-              <span className={surfaceBadgeClass(item.surface)}>
-                {raceIcon(item.surface)} {surfaceShort(item.surface)} {item.distance}m
-              </span>
-              {!resolved && <span className="rl-race-list__recovery rl-race-list__recovery--pending">回収 未確定</span>}
-            </div>
-          </div>
-        </Link>
-        <NetkeibaRaceLinks raceId={item.raceId} variant="cardBar" />
-      </div>
-    );
-  }
+  const raceLabel = item.raceName ?? `${item.raceNumber}R`;
+  const recovery = recoveryLabel(outcome);
 
   return (
-    <div className={`bt-hit-card bt-hit-card--${tone} bt-hit-card--game rounded-xl`}>
-      <Link to={`/race/${item.raceId}`} className="bt-hit-card__link bt-hit-card__link--game" title={item.raceName ?? item.raceId}>
-        <div className="bt-hit-card__top">
-          <div className="bt-hit-card__left">
-            <div className="bt-hit-card__r-badge" aria-label={`${item.raceNumber}レース`}>
-              <span className="bt-hit-card__r-label">R</span>
-              <span className="bt-hit-card__r-num">{item.raceNumber}</span>
-            </div>
-            {outcome ? (
-              <span
-                className={
-                  tone === "hit"
-                    ? "bt-hit-card__status bt-hit-card__status--hit"
-                    : tone === "skip"
-                      ? "bt-hit-card__status bt-hit-card__status--skip"
-                      : "bt-hit-card__status bt-hit-card__status--miss"
-                }
-              >
-                {hitStatusLabel(outcome)}
-              </span>
-            ) : null}
-          </div>
-          {tone === "hit" && outcome && outcome.totalPayout > 0 ? (
-            <span className="bt-hit-card__payout">{outcome.totalPayout.toLocaleString()}円</span>
-          ) : null}
-          {resolved && outcome && (
-            <span
-              className={`bt-hit-card__recovery${outcome.recoveryRate >= 100 ? " bt-hit-card__recovery--plus" : ""}`}
-            >
-              回収 {outcome.recoveryRate}%
-            </span>
-          )}
-          <span className="bt-hit-card__arrow" aria-hidden>
-            ›
+    <Link
+      to={`/race/${item.raceId}`}
+      className={`rl-card rl-card--${tone}`}
+      title={raceLabel}
+    >
+      <div className="rl-card__top">
+        <span className="rl-card__r">{item.raceNumber}R</span>
+        {gradeBadge ? (
+          <span className={`rl-card__grade rl-card__grade--${gradeBadge.variant}`}>{gradeBadge.label}</span>
+        ) : null}
+      </div>
+
+      <p className="rl-card__name">{raceLabel}</p>
+
+      {honmeiHorseName ? (
+        <p className="rl-card__honmei">
+          <span className="rl-card__honmei-mark" aria-hidden>
+            ◎
           </span>
+          <span className="rl-card__honmei-name">{honmeiHorseName}</span>
+        </p>
+      ) : null}
+
+      <div className="rl-card__foot">
+        <span className={surfaceBadgeClass(item.surface)}>
+          {surfaceShort(item.surface)} {item.distance}m
+        </span>
+        <div className="rl-card__meta">
+          <span
+            className={`rl-card__recovery rl-card__recovery--${recovery.tone}`}
+            aria-label={`回収率 ${recovery.text}`}
+          >
+            回収 {recovery.text}
+          </span>
+          {resolved && outcome ? (
+            <span className={`rl-card__badge rl-card__badge--${tone}`}>{statusLabel(tone, outcome)}</span>
+          ) : (
+            <span className="rl-card__badge rl-card__badge--pending">未確定</span>
+          )}
         </div>
-        <div className="bt-hit-card__body">
-          <div className="bt-hit-card__name-row">
-            {honmeiHorseName ? <HonmeiBadge horseName={honmeiHorseName} /> : null}
-            <span className="bt-hit-card__name">{item.raceName ?? `${item.raceNumber}R`}</span>
-            {gradeBadge ? <span className="bt-hit-card__tier">{gradeBadge.label}</span> : null}
-          </div>
-          <p className="bt-hit-card__diagnosis" aria-hidden={!previewText}>
-            {previewText ?? "\u00A0"}
-          </p>
-          <div className="bt-hit-card__tickets">
-            <span className={surfaceBadgeClass(item.surface)}>
-              {raceIcon(item.surface)} {surfaceShort(item.surface)} {item.distance}m
-            </span>
-          </div>
-        </div>
-      </Link>
-      <NetkeibaRaceLinks raceId={item.raceId} variant="cardBar" />
-    </div>
+      </div>
+    </Link>
   );
 }

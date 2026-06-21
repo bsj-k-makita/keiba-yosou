@@ -30,8 +30,8 @@
         "sustain": 47.4,
         "power": 48.8
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -159,16 +159,16 @@
       "predicted_win_rate": 0.1764,
       "ability_index": 90.8,
       "suitability_flags": [],
-      "final_expected_value": 0.12,
+      "final_expected_value": 1.9,
       "predicted_probability": 0.49,
-      "estimated_actual_odds": 1.1,
+      "estimated_actual_odds": 4.52,
       "odds_source": "estimated",
-      "market_popularity": 1,
-      "market_win_odds": 1.82,
-      "value_rank": "D",
-      "kelly_weight": 0,
+      "market_popularity": 4,
+      "market_win_odds": 11.9,
+      "value_rank": "C",
+      "kelly_weight": 0.03,
       "confidence_rank": "A",
-      "bet_type": "見送り",
+      "bet_type": "軸",
       "value_change": "STABLE",
       "key_factors": [
         "末脚性能",
@@ -178,8 +178,11 @@
         "先行力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.1089,
-      "ai_effective_ev": 0.0483
+      "ai_predicted_win_rate": 0.0248,
+      "ai_effective_ev": 0.1449,
+      "marketWinOdds": 11.9,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 4
     },
     {
       "horseId": "2023106836",
@@ -199,8 +202,8 @@
         "sustain": 36.3,
         "power": 38.8
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -343,12 +346,12 @@
       "predicted_win_rate": 0.0967,
       "ability_index": 90.9,
       "suitability_flags": [],
-      "final_expected_value": 0.33,
+      "final_expected_value": 0.87,
       "predicted_probability": 0.31,
-      "estimated_actual_odds": 2.07,
+      "estimated_actual_odds": 4.22,
       "odds_source": "estimated",
-      "market_popularity": 5,
-      "market_win_odds": 5.46,
+      "market_popularity": 3,
+      "market_win_odds": 11.1,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "B",
@@ -362,8 +365,11 @@
         "持続力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.1413
+      "ai_predicted_win_rate": 0.0681,
+      "ai_effective_ev": 0.6064,
+      "marketWinOdds": 11.1,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 3
     },
     {
       "horseId": "2023105870",
@@ -383,8 +389,8 @@
         "sustain": 32.4,
         "power": 34.1
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -535,10 +541,10 @@
       "suitability_flags": [],
       "final_expected_value": -0.2,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 5.55,
+      "estimated_actual_odds": 7.52,
       "odds_source": "estimated",
-      "market_popularity": 13,
-      "market_win_odds": 14.61,
+      "market_popularity": 5,
+      "market_win_odds": 19.8,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -552,8 +558,11 @@
         "先行力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.6295
+      "ai_predicted_win_rate": 0.0681,
+      "ai_effective_ev": 1.1993,
+      "marketWinOdds": 19.8,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 5
     },
     {
       "horseId": "2023106214",
@@ -573,8 +582,8 @@
         "sustain": 32.6,
         "power": 34.1
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -671,10 +680,10 @@
       "suitability_flags": [],
       "final_expected_value": -0.2,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 4.18,
+      "estimated_actual_odds": 18.43,
       "odds_source": "estimated",
-      "market_popularity": 10,
-      "market_win_odds": 10.99,
+      "market_popularity": 9,
+      "market_win_odds": 48.5,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -688,8 +697,11 @@
         "持続力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.4363
+      "ai_predicted_win_rate": 0.0248,
+      "ai_effective_ev": 1.052,
+      "marketWinOdds": 48.5,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 9
     },
     {
       "horseId": "2023100862",
@@ -709,8 +721,8 @@
         "sustain": 26.2,
         "power": 26.2
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -828,14 +840,14 @@
       "predicted_win_rate": 0.0317,
       "ability_index": 85.5,
       "suitability_flags": [],
-      "final_expected_value": 0.19,
+      "final_expected_value": 9.5,
       "predicted_probability": 0.17,
-      "estimated_actual_odds": 4.62,
+      "estimated_actual_odds": 60,
       "odds_source": "estimated",
-      "market_popularity": 11,
-      "market_win_odds": 12.17,
-      "value_rank": "D",
-      "kelly_weight": 0,
+      "market_popularity": 16,
+      "market_win_odds": 306,
+      "value_rank": "A",
+      "kelly_weight": 0.01,
       "confidence_rank": "C",
       "bet_type": "見送り",
       "value_change": "STABLE",
@@ -847,8 +859,11 @@
         "先行力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.4993
+      "ai_predicted_win_rate": 0.0562,
+      "ai_effective_ev": 5.4676,
+      "marketWinOdds": 306,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 16
     },
     {
       "horseId": "2023106691",
@@ -868,8 +883,8 @@
         "sustain": 42.2,
         "power": 44.2
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -993,10 +1008,10 @@
       "suitability_flags": [],
       "final_expected_value": -0.2,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 2.88,
+      "estimated_actual_odds": 3.99,
       "odds_source": "estimated",
-      "market_popularity": 7,
-      "market_win_odds": 7.58,
+      "market_popularity": 2,
+      "market_win_odds": 10.5,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -1010,8 +1025,11 @@
         "持続力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.2544
+      "ai_predicted_win_rate": 0.0681,
+      "ai_effective_ev": 0.5656,
+      "marketWinOdds": 10.5,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 2
     },
     {
       "horseId": "2023106733",
@@ -1031,8 +1049,8 @@
         "sustain": 32.6,
         "power": 34.8
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -1175,12 +1193,12 @@
       "predicted_win_rate": 0.0008,
       "ability_index": 67.6,
       "suitability_flags": [],
-      "final_expected_value": -0.19,
+      "final_expected_value": -0.18,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 3.3,
+      "estimated_actual_odds": 11.21,
       "odds_source": "estimated",
-      "market_popularity": 8,
-      "market_win_odds": 8.69,
+      "market_popularity": 7,
+      "market_win_odds": 29.5,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -1194,8 +1212,11 @@
         "持続力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.3136
+      "ai_predicted_win_rate": 0.0248,
+      "ai_effective_ev": 0.5811,
+      "marketWinOdds": 29.5,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 7
     },
     {
       "horseId": "2023105717",
@@ -1215,8 +1236,8 @@
         "sustain": 37,
         "power": 37.9
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -1290,13 +1311,13 @@
       "predicted_win_rate": 0.0276,
       "ability_index": 84.8,
       "suitability_flags": [],
-      "final_expected_value": -0.02,
+      "final_expected_value": 2.26,
       "predicted_probability": 0.16,
-      "estimated_actual_odds": 2.47,
+      "estimated_actual_odds": 33.9,
       "odds_source": "estimated",
-      "market_popularity": 6,
-      "market_win_odds": 6.5,
-      "value_rank": "D",
+      "market_popularity": 13,
+      "market_win_odds": 89.2,
+      "value_rank": "C",
       "kelly_weight": 0,
       "confidence_rank": "C",
       "bet_type": "見送り",
@@ -1309,8 +1330,11 @@
         "先行力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.1968
+      "ai_predicted_win_rate": 0.0211,
+      "ai_effective_ev": 1.7305,
+      "marketWinOdds": 89.2,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 13
     },
     {
       "horseId": "2023100271",
@@ -1330,8 +1354,8 @@
         "sustain": 31.7,
         "power": 31.7
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -1377,10 +1401,10 @@
       "suitability_flags": [],
       "final_expected_value": -0.2,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 6.99,
+      "estimated_actual_odds": 43.78,
       "odds_source": "estimated",
-      "market_popularity": 16,
-      "market_win_odds": 18.4,
+      "market_popularity": 14,
+      "market_win_odds": 115.2,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -1394,8 +1418,11 @@
         "先行力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.8317
+      "ai_predicted_win_rate": 0.0211,
+      "ai_effective_ev": 1.9581,
+      "marketWinOdds": 115.2,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 14
     },
     {
       "horseId": "2023104706",
@@ -1415,8 +1442,8 @@
         "sustain": 31.9,
         "power": 34.1
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -1560,12 +1587,12 @@
       "predicted_win_rate": 0.0001,
       "ability_index": 58.7,
       "suitability_flags": [],
-      "final_expected_value": -0.2,
+      "final_expected_value": -0.19,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 5.08,
+      "estimated_actual_odds": 24.09,
       "odds_source": "estimated",
-      "market_popularity": 12,
-      "market_win_odds": 13.38,
+      "market_popularity": 11,
+      "market_win_odds": 63.4,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -1579,8 +1606,11 @@
         "持続力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.5638
+      "ai_predicted_win_rate": 0.0562,
+      "ai_effective_ev": 3.4116,
+      "marketWinOdds": 63.4,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 11
     },
     {
       "horseId": "2023102520",
@@ -1600,8 +1630,8 @@
         "sustain": 34.7,
         "power": 35.7
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -1699,10 +1729,10 @@
       "suitability_flags": [],
       "final_expected_value": -0.2,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 3.73,
+      "estimated_actual_odds": 9.2,
       "odds_source": "estimated",
-      "market_popularity": 9,
-      "market_win_odds": 9.82,
+      "market_popularity": 6,
+      "market_win_odds": 24.2,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -1716,8 +1746,11 @@
         "先行力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.3739
+      "ai_predicted_win_rate": 0.1261,
+      "ai_effective_ev": 2.9026,
+      "marketWinOdds": 24.2,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 6
     },
     {
       "horseId": "2023100985",
@@ -1737,8 +1770,8 @@
         "sustain": 29.5,
         "power": 29.5
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -1809,10 +1842,10 @@
       "suitability_flags": [],
       "final_expected_value": -0.2,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 6.51,
+      "estimated_actual_odds": 60,
       "odds_source": "estimated",
       "market_popularity": 15,
-      "market_win_odds": 17.12,
+      "market_win_odds": 205.5,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -1826,8 +1859,11 @@
         "スタミナ不安"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.7634
+      "ai_predicted_win_rate": 0.0113,
+      "ai_effective_ev": 0.9838,
+      "marketWinOdds": 205.5,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 15
     },
     {
       "horseId": "2023103731",
@@ -1847,8 +1883,8 @@
         "sustain": 48.2,
         "power": 50.7
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -2002,12 +2038,12 @@
       "predicted_win_rate": 0.0475,
       "ability_index": 87.5,
       "suitability_flags": [],
-      "final_expected_value": -0.08,
+      "final_expected_value": -0.13,
       "predicted_probability": 0.2,
       "estimated_actual_odds": 1.1,
       "odds_source": "estimated",
-      "market_popularity": 2,
-      "market_win_odds": 2.62,
+      "market_popularity": 1,
+      "market_win_odds": 1.4,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -2021,8 +2057,11 @@
         "先行力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0987,
-      "ai_effective_ev": 0.1087
+      "ai_predicted_win_rate": 0.2367,
+      "ai_effective_ev": 0.1814,
+      "marketWinOdds": 1.4,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 1
     },
     {
       "horseId": "2023106827",
@@ -2042,8 +2081,8 @@
         "sustain": 39.7,
         "power": 40.6
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -2143,14 +2182,14 @@
       "predicted_win_rate": 0.6078,
       "ability_index": 100,
       "suitability_flags": [],
-      "final_expected_value": 1.93,
+      "final_expected_value": 25.45,
       "predicted_probability": 0.85,
-      "estimated_actual_odds": 1.33,
+      "estimated_actual_odds": 16.04,
       "odds_source": "estimated",
-      "market_popularity": 3,
-      "market_win_odds": 3.51,
-      "value_rank": "C",
-      "kelly_weight": 0.11,
+      "market_popularity": 8,
+      "market_win_odds": 42.2,
+      "value_rank": "S",
+      "kelly_weight": 0.15,
       "confidence_rank": "S",
       "bet_type": "軸",
       "value_change": "STABLE",
@@ -2162,8 +2201,11 @@
         "先行力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0987,
-      "ai_effective_ev": 0.1966
+      "ai_predicted_win_rate": 0.0681,
+      "ai_effective_ev": 2.7259,
+      "marketWinOdds": 42.2,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 8
     },
     {
       "horseId": "2023101479",
@@ -2183,8 +2225,8 @@
         "sustain": 27.5,
         "power": 29.7
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -2321,12 +2363,12 @@
       "predicted_win_rate": 0.0002,
       "ability_index": 61,
       "suitability_flags": [],
-      "final_expected_value": -0.2,
+      "final_expected_value": -0.18,
       "predicted_probability": 0.1,
-      "estimated_actual_odds": 6.02,
+      "estimated_actual_odds": 32.64,
       "odds_source": "estimated",
-      "market_popularity": 14,
-      "market_win_odds": 15.85,
+      "market_popularity": 12,
+      "market_win_odds": 85.9,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -2340,8 +2382,11 @@
         "持続力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.6956
+      "ai_predicted_win_rate": 0.0681,
+      "ai_effective_ev": 5.7039,
+      "marketWinOdds": 85.9,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 12
     },
     {
       "horseId": "2023100668",
@@ -2361,8 +2406,8 @@
         "sustain": 40.5,
         "power": 42.6
       },
-      "market_win_odds_source": "estimated",
-      "market_popularity_source": "estimated",
+      "market_win_odds_source": "actual",
+      "market_popularity_source": "actual",
       "running_style_source": "netkeiba_shutuba_past",
       "pastRuns": [
         {
@@ -2478,12 +2523,12 @@
       "predicted_win_rate": 0.0106,
       "ability_index": 80.1,
       "suitability_flags": [],
-      "final_expected_value": -0.15,
+      "final_expected_value": 0.35,
       "predicted_probability": 0.12,
-      "estimated_actual_odds": 1.69,
+      "estimated_actual_odds": 19.76,
       "odds_source": "estimated",
-      "market_popularity": 4,
-      "market_win_odds": 4.46,
+      "market_popularity": 10,
+      "market_win_odds": 52,
       "value_rank": "D",
       "kelly_weight": 0,
       "confidence_rank": "C",
@@ -2497,8 +2542,11 @@
         "持続力不足"
       ],
       "ev_margin_applied": 0.2,
-      "ai_predicted_win_rate": 0.0534,
-      "ai_effective_ev": 0.0879
+      "ai_predicted_win_rate": 0.0562,
+      "ai_effective_ev": 2.7712,
+      "marketWinOdds": 52,
+      "market_observed_at": "2026-06-12T22:50:39.952Z",
+      "marketPopularity": 10
     }
   ],
   "ev_margin_dynamic": 0.2
