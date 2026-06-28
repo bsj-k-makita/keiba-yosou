@@ -65,7 +65,9 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1111,
+      "ai_effective_ev": 0.0978
     },
     {
       "horseId": "2024106976",
@@ -120,7 +122,9 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1111,
+      "ai_effective_ev": 0.2467
     },
     {
       "horseId": "2024106674",
@@ -175,7 +179,9 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1111,
+      "ai_effective_ev": 0.4111
     },
     {
       "horseId": "2024106229",
@@ -230,7 +236,9 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1111,
+      "ai_effective_ev": 0.5878
     },
     {
       "horseId": "2024100521",
@@ -285,7 +293,9 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1111,
+      "ai_effective_ev": 0.7733
     },
     {
       "horseId": "2024106461",
@@ -340,7 +350,9 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1111,
+      "ai_effective_ev": 0.9667
     },
     {
       "horseId": "2024105760",
@@ -395,7 +407,9 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1111,
+      "ai_effective_ev": 1.1667
     },
     {
       "horseId": "2024108273",
@@ -450,7 +464,9 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1111,
+      "ai_effective_ev": 1.3722
     },
     {
       "horseId": "2024106922",
@@ -505,29 +521,33 @@
       "risk_factors": [
         "先行力不足"
       ],
-      "ev_margin_applied": 0.15
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1111,
+      "ai_effective_ev": 1.5833
     }
   ],
   "ev_margin_dynamic": 0.15,
   "analysis": {
     "bias": {
-      "innerOuter": -2,
+      "innerOuter": -0.6,
       "frontCloser": 0
     },
-    "lapType": "neutral",
-    "medianFinal3fSec": 35.6,
-    "meanMarginFieldSec": 0.31,
-    "lapStructure": "中間",
+    "lapType": "late_accelerated",
+    "paceBalance": 27.9,
+    "medianFinal3fSec": 34.6,
+    "meanMarginFieldSec": 1.56,
+    "lapStructure": "瞬発戦",
     "peerBaseline": {
-      "peerRaceCount": 0,
-      "avgMedianFinal3fPeer": 35.41,
-      "avgMeanMarginPeer": 1.048,
-      "fallbackFromFile": true,
-      "savedDayRaceCount": 6,
+      "peerRaceCount": 2,
+      "avgPaceBalancePeer": 47,
+      "avgMedianFinal3fPeer": 36.512499999999996,
+      "avgMeanMarginPeer": 0.8325,
+      "fallbackFromFile": false,
+      "savedDayRaceCount": 5,
       "savedAvgPaceBalance": null
     },
     "source": "netkeiba_result",
-    "computedAt": "2026-06-20T13:18:00.725Z"
+    "computedAt": "2026-06-27T10:25:36.632Z"
   },
   "condition": {
     "venue": "阪神",
@@ -541,26 +561,37 @@
     "adjustmentStrength": "middle",
     "raceAnalysis": {
       "bias": {
-        "innerOuter": -2,
+        "innerOuter": -0.6,
         "frontCloser": 0,
-        "innerShare": 0,
+        "innerShare": 0.33,
         "outerSashiShare": 0
       },
-      "lapType": "neutral",
-      "medianFinal3fSec": 35.6,
-      "meanMarginFieldSec": 0.31,
+      "lapType": "late_accelerated",
+      "paceBalance": 27.9,
+      "medianFinal3fSec": 34.6,
+      "meanMarginFieldSec": 1.56,
+      "lapStructureLabel": "瞬発戦",
       "peerBaseline": {
-        "peerRaceCount": 0,
-        "avgMedianFinal3fPeer": 35.41,
-        "avgMeanMarginPeer": 1.048,
-        "fallbackFromFile": true,
-        "savedDayRaceCount": 6,
+        "peerRaceCount": 2,
+        "avgPaceBalancePeer": 47,
+        "avgMedianFinal3fPeer": 36.512499999999996,
+        "avgMeanMarginPeer": 0.8325,
+        "fallbackFromFile": false,
+        "savedDayRaceCount": 5,
         "savedAvgPaceBalance": null
       },
       "source": "netkeiba_result",
-      "computedAt": "2026-06-20T13:18:00.725Z",
-      "appliedFromRaceId": "202609030512",
-      "appliedFromDate": "2026-06-20"
-    }
+      "computedAt": "2026-06-27T10:25:36.632Z"
+    },
+    "section200mSec": [
+      12.8,
+      11.8,
+      12.5,
+      12.8,
+      12.6,
+      11.8,
+      11,
+      11.8
+    ]
   }
 }

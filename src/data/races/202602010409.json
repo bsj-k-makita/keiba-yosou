@@ -192,7 +192,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 18.1,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 8
+      "marketPopularity": 8,
+      "ai_predicted_win_rate": 0.0426,
+      "ai_effective_ev": 0.6213
     },
     {
       "horseId": "2023103766",
@@ -350,7 +352,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 3.4,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 1
+      "marketPopularity": 1,
+      "ai_predicted_win_rate": 0.1172,
+      "ai_effective_ev": 0.2484
     },
     {
       "horseId": "2022105817",
@@ -544,7 +548,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 18.4,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 9
+      "marketPopularity": 9,
+      "ai_predicted_win_rate": 0.1172,
+      "ai_effective_ev": 2.0061
     },
     {
       "horseId": "2023106835",
@@ -683,7 +689,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 6.2,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 3
+      "marketPopularity": 3,
+      "ai_predicted_win_rate": 0.0362,
+      "ai_effective_ev": 0.0747
     },
     {
       "horseId": "2022105182",
@@ -877,7 +885,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 10.9,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 6
+      "marketPopularity": 6,
+      "ai_predicted_win_rate": 0.1172,
+      "ai_effective_ev": 1.1272
     },
     {
       "horseId": "2023102091",
@@ -1007,7 +1017,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 5,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 2
+      "marketPopularity": 2,
+      "ai_predicted_win_rate": 0.1172,
+      "ai_effective_ev": 0.4359
     },
     {
       "horseId": "2023101591",
@@ -1198,7 +1210,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 12.6,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 7
+      "marketPopularity": 7,
+      "ai_predicted_win_rate": 0.0966,
+      "ai_effective_ev": 1.0671
     },
     {
       "horseId": "2021101725",
@@ -1348,7 +1362,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 32,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 11
+      "marketPopularity": 11,
+      "ai_predicted_win_rate": 0.0362,
+      "ai_effective_ev": 1.01
     },
     {
       "horseId": "2022105525",
@@ -1537,7 +1553,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 8.9,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 5
+      "marketPopularity": 5,
+      "ai_predicted_win_rate": 0.1172,
+      "ai_effective_ev": 0.8929
     },
     {
       "horseId": "2023100503",
@@ -1650,7 +1668,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 8.4,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 4
+      "marketPopularity": 4,
+      "ai_predicted_win_rate": 0.0426,
+      "ai_effective_ev": 0.208
     },
     {
       "horseId": "2021104931",
@@ -1838,7 +1858,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 68.3,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 12
+      "marketPopularity": 12,
+      "ai_predicted_win_rate": 0.0426,
+      "ai_effective_ev": 2.7605
     },
     {
       "horseId": "2023107144",
@@ -2028,29 +2050,33 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 20.7,
       "market_observed_at": "2026-06-20T13:46:28.150Z",
-      "marketPopularity": 10
+      "marketPopularity": 10,
+      "ai_predicted_win_rate": 0.1172,
+      "ai_effective_ev": 2.2756
     }
   ],
   "ev_margin_dynamic": 0.15,
   "analysis": {
     "bias": {
-      "innerOuter": -0.6,
+      "innerOuter": -2,
       "frontCloser": 0
     },
-    "lapType": "neutral",
-    "medianFinal3fSec": 36,
-    "meanMarginFieldSec": 0.65,
-    "lapStructure": "中間",
+    "lapType": "early_pressured",
+    "paceBalance": 47.1,
+    "medianFinal3fSec": 36.3,
+    "meanMarginFieldSec": 0.47,
+    "lapStructure": "持続戦",
     "peerBaseline": {
-      "peerRaceCount": 0,
-      "avgMedianFinal3fPeer": 34.99166666666667,
-      "avgMeanMarginPeer": 0.5883333333333333,
-      "fallbackFromFile": true,
+      "peerRaceCount": 4,
+      "avgPaceBalancePeer": 8.049999999999999,
+      "avgMedianFinal3fPeer": 35.291666666666664,
+      "avgMeanMarginPeer": 0.6533333333333333,
+      "fallbackFromFile": false,
       "savedDayRaceCount": 7,
       "savedAvgPaceBalance": null
     },
     "source": "netkeiba_result",
-    "computedAt": "2026-06-20T13:17:47.252Z"
+    "computedAt": "2026-06-27T10:25:25.792Z"
   },
   "condition": {
     "venue": "函館",
@@ -2064,26 +2090,39 @@
     "adjustmentStrength": "middle",
     "raceAnalysis": {
       "bias": {
-        "innerOuter": -0.6,
+        "innerOuter": -2,
         "frontCloser": 0,
-        "innerShare": 0.33,
+        "innerShare": 0,
         "outerSashiShare": 0
       },
-      "lapType": "neutral",
-      "medianFinal3fSec": 36,
-      "meanMarginFieldSec": 0.65,
+      "lapType": "early_pressured",
+      "paceBalance": 47.1,
+      "medianFinal3fSec": 36.3,
+      "meanMarginFieldSec": 0.47,
+      "lapStructureLabel": "持続戦",
       "peerBaseline": {
-        "peerRaceCount": 0,
-        "avgMedianFinal3fPeer": 34.99166666666667,
-        "avgMeanMarginPeer": 0.5883333333333333,
-        "fallbackFromFile": true,
+        "peerRaceCount": 4,
+        "avgPaceBalancePeer": 8.049999999999999,
+        "avgMedianFinal3fPeer": 35.291666666666664,
+        "avgMeanMarginPeer": 0.6533333333333333,
+        "fallbackFromFile": false,
         "savedDayRaceCount": 7,
         "savedAvgPaceBalance": null
       },
       "source": "netkeiba_result",
-      "computedAt": "2026-06-20T13:17:47.252Z",
-      "appliedFromRaceId": "202602010303",
-      "appliedFromDate": "2026-06-20"
-    }
+      "computedAt": "2026-06-27T10:25:25.792Z"
+    },
+    "section200mSec": [
+      12.6,
+      10.7,
+      12.1,
+      12.2,
+      12.4,
+      12,
+      11.8,
+      12.1,
+      12,
+      11.8
+    ]
   }
 }

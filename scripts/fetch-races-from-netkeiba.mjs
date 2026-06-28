@@ -152,6 +152,14 @@ function makeJobs(targetDate = null) {
       date: "2026-06-21",
       placeCodes: ["050306", "090306", "020104"], // 東京 / 阪神 / 函館（3回東京6日・3回阪神6日・1回函館4日）
     }),
+    ...makeDayJobs({
+      date: "2026-06-27",
+      placeCodes: ["030201", "100201", "020105"], // 福島 / 小倉 / 函館（2回福島1日・2回小倉1日・1回函館5日）
+    }),
+    ...makeDayJobs({
+      date: "2026-06-28",
+      placeCodes: ["030202", "100202", "020106"], // 福島 / 小倉 / 函館（2回福島2日・2回小倉2日・1回函館6日・G3ラジオNIKKEI賞・函館記念）
+    }),
   ];
   if (!targetDate) return out;
   return out.filter((j) => j.date === targetDate);
@@ -222,6 +230,7 @@ function venueFromNetkeibaRaceId(raceId) {
     "05": "東京",
     "08": "京都",
     "09": "阪神",
+    "10": "小倉",
   };
   return PREFIX_TO_VENUE[head] ?? null;
 }
@@ -757,7 +766,7 @@ function parseOptions() {
 }
 
 const venueOrder = (v) => {
-  const m = { 函館: 0, 福島: 1, 新潟: 2, 東京: 3, 京都: 4, 阪神: 5 };
+  const m = { 函館: 0, 福島: 1, 小倉: 2, 新潟: 3, 東京: 4, 京都: 5, 阪神: 6 };
   return m[v] ?? 9;
 };
 

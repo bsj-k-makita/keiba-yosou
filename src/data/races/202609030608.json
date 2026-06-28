@@ -121,7 +121,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 26.6,
       "market_observed_at": "2026-06-20T13:39:00.688Z",
-      "marketPopularity": 8
+      "marketPopularity": 8,
+      "ai_predicted_win_rate": 0.108,
+      "ai_effective_ev": 2.7236
     },
     {
       "horseId": "2022104794",
@@ -312,7 +314,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 8.9,
       "market_observed_at": "2026-06-20T13:39:00.688Z",
-      "marketPopularity": 6
+      "marketPopularity": 6,
+      "ai_predicted_win_rate": 0.108,
+      "ai_effective_ev": 0.8115
     },
     {
       "horseId": "2023107071",
@@ -471,7 +475,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 7.8,
       "market_observed_at": "2026-06-20T13:39:00.688Z",
-      "marketPopularity": 4
+      "marketPopularity": 4,
+      "ai_predicted_win_rate": 0.108,
+      "ai_effective_ev": 0.6926
     },
     {
       "horseId": "2022102550",
@@ -661,7 +667,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 7.6,
       "market_observed_at": "2026-06-20T13:39:00.688Z",
-      "marketPopularity": 3
+      "marketPopularity": 3,
+      "ai_predicted_win_rate": 0.108,
+      "ai_effective_ev": 0.671
     },
     {
       "horseId": "2023105484",
@@ -827,7 +835,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 3.4,
       "market_observed_at": "2026-06-20T13:39:00.688Z",
-      "marketPopularity": 2
+      "marketPopularity": 2,
+      "ai_predicted_win_rate": 0.2206,
+      "ai_effective_ev": 0.6
     },
     {
       "horseId": "2023107283",
@@ -961,7 +971,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 2.8,
       "market_observed_at": "2026-06-20T13:39:00.688Z",
-      "marketPopularity": 1
+      "marketPopularity": 1,
+      "ai_predicted_win_rate": 0.2,
+      "ai_effective_ev": 0.4099
     },
     {
       "horseId": "2022103100",
@@ -1143,7 +1155,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 13.8,
       "market_observed_at": "2026-06-20T13:39:00.688Z",
-      "marketPopularity": 7
+      "marketPopularity": 7,
+      "ai_predicted_win_rate": 0.0393,
+      "ai_effective_ev": 0.3922
     },
     {
       "horseId": "2023102376",
@@ -1330,8 +1344,78 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 7.9,
       "market_observed_at": "2026-06-20T13:39:00.688Z",
-      "marketPopularity": 5
+      "marketPopularity": 5,
+      "ai_predicted_win_rate": 0.108,
+      "ai_effective_ev": 0.7034
     }
   ],
-  "ev_margin_dynamic": 0.15
+  "ev_margin_dynamic": 0.15,
+  "analysis": {
+    "bias": {
+      "innerOuter": -0.6,
+      "frontCloser": 0
+    },
+    "lapType": "early_pressured",
+    "paceBalance": 52.2,
+    "medianFinal3fSec": 34.85,
+    "meanMarginFieldSec": 1.61,
+    "lapStructure": "中間",
+    "peerBaseline": {
+      "peerRaceCount": 4,
+      "avgPaceBalancePeer": 32.925000000000004,
+      "avgMedianFinal3fPeer": 35.91,
+      "avgMeanMarginPeer": 0.85,
+      "fallbackFromFile": false,
+      "savedDayRaceCount": 5,
+      "savedAvgPaceBalance": null
+    },
+    "source": "netkeiba_result",
+    "computedAt": "2026-06-27T10:25:38.548Z"
+  },
+  "condition": {
+    "venue": "阪神",
+    "raceName": "3歳以上1勝クラス",
+    "surface": "芝",
+    "distance": 2000,
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "section200mSec": [
+      12.9,
+      12.1,
+      12.8,
+      12.6,
+      12.3,
+      12.4,
+      12.4,
+      11.6,
+      11.2,
+      11.6
+    ],
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -0.6,
+        "frontCloser": 0,
+        "innerShare": 0.33,
+        "outerSashiShare": 0
+      },
+      "lapType": "early_pressured",
+      "paceBalance": 52.2,
+      "medianFinal3fSec": 34.85,
+      "meanMarginFieldSec": 1.61,
+      "lapStructureLabel": "中間",
+      "peerBaseline": {
+        "peerRaceCount": 4,
+        "avgPaceBalancePeer": 32.925000000000004,
+        "avgMedianFinal3fPeer": 35.91,
+        "avgMeanMarginPeer": 0.85,
+        "fallbackFromFile": false,
+        "savedDayRaceCount": 5,
+        "savedAvgPaceBalance": null
+      },
+      "source": "netkeiba_result",
+      "computedAt": "2026-06-27T10:25:38.548Z"
+    }
+  }
 }

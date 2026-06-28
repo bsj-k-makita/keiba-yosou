@@ -53,6 +53,8 @@ export type BuildRaceBettingContextOptions = {
   noAiEvRegime?: boolean;
   /** ◎付与時の勝率8%ルール（相印はAI EV順のまま） */
   anchorHonmeiWinRateRule?: AnchorHonmeiWinRateRule;
+  /** 馬連EV推奨閾値（バックテスト試算用） */
+  renEvThreshold?: number;
 };
 
 /** 評価パイプライン出力から馬券コンテキストを組み立てる（印・EVエンジンを揃える） */
@@ -64,7 +66,7 @@ export function buildRaceBettingContextFromPipeline(
   horses: readonly HorseAbility[],
   condition: RaceCondition,
   betAmount = 100,
-  pipelineOpts?: Pick<BuildRaceBettingContextOptions, "anchorHonmeiWinRateRule">,
+  pipelineOpts?: Pick<BuildRaceBettingContextOptions, "anchorHonmeiWinRateRule" | "renEvThreshold">,
 ): RaceBettingContext | null {
   return buildRaceBettingContext(pipeline.results, horses, condition, betAmount, {
     adjustedProbabilities: pipeline.adjustedProbabilities,
@@ -171,6 +173,7 @@ export function buildRaceBettingContext(
     {
       classTier,
       probabilityEngine,
+      renEvThreshold: pipelineOpts?.renEvThreshold,
     },
   );
   const formationTickets =

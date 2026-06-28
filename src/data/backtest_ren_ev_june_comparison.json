@@ -1,0 +1,145 @@
+{
+  "period": "2026-06",
+  "raceCount": 72,
+  "baseline": {
+    "renEvThreshold": 1.8,
+    "totalRacesMatched": 72,
+    "totalRecoveryRate": 78.5,
+    "totalInvestedSum": 131600,
+    "totalPayoutSum": 103270,
+    "mainLine": {
+      "invested": 72300,
+      "payout": 59030,
+      "rate": 81.6,
+      "accuracy": 2.8,
+      "hitCount": 20,
+      "betCount": 720,
+      "estimatedPayout": false
+    },
+    "wide": {
+      "invested": 36000,
+      "payout": 42810,
+      "rate": 118.9,
+      "accuracy": 7.5,
+      "hitCount": 27,
+      "betCount": 360,
+      "estimatedPayout": false
+    },
+    "trifecta": {
+      "invested": 21200,
+      "payout": 1430,
+      "rate": 6.7,
+      "accuracy": 0.5,
+      "hitCount": 1,
+      "betCount": 212,
+      "estimatedPayout": false
+    },
+    "win": {
+      "invested": 2100,
+      "payout": 0,
+      "rate": 0,
+      "accuracy": 0,
+      "hitCount": 0,
+      "betCount": 11,
+      "estimatedPayout": false
+    }
+  },
+  "trial": {
+    "renEvThreshold": 2,
+    "totalRacesMatched": 72,
+    "totalRecoveryRate": 74.6,
+    "totalInvestedSum": 59300,
+    "totalPayoutSum": 44240,
+    "mainLine": {
+      "invested": 0,
+      "payout": 0,
+      "rate": 0,
+      "accuracy": 0,
+      "hitCount": 0,
+      "betCount": 0,
+      "estimatedPayout": false
+    },
+    "wide": {
+      "invested": 36000,
+      "payout": 42810,
+      "rate": 118.9,
+      "accuracy": 7.5,
+      "hitCount": 27,
+      "betCount": 360,
+      "estimatedPayout": false
+    },
+    "trifecta": {
+      "invested": 21200,
+      "payout": 1430,
+      "rate": 6.7,
+      "accuracy": 0.5,
+      "hitCount": 1,
+      "betCount": 212,
+      "estimatedPayout": false
+    },
+    "win": {
+      "invested": 2100,
+      "payout": 0,
+      "rate": 0,
+      "accuracy": 0,
+      "hitCount": 0,
+      "betCount": 11,
+      "estimatedPayout": false
+    }
+  },
+  "delta": {
+    "totalRecoveryRate": -3.9000000000000057,
+    "mainLineRecoveryRate": -81.6,
+    "mainLineInvested": -72300,
+    "mainLinePayout": -59030,
+    "mainLineHitCount": -20
+  },
+  "sweep": [
+    {
+      "renEvThreshold": 1.8,
+      "totalRecoveryRate": 78.5,
+      "mainLineRate": 81.6,
+      "mainLineInvested": 72300,
+      "mainLineHitCount": 20,
+      "mainLineBetCount": 720
+    },
+    {
+      "renEvThreshold": 1.85,
+      "totalRecoveryRate": 78.5,
+      "mainLineRate": 81.6,
+      "mainLineInvested": 72300,
+      "mainLineHitCount": 20,
+      "mainLineBetCount": 720
+    },
+    {
+      "renEvThreshold": 1.9,
+      "totalRecoveryRate": 74.6,
+      "mainLineRate": 0,
+      "mainLineInvested": 0,
+      "mainLineHitCount": 0,
+      "mainLineBetCount": 0
+    },
+    {
+      "renEvThreshold": 1.95,
+      "totalRecoveryRate": 74.6,
+      "mainLineRate": 0,
+      "mainLineInvested": 0,
+      "mainLineHitCount": 0,
+      "mainLineBetCount": 0
+    },
+    {
+      "renEvThreshold": 2,
+      "totalRecoveryRate": 74.6,
+      "mainLineRate": 0,
+      "mainLineInvested": 0,
+      "mainLineHitCount": 0,
+      "mainLineBetCount": 0
+    }
+  ],
+  "mainLineRaceChanges": {
+    "dropped": 72,
+    "added": 0,
+    "investedChanged": 72
+  },
+  "generatedAt": "2026-06-21T11:30:21.020Z"
+}

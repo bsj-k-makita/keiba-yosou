@@ -1,0 +1,744 @@
+{
+  "raceId": "202602010601",
+  "meta": {
+    "date": "2026-06-28",
+    "venue": "函館",
+    "raceNumber": 1,
+    "raceName": "2歳未勝利",
+    "surface": "芝",
+    "distance": 1200,
+    "groundLabel": null,
+    "weather": "晴",
+    "postTime": "09:50"
+  },
+  "entries": [
+    {
+      "horseId": "2024104976",
+      "horseName": "チカバリエンテ",
+      "frameNumber": 1,
+      "horseNumber": 1,
+      "sex": "牝",
+      "age": 2,
+      "jockey": "小林美",
+      "trainer": "藤野",
+      "weight": 52,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 45.2,
+        "stamina": 39.1,
+        "kick": 53.6,
+        "sustain": 38.5,
+        "power": 39.9
+      },
+      "market_win_odds_source": "estimated",
+      "market_popularity_source": "estimated",
+      "running_style_source": "netkeiba_shutuba_past",
+      "pastRuns": [
+        {
+          "date": "2026-06-20",
+          "raceId": "202602010305",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 4,
+          "marginToWinnerSec": 1.1,
+          "section200mSec": [
+            12.3,
+            11.2,
+            11.6,
+            11.4,
+            11.5,
+            11
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 10,
+          "waku": 8,
+          "passingOrder": "9-9",
+          "final3fSec": 33.8
+        }
+      ],
+      "pedigree": {
+        "sireId": "2013105903",
+        "sireName": "シルバーステート",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
+      "abilities_source": "past_runs_estimated",
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.601,
+      "l2_sustain_ratio": 0.5625,
+      "pace_mismatch": false,
+      "position_x": 94,
+      "predicted_win_rate": 0.1253,
+      "ability_index": 93.9,
+      "suitability_flags": [],
+      "final_expected_value": 1,
+      "predicted_probability": 0.38,
+      "estimated_actual_odds": 3.48,
+      "odds_source": "estimated",
+      "market_popularity": 5,
+      "market_win_odds": 9.16,
+      "value_rank": "C",
+      "kelly_weight": 0,
+      "confidence_rank": "A",
+      "bet_type": "相手",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "先行力"
+      ],
+      "risk_factors": [
+        "持続力不足"
+      ],
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.0541,
+      "ai_effective_ev": 0.3452
+    },
+    {
+      "horseId": "2024105339",
+      "horseName": "パンジャケリー",
+      "frameNumber": 2,
+      "horseNumber": 2,
+      "sex": "牡",
+      "age": 2,
+      "jockey": "岩田望",
+      "trainer": "橋田",
+      "weight": 55,
+      "runningStyle": "先行",
+      "abilities": {
+        "speed": 47.1,
+        "stamina": 40.3,
+        "kick": 57,
+        "sustain": 39.5,
+        "power": 41.2
+      },
+      "market_win_odds_source": "estimated",
+      "market_popularity_source": "estimated",
+      "running_style_source": "netkeiba_shutuba_past",
+      "pastRuns": [
+        {
+          "date": "2026-06-14",
+          "raceId": "202602010205",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 4,
+          "marginToWinnerSec": 0.8,
+          "section200mSec": [
+            12.6,
+            11.4,
+            11.6,
+            11.1,
+            11
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 8,
+          "waku": 8,
+          "passingOrder": "2-3",
+          "final3fSec": 34.3
+        }
+      ],
+      "pedigree": {
+        "sireId": "000a0113a1",
+        "sireName": "ディスクリートキャット Discreet Cat(米)",
+        "damSireId": "000a001a98",
+        "damSireName": "Storm Cat (米)",
+        "sireLineName": "Bird系"
+      },
+      "abilities_source": "past_runs_estimated",
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.8665,
+      "l2_sustain_ratio": 0.3125,
+      "pace_mismatch": false,
+      "position_x": 0,
+      "predicted_win_rate": 0.3428,
+      "ability_index": 99.3,
+      "suitability_flags": [],
+      "final_expected_value": 2.35,
+      "predicted_probability": 0.85,
+      "estimated_actual_odds": 2.77,
+      "odds_source": "estimated",
+      "market_popularity": 4,
+      "market_win_odds": 7.29,
+      "value_rank": "C",
+      "kelly_weight": 0.06,
+      "confidence_rank": "S",
+      "bet_type": "軸",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "先行力"
+      ],
+      "risk_factors": [
+        "持続力不足"
+      ],
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1486,
+      "ai_effective_ev": 0.4223
+    },
+    {
+      "horseId": "2024106849",
+      "horseName": "ウィルレーヴィア",
+      "frameNumber": 3,
+      "horseNumber": 3,
+      "sex": "牡",
+      "age": 2,
+      "jockey": "横山琉",
+      "trainer": "尾形",
+      "weight": 55,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 42.7,
+        "stamina": 37.5,
+        "kick": 49.3,
+        "sustain": 36.9,
+        "power": 38.2
+      },
+      "market_win_odds_source": "estimated",
+      "market_popularity_source": "estimated",
+      "running_style_source": "netkeiba_shutuba_past",
+      "pastRuns": [
+        {
+          "date": "2026-06-13",
+          "raceId": "202602010105",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 11,
+          "marginToWinnerSec": 1.5,
+          "section200mSec": [
+            12,
+            10.5,
+            11.5,
+            11.8,
+            12,
+            11.6
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 12,
+          "waku": 6,
+          "passingOrder": "11-12",
+          "final3fSec": 35.4
+        }
+      ],
+      "pedigree": {
+        "sireId": "2008103273",
+        "sireName": "トーセンレーヴ",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
+      "abilities_source": "past_runs_estimated",
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.2941,
+      "l2_sustain_ratio": 0.5,
+      "pace_mismatch": false,
+      "position_x": 91,
+      "predicted_win_rate": 0.0062,
+      "ability_index": 75.8,
+      "suitability_flags": [],
+      "final_expected_value": -0.07,
+      "predicted_probability": 0.11,
+      "estimated_actual_odds": 4.99,
+      "odds_source": "estimated",
+      "market_popularity": 7,
+      "market_win_odds": 13.13,
+      "value_rank": "D",
+      "kelly_weight": 0,
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "先行力"
+      ],
+      "risk_factors": [
+        "持続力不足"
+      ],
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.0541,
+      "ai_effective_ev": 0.6717
+    },
+    {
+      "horseId": "2024102398",
+      "horseName": "キセキノユニコーン",
+      "frameNumber": 4,
+      "horseNumber": 4,
+      "sex": "牡",
+      "age": 2,
+      "jockey": "◇古川奈",
+      "trainer": "伊坂",
+      "weight": 53,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 50.2,
+        "stamina": 42.2,
+        "kick": 49.3,
+        "sustain": 41.4,
+        "power": 43.3
+      },
+      "market_win_odds_source": "estimated",
+      "market_popularity_source": "estimated",
+      "running_style_source": "netkeiba_shutuba_past",
+      "pastRuns": [
+        {
+          "date": "2026-06-13",
+          "raceId": "202602010105",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 3,
+          "marginToWinnerSec": 0.3,
+          "section200mSec": [
+            12,
+            10.5,
+            11.5,
+            11.8,
+            12,
+            11.6
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 12,
+          "waku": 5,
+          "passingOrder": "9-7",
+          "final3fSec": 34.9
+        }
+      ],
+      "pedigree": {
+        "sireId": "2014101976",
+        "sireName": "キセキ",
+        "damSireId": "2001103460",
+        "damSireName": "キングカメハメハ",
+        "sireLineName": "Prospector系"
+      },
+      "abilities_source": "past_runs_estimated",
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.3534,
+      "l2_sustain_ratio": 0.4375,
+      "pace_mismatch": false,
+      "position_x": 62,
+      "predicted_win_rate": 0.0146,
+      "ability_index": 83.9,
+      "suitability_flags": [],
+      "final_expected_value": -0.12,
+      "predicted_probability": 0.13,
+      "estimated_actual_odds": 1.1,
+      "odds_source": "estimated",
+      "market_popularity": 1,
+      "market_win_odds": 2.35,
+      "value_rank": "D",
+      "kelly_weight": 0,
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "末脚性能"
+      ],
+      "risk_factors": [
+        "持続力不足"
+      ],
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1486,
+      "ai_effective_ev": 0.669
+    },
+    {
+      "horseId": "2024102983",
+      "horseName": "シークレットタワー",
+      "frameNumber": 5,
+      "horseNumber": 5,
+      "sex": "牡",
+      "age": 2,
+      "jockey": "丹内",
+      "trainer": "金成",
+      "weight": 55,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 47.7,
+        "stamina": 40.7,
+        "kick": 57,
+        "sustain": 40,
+        "power": 41.6
+      },
+      "market_win_odds_source": "estimated",
+      "market_popularity_source": "estimated",
+      "running_style_source": "netkeiba_shutuba_past",
+      "pastRuns": [
+        {
+          "date": "2026-06-14",
+          "raceId": "202602010205",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 3,
+          "marginToWinnerSec": 0.7,
+          "section200mSec": [
+            12.6,
+            11.4,
+            11.6,
+            11.1,
+            11
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 8,
+          "waku": 5,
+          "passingOrder": "4-5",
+          "final3fSec": 34.1
+        }
+      ],
+      "pedigree": {
+        "sireId": "2015101621",
+        "sireName": "タワーオブロンドン",
+        "damSireId": "000a00231f",
+        "damSireName": "Elusive Quality",
+        "sireLineName": "Prospector系"
+      },
+      "abilities_source": "past_runs_estimated",
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.8665,
+      "l2_sustain_ratio": 0.3125,
+      "pace_mismatch": false,
+      "position_x": 13,
+      "predicted_win_rate": 0.3685,
+      "ability_index": 100,
+      "suitability_flags": [],
+      "final_expected_value": 1.88,
+      "predicted_probability": 0.85,
+      "estimated_actual_odds": 2.09,
+      "odds_source": "estimated",
+      "market_popularity": 3,
+      "market_win_odds": 5.51,
+      "value_rank": "C",
+      "kelly_weight": 0.06,
+      "confidence_rank": "S",
+      "bet_type": "軸",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "先行力"
+      ],
+      "risk_factors": [
+        "持続力不足"
+      ],
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1486,
+      "ai_effective_ev": 0.1993
+    },
+    {
+      "horseId": "2024100352",
+      "horseName": "ガーシュウィン",
+      "frameNumber": 6,
+      "horseNumber": 6,
+      "sex": "牡",
+      "age": 2,
+      "jockey": "★河原田",
+      "trainer": "和田雄",
+      "weight": 51,
+      "runningStyle": "差し",
+      "abilities": {
+        "speed": 34.7,
+        "stamina": 34.4,
+        "kick": 57,
+        "sustain": 34.4,
+        "power": 34.4
+      },
+      "market_win_odds_source": "estimated",
+      "market_popularity_source": "estimated",
+      "running_style_source": "netkeiba_shutuba_past",
+      "pastRuns": [
+        {
+          "date": "2026-06-14",
+          "raceId": "202602010205",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 8,
+          "marginToWinnerSec": 2.8,
+          "section200mSec": [
+            12.6,
+            11.4,
+            11.6,
+            11.1,
+            11
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 8,
+          "waku": 1,
+          "passingOrder": "8-8",
+          "final3fSec": 35.5
+        }
+      ],
+      "pedigree": {
+        "sireId": "2016106065",
+        "sireName": "ロジャーバローズ",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
+      "abilities_source": "past_runs_estimated",
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.8665,
+      "l2_sustain_ratio": 0.3125,
+      "pace_mismatch": false,
+      "position_x": 53,
+      "predicted_win_rate": 0.1202,
+      "ability_index": 89.4,
+      "suitability_flags": [],
+      "final_expected_value": 1.68,
+      "predicted_probability": 0.36,
+      "estimated_actual_odds": 5.78,
+      "odds_source": "estimated",
+      "market_popularity": 8,
+      "market_win_odds": 15.2,
+      "value_rank": "C",
+      "kelly_weight": 0.01,
+      "confidence_rank": "A",
+      "bet_type": "相手",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "先行力"
+      ],
+      "risk_factors": [
+        "スタミナ不安"
+      ],
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1486,
+      "ai_effective_ev": 1.8017
+    },
+    {
+      "horseId": "2024103288",
+      "horseName": "ダイシンドラゴン",
+      "frameNumber": 7,
+      "horseNumber": 7,
+      "sex": "牡",
+      "age": 2,
+      "jockey": "佐々木",
+      "trainer": "高橋一",
+      "weight": 55,
+      "runningStyle": "逃げ",
+      "abilities": {
+        "speed": 49.5,
+        "stamina": 41.9,
+        "kick": 49.3,
+        "sustain": 41.1,
+        "power": 42.9
+      },
+      "market_win_odds_source": "estimated",
+      "market_popularity_source": "estimated",
+      "running_style_source": "netkeiba_shutuba_past",
+      "pastRuns": [
+        {
+          "date": "2026-06-13",
+          "raceId": "202602010105",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 5,
+          "marginToWinnerSec": 0.4,
+          "section200mSec": [
+            12,
+            10.5,
+            11.5,
+            11.8,
+            12,
+            11.6
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 12,
+          "waku": 4,
+          "passingOrder": "5-2",
+          "final3fSec": 35.5
+        }
+      ],
+      "pedigree": {
+        "sireId": "2011103328",
+        "sireName": "ビッグアーサー",
+        "damSireId": "1982101222",
+        "damSireName": "サクラユタカオー",
+        "sireLineName": "テスコボーイ系"
+      },
+      "abilities_source": "past_runs_estimated",
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.3835,
+      "l2_sustain_ratio": 0.4062,
+      "pace_mismatch": false,
+      "position_x": 17,
+      "predicted_win_rate": 0.0143,
+      "ability_index": 83.6,
+      "suitability_flags": [],
+      "final_expected_value": -0.09,
+      "predicted_probability": 0.13,
+      "estimated_actual_odds": 1.46,
+      "odds_source": "estimated",
+      "market_popularity": 2,
+      "market_win_odds": 3.85,
+      "value_rank": "D",
+      "kelly_weight": 0,
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "先行力",
+        "末脚性能"
+      ],
+      "risk_factors": [
+        "持続力不足"
+      ],
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1486,
+      "ai_effective_ev": 0.9336
+    },
+    {
+      "horseId": "2024100607",
+      "horseName": "アイルドフルール",
+      "frameNumber": 8,
+      "horseNumber": 8,
+      "sex": "牝",
+      "age": 2,
+      "jockey": "北村友",
+      "trainer": "田中克",
+      "weight": 55,
+      "runningStyle": "好位",
+      "abilities": {
+        "speed": 45.2,
+        "stamina": 39.1,
+        "kick": 49.3,
+        "sustain": 38.5,
+        "power": 39.9
+      },
+      "market_win_odds_source": "estimated",
+      "market_popularity_source": "estimated",
+      "running_style_source": "netkeiba_shutuba_past",
+      "pastRuns": [
+        {
+          "date": "2026-06-13",
+          "raceId": "202602010105",
+          "raceName": "2歳新馬",
+          "raceClass": "新馬",
+          "place": 8,
+          "marginToWinnerSec": 1.1,
+          "section200mSec": [
+            12,
+            10.5,
+            11.5,
+            11.8,
+            12,
+            11.6
+          ],
+          "venue": "函館",
+          "surface": "芝",
+          "fieldSize": 12,
+          "waku": 7,
+          "passingOrder": "10-10",
+          "final3fSec": 35.3
+        }
+      ],
+      "pedigree": {
+        "sireId": "2011103916",
+        "sireName": "ミッキーアイル",
+        "damSireId": "000a00033a",
+        "damSireName": "サンデーサイレンス Sunday Silence(米)",
+        "sireLineName": "Halo系"
+      },
+      "abilities_source": "past_runs_estimated",
+      "was_bias_disadvantaged": false,
+      "l2_top_speed": 0.2941,
+      "l2_sustain_ratio": 0.5,
+      "pace_mismatch": false,
+      "position_x": 78,
+      "predicted_win_rate": 0.0081,
+      "ability_index": 78.4,
+      "suitability_flags": [],
+      "final_expected_value": -0.06,
+      "predicted_probability": 0.12,
+      "estimated_actual_odds": 4.22,
+      "odds_source": "estimated",
+      "market_popularity": 6,
+      "market_win_odds": 11.11,
+      "value_rank": "D",
+      "kelly_weight": 0,
+      "confidence_rank": "C",
+      "bet_type": "見送り",
+      "value_change": "STABLE",
+      "key_factors": [
+        "末脚性能",
+        "先行力"
+      ],
+      "risk_factors": [
+        "持続力不足"
+      ],
+      "ev_margin_applied": 0.15,
+      "ai_predicted_win_rate": 0.1486,
+      "ai_effective_ev": 1.5015
+    }
+  ],
+  "ev_margin_dynamic": 0.15,
+  "analysis": {
+    "bias": {
+      "innerOuter": -0.6,
+      "frontCloser": 0
+    },
+    "lapType": "late_accelerated",
+    "paceBalance": -1.7,
+    "medianFinal3fSec": 34.8,
+    "meanMarginFieldSec": 0.61,
+    "lapStructure": "高速巡航戦",
+    "peerBaseline": {
+      "peerRaceCount": 5,
+      "avgPaceBalancePeer": 15.86,
+      "avgMedianFinal3fPeer": 35.599999999999994,
+      "avgMeanMarginPeer": 0.6933333333333334,
+      "fallbackFromFile": false,
+      "savedDayRaceCount": 7,
+      "savedAvgPaceBalance": null
+    },
+    "source": "netkeiba_result",
+    "computedAt": "2026-06-27T10:25:26.852Z"
+  },
+  "condition": {
+    "venue": "函館",
+    "raceName": "2歳未勝利",
+    "surface": "芝",
+    "distance": 1200,
+    "meetingDate": "2026-06-28",
+    "ground": "good",
+    "bias": "flat",
+    "pace": "middle",
+    "adjustmentStrength": "middle",
+    "section200mSec": [
+      11.7,
+      10,
+      11,
+      11.8,
+      11.7,
+      11.7
+    ],
+    "raceAnalysis": {
+      "bias": {
+        "innerOuter": -0.6,
+        "frontCloser": 0,
+        "innerShare": 0.33,
+        "outerSashiShare": 0
+      },
+      "lapType": "late_accelerated",
+      "paceBalance": -1.7,
+      "medianFinal3fSec": 34.8,
+      "meanMarginFieldSec": 0.61,
+      "peerBaseline": {
+        "peerRaceCount": 5,
+        "avgPaceBalancePeer": 15.86,
+        "avgMedianFinal3fPeer": 35.599999999999994,
+        "avgMeanMarginPeer": 0.6933333333333334,
+        "fallbackFromFile": false,
+        "savedDayRaceCount": 7,
+        "savedAvgPaceBalance": null
+      },
+      "source": "netkeiba_result",
+      "computedAt": "2026-06-27T10:25:26.852Z",
+      "appliedFromRaceId": "202602010511",
+      "appliedFromDate": "2026-06-27"
+    }
+  }
+}

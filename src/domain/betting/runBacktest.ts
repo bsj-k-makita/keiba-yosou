@@ -70,6 +70,8 @@ export type RunBacktestOnRaceOptions = {
   probabilityEngine?: ProbabilityEngine;
   /** AIモード時の◎勝率8%ルール（相印はAI EV順） */
   anchorHonmeiWinRateRule?: AnchorHonmeiWinRateRule;
+  /** 馬連EV推奨閾値（バックテスト試算用） */
+  renEvThreshold?: number;
 };
 
 function horseNumberMap(horses: readonly HorseAbility[]): Map<string, number> {
@@ -199,8 +201,13 @@ export function runBacktestOnRace(
     input.horses,
     input.condition,
     100,
-    options?.anchorHonmeiWinRateRule != null
-      ? { anchorHonmeiWinRateRule: options.anchorHonmeiWinRateRule }
+    options?.anchorHonmeiWinRateRule != null || options?.renEvThreshold != null
+      ? {
+          ...(options.anchorHonmeiWinRateRule != null
+            ? { anchorHonmeiWinRateRule: options.anchorHonmeiWinRateRule }
+            : {}),
+          ...(options.renEvThreshold != null ? { renEvThreshold: options.renEvThreshold } : {}),
+        }
       : undefined,
   );
   const marks = ctx?.marks ?? [];

@@ -107,6 +107,8 @@ const ESTIMATED_EXOTIC_MARKET_FACTOR_TRI = 2.0;
 export type GenerateTicketsEvOptions = {
   probabilityEngine?: ProbabilityEngine;
   thresholdEV?: number;
+  /** 馬連EV推奨閾値（未指定時は REN_EV_THRESHOLD） */
+  renEvThreshold?: number;
 };
 
 type ValidHorse = HorseEvaluation & { prob: number };
@@ -350,7 +352,7 @@ export function generateTicketsFromEvaluation(
   if (context.isSkippableRace) return [];
 
   const winThreshold = evOptions?.thresholdEV ?? thresholdEV;
-  const renThreshold = REN_EV_THRESHOLD;
+  const renThreshold = evOptions?.renEvThreshold ?? REN_EV_THRESHOLD;
   const wideThreshold = WIDE_EV_THRESHOLD;
   const triThreshold = TRI_EV_THRESHOLD;
 
@@ -695,6 +697,7 @@ export type GenerateTicketsOptions = {
   classTier?: ClassTier;
   thresholdEV?: number;
   probabilityEngine?: ProbabilityEngine;
+  renEvThreshold?: number;
 };
 
 export type FormationBetOptions = {
@@ -937,6 +940,7 @@ export function generateBetTicketsFromEvaluation(
   const evTickets = generateTicketsFromEvaluation(context, input.oddsMap, threshold, {
     probabilityEngine: options?.probabilityEngine,
     thresholdEV: options?.thresholdEV,
+    renEvThreshold: options?.renEvThreshold,
   });
   return evTicketsToBetTickets(evTickets, betAmount);
 }

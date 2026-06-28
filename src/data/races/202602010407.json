@@ -181,7 +181,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 9.1,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 5
+      "marketPopularity": 5,
+      "ai_predicted_win_rate": 0.0992,
+      "ai_effective_ev": 0.753
     },
     {
       "horseId": "2023105263",
@@ -333,7 +335,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 3.8,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 3
+      "marketPopularity": 3,
+      "ai_predicted_win_rate": 0.143,
+      "ai_effective_ev": 0.3934
     },
     {
       "horseId": "2021103322",
@@ -507,7 +511,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 39.3,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 9
+      "marketPopularity": 9,
+      "ai_predicted_win_rate": 0.0307,
+      "ai_effective_ev": 1.0564
     },
     {
       "horseId": "2023104875",
@@ -678,7 +684,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 27.7,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 8
+      "marketPopularity": 8,
+      "ai_predicted_win_rate": 0.0992,
+      "ai_effective_ev": 2.5988
     },
     {
       "horseId": "2023106912",
@@ -851,7 +859,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 79.9,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 11
+      "marketPopularity": 11,
+      "ai_predicted_win_rate": 0.0165,
+      "ai_effective_ev": 1.1691
     },
     {
       "horseId": "2023103528",
@@ -1024,7 +1034,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 21.6,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 6
+      "marketPopularity": 6,
+      "ai_predicted_win_rate": 0.0992,
+      "ai_effective_ev": 1.9935
     },
     {
       "horseId": "2023100617",
@@ -1174,7 +1186,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 3.7,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 2
+      "marketPopularity": 2,
+      "ai_predicted_win_rate": 0.1837,
+      "ai_effective_ev": 0.5296
     },
     {
       "horseId": "2021105715",
@@ -1347,7 +1361,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 39.9,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 10
+      "marketPopularity": 10,
+      "ai_predicted_win_rate": 0.0307,
+      "ai_effective_ev": 1.0748
     },
     {
       "horseId": "2023105277",
@@ -1525,7 +1541,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 3.5,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 1
+      "marketPopularity": 1,
+      "ai_predicted_win_rate": 0.0992,
+      "ai_effective_ev": 0.1973
     },
     {
       "horseId": "2022102878",
@@ -1697,7 +1715,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 6.9,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 4
+      "marketPopularity": 4,
+      "ai_predicted_win_rate": 0.0992,
+      "ai_effective_ev": 0.5347
     },
     {
       "horseId": "2023104159",
@@ -1821,29 +1841,33 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 23.6,
       "market_observed_at": "2026-06-20T13:45:24.170Z",
-      "marketPopularity": 7
+      "marketPopularity": 7,
+      "ai_predicted_win_rate": 0.0992,
+      "ai_effective_ev": 2.1919
     }
   ],
   "ev_margin_dynamic": 0.15,
   "analysis": {
     "bias": {
-      "innerOuter": 2,
+      "innerOuter": -2,
       "frontCloser": 0
     },
-    "lapType": "neutral",
-    "medianFinal3fSec": 34.45,
-    "meanMarginFieldSec": 0.23,
-    "lapStructure": "中間",
+    "lapType": "late_accelerated",
+    "paceBalance": -1.1,
+    "medianFinal3fSec": 34.7,
+    "meanMarginFieldSec": 0.49,
+    "lapStructure": "高速巡航戦",
     "peerBaseline": {
-      "peerRaceCount": 0,
-      "avgMedianFinal3fPeer": 35.25,
-      "avgMeanMarginPeer": 0.6583333333333333,
-      "fallbackFromFile": true,
+      "peerRaceCount": 3,
+      "avgPaceBalancePeer": 11.1,
+      "avgMedianFinal3fPeer": 35.508333333333326,
+      "avgMeanMarginPeer": 0.68,
+      "fallbackFromFile": false,
       "savedDayRaceCount": 7,
       "savedAvgPaceBalance": null
     },
     "source": "netkeiba_result",
-    "computedAt": "2026-06-20T13:17:50.716Z"
+    "computedAt": "2026-06-27T10:25:24.903Z"
   },
   "condition": {
     "venue": "函館",
@@ -1857,26 +1881,35 @@
     "adjustmentStrength": "middle",
     "raceAnalysis": {
       "bias": {
-        "innerOuter": 2,
+        "innerOuter": -2,
         "frontCloser": 0,
-        "innerShare": 0.67,
+        "innerShare": 0,
         "outerSashiShare": 0
       },
-      "lapType": "neutral",
-      "medianFinal3fSec": 34.45,
-      "meanMarginFieldSec": 0.23,
+      "lapType": "late_accelerated",
+      "paceBalance": -1.1,
+      "medianFinal3fSec": 34.7,
+      "meanMarginFieldSec": 0.49,
+      "lapStructureLabel": "高速巡航戦",
       "peerBaseline": {
-        "peerRaceCount": 0,
-        "avgMedianFinal3fPeer": 35.25,
-        "avgMeanMarginPeer": 0.6583333333333333,
-        "fallbackFromFile": true,
+        "peerRaceCount": 3,
+        "avgPaceBalancePeer": 11.1,
+        "avgMedianFinal3fPeer": 35.508333333333326,
+        "avgMeanMarginPeer": 0.68,
+        "fallbackFromFile": false,
         "savedDayRaceCount": 7,
         "savedAvgPaceBalance": null
       },
       "source": "netkeiba_result",
-      "computedAt": "2026-06-20T13:17:50.716Z",
-      "appliedFromRaceId": "202602010311",
-      "appliedFromDate": "2026-06-20"
-    }
+      "computedAt": "2026-06-27T10:25:24.903Z"
+    },
+    "section200mSec": [
+      12.1,
+      10.5,
+      11.1,
+      11.3,
+      11.5,
+      11.8
+    ]
   }
 }

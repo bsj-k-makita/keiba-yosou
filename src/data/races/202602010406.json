@@ -194,7 +194,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 13.1,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 7
+      "marketPopularity": 7,
+      "ai_predicted_win_rate": 0.0328,
+      "ai_effective_ev": 0.2801
     },
     {
       "horseId": "2023101756",
@@ -379,7 +381,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 8.2,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 5
+      "marketPopularity": 5,
+      "ai_predicted_win_rate": 0.0903,
+      "ai_effective_ev": 0.5904
     },
     {
       "horseId": "2023101046",
@@ -563,7 +567,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 46.6,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 12
+      "marketPopularity": 12,
+      "ai_predicted_win_rate": 0.0279,
+      "ai_effective_ev": 1.1516
     },
     {
       "horseId": "2023106060",
@@ -726,7 +732,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 6.4,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 3
+      "marketPopularity": 3,
+      "ai_predicted_win_rate": 0.0744,
+      "ai_effective_ev": 0.3263
     },
     {
       "horseId": "2023105320",
@@ -836,7 +844,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 4.6,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 1
+      "marketPopularity": 1,
+      "ai_predicted_win_rate": 0.0903,
+      "ai_effective_ev": 0.2653
     },
     {
       "horseId": "2023105857",
@@ -971,7 +981,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 5.7,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 2
+      "marketPopularity": 2,
+      "ai_predicted_win_rate": 0.0903,
+      "ai_effective_ev": 0.3646
     },
     {
       "horseId": "2023104158",
@@ -1125,7 +1137,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 9.2,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 6
+      "marketPopularity": 6,
+      "ai_predicted_win_rate": 0.0903,
+      "ai_effective_ev": 0.6807
     },
     {
       "horseId": "2023105357",
@@ -1212,7 +1226,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 14.2,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 8
+      "marketPopularity": 8,
+      "ai_predicted_win_rate": 0.0328,
+      "ai_effective_ev": 0.3162
     },
     {
       "horseId": "2023100608",
@@ -1354,7 +1370,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 20.2,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 9
+      "marketPopularity": 9,
+      "ai_predicted_win_rate": 0.0903,
+      "ai_effective_ev": 1.6738
     },
     {
       "horseId": "2023110069",
@@ -1412,7 +1430,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 21,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 10
+      "marketPopularity": 10,
+      "ai_predicted_win_rate": 0.0903,
+      "ai_effective_ev": 1.7461
     },
     {
       "horseId": "2023106040",
@@ -1599,7 +1619,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 67.5,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 13
+      "marketPopularity": 13,
+      "ai_predicted_win_rate": 0.0328,
+      "ai_effective_ev": 2.0663
     },
     {
       "horseId": "2023110082",
@@ -1712,7 +1734,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 6.5,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 4
+      "marketPopularity": 4,
+      "ai_predicted_win_rate": 0.0903,
+      "ai_effective_ev": 0.4369
     },
     {
       "horseId": "2023110096",
@@ -1770,29 +1794,33 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 21.7,
       "market_observed_at": "2026-06-20T13:44:51.851Z",
-      "marketPopularity": 11
+      "marketPopularity": 11,
+      "ai_predicted_win_rate": 0.1671,
+      "ai_effective_ev": 3.4765
     }
   ],
   "ev_margin_dynamic": 0.15,
   "analysis": {
     "bias": {
-      "innerOuter": -2,
+      "innerOuter": 2,
       "frontCloser": 0
     },
-    "lapType": "neutral",
-    "medianFinal3fSec": 38.2,
-    "meanMarginFieldSec": 0.98,
+    "lapType": "late_accelerated",
+    "paceBalance": 24.9,
+    "medianFinal3fSec": 41,
+    "meanMarginFieldSec": 1.91,
     "lapStructure": "中間",
     "peerBaseline": {
-      "peerRaceCount": 0,
-      "avgMedianFinal3fPeer": 37.7875,
-      "avgMeanMarginPeer": 1.235,
-      "fallbackFromFile": true,
-      "savedDayRaceCount": 5,
+      "peerRaceCount": 2,
+      "avgPaceBalancePeer": 29.450000000000003,
+      "avgMedianFinal3fPeer": 38.725,
+      "avgMeanMarginPeer": 1.165,
+      "fallbackFromFile": false,
+      "savedDayRaceCount": 4,
       "savedAvgPaceBalance": null
     },
     "source": "netkeiba_result",
-    "computedAt": "2026-06-20T13:17:51.179Z"
+    "computedAt": "2026-06-27T10:25:24.375Z"
   },
   "condition": {
     "venue": "函館",
@@ -1806,26 +1834,38 @@
     "adjustmentStrength": "middle",
     "raceAnalysis": {
       "bias": {
-        "innerOuter": -2,
+        "innerOuter": 2,
         "frontCloser": 0,
-        "innerShare": 0,
+        "innerShare": 0.67,
         "outerSashiShare": 0
       },
-      "lapType": "neutral",
-      "medianFinal3fSec": 38.2,
-      "meanMarginFieldSec": 0.98,
+      "lapType": "late_accelerated",
+      "paceBalance": 24.9,
+      "medianFinal3fSec": 41,
+      "meanMarginFieldSec": 1.91,
+      "lapStructureLabel": "中間",
       "peerBaseline": {
-        "peerRaceCount": 0,
-        "avgMedianFinal3fPeer": 37.7875,
-        "avgMeanMarginPeer": 1.235,
-        "fallbackFromFile": true,
-        "savedDayRaceCount": 5,
+        "peerRaceCount": 2,
+        "avgPaceBalancePeer": 29.450000000000003,
+        "avgMedianFinal3fPeer": 38.725,
+        "avgMeanMarginPeer": 1.165,
+        "fallbackFromFile": false,
+        "savedDayRaceCount": 4,
         "savedAvgPaceBalance": null
       },
       "source": "netkeiba_result",
-      "computedAt": "2026-06-20T13:17:51.179Z",
-      "appliedFromRaceId": "202602010312",
-      "appliedFromDate": "2026-06-20"
-    }
+      "computedAt": "2026-06-27T10:25:24.375Z"
+    },
+    "section200mSec": [
+      7.1,
+      10.8,
+      11.6,
+      12.2,
+      12.7,
+      13,
+      13.1,
+      13.6,
+      12.8
+    ]
   }
 }

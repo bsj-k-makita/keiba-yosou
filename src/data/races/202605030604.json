@@ -68,7 +68,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 5.4,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 3
+      "marketPopularity": 3,
+      "ai_predicted_win_rate": 0.1151,
+      "ai_effective_ev": 0.4714
     },
     {
       "horseId": "2024106894",
@@ -126,7 +128,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 30.5,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 9
+      "marketPopularity": 9,
+      "ai_predicted_win_rate": 0.0356,
+      "ai_effective_ev": 0.9357
     },
     {
       "horseId": "2024106052",
@@ -184,7 +188,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 17.7,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 5
+      "marketPopularity": 5,
+      "ai_predicted_win_rate": 0.1151,
+      "ai_effective_ev": 1.8867
     },
     {
       "horseId": "2024104825",
@@ -242,7 +248,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 47.1,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 10
+      "marketPopularity": 10,
+      "ai_predicted_win_rate": 0.0191,
+      "ai_effective_ev": 0.7517
     },
     {
       "horseId": "2024101005",
@@ -300,7 +308,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 18.8,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 6
+      "marketPopularity": 6,
+      "ai_predicted_win_rate": 0.1151,
+      "ai_effective_ev": 2.0133
     },
     {
       "horseId": "2024106657",
@@ -358,7 +368,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 1.8,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 1
+      "marketPopularity": 1,
+      "ai_predicted_win_rate": 0.213,
+      "ai_effective_ev": 0.2334
     },
     {
       "horseId": "2024106629",
@@ -416,7 +428,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 4.8,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 2
+      "marketPopularity": 2,
+      "ai_predicted_win_rate": 0.1151,
+      "ai_effective_ev": 0.4023
     },
     {
       "horseId": "2024107096",
@@ -474,7 +488,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 21.5,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 7
+      "marketPopularity": 7,
+      "ai_predicted_win_rate": 0.1151,
+      "ai_effective_ev": 2.324
     },
     {
       "horseId": "2024102434",
@@ -532,7 +548,9 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 13.3,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 4
+      "marketPopularity": 4,
+      "ai_predicted_win_rate": 0.1151,
+      "ai_effective_ev": 1.3804
     },
     {
       "horseId": "2024100469",
@@ -590,29 +608,32 @@
       "ev_margin_applied": 0.15,
       "marketWinOdds": 29.9,
       "market_observed_at": "2026-06-20T13:50:12.925Z",
-      "marketPopularity": 8
+      "marketPopularity": 8,
+      "ai_predicted_win_rate": 0.0418,
+      "ai_effective_ev": 1.1012
     }
   ],
   "ev_margin_dynamic": 0.15,
   "analysis": {
     "bias": {
-      "innerOuter": 2,
+      "innerOuter": -0.6,
       "frontCloser": 0
     },
-    "lapType": "neutral",
-    "medianFinal3fSec": 33.9,
-    "meanMarginFieldSec": 0.45,
-    "lapStructure": "中間",
+    "lapType": "early_pressured",
+    "paceBalance": 16.9,
+    "medianFinal3fSec": 34.25,
+    "meanMarginFieldSec": 0.7,
+    "lapStructure": "瞬発戦",
     "peerBaseline": {
       "peerRaceCount": 0,
-      "avgMedianFinal3fPeer": 35.08,
-      "avgMeanMarginPeer": 0.72,
+      "avgMedianFinal3fPeer": 34.84,
+      "avgMeanMarginPeer": 0.522,
       "fallbackFromFile": true,
       "savedDayRaceCount": 6,
       "savedAvgPaceBalance": null
     },
     "source": "netkeiba_result",
-    "computedAt": "2026-06-20T13:17:55.079Z"
+    "computedAt": "2026-06-27T10:25:29.180Z"
   },
   "condition": {
     "venue": "東京",
@@ -626,26 +647,35 @@
     "adjustmentStrength": "middle",
     "raceAnalysis": {
       "bias": {
-        "innerOuter": 2,
+        "innerOuter": -0.6,
         "frontCloser": 0,
-        "innerShare": 0.67,
+        "innerShare": 0.33,
         "outerSashiShare": 0
       },
-      "lapType": "neutral",
-      "medianFinal3fSec": 33.9,
-      "meanMarginFieldSec": 0.45,
+      "lapType": "early_pressured",
+      "paceBalance": 16.9,
+      "medianFinal3fSec": 34.25,
+      "meanMarginFieldSec": 0.7,
+      "lapStructureLabel": "瞬発戦",
       "peerBaseline": {
         "peerRaceCount": 0,
-        "avgMedianFinal3fPeer": 35.08,
-        "avgMeanMarginPeer": 0.72,
+        "avgMedianFinal3fPeer": 34.84,
+        "avgMeanMarginPeer": 0.522,
         "fallbackFromFile": true,
         "savedDayRaceCount": 6,
         "savedAvgPaceBalance": null
       },
       "source": "netkeiba_result",
-      "computedAt": "2026-06-20T13:17:55.079Z",
-      "appliedFromRaceId": "202605030510",
-      "appliedFromDate": "2026-06-20"
-    }
+      "computedAt": "2026-06-27T10:25:29.180Z"
+    },
+    "section200mSec": [
+      13.3,
+      12.9,
+      13,
+      12.6,
+      11.9,
+      10.9,
+      10.8
+    ]
   }
 }
